@@ -1,6 +1,6 @@
 import { Routes, RouterModule } from '@angular/router';
 import { provideRouter } from '@angular/router';
-import { RegisterComponent } from './components/register/register.component';
+import { RegisterComponent } from './components/public/register/register.component';
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
 import { ServerErrorComponent } from './components/errors/server-error/server-error.component';
