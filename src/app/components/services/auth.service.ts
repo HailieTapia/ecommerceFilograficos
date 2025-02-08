@@ -22,4 +22,12 @@ export class AuthService {
       })
     );
   }
+  login(loginData: any): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.post(`${this.apiUrl}/auth/login`, loginData, { headers, withCredentials: true });
+      })
+    );
+  }
 }

@@ -1,4 +1,3 @@
-<!-- register.component.html -->
 <div class="register-container">
   <h2>Registro</h2>
 
@@ -35,17 +34,6 @@
       <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="error">
         <small *ngIf="registerForm.get('password')?.hasError('required')">La contraseña es obligatoria.</small>
         <small *ngIf="registerForm.get('password')?.hasError('minlength')">La contraseña debe tener al menos 8 caracteres.</small>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="user_type">Tipo de usuario</label>
-      <select id="user_type" formControlName="user_type" class="form-control">
-        <option value="cliente">Cliente</option>
-        <option value="admin">Administrador</option>
-      </select>
-      <div *ngIf="registerForm.get('user_type')?.touched && registerForm.get('user_type')?.invalid" class="error">
-        <small *ngIf="registerForm.get('user_type')?.hasError('required')">El tipo de usuario es obligatorio.</small>
       </div>
     </div>
 
