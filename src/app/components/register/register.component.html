@@ -1,1 +1,27 @@
-<p>register works!</p>
+<div class="register-container">
+    <h2>Registro</h2>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <label>Nombre:</label>
+      <input type="text" formControlName="name" required />
+  
+      <label>Email:</label>
+      <input type="email" formControlName="email" required />
+  
+      <label>Teléfono:</label>
+      <input type="text" formControlName="phone" required />
+  
+      <label>Contraseña:</label>
+      <input type="password" formControlName="password" required />
+  
+      <label>Tipo de Usuario:</label>
+      <select formControlName="user_type">
+        <option value="cliente">Cliente</option>
+        <option value="administrador">Administrador</option>
+      </select>
+  
+      <button type="submit" [disabled]="loading">Registrarse</button>
+    </form>
+  
+    <p *ngIf="message">{{ message }}</p>
+  </div>
+  
