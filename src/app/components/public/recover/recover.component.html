@@ -1,0 +1,30 @@
+<div class="password-recovery-container">
+    <!-- Etapa 1: Iniciar recuperación -->
+    <div *ngIf="stage === 1">
+      <h2>Recuperación de Contraseña</h2>
+      <form [formGroup]="recoveryForm" (ngSubmit)="initiateRecovery()">
+        <input formControlName="email" placeholder="Correo electrónico" type="email" />
+        <button type="submit" [disabled]="recoveryForm.invalid">Enviar código OTP</button>
+      </form>
+    </div>
+  
+    <!-- Etapa 2: Verificar OTP -->
+    <div *ngIf="stage === 2">
+      <h2>Verificar Código OTP</h2>
+      <form [formGroup]="otpForm" (ngSubmit)="verifyOTP()">
+        <input formControlName="otp" placeholder="Código OTP" type="text" />
+        <button type="submit" [disabled]="otpForm.invalid">Verificar OTP</button>
+      </form>
+    </div>
+  
+    <!-- Etapa 3: Restablecer Contraseña -->
+    <div *ngIf="stage === 3">
+      <h2>Restablecer Contraseña</h2>
+      <form [formGroup]="resetForm" (ngSubmit)="resetPassword()">
+        <input formControlName="newPassword" placeholder="Nueva contraseña" type="password" />
+        <input formControlName="confirmPassword" placeholder="Confirmar contraseña" type="password" />
+        <button type="submit" [disabled]="resetForm.invalid">Restablecer Contraseña</button>
+      </form>
+    </div>
+  </div>
+  
