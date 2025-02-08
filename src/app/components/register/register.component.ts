@@ -23,7 +23,7 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      user_type: ['cliente', [Validators.required]]
+      user_type: ['cliente', [Validators.required]],
     });
   }
 
