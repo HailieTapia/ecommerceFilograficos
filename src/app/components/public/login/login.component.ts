@@ -59,7 +59,7 @@ export class LoginComponent implements AfterViewInit {
         this.message = response.message;
         this.loading = false;
         alert('Te has logeado');
-        this.router.navigate(['/recovery']);
+        this.router.navigate(['/profile']);
       },
       error: (error) => {
         this.message = error.error.message || 'Error en el acceso';
