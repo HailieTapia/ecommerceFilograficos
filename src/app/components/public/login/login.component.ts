@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/config';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,7 @@ export class LoginComponent implements AfterViewInit {
   loginForm: FormGroup;
   loading = false;
   message = '';
-  siteKey = '6Lck9V8qAAAAAEnjZRJxMKa27R1P_GWppjLuxmbG';
+  siteKey = environment.recaptchaSiteKey;
 
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.loginForm = this.fb.group({
