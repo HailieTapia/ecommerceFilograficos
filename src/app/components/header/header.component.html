@@ -1,7 +1,18 @@
-<header>
-  <div class="logo">
-    <!-- Aquí puedes poner tu logo o nombre de la aplicación -->
-    <h1>Mi Aplicación</h1>
-  </div>
+<nav>
+  <ul>
+    <li *ngIf="!user">
+      <button (click)="navigateTo('/login')">Login</button>
+      <button (click)="navigateTo('/register')">Register</button>
 
-</header>
+
+    <li *ngIf="user?.user_type === 'cliente'">
+      <button (click)="navigateTo('/profile')">profile</button>
+      <button (click)="logout()">Logout</button>
+    </li>
+
+    <li *ngIf="user?.user_type === 'administrador'">
+      <a routerLink="/recovery">Recovery</a>
+      <button (click)="logout()">Logout</button>
+    </li>
+  </ul>
+</nav>
