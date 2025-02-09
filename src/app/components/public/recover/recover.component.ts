@@ -15,7 +15,7 @@ export class RecoverComponent {
   recoveryForm: FormGroup;
   otpForm: FormGroup;
   resetForm: FormGroup;
-  stage: number = 1; // 1: Recuperación, 2: Verificación OTP, 3: Restablecer Contraseña
+  stage: number = 1; 
   email: string ="";
   recoveryToken: string = "";
 
