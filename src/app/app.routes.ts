@@ -21,7 +21,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'login', component: LoginComponent },
   { path: 'recovery', component: RecoverComponent },
-  { path: '', redirectTo: '/profile', pathMatch: 'full' },
+  { path: '', redirectTo: '/register', pathMatch: 'full' },
   
   // Ruta para el error 400 (Bad Request)
   { path: '400', component: BadRequestComponent },
