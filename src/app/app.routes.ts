@@ -9,12 +9,20 @@ import { LoginComponent } from './components/public/login/login.component';
 //autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
 
+//administrador
+import { CompanyComponent } from './components/administrator/company/company.component';
+
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
 import { ServerErrorComponent } from './components/errors/server-error/server-error.component';
 
 export const routes: Routes = [
+
+  //administrador
+  { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
+
+
   //autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },
 
