@@ -1,25 +1,31 @@
 <div class="profile-container">
     <h2>Perfil de Usuario</h2>
+    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+      <label>Nombre:</label>
+      <input nz-input formControlName="name" placeholder="Nombre completo" />
   
-    <div *ngIf="user; else errorTemplate">
-      <p><strong>ID:</strong> {{ user.user_id }}</p>
-      <p><strong>Nombre:</strong> {{ user.name }}</p>
-      <p><strong>Correo Electrónico:</strong> {{ user.email }}</p>
-      <p><strong>Teléfono:</strong> {{ user.phone }}</p>
-      <p><strong>Estado:</strong> {{ user.status }}</p>
-      <p><strong>Tipo de Usuario:</strong> {{ user.user_type }}</p>
+      <label>Teléfono:</label>
+      <input nz-input formControlName="phone" placeholder="Número de teléfono" />
   
-      <div *ngIf="user.Addresses && user.Addresses.length">
-        <h3>Dirección Primaria</h3>
-        <p><strong>Calle:</strong> {{ user.Addresses[0].street }}</p>
-        <p><strong>Ciudad:</strong> {{ user.Addresses[0].city }}</p>
-        <p><strong>Estado:</strong> {{ user.Addresses[0].state }}</p>
-        <p><strong>País:</strong> {{ user.Addresses[0].country }}</p>
-      </div>
-    </div>
+      <button nz-button nzType="primary" [disabled]="profileForm.invalid">Actualizar Perfil</button>
+    </form>
   
-    <ng-template #errorTemplate>
-      <p class="error-message">{{ error }}</p>
-    </ng-template>
+    <h2>Dirección</h2>
+    <form [formGroup]="addressForm" (ngSubmit)="updateAddress()">
+      <label>Calle:</label>
+      <input nz-input formControlName="street" placeholder="Calle" />
+  
+      <label>Ciudad:</label>
+      <input nz-input formControlName="city" placeholder="Ciudad" />
+  
+      <label>Estado:</label>
+      <input nz-input formControlName="state" placeholder="Estado" />
+  
+      <label>Código Postal:</label>
+      <input nz-input formControlName="postal_code" placeholder="Código Postal" />
+  
+      <button nz-button nzType="primary" [disabled]="addressForm.invalid">Actualizar Dirección</button>
+    </form>
   </div>
+
   
