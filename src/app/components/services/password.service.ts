@@ -8,7 +8,7 @@ import { environment } from '../../environments/config';
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class PasswordService {
 
   private apiUrl = `${environment.baseUrl}`;
 

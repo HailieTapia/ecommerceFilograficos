@@ -1,6 +1,7 @@
 import { Routes, RouterModule } from '@angular/router';
 import { RegisterComponent } from './components/public/register/register.component';
 import { RecoverComponent } from './components/public/recover/recover.component';
+import { LoginComponent } from './components/public/login/login.component';
 
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
@@ -8,8 +9,9 @@ import { ServerErrorComponent } from './components/errors/server-error/server-er
 
 export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
+  { path: 'login', component: LoginComponent },
   { path: 'recovery', component: RecoverComponent },
-  { path: '', redirectTo: '/recovery', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   
   // Ruta para el error 400 (Bad Request)
   { path: '400', component: BadRequestComponent },

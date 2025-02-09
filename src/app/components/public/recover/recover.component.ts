@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from '../../services/password.service';
+import { PasswordService } from '../../services/password.service';
 import {ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -19,7 +19,7 @@ export class RecoverComponent {
   email: string ="";
   recoveryToken: string = "";
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(private fb: FormBuilder, private passwordService: PasswordService) {
     // Formulario para iniciar la recuperación de contraseña
     this.recoveryForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
@@ -43,7 +43,7 @@ export class RecoverComponent {
       console.error('Por favor ingresa un correo válido');
       return;
     }
-    this.authService.recover(this.recoveryForm.value).subscribe(
+    this.passwordService.recover(this.recoveryForm.value).subscribe(
       (response) => {
         console.error('Se ha enviado un código de recuperación a tu correo');
         this.email = this.recoveryForm.value.email;
@@ -61,7 +61,7 @@ export class RecoverComponent {
       console.error('Por favor ingresa un código OTP válido');
       return;
     }
-    this.authService.verify({ email: this.email, otp: this.otpForm.value.otp }).subscribe(
+    this.passwordService.verify({ email: this.email, otp: this.otpForm.value.otp }).subscribe(
       (response) => {
         console.error('OTP verificado correctamente');
         this.recoveryToken = this.otpForm.value.otp;
@@ -84,7 +84,7 @@ export class RecoverComponent {
       newPassword: this.resetForm.value.newPassword
     };
 
-    this.authService.resets(credentials).subscribe(
+    this.passwordService.resets(credentials).subscribe(
       (response) => {
         console.error('Contraseña restablecida exitosamente');
         this.stage = 1; // Volver al inicio del proceso
