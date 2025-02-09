@@ -1,4 +1,6 @@
 import { Routes, RouterModule } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard'; 
+
 //publicos
 import { RegisterComponent } from './components/public/register/register.component';
 import { RecoverComponent } from './components/public/recover/recover.component';
@@ -7,7 +9,6 @@ import { LoginComponent } from './components/public/login/login.component';
 //autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
 
-
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
@@ -15,7 +16,7 @@ import { ServerErrorComponent } from './components/errors/server-error/server-er
 
 export const routes: Routes = [
   //autenticados
-  { path: 'profile', component: ProfileComponent },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },
 
   //publicos
   { path: 'register', component: RegisterComponent },
@@ -23,12 +24,10 @@ export const routes: Routes = [
   { path: 'recovery', component: RecoverComponent },
   { path: '', redirectTo: '/register', pathMatch: 'full' },
   
-  // Ruta para el error 400 (Bad Request)
+
   { path: '400', component: BadRequestComponent },
-  // Ruta para el error 404 (Not Found)
   { path: '404', component: NotFoundComponent },
-  // Ruta para el error 500 (Internal Server Error)
   { path: '500', component: ServerErrorComponent },
-  // Ruta comodín para otros errores (puedes redirigir aquí en caso de que sea necesario)
+  // Ruta comodín para otros errores 404
   { path: '**', component: NotFoundComponent },
 ];

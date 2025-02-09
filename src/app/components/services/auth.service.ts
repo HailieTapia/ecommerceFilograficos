@@ -11,16 +11,23 @@ import { environment } from '../../environments/config';
 export class AuthService {
   private apiUrl = `${environment.baseUrl}`;
 
-  private userSubject = new BehaviorSubject<any>(null); // Estado del usuario
-  public user$ = this.userSubject.asObservable(); // Observable del usuario
+  private userSubject = new BehaviorSubject<any>(null); 
+  public user$ = this.userSubject.asObservable(); 
 
   constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
   // Obtener el perfil del usuario al iniciar sesión
   fetchUserProfile(): void {
     this.http.get(`${this.apiUrl}/users/profile`, { withCredentials: true })
-      .subscribe(user => this.userSubject.next(user), () => this.userSubject.next(null));
+      .subscribe(user => {
+        this.userSubject.next(user);
+        localStorage.setItem('user', JSON.stringify(user)); 
+      }, () => {
+        this.userSubject.next(null);
+        localStorage.removeItem('user'); 
+      });
   }
+
 
   register(userData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
@@ -36,7 +43,11 @@ export class AuthService {
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         return this.http.post(`${this.apiUrl}/auth/login`, loginData, { headers, withCredentials: true })
-          .pipe(tap(() => this.fetchUserProfile()));
+          .pipe(
+            tap(() => {
+              this.fetchUserProfile(); 
+            })
+          );
       })
     );
   }
@@ -46,7 +57,12 @@ export class AuthService {
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         return this.http.post(`${this.apiUrl}/auth/logout`, {}, { headers, withCredentials: true })
-          .pipe(tap(() => this.userSubject.next(null)));
+          .pipe(
+            tap(() => {
+              this.userSubject.next(null);
+              localStorage.removeItem('user'); 
+            })
+          );
       })
     );
   }
