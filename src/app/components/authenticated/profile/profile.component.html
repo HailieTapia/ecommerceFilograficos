@@ -1,1 +1,25 @@
-<p>profile works!</p>
+<div class="profile-container">
+    <h2>Perfil de Usuario</h2>
+  
+    <div *ngIf="user; else errorTemplate">
+      <p><strong>ID:</strong> {{ user.user_id }}</p>
+      <p><strong>Nombre:</strong> {{ user.name }}</p>
+      <p><strong>Correo Electrónico:</strong> {{ user.email }}</p>
+      <p><strong>Teléfono:</strong> {{ user.phone }}</p>
+      <p><strong>Estado:</strong> {{ user.status }}</p>
+      <p><strong>Tipo de Usuario:</strong> {{ user.user_type }}</p>
+  
+      <div *ngIf="user.Addresses && user.Addresses.length">
+        <h3>Dirección Primaria</h3>
+        <p><strong>Calle:</strong> {{ user.Addresses[0].street }}</p>
+        <p><strong>Ciudad:</strong> {{ user.Addresses[0].city }}</p>
+        <p><strong>Estado:</strong> {{ user.Addresses[0].state }}</p>
+        <p><strong>País:</strong> {{ user.Addresses[0].country }}</p>
+      </div>
+    </div>
+  
+    <ng-template #errorTemplate>
+      <p class="error-message">{{ error }}</p>
+    </ng-template>
+  </div>
+  
