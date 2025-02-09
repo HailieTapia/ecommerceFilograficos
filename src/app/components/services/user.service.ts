@@ -43,4 +43,13 @@ export class UserService {
             })
         );
     }
+    // Eliminación de cuenta del cliente autenticado
+    deleteMyAccount(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.delete(`${this.apiUrl}/users/delete-account`, { headers, withCredentials: true })
+            })
+        );
+    }
 }
