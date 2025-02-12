@@ -1,5 +1,18 @@
-
-    <h2>Perfil de Usuario</h2>
-
-
+<div *ngIf="userProfile">
+    <h2>Perfil del Usuario</h2>
+    <p>Nombre: {{ userProfile.name }}</p>
+    <p>Email: {{ userProfile.email }}</p>
+    <p>Teléfono: {{ userProfile.phone }}</p>
+    <p>Estado: {{ userProfile.status }}</p>
+  
+    <h3>Dirección</h3>
+    <!-- Verificar si hay direcciones y mostrar la primera dirección -->
+    <div *ngIf="userProfile.Addresses && userProfile.Addresses.length > 0">
+      <p><strong>Calle:</strong> {{ userProfile.Addresses[0].street }}</p>
+      <p><strong>Ciudad:</strong> {{ userProfile.Addresses[0].city }}</p>
+      <p><strong>Estado:</strong> {{ userProfile.Addresses[0].state }}</p>
+      <p><strong>Código Postal:</strong> {{ userProfile.Addresses[0].postal_code }}</p>
+    </div>
+  
+  </div>
   
