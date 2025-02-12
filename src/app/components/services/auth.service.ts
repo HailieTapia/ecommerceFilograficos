@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/config';
 import { CsrfService } from './csrf.service';
+import { throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiUrl = `${environment.baseUrl}`;
-  private userSubject = new BehaviorSubject<any>(null); 
+  private userSubject = new BehaviorSubject<any>(null);
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {
     this.loadUserFromStorage();  // Cargar usuario desde el LocalStorage cuando inicie el servicio
@@ -52,11 +53,24 @@ export class AuthService {
     );
   }
   // Método para cerrar sesión
-  logout(): void {
+  logout(): Observable<any> {
     console.log('Cerrando sesión del usuario');
-
-    localStorage.removeItem('userData'); // Elimina la información del usuario al cerrar sesión
-    this.userSubject.next(null); // Actualiza el estado en el BehaviorSubject
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.post(`${this.apiUrl}/auth/logout`, {}, { headers, withCredentials: true }).pipe(
+          tap(() => {
+            localStorage.removeItem('userData'); // Eliminar el usuario del LocalStorage
+            this.userSubject.next(null); // Resetear el estado del usuario
+            console.log('Sesión cerrada exitosamente');
+          }),
+          catchError((error) => {
+            console.error('Error al cerrar sesión:', error);
+            return throwError(() => new Error('No se pudo cerrar sesión.'));
+          })
+        );
+      })
+    );
   }
 
   // Método para obtener el usuario logueado
