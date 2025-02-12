@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PasswordService } from '../../services/password.service';
-import {ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-recover',
   standalone: true,
-  imports: [CommonModule,ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './recover.component.html',
   styleUrl: './recover.component.css'
 })
@@ -15,8 +15,8 @@ export class RecoverComponent {
   recoveryForm: FormGroup;
   otpForm: FormGroup;
   resetForm: FormGroup;
-  stage: number = 1; 
-  email: string ="";
+  stage: number = 1;
+  email: string = "";
   recoveryToken: string = "";
 
   constructor(private fb: FormBuilder, private passwordService: PasswordService) {
@@ -27,7 +27,7 @@ export class RecoverComponent {
 
     // Formulario para verificar OTP
     this.otpForm = this.fb.group({
-      otp: ['', [Validators.required, Validators.minLength(6)]]
+      otp: ['', [Validators.required]]
     });
 
     // Formulario para restablecer la contraseña
@@ -45,12 +45,13 @@ export class RecoverComponent {
     }
     this.passwordService.recover(this.recoveryForm.value).subscribe(
       (response) => {
-        console.error('Se ha enviado un código de recuperación a tu correo');
+        console.log('Se ha enviado un código de recuperación a tu correo');
         this.email = this.recoveryForm.value.email;
         this.stage = 2; // Pasar a la siguiente etapa (verificación OTP)
       },
       (error) => {
-        console.error('Error al iniciar el proceso de recuperación');
+        const errorMessage = error?.error?.message || 'Error al iniciar el proceso de recuperación';
+        console.error('MENSAJE DE MI BACK.',errorMessage);
       }
     );
   }
@@ -61,14 +62,24 @@ export class RecoverComponent {
       console.error('Por favor ingresa un código OTP válido');
       return;
     }
-    this.passwordService.verify({ email: this.email, otp: this.otpForm.value.otp }).subscribe(
+
+    const requestData = {
+      email: this.email,
+      otp: this.otpForm.value.otp
+    };
+
+    console.log('Enviando datos para verificar OTP:', requestData);
+
+    this.passwordService.verify(requestData).subscribe(
       (response) => {
-        console.error('OTP verificado correctamente');
+        console.log('Respuesta del backend:', response);
+        console.log('OTP verificado correctamente');
         this.recoveryToken = this.otpForm.value.otp;
         this.stage = 3; // Pasar a la siguiente etapa (restablecer contraseña)
       },
       (error) => {
-        console.error('Código OTP incorrecto o expirado');
+        const errorMessage = error?.error?.message || 'El OTP ingresado es incorrecto o ha expirado.';
+        console.error('MENSAJE DE MI BACK.',errorMessage);
       }
     );
   }
