@@ -1,31 +1,5 @@
-<div class="profile-container">
+
     <h2>Perfil de Usuario</h2>
-    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
-      <label>Nombre:</label>
-      <input nz-input formControlName="name" placeholder="Nombre completo" />
-  
-      <label>Teléfono:</label>
-      <input nz-input formControlName="phone" placeholder="Número de teléfono" />
-  
-      <button nz-button nzType="primary" [disabled]="profileForm.invalid">Actualizar Perfil</button>
-    </form>
-  
-    <h2>Dirección</h2>
-    <form [formGroup]="addressForm" (ngSubmit)="updateAddress()">
-      <label>Calle:</label>
-      <input nz-input formControlName="street" placeholder="Calle" />
-  
-      <label>Ciudad:</label>
-      <input nz-input formControlName="city" placeholder="Ciudad" />
-  
-      <label>Estado:</label>
-      <input nz-input formControlName="state" placeholder="Estado" />
-  
-      <label>Código Postal:</label>
-      <input nz-input formControlName="postal_code" placeholder="Código Postal" />
-  
-      <button nz-button nzType="primary" [disabled]="addressForm.invalid">Actualizar Dirección</button>
-    </form>
-  </div>
+
 
   
