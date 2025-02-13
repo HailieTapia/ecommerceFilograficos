@@ -13,7 +13,6 @@ import { ProfileComponent } from './components/authenticated/profile/profile.com
 import { CompanyComponent } from './components/administrator/company/company.component';
 import { FaqCategoriesComponent } from './components/administrator/faq-categories/faq-categories.component';
 
-
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
@@ -32,7 +31,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'login', component: LoginComponent },
   { path: 'recovery', component: RecoverComponent },
-  { path: '', redirectTo: '/register', pathMatch: 'full' },
+  { path: '', redirectTo: '/recovery', pathMatch: 'full' },
   
 
   { path: '400', component: BadRequestComponent },

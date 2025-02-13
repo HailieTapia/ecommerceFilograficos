@@ -52,7 +52,7 @@ export class LoginComponent implements AfterViewInit {
     if (this.loginForm.invalid) {
       return;
     }
-
+  
     this.loading = true;
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
@@ -62,8 +62,17 @@ export class LoginComponent implements AfterViewInit {
         this.router.navigate(['/profile']);
       },
       error: (error) => {
-        this.message = error.error.message || 'Error en el acceso';
         this.loading = false;
+  
+        // Si el error tiene un mensaje, imprímelo directamente
+        if (error.error?.message) {
+          console.log('Mensaje de error del backend:', error.error.message);
+          this.message = error.error.message; // Asignar el mensaje para mostrarlo en el frontend
+        } else {
+          // Si no hay mensaje, muestra un error genérico
+          console.log('error desconocidooooooooooo');
+          this.message = 'Error en el inicio de sesión. Intenta de nuevo.';
+        }
       }
     });
   }

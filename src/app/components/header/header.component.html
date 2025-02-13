@@ -1,19 +1,29 @@
-<nav>
-  <ul>
-    <li *ngIf="!user">
-      <button (click)="navigateTo('/login')">Login</button>
-      <button (click)="navigateTo('/register')">Register</button>
+<header>
+  <nav class="navbar">
+    <ul>
+      <!-- Botones para 'cliente' -->
+      <li *ngIf="isLoggedIn && userRole === 'cliente'">
+        <button routerLink="/profile">Perfil</button>
+      </li>
 
+      <!-- Botones para 'administrador' -->
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/company">Empresa</button>
+        <button routerLink="/faq-categories">Categorias de FAQ</button>
+      </li>
 
-    <li *ngIf="user?.user_type === 'cliente'">
-      <button (click)="navigateTo('/profile')">profile</button>
-      <button (click)="logout()">Logout</button>
-    </li>
+      <!-- Botones de logout -->
+      <li *ngIf="isLoggedIn">
+        <button (click)="logout()">Cerrar sesión</button>
+      </li>
 
-    <li *ngIf="user?.user_type === 'administrador'">
-      <a routerLink="/company">empresa</a>
-      <a routerLink="/faq-categories">Categorias de FAQ</a>
-      <button (click)="logout()">Logout</button>
-    </li>
-  </ul>
-</nav>
+      <!-- Botones para usuarios no logueados -->
+      <li *ngIf="!isLoggedIn">
+        <button routerLink="/login">Login</button>
+      </li>
+      <li *ngIf="!isLoggedIn">
+        <button routerLink="/register">Register</button>
+      </li>
+    </ul>
+  </nav>
+</header>

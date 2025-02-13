@@ -1,31 +1,18 @@
-<div class="profile-container">
-    <h2>Perfil de Usuario</h2>
-    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
-      <label>Nombre:</label>
-      <input nz-input formControlName="name" placeholder="Nombre completo" />
+<div *ngIf="userProfile">
+    <h2>Perfil del Usuario</h2>
+    <p>Nombre: {{ userProfile.name }}</p>
+    <p>Email: {{ userProfile.email }}</p>
+    <p>Teléfono: {{ userProfile.phone }}</p>
+    <p>Estado: {{ userProfile.status }}</p>
   
-      <label>Teléfono:</label>
-      <input nz-input formControlName="phone" placeholder="Número de teléfono" />
+    <h3>Dirección</h3>
+    <!-- Verificar si hay direcciones y mostrar la primera dirección -->
+    <div *ngIf="userProfile.Addresses && userProfile.Addresses.length > 0">
+      <p><strong>Calle:</strong> {{ userProfile.Addresses[0].street }}</p>
+      <p><strong>Ciudad:</strong> {{ userProfile.Addresses[0].city }}</p>
+      <p><strong>Estado:</strong> {{ userProfile.Addresses[0].state }}</p>
+      <p><strong>Código Postal:</strong> {{ userProfile.Addresses[0].postal_code }}</p>
+    </div>
   
-      <button nz-button nzType="primary" [disabled]="profileForm.invalid">Actualizar Perfil</button>
-    </form>
-  
-    <h2>Dirección</h2>
-    <form [formGroup]="addressForm" (ngSubmit)="updateAddress()">
-      <label>Calle:</label>
-      <input nz-input formControlName="street" placeholder="Calle" />
-  
-      <label>Ciudad:</label>
-      <input nz-input formControlName="city" placeholder="Ciudad" />
-  
-      <label>Estado:</label>
-      <input nz-input formControlName="state" placeholder="Estado" />
-  
-      <label>Código Postal:</label>
-      <input nz-input formControlName="postal_code" placeholder="Código Postal" />
-  
-      <button nz-button nzType="primary" [disabled]="addressForm.invalid">Actualizar Dirección</button>
-    </form>
   </div>
-
   

@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
   selector: 'app-faq-category-form',
   standalone: true,
   templateUrl: './faq-category-form.component.html',
-  styleUrls: ['./faq-category-form.component.scss'],
+  styleUrls: ['./faq-category-form.component.css'],
   imports: [
     CommonModule, 
     ReactiveFormsModule, 
@@ -52,7 +52,7 @@ export class FaqCategoryFormComponent implements OnInit {
     const categoryData = this.categoryForm.value;
 
     if (this.isEdit) {
-      this.faqCategoryService.updateCategory(this.data.id, categoryData).subscribe({
+      this.faqCategoryService.updateCategory(this.data.category_id, categoryData).subscribe({
         next: () => this.onSuccess(),
         error: (err) => console.error('Error al actualizar la categoría:', err)
       });
