@@ -1,1 +1,31 @@
-<p>email-type works!</p>
+<h2>Tipos de Email</h2>
+
+<!-- Formulario para agregar un nuevo tipo de email -->
+<form [formGroup]="emailTypeForm" (ngSubmit)="addEmailType()">
+  <label>Nombre:</label>
+  <input type="text" formControlName="name" required>
+
+  <label>Descripción:</label>
+  <input type="text" formControlName="description" required>
+
+  <label>Token:</label>
+  <input type="text" formControlName="token" required>
+
+  <button type="submit" [disabled]="emailTypeForm.invalid">Agregar</button>
+</form>
+
+<hr>
+
+<!-- Lista de tipos de email -->
+<ul *ngIf="emailTypes.length > 0; else noData">
+  <li *ngFor="let type of emailTypes">
+    <strong>{{ type.name }}</strong> - {{ type.description }}
+    <br>
+    <small><b>Token:</b> {{ type.token }}</small>
+  </li>
+</ul>
+
+<!-- Mensaje si no hay datos -->
+<ng-template #noData>
+  <p>No hay tipos de email disponibles.</p>
+</ng-template>
