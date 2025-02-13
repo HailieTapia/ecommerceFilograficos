@@ -13,6 +13,17 @@ export class IncidenceService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
+    // Obtener configuración existente
+    getConfig(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.get<any>(`${this.apiUrl}/security/token-lifetime`,
+                    { headers, withCredentials: true }
+                );
+            })
+        );
+    }
     // Obtener intentos fallidos de inicio de sesión
     getFailedLoginAttempts(periodo: string): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
