@@ -23,6 +23,17 @@ export class UserService {
             })
         );
     }
+
+    //  Actualización del perfil del usuario
+    updateProfile(data: any): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.put(`${this.apiUrl}/users/profile`, data, { headers, withCredentials: true });
+            })
+        );
+    }
+
     //  AGREGAR DIRECCION
     addAddress(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -42,17 +53,6 @@ export class UserService {
             })
         );
     }
-    
-    //  Actualización del perfil del usuario
-    updateProfile(data: any): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put(`${this.apiUrl}/users/profile`, data, { headers, withCredentials: true });
-            })
-        );
-    }
-
     // Eliminación de cuenta del cliente autenticado
     deleteMyAccount(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(

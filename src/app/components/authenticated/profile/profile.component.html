@@ -1,18 +1,84 @@
-<div *ngIf="userProfile">
+<div class="profile-container">
     <h2>Perfil del Usuario</h2>
-    <p>Nombre: {{ userProfile.name }}</p>
-    <p>Email: {{ userProfile.email }}</p>
-    <p>Teléfono: {{ userProfile.phone }}</p>
-    <p>Estado: {{ userProfile.status }}</p>
   
-    <h3>Dirección</h3>
-    <!-- Verificar si hay direcciones y mostrar la primera dirección -->
-    <div *ngIf="userProfile.Addresses && userProfile.Addresses.length > 0">
-      <p><strong>Calle:</strong> {{ userProfile.Addresses[0].street }}</p>
-      <p><strong>Ciudad:</strong> {{ userProfile.Addresses[0].city }}</p>
-      <p><strong>Estado:</strong> {{ userProfile.Addresses[0].state }}</p>
-      <p><strong>Código Postal:</strong> {{ userProfile.Addresses[0].postal_code }}</p>
+    <!-- Mensajes de éxito o error -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
     </div>
   
+    <!-- Mostrar los datos del perfil del usuario -->
+    <div class="user-profile">
+      <p><strong>Nombre:</strong> {{ userProfile?.name }}</p>
+      <p><strong>Email:</strong> {{ userProfile?.email }}</p>
+      <p><strong>Teléfono:</strong> {{ userProfile?.phone }}</p>
+      <p><strong>Estado:</strong> {{ userProfile?.status }}</p>
+      <p><strong>Tipo de usuario:</strong> {{ userProfile?.user_type }}</p>
+    </div>
+  
+    <!-- Mostrar la dirección si existe -->
+    <div *ngIf="userProfile?.Addresses?.length > 0">
+      <h3>Dirección Registrada</h3>
+      <p><strong>Calle:</strong> {{ userProfile.Addresses[0]?.street }}</p>
+      <p><strong>Ciudad:</strong> {{ userProfile.Addresses[0]?.city }}</p>
+      <p><strong>Estado:</strong> {{ userProfile.Addresses[0]?.state }}</p>
+      <p><strong>Código Postal:</strong> {{ userProfile.Addresses[0]?.postal_code }}</p>
+  
+      <!-- Botón de actualizar dirección si ya hay una dirección -->
+      <button class="btn btn-primary" (click)="editAddress()" *ngIf="userProfile?.Addresses?.length > 0">Actualizar Dirección</button>
+    </div>
+  
+    <!-- Si no hay dirección, ofrecer opción para agregar una nueva -->
+    <div *ngIf="userProfile?.Addresses?.length === 0">
+      <h3>Agregar Nueva Dirección</h3>
+      <form [formGroup]="addressForm" (ngSubmit)="addAddress()">
+        <div class="form-group">
+          <label for="street">Calle</label>
+          <input id="street" formControlName="street" type="text" class="form-control" />
+        </div>
+  
+        <div class="form-group">
+          <label for="city">Ciudad</label>
+          <input id="city" formControlName="city" type="text" class="form-control" />
+        </div>
+  
+        <div class="form-group">
+          <label for="state">Estado</label>
+          <input id="state" formControlName="state" type="text" class="form-control" />
+        </div>
+  
+        <div class="form-group">
+          <label for="postal_code">Código Postal</label>
+          <input id="postal_code" formControlName="postal_code" type="text" class="form-control" />
+        </div>
+  
+        <!-- Botón para agregar dirección -->
+        <button type="submit" class="btn btn-primary" [disabled]="addressForm.invalid">Agregar Dirección</button>
+      </form>
+    </div>
+  
+    <!-- Botón de actualización del perfil, solo visible después de agregar la dirección -->
+    <h3>Actualizar Perfil</h3>
+    <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+      <div class="form-group">
+        <label for="name">Nombre</label>
+        <input id="name" formControlName="name" type="text" class="form-control" />
+      </div>
+  
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" formControlName="email" type="email" class="form-control" />
+      </div>
+  
+      <div class="form-group">
+        <label for="phone">Teléfono</label>
+        <input id="phone" formControlName="phone" type="text" class="form-control" />
+      </div>
+  
+      <!-- Botón de actualizar perfil -->
+      <button *ngIf="userProfile?.Addresses?.length > 0" type="submit" class="btn btn-primary" [disabled]="profileForm.invalid">Actualizar Perfil</button>
+    </form>
   </div>
   
