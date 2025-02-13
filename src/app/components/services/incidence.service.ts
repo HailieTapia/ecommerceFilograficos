@@ -1,14 +1,30 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { switchMap, tap, catchError } from 'rxjs/operators';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/config';
 import { CsrfService } from './csrf.service';
-import { throwError } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class IncidenceService {
+    private apiUrl = `${environment.baseUrl}`;
 
+    constructor(private csrfService: CsrfService, private http: HttpClient) { }
+
+    // Obtener intentos fallidos de inicio de sesión
+    getFailedLoginAttempts(periodo: string): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                const params = new HttpParams().set('periodo', periodo);
+                return this.http.get<any>(`${this.apiUrl}/security/failed-attempts`, {
+                    headers,
+                    params,
+                    withCredentials: true
+                });
+            })
+        );
+    }
 }

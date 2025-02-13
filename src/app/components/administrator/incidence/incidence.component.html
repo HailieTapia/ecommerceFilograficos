@@ -1,1 +1,14 @@
-<p>incidence works!</p>
+<h2>Intentos fallidos de inicio de sesión</h2>
+
+<label for="periodo">Selecciona un periodo:</label>
+<select id="periodo" [(ngModel)]="selectedPeriodo" (change)="onPeriodoChange()">
+  <option value="dia">Día</option>
+  <option value="semana">Semana</option>
+  <option value="mes">Mes</option>
+</select>
+
+<ul>
+  <li *ngFor="let attempt of failedLoginAttempts">
+    <strong>{{ attempt.nombre }}</strong> - {{ attempt.email }} - Intentos: {{ attempt.numero_intentos }}
+  </li>
+</ul>

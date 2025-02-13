@@ -11,6 +11,7 @@ import { ProfileComponent } from './components/authenticated/profile/profile.com
 
 //administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
+import { IncidenceComponent } from './components/administrator/incidence/incidence.component';
 
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -21,6 +22,7 @@ export const routes: Routes = [
 
   //administrador
   { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'incidence', component: IncidenceComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
 
 
   //autenticados
