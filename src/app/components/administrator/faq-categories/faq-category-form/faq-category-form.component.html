@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+
+<form [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
+  <mat-form-field appearance="outline" class="full-width">
+
+    <mat-label>Nombre de la Categoría</mat-label>
+    <input matInput formControlName="name" placeholder="Ej. General">
+    <mat-error *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">
+      El nombre es obligatorio y debe tener al menos 3 caracteres.
+    </mat-error>
+
+    <mat-label>Descripcion de la Categoría</mat-label>
+    <input matInput formControlName="description" placeholder="Ej. General">
+    <mat-error *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched">
+      La descripción es obligatoria.
+    </mat-error>
+
+  </mat-form-field>
+
+  <div class="actions">
+    <button mat-button type="button" (click)="dialogRef.close()">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="categoryForm.invalid">
+      {{ isEdit ? 'Actualizar' : 'Crear' }}
+    </button>
+  </div>
+</form>
