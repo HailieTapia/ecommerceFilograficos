@@ -18,7 +18,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post(`${this.apiUrl}/users/profile`,data, { headers, withCredentials: true });
+                return this.http.post(`${this.apiUrl}/regulatory/create`, data, { headers, withCredentials: true });
             })
         );
     }
@@ -27,7 +27,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.delete(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+                return this.http.delete(`${this.apiUrl}/regulatory/delete-document/:document_id`, { headers, withCredentials: true });
             })
         );
     }
@@ -36,7 +36,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.delete(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+                return this.http.delete(`${this.apiUrl}/regulatory/delete/:document_id/:version_id`, { headers, withCredentials: true });
             })
         );
     }
@@ -45,26 +45,26 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put(`${this.apiUrl}/users/profile`, data,{ headers, withCredentials: true });
+                return this.http.put(`${this.apiUrl}/regulatory/update/:document_id`, data, { headers, withCredentials: true });
             })
         );
     }
-    // Obtener todas las versiones vigentes
+    // Obtener todas las versiones Vigentes (Público)
     getAllCurrentVersions(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/regulatory/`, { headers, withCredentials: true });
             })
         );
     }
 
-    // Obtener versión vigente de un documento
+    // Obtener versión vigente de un documento/por Título (Público)
     getCurrentVersion(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/regulatory/:title`, { headers, withCredentials: true });
             })
         );
     }
@@ -74,7 +74,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/regulatory/version-history/:document_id`, { headers, withCredentials: true });
             })
         );
     }
@@ -84,7 +84,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/regulatory/document/:document_id`, { headers, withCredentials: true });
             })
         );
     }
@@ -94,7 +94,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+                return this.http.put(`${this.apiUrl}/regulatory/restore-document/:document_id`, { headers, withCredentials: true });
             })
         );
     }
@@ -104,7 +104,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+                return this.http.put(`${this.apiUrl}/regulatory/restore-version/:document_id/:version_id`, { headers, withCredentials: true });
             })
         );
     }
