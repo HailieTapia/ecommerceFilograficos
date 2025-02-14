@@ -27,8 +27,27 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post(`${this.apiUrl}/email-types`,data, { headers, withCredentials: true });
+                return this.http.post(`${this.apiUrl}/email-types`, data, { headers, withCredentials: true });
             })
         );
     }
+    // Obtener tipo de email por ID
+    getEmailTypeById(id: number): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.get(`${this.apiUrl}/email-types/${id}`, { headers, withCredentials: true });
+            })
+        );
+    }
+    // Eliminar tipo de email (eliminación lógica)
+    deleteEmailType(id: number): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.put(`${this.apiUrl}/email-types/${id}`, {}, { headers, withCredentials: true });
+            })
+        );
+    }
+
 }
