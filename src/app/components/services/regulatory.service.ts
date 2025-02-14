@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/config';
@@ -23,29 +23,32 @@ export class TypeService {
         );
     }
     // Eliminar documento (lógico)
-    deleteRegulatoryDocument(): Observable<any> {
+    deleteRegulatoryDocument(document_id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.delete(`${this.apiUrl}/regulatory/delete-document/:document_id`, { headers, withCredentials: true });
+                return this.http.delete(`${this.apiUrl}/regulatory/delete-document/${document_id}`, { headers, withCredentials: true });
             })
         );
     }
     // Eliminar versión específica
-    deleteRegulatoryDocumentVersion(): Observable<any> {
+    deleteRegulatoryDocumentVersion(document_id: number, version_id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.delete(`${this.apiUrl}/regulatory/delete/:document_id/:version_id`, { headers, withCredentials: true });
+                return this.http.delete(
+                    `${this.apiUrl}/regulatory/delete/${document_id}/${version_id}`,
+                    { headers, withCredentials: true }
+                );
             })
         );
     }
     // Actualizar documento (nueva versión)
-    updateRegulatoryDocument(data: any): Observable<any> {
+    updateRegulatoryDocument(document_id: number, data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put(`${this.apiUrl}/regulatory/update/:document_id`, data, { headers, withCredentials: true });
+                return this.http.put(`${this.apiUrl}/regulatory/update/${document_id}`, data, { headers, withCredentials: true });
             })
         );
     }
@@ -58,53 +61,48 @@ export class TypeService {
             })
         );
     }
-
     // Obtener versión vigente de un documento/por Título (Público)
-    getCurrentVersion(): Observable<any> {
+    getCurrentVersion(title: string): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/regulatory/:title`, { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/regulatory/${title}`, { headers, withCredentials: true });
             })
         );
     }
-
     // Obtener historial de versiones
-    getVersionHistory(): Observable<any> {
+    getVersionHistory(document_id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/regulatory/version-history/:document_id`, { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/regulatory/version-history/${document_id}`, { headers, withCredentials: true });
             })
         );
     }
-
     // Obtener documento por ID con todas sus versiones
-    getDocumentById(): Observable<any> {
+    getDocumentById(document_id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/regulatory/document/:document_id`, { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/regulatory/document/${document_id}`, { headers, withCredentials: true });
             })
         );
     }
-
     // Restaurar documento
-    restoreRegulatoryDocument(): Observable<any> {
+    restoreRegulatoryDocument(document_id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put(`${this.apiUrl}/regulatory/restore-document/:document_id`, { headers, withCredentials: true });
+                return this.http.put(`${this.apiUrl}/regulatory/restore-document/${document_id}`, {}, { headers, withCredentials: true });
             })
         );
     }
-
     // Restaurar versión específica
-    restoreRegulatoryDocumentVersion(): Observable<any> {
+    restoreRegulatoryDocumentVersion(document_id: number, version_id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put(`${this.apiUrl}/regulatory/restore-version/:document_id/:version_id`, { headers, withCredentials: true });
+                return this.http.put(`${this.apiUrl}/regulatory/restore-version/${document_id}/${version_id}`, {}, { headers, withCredentials: true });
             })
         );
     }
