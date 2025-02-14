@@ -12,5 +12,13 @@ export class TemplateService {
     private apiUrl = `${environment.baseUrl}`;
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
-
+    // Obtener todas las plantillas activas
+    getAllTemplates(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.get(`${this.apiUrl}/email-templates`,  { headers, withCredentials: true });
+            })
+        );
+    }
 }
