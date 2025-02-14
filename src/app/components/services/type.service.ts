@@ -41,7 +41,14 @@ export class TypeService {
         );
     }
     // Actualizar tipo de email(NO)
-
+    updateEmailType(id: number, data: any): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.put(`${this.apiUrl}/email-types/${id}`, data, { headers, withCredentials: true });
+            })
+        );
+    }
 
     // Eliminación lógica(NO)
     deleteEmailType(id: number): Observable<any> {
