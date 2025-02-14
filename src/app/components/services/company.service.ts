@@ -12,16 +12,23 @@ export class CompanyService {
     private apiUrl = `${environment.baseUrl}`;
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
-    
-    // Actualizar la información de la empresa(NO)
-    updateCompanyInfo(formData: FormData): Observable<any> {
+
+    // Crear nueva empresa(NO SE OCUPA)
+    createCompany(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put<any>(`${this.apiUrl}/company/update`, formData, {
-                    headers,
-                    withCredentials: true
-                });
+                return this.http.post<any>(`${this.apiUrl}/company/create`, data, { headers, withCredentials: true });
+            })
+        );
+    }
+
+    // Actualizar la información de la empresa(NO)
+    updateCompanyInfo(data: any): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.put<any>(`${this.apiUrl}/company/update`, data, { headers, withCredentials: true });
             })
         );
     }
@@ -30,48 +37,17 @@ export class CompanyService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get<any>(`${this.apiUrl}/company/`, {
-                    headers,
-                    withCredentials: true
-                });
-            })
-        );
-    }
-
-    //(?)
-    uploadCompanyLogo(file: File): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const formData = new FormData();
-                formData.append('logo', file); // Agrega el archivo bajo el nombre "logo"
-
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post<any>(`${this.apiUrl}/company/upload-logo`, formData, {
-                    headers,
-                    withCredentials: true
-                });
+                return this.http.get<any>(`${this.apiUrl}/company/`, { headers, withCredentials: true });
             })
         );
     }
 
     // Método para eliminar enlaces a las redes sociales de la empresa(NO)
-    deleteSocialMediaLinks(redesSociales: any): Observable<any> {
+    deleteSocialMediaLinks(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put<any>(`${this.apiUrl}/company/delete-social-media-links`,
-                    { redes_sociales: redesSociales },
-                    { headers, withCredentials: true });
-            })
-        );
-    }
-
-    // Crear una nueva empresa(NO)
-    createCompany(companyData: any): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post<any>(`${this.apiUrl}/company/create`, companyData, { headers, withCredentials: true });
+                return this.http.put<any>(`${this.apiUrl}/company/delete-social-media-links`, { data }, { headers, withCredentials: true });
             })
         );
     }
@@ -86,12 +62,27 @@ export class CompanyService {
         );
     }
 
-    //Deshacer el borrado de la informacion de la compañia (activarlo)(NO)
+    //Deshacer el borrado de la informacion de la compañia (activarlo)(NO SE OCUPA)
     restoreCompany(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
                 return this.http.post<any>(`${this.apiUrl}/company/restore`, {}, { headers, withCredentials: true });
+            })
+        );
+    }
+    //(?)
+    uploadCompanyLogo(file: File): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const formData = new FormData();
+                formData.append('logo', file); // Agrega el archivo bajo el nombre "logo"
+
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.post<any>(`${this.apiUrl}/company/upload-logo`, formData, {
+                    headers,
+                    withCredentials: true
+                });
             })
         );
     }

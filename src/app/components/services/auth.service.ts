@@ -26,21 +26,21 @@ export class AuthService {
   }
 
 // Registro de usuarios
-  register(userData: any): Observable<any> {
+  register(data: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post(`${this.apiUrl}/auth/register`, userData, { headers, withCredentials: true });
+        return this.http.post(`${this.apiUrl}/auth/register`, data, { headers, withCredentials: true });
       })
     );
   }
 
 // Inicio de sesión
-  login(loginData: any): Observable<any> {
+  login(data: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post(`${this.apiUrl}/auth/login`, loginData, { headers, withCredentials: true });
+        return this.http.post(`${this.apiUrl}/auth/login`, data, { headers, withCredentials: true });
       }),
       tap((user: any) => {
         console.log('Usuario logueado:', user);
