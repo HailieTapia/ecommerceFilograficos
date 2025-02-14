@@ -12,6 +12,7 @@ import { ProfileComponent } from './components/authenticated/profile/profile.com
 //administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
 import { FaqCategoriesComponent } from './components/administrator/faq-categories/faq-categories.component';
+import { FaqComponent } from './components/administrator/faq/faq.component';
 
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -23,6 +24,7 @@ export const routes: Routes = [
   //administrador
   { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'faq-categories', component: FaqCategoriesComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'faq', component: FaqComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
 
   //autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },

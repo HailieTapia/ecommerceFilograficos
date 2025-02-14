@@ -1,0 +1,33 @@
+/* Asegurar que el contenido del modal no tenga scroll innecesario */
+.mat-dialog-container {
+    overflow: visible !important;
+  }
+  
+  /* Asegura que el dropdown se muestre sobre el modal */
+  .cdk-overlay-container, .cdk-overlay-pane {
+    z-index: 2000 !important;
+  }
+  
+  /* Evita que el contenido se desborde */
+  .modal-content {
+    overflow: visible !important;
+    max-height: 80vh; /* Evita que el modal sea demasiado alto */
+  }
+  
+  /* Ajustes generales */
+  .full-width {
+    width: 100%;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  
+  /* Ajuste para evitar desbordamiento del select */
+  mat-form-field {
+    position: relative;
+  }
+  
