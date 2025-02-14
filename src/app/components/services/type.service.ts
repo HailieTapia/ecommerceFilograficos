@@ -13,16 +13,7 @@ export class TypeService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-    // obtener todos los tipos de email
-    getAllEmailTypes(): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/email-types`, { headers, withCredentials: true });
-            })
-        );
-    }
-    // Crear un nuevo tipo de email
+    // Crear tipo de email (NO)
     createEmailType(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -31,7 +22,7 @@ export class TypeService {
             })
         );
     }
-    // Obtener tipo de email por ID
+    // Obtener tipo por ID
     getEmailTypeById(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -40,7 +31,19 @@ export class TypeService {
             })
         );
     }
-    // Eliminar tipo de email (eliminación lógica)
+    // Obtener todos los tipos activos
+    getAllEmailTypes(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.get(`${this.apiUrl}/email-types`, { headers, withCredentials: true });
+            })
+        );
+    }
+    // Actualizar tipo de email(NO)
+
+
+    // Eliminación lógica(NO)
     deleteEmailType(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -49,5 +52,4 @@ export class TypeService {
             })
         );
     }
-
 }

@@ -28,55 +28,55 @@ export class EmailTypeComponent implements OnInit {
     this.loadEmailTypes();
   }
 
-  // Cargar todos los tipos de email
+  // Obtener todos los tipos activos
   loadEmailTypes(): void {
     this.typeService.getAllEmailTypes().subscribe({
       next: (data) => {
         this.emailTypes = data.emailTypes;
       },
       error: (err) => {
-        console.error('Error fetching email types:', err);
+        console.error('Error al obtener los tipos de correo electrónico:', err);
       }
     });
   }
 
-  // Agregar un nuevo tipo de email
+  // Crear tipo de email (NO)
   addEmailType(): void {
     if (this.emailTypeForm.valid) {
       this.typeService.createEmailType(this.emailTypeForm.value).subscribe({
         next: (response) => {
-          console.log('Email Type Created:', response);
-          this.loadEmailTypes(); // Recargar la lista
-          this.emailTypeForm.reset(); // Limpiar el formulario
+          console.log('Tipo de correo electrónico creado:', response);
+          this.loadEmailTypes();
+          this.emailTypeForm.reset();
         },
         error: (err) => {
-          console.error('Error creating email type:', err);
+          console.error('Error al crear el tipo de correo electrónico:', err);
         }
       });
     }
   }
-  //agregar
+  // Obtener tipo por ID
   getEmailTypeById(id: number): void {
     this.typeService.getEmailTypeById(id).subscribe({
       next: (data) => {
         this.selectedEmailType = data.emailType;
-        console.log('Selected Email Type:', this.selectedEmailType);
+        console.log('Tipo de correo electrónico seleccionado:', this.selectedEmailType);
       },
       error: (err) => {
-        console.error('Error fetching email type by ID:', err);
+        console.error('Error al obtener el tipo de correo electrónico por ID:', err);
       }
     });
   }
-  //eliminar 
+  // Eliminación lógica(NO)
   deleteEmailType(id: number): void {
     if (confirm('¿Estás seguro de que deseas eliminar este tipo de email?')) {
       this.typeService.deleteEmailType(id).subscribe({
         next: () => {
           alert('Tipo de email eliminado correctamente.');
-          this.loadEmailTypes(); // Recargar lista
+          this.loadEmailTypes();
         },
         error: (err) => {
-          console.error('Error deleting email type:', err);
+          console.error('Error al eliminar el tipo de correo electrónico:', err);
           alert('Error al eliminar el tipo de email.');
         }
       });

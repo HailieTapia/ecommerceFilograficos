@@ -1,1 +1,25 @@
-<p>email-template works!</p>
+<div class="container">
+  <h2 class="title">Plantillas de Correo Electrónico</h2>
+  
+  <ul class="template-list">
+    <li *ngFor="let template of emailTemplate" class="template-item" (click)="selectedEmailType = template">
+      <h3 class="template-name">{{ template.name }}</h3>
+      <p class="template-subject"><strong>Asunto:</strong> {{ template.subject }}</p>
+    </li>
+  </ul>
+
+  <!-- Sección para mostrar la plantilla seleccionada -->
+  <div *ngIf="selectedEmailType" class="template-details">
+    <h3>{{ selectedEmailType.name }}</h3>
+    <p><strong>Asunto:</strong> {{ selectedEmailType.subject }}</p>
+    <p><strong>Variables:</strong> {{ selectedEmailType.variables.join(', ') }}</p>
+
+    <div class="email-preview">
+      <h4>Vista previa en texto:</h4>
+      <pre>{{ selectedEmailType.text_content }}</pre>
+      
+      <h4>Vista previa en HTML:</h4>
+      <div [innerHTML]="selectedEmailType.html_content"></div>
+    </div>
+  </div>
+</div>

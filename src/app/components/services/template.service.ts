@@ -17,7 +17,16 @@ export class TemplateService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/email-templates`,  { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/email-templates`, { headers, withCredentials: true });
+            })
+        );
+    }
+    // Obtener plantilla por ID
+    getEmailTemplateById(id: number): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.get(`${this.apiUrl}/email-templates/${id}`, { headers, withCredentials: true });
             })
         );
     }
