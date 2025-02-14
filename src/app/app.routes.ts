@@ -13,6 +13,7 @@ import { ProfileComponent } from './components/authenticated/profile/profile.com
 import { CompanyComponent } from './components/administrator/company/company.component';
 import { IncidenceComponent } from './components/administrator/incidence/incidence.component';
 import { EmailTypeComponent } from './components/administrator/email-type/email-type.component';
+import { EmailTemplateComponent } from './components/administrator/email-template/email-template.component';
 
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -25,7 +26,7 @@ export const routes: Routes = [
   { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'incidence', component: IncidenceComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'type', component: EmailTypeComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
-
+  { path: 'template', component: EmailTemplateComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
 
   //autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },

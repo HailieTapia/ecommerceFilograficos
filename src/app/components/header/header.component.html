@@ -16,6 +16,9 @@
       <li *ngIf="isLoggedIn && userRole === 'administrador'">
         <button routerLink="/type">Tipo</button>
       </li>
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/template">Tipo</button>
+      </li>
 
       <!-- Botones de logout -->
       <li *ngIf="isLoggedIn">
