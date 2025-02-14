@@ -14,17 +14,7 @@ export class UserService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-    //Obtener perfil del usuario autenticado
-    getProfile(): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
-            })
-        );
-    }
-
-    //  Actualización del perfil del usuario
+    // Actualización del perfil del usuario (nombre, dirección, teléfono)
     updateProfile(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -34,7 +24,7 @@ export class UserService {
         );
     }
 
-    //  AGREGAR DIRECCION
+    //Añadir una dirección al usuario 
     addAddress(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -44,7 +34,7 @@ export class UserService {
         );
     }
 
-    //Actualización solo de la dirección del usuario
+    // Actualizar solo la dirección del usuario
     updateUserProfile(direccion: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -53,7 +43,18 @@ export class UserService {
             })
         );
     }
-    // Eliminación de cuenta del cliente autenticado
+
+    // Función para obtener el perfil del usuario autenticado
+    getProfile(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
+            })
+        );
+    }
+
+    // Eliminar la cuenta del cliente autenticado(NO)
     deleteMyAccount(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
