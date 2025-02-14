@@ -14,7 +14,7 @@ export class AuthService {
   private userSubject = new BehaviorSubject<any>(null);
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {
-    this.loadUserFromStorage();  // Cargar usuario desde el LocalStorage cuando inicie el servicio
+    this.loadUserFromStorage(); 
   }
 
   // Cargar usuario desde el localStorage al iniciar la aplicación
@@ -25,7 +25,7 @@ export class AuthService {
     }
   }
 
-  // Método para registrar al usuario
+// Registro de usuarios
   register(userData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -35,7 +35,7 @@ export class AuthService {
     );
   }
 
-  // Método para logear al usuario
+// Inicio de sesión
   login(loginData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -43,7 +43,6 @@ export class AuthService {
         return this.http.post(`${this.apiUrl}/auth/login`, loginData, { headers, withCredentials: true });
       }),
       tap((user: any) => {
-        // Imprimir en consola cada vez que el usuario se loguea
         console.log('Usuario logueado:', user);
 
         // Al hacer login, guarda la información del usuario en LocalStorage y actualiza el BehaviorSubject
@@ -52,7 +51,7 @@ export class AuthService {
       })
     );
   }
-  // Método para cerrar sesión
+// Cerrar sesión del usuario (elimina el token de la sesión actual)
   logout(): Observable<any> {
     console.log('Cerrando sesión del usuario');
     return this.csrfService.getCsrfToken().pipe(

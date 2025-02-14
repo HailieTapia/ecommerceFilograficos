@@ -13,6 +13,18 @@ export class CompanyService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
     
+    // Actualizar la información de la empresa(NO)
+    updateCompanyInfo(formData: FormData): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.put<any>(`${this.apiUrl}/company/update`, formData, {
+                    headers,
+                    withCredentials: true
+                });
+            })
+        );
+    }
     // Obtener la información de la empresa
     getCompanyInfo(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -26,6 +38,7 @@ export class CompanyService {
         );
     }
 
+    //(?)
     uploadCompanyLogo(file: File): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -40,22 +53,8 @@ export class CompanyService {
             })
         );
     }
-    
-    // Actualizar la información existente de la empresa
-    updateCompanyInfo(formData: FormData): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                // No establecer 'Content-Type' para que Angular lo maneje automáticamente
-                return this.http.put<any>(`${this.apiUrl}/company/update`, formData, {
-                    headers,
-                    withCredentials: true
-                });
-            })
-        );
-    }
 
-    // Eliminar enlaces de redes sociales
+    // Método para eliminar enlaces a las redes sociales de la empresa(NO)
     deleteSocialMediaLinks(redesSociales: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -67,8 +66,7 @@ export class CompanyService {
         );
     }
 
-    //NO SE OCUPA
-    // Crear una nueva empresa
+    // Crear una nueva empresa(NO)
     createCompany(companyData: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -78,7 +76,7 @@ export class CompanyService {
         );
     }
 
-    // Borrar la empresa (marcarla como inactiva)
+    //Borrado lógico de la informacion de la empresa (marcarlo como inactivo)(NO)
     deleteCompany(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -88,7 +86,7 @@ export class CompanyService {
         );
     }
 
-    // Restaurar la empresa (activar de nuevo)
+    //Deshacer el borrado de la informacion de la compañia (activarlo)(NO)
     restoreCompany(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {

@@ -37,13 +37,14 @@ export class RecoverComponent {
     });
   }
 
-  // Iniciar la recuperación de contraseña
+
+  // Método para iniciar el proceso de recuperación de contraseña
   initiateRecovery() {
     if (this.recoveryForm.invalid) {
       console.error('Por favor ingresa un correo válido');
       return;
     }
-    this.passwordService.recover(this.recoveryForm.value).subscribe(
+    this.passwordService.initiatePasswordRecovery(this.recoveryForm.value).subscribe(
       (response) => {
         console.log('Se ha enviado un código de recuperación a tu correo');
         this.email = this.recoveryForm.value.email;
@@ -51,12 +52,13 @@ export class RecoverComponent {
       },
       (error) => {
         const errorMessage = error?.error?.message || 'Error al iniciar el proceso de recuperación';
-        console.error('MENSAJE DE MI BACK.',errorMessage);
+        console.error('MENSAJE DE MI BACK.', errorMessage);
       }
     );
   }
 
-  // Verificar el código OTP
+
+  //metodo para verificar el codigo otp para recuperacion de contraseña(NO)
   verifyOTP() {
     if (this.otpForm.invalid) {
       console.error('Por favor ingresa un código OTP válido');
@@ -70,7 +72,7 @@ export class RecoverComponent {
 
     console.log('Enviando datos para verificar OTP:', requestData);
 
-    this.passwordService.verify(requestData).subscribe(
+    this.passwordService.verifyOTP(requestData).subscribe(
       (response) => {
         console.log('Respuesta del backend:', response);
         console.log('OTP verificado correctamente');
@@ -79,12 +81,12 @@ export class RecoverComponent {
       },
       (error) => {
         const errorMessage = error?.error?.message || 'El OTP ingresado es incorrecto o ha expirado.';
-        console.error('MENSAJE DE MI BACK.',errorMessage);
+        console.error('MENSAJE DE MI BACK.', errorMessage);
       }
     );
   }
 
-  // Restablecer la contraseña
+  //metodo para reestablecer una contraseña(NO)
   resetPassword() {
     if (this.resetForm.invalid || this.resetForm.value.newPassword !== this.resetForm.value.confirmPassword) {
       console.error('Las contraseñas no coinciden o son inválidas');
@@ -95,7 +97,7 @@ export class RecoverComponent {
       newPassword: this.resetForm.value.newPassword
     };
 
-    this.passwordService.resets(credentials).subscribe(
+    this.passwordService.resetPassword(credentials).subscribe(
       (response) => {
         console.error('Contraseña restablecida exitosamente');
         this.stage = 1; // Volver al inicio del proceso

@@ -1,34 +1,40 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IncidenceService } from '../../services/incidence.service';
+import { SecurityService } from '../../services/security.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-incidence',
+  selector: 'app-security',
   standalone: true,
-  imports: [CommonModule,FormsModule],
-  templateUrl: './incidence.component.html',
-  styleUrl: './incidence.component.css'
+  imports: [CommonModule, FormsModule],
+  templateUrl: './security.component.html',
+  styleUrl: './security.component.css'
 })
-export class IncidenceComponent {
+export class SecurityComponent {
 
   failedAttempts: any[] = [];
   failedLoginAttempts: any[] = [];
   selectedPeriodo: string = 'dia';
 
-  constructor(private incidenceService: IncidenceService,) {
+  constructor(private securityService: SecurityService) {
   }
 
+  //componente de carga al ejecutar el componente
   ngOnInit(): void {
+    //obtiene los intentos fallidos al cargar
     this.getFailedLoginAttempts(this.selectedPeriodo);
   }
 
+  //usuario cambia el período seleccionado.
   onPeriodoChange(): void {
     this.getFailedLoginAttempts(this.selectedPeriodo);
   }
 
+
+  // Obtener intentos fallidos de inicio de sesión
+  //Hace una petición a un servicio para obtener los intentos fallidos de inicio de sesión del período especificado
   getFailedLoginAttempts(periodo: string): void {
-    this.incidenceService.getFailedLoginAttempts(periodo).subscribe(
+    this.securityService.getFailedLoginAttempts(periodo).subscribe(
       (data) => {
         console.log('Intentos fallidos:', data);
         this.failedLoginAttempts = [

@@ -14,9 +14,12 @@ export class PasswordService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-  //RECUPERACION DE CONTRASEÑA  
-  //iniciar el proceso de recuperación de contraseña
-  recover(credentials: any): Observable<any> {
+  //Método para cambiar la contraseña del usuario autenticado(NO)
+
+
+
+  // Método para iniciar el proceso de recuperación de contraseña
+  initiatePasswordRecovery(credentials: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
@@ -25,8 +28,8 @@ export class PasswordService {
     );
   }
 
-  //verificar el código OTP
-  verify(credentials: any): Observable<any> {
+  //metodo para verificar el codigo otp para recuperacion de contraseña(NO)
+  verifyOTP(credentials: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
@@ -35,8 +38,8 @@ export class PasswordService {
     );
   }
 
-  //reestablecer la contraseña
-  resets(credentials: any): Observable<any> {
+  //metodo para reestablecer una contraseña(NO)
+  resetPassword(credentials: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
