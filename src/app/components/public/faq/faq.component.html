@@ -1,0 +1,23 @@
+<div class="faq-container">
+    <h2>Preguntas Frecuentes</h2>
+  
+    <p *ngIf="faqCategories.length === 0">Cargando preguntas frecuentes...</p>
+  
+    <div *ngFor="let category of faqCategories" class="faq-category">
+      <button class="category-header" (click)="toggleCategory(category.id)">
+        {{ category.name }}
+      </button>
+  
+      <div *ngIf="expandedCategoryId === category.id" class="faq-list">
+        <p class="category-description">{{ category.description }}</p>
+        <p *ngIf="category.faqs.length === 0">No hay preguntas en esta categoría.</p>
+  
+        <div *ngFor="let faq of category.faqs" class="faq-item">
+          <h3>{{ faq.question }}</h3>
+          <p><strong>Respuesta:</strong> {{ faq.answer }}</p>
+          <p><em>Última actualización: {{ faq.updatedAt | date:'longDate' }}</em></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
