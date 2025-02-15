@@ -50,7 +50,7 @@ export class TypeService {
         );
     }
 
-    // Eliminación lógica(NO)
+    // Eliminación lógica
     deleteEmailType(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {

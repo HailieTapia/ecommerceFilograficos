@@ -36,7 +36,6 @@ export class EmailTypeComponent implements OnInit {
   getAllEmailTypes(): void {
     this.typeService.getAllEmailTypes().subscribe({
       next: (data) => {
-        console.error(data);
         this.emailTypes = data.emailTypes;
       },
       error: (err) => {
@@ -44,7 +43,7 @@ export class EmailTypeComponent implements OnInit {
       }
     });
   }
-// Eliminación lógica
+  // Eliminación lógica
   deleteEmailType(id: number): void {
     if (confirm('¿Está seguro de eliminar este tipo de correo electrónico?')) {
       this.typeService.deleteEmailType(id).subscribe({
@@ -71,50 +70,69 @@ export class EmailTypeComponent implements OnInit {
       }
     });
   }
-  // Crear tipo de email
-  createEmailType() {
+  submitEmailType() {
     if (this.emailTypeForm.invalid) {
       this.errorMessage = 'Por favor, completa todos los campos requeridos.';
       return;
     }
 
-    const formData = this.emailTypeForm.value;
-    console.log("Datos antes de enviar:", formData);
+    const formData = { ...this.emailTypeForm.value };
+    formData.required_variables = formData.required_variables
+      .split(',')
+      .map((item: string) => item.trim());
 
-    if (typeof formData.required_variables === 'string') {
-      formData.required_variables = formData.required_variables
-        .split(',')
-        .map((item: string) => item.trim());
-      console.log("required_variables como array:", formData.required_variables);
+    if (this.emailTypeId) {
+      this.updateEmailType(this.emailTypeId, formData);
+    } else {
+      this.createEmailType(formData);
     }
-
-    this.typeService.createEmailType(formData).subscribe(
+  }
+  // Crear tipo de email
+  private createEmailType(data: any) {
+    this.typeService.createEmailType(data).subscribe(
       response => {
         this.successMessage = 'Tipo de correo electrónico creado exitosamente.';
-        this.emailTypeForm.reset();
+        this.modal.close();
+        this.getAllEmailTypes();
       },
       error => {
         this.errorMessage = 'Error al crear el tipo de correo electrónico: ' + error.message;
-        console.error("Error en la llamada API:", error);
       }
     );
   }
   // Actualizar tipo de email
-  updateEmailType(id: number, data: any): void {
+  private updateEmailType(id: number, data: any) {
     this.typeService.updateEmailType(id, data).subscribe(
       response => {
         this.successMessage = 'Tipo de correo electrónico actualizado exitosamente.';
-        this.emailTypeForm.reset();
+        this.modal.close();
+        this.getAllEmailTypes();
       },
       error => {
         this.errorMessage = 'Error al actualizar el tipo de correo electrónico: ' + error.message;
-        console.error("Error en la llamada API:", error);
       }
     );
   }
+
   //MODAL
   @ViewChild('modal') modal!: ModalComponent;
-  openModal() {
+  openModal(emailType?: any) {
+    this.emailTypeForm.reset();
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    if (emailType) {
+      this.emailTypeId = emailType.email_type_id;
+      this.emailTypeForm.patchValue({
+        token: emailType.token,
+        name: emailType.name,
+        description: emailType.description,
+        required_variables: emailType.required_variables?.join(', ') || ''
+      });
+    } else {
+      this.emailTypeId = null;
+    }
+
     this.modal.open();
   }
 }
