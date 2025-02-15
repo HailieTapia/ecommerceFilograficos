@@ -1,22 +1,36 @@
 <div class="faq-container">
-    <h2>Preguntas Frecuentes</h2>
+    <!-- Menú lateral de categorías -->
+    <div class="faq-sidebar">
+      <ul>
+        <li 
+          *ngFor="let category of faqCategories" 
+          [class.active]="selectedCategory?.id === category.id"
+          (click)="selectCategory(category)">
+          {{ category.name }}
+        </li>
+      </ul>
+    </div>
   
-    <p *ngIf="faqCategories.length === 0">Cargando preguntas frecuentes...</p>
+    <!-- Contenido de preguntas frecuentes -->
+    <div class="faq-content">
+      <h2>{{ selectedCategory?.name }}</h2>
+      <p class="category-description">{{ selectedCategory?.description }}</p>
   
-    <div *ngFor="let category of faqCategories" class="faq-category">
-      <button class="category-header" (click)="toggleCategory(category.id)">
-        {{ category.name }}
-      </button>
+      <p *ngIf="!selectedCategory || selectedCategory.faqs.length === 0">
+        No hay preguntas en esta categoría.
+      </p>
   
-      <div *ngIf="expandedCategoryId === category.id" class="faq-list">
-        <p class="category-description">{{ category.description }}</p>
-        <p *ngIf="category.faqs.length === 0">No hay preguntas en esta categoría.</p>
+      <div *ngFor="let faq of getPaginatedFaqs()" class="faq-item">
+        <h3>{{ faq.question }}</h3>
+        <p>{{ faq.answer }}</p>
+        <p><em>Última actualización: {{ faq.updatedAt | date:'longDate' }}</em></p>
+      </div>
   
-        <div *ngFor="let faq of category.faqs" class="faq-item">
-          <h3>{{ faq.question }}</h3>
-          <p><strong>Respuesta:</strong> {{ faq.answer }}</p>
-          <p><em>Última actualización: {{ faq.updatedAt | date:'longDate' }}</em></p>
-        </div>
+      <!-- Controles de paginación -->
+      <div class="pagination" *ngIf="selectedCategory && selectedCategory.faqs.length > itemsPerPage">
+        <button (click)="changePage(-1)" [disabled]="currentPage === 1">Anterior</button>
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+        <button (click)="changePage(1)" [disabled]="currentPage === totalPages">Siguiente</button>
       </div>
     </div>
   </div>
