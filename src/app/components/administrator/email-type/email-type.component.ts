@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { ModalComponent } from '../../../modal/modal.component';
+import { NgForm } from '@angular/forms';  // Necesario para usar el formulario de Angular
+
 import { TypeService } from '../../services/type.service';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule,FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-email-type',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [FormsModule,ModalComponent, ReactiveFormsModule, CommonModule],
   standalone: true,
   templateUrl: './email-type.component.html',
   styleUrls: ['./email-type.component.css'],
@@ -26,9 +29,15 @@ export class EmailTypeComponent implements OnInit {
       required_variables: ['', [Validators.required]]
     });
   }
-  
+
   ngOnInit(): void {
     this.loadEmailTypes();
+  }
+
+  @ViewChild('modal') modal!: ModalComponent;  // Usar '!' para asegurarse que modal se asigna correctamente
+
+  openModal() {
+    this.modal.open();  // Llama al método open() del modal
   }
 
   // Obtener todos los tipos activos

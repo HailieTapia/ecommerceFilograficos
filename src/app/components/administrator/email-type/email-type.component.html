@@ -1,99 +1,79 @@
-<div class="email-type-container">
-  <h2>{{ emailTypeId ? 'Editar Tipo de Correo Electrónico' : 'Crear Tipo de Correo Electrónico' }}</h2>
-
-  <form [formGroup]="emailTypeForm" (ngSubmit)="onSubmit()">
-    <!-- Token -->
-    <div class="form-group">
-      <label for="token">Token</label>
-      <input 
-        id="token" 
-        formControlName="token" 
-        type="text" 
-        class="form-control" 
-        placeholder="Ingrese el token"
-        required
-      />
-
-    </div>
-
-    <!-- Nombre -->
-    <div class="form-group">
-      <label for="name">Nombre</label>
-      <input 
-        id="name" 
-        formControlName="name" 
-        type="text" 
-        class="form-control" 
-        placeholder="Ingrese el nombre"
-        required
-      />
-
-    </div>
-
-    <!-- Descripción -->
-    <div class="form-group">
-      <label for="description">Descripción</label>
-      <textarea 
-        id="description" 
-        formControlName="description" 
-        class="form-control" 
-        placeholder="Ingrese la descripción (opcional)"
-      ></textarea>
-    </div>
-
-    <!-- Variables requeridas -->
-    <div class="form-group">
-      <label for="required_variables">Variables Requeridas</label>
-      <input 
-        id="required_variables" 
-        formControlName="required_variables" 
-        type="text" 
-        class="form-control" 
-        placeholder="Ingrese las variables separadas por coma"
-        required
-      />
-
-    </div>
-
-    <!-- Mensajes de éxito o error -->
-    <div *ngIf="successMessage" class="success-message">
-      {{ successMessage }}
-    </div>
-    <div *ngIf="errorMessage" class="error-message">
-      {{ errorMessage }}
-    </div>
-
-    <!-- Botón de envío -->
-    <button type="submit" class="btn btn-primary" [disabled]="emailTypeForm.invalid">
-      {{ emailTypeId ? 'Actualizar Tipo de Correo' : 'Crear Tipo de Correo' }}
-    </button>
-  </form>
-</div>
-
-
 <div class="flex justify-between items-center mb-6">
   <div>
     <h1 class="text-3xl font-bold">Tipos de Email</h1>
     <p class="text-gray-600">Gestiona los tipos de correos electrónicos del sistema</p>
   </div>
-  <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+  <button (click)="openModal()"
+    class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
     Crear Tipo
   </button>
 </div>
 
 <div *ngIf="emailTypes && emailTypes.length">
-  <h2 class="text-xs font-semibold mb-4">Tipos de Correo Electrónico Activos</h2>
-  <div *ngFor="let emailType of emailTypes" class="bg-white p-4 rounded-lg shadow-md mb-4">
-    <h3 class="text-xl font-bold mb-2">{{ emailType.name }}</h3>
-    <p class="text-gray-700"><strong>Token:</strong> {{ emailType.token }}</p>
-    <p class="text-gray-700"><strong>Descripción:</strong> {{ emailType.description }}</p>
-    <p class="text-gray-700"><strong>Variables Requeridas:</strong> {{ emailType.required_variables.join(', ') }}</p>
-    <p class="text-gray-700"><strong>Creado el:</strong> {{ emailType.created_at | date }}</p>
-    <p class="text-gray-700"><strong>Actualizado el:</strong> {{ emailType.updated_at | date }}</p>
-    <hr class="my-4" />
+  <div class="bg-white p-6 rounded-lg shadow-lg">
+    <h2 class="text-xs font-semibold mb-4">Tipos de Correo Electrónico Activos</h2>
+    <div *ngFor="let emailType of emailTypes" class="bg-white p-4 rounded-lg shadow-md mb-4">
+      <h3 class="text-xl font-bold mb-2">{{ emailType.name }}</h3>
+      <p class="text-gray-700"><strong>Token:</strong> {{ emailType.token }}</p>
+      <p class="text-gray-700"><strong>Descripción:</strong> {{ emailType.description }}</p>
+      <p class="text-gray-700"><strong>Variables Requeridas:</strong> {{ emailType.required_variables.join(', ') }}</p>
+      <p class="text-gray-700"><strong>Creado el:</strong> {{ emailType.created_at | date }}</p>
+      <p class="text-gray-700"><strong>Actualizado el:</strong> {{ emailType.updated_at | date }}</p>
+      <hr class="my-4 border-gray-300" />
+    </div>
   </div>
 </div>
 
 <div *ngIf="!emailTypes || !emailTypes.length">
-  <p class="text-center text-gray-500">No hay tipos de correo electrónico activos para mostrar.</p>
+  <div class="bg-white p-6 rounded-lg shadow-lg">
+    <p class="text-center text-gray-500">No hay tipos de correo electrónico activos para mostrar.</p>
+  </div>
 </div>
+
+
+<app-modal #modal title="Tipo de Correo">
+  <form [formGroup]="emailTypeForm" (ngSubmit)="onSubmit()" class="space-y-4">
+    <!-- Token -->
+    <div>
+      <label for="token" class="block text-sm font-medium text-gray-700">Token</label>
+      <input id="token" formControlName="token" placeholder="Ingrese el token"
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" required />
+    </div>
+
+    <!-- Nombre -->
+    <div>
+      <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+      <input id="name" formControlName="name" type="text" placeholder="Ingrese el nombre"
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" required />
+    </div>
+
+    <!-- Descripción -->
+    <div>
+      <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
+      <textarea id="description" formControlName="description" placeholder="Ingrese la descripción (opcional)"
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"></textarea>
+    </div>
+
+    <!-- Variables requeridas -->
+    <div>
+      <label for="required_variables" class="block text-sm font-medium text-gray-700">Variables Requeridas</label>
+      <input id="required_variables" formControlName="required_variables" type="text"
+        placeholder="Ingrese las variables separadas por coma" required
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" />
+    </div>
+
+    <!-- Mensajes de éxito o error -->
+    <div *ngIf="successMessage" class="text-green-600 text-sm">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="text-red-600 text-sm">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Botón de envío -->
+    <button type="submit" [disabled]="emailTypeForm.invalid"
+      class="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      {{ emailTypeId ? 'Actualizar' : 'Crear' }}
+    </button>
+  </form>
+</app-modal>
