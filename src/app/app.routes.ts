@@ -11,8 +11,14 @@ import { ProfileComponent } from './components/authenticated/profile/profile.com
 
 //administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
+import { SecurityComponent } from './components/administrator/security/security.component';
+import { EmailTypeComponent } from './components/administrator/email-type/email-type.component';
+import { EmailTemplateComponent } from './components/administrator/email-template/email-template.component';
+import { SessionComponent } from './components/administrator/session/session.component';
+import { RegulatoryComponent } from './components/administrator/regulatory/regulatory.component';
+
 import { FaqCategoriesComponent } from './components/administrator/faq-categories/faq-categories.component';
-import { FaqComponent } from './components/administrator/faq/faq.component';
+
 
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -23,8 +29,12 @@ export const routes: Routes = [
 
   //administrador
   { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'security', component: SecurityComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'type', component: EmailTypeComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'template', component: EmailTemplateComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'session', component: SessionComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'regulatory', component: RegulatoryComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'faq-categories', component: FaqCategoriesComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'faq', component: FaqComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
 
   //autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },

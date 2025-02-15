@@ -9,9 +9,26 @@
       <!-- Botones para 'administrador' -->
       <li *ngIf="isLoggedIn && userRole === 'administrador'">
         <button routerLink="/company">Empresa</button>
-        <button routerLink="/faq-categories">Categorias de FAQ</button>
-        <button routerLink="/faq">FAQ</button>
       </li>
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/faq-categories">Categorias de FAQ</button>
+      </li>
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/security">Seguridad</button>
+      </li>
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/type">Tipo</button>
+      </li>
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/template">Plantillas</button>
+      </li>
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/session">Sesiones</button>
+      </li>
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/regulatory">Documentos</button>
+      </li>
+
 
       <!-- Botones de logout -->
       <li *ngIf="isLoggedIn">

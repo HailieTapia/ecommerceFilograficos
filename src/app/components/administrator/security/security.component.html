@@ -1,0 +1,39 @@
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-xl sm:p-8">
+  <h2 class="text-3xl font-bold text-center mb-8 text-gray-900">Intentos Fallidos de Inicio</h2>
+
+  <div class="mb-6">
+    <label for="periodo" class="block text-lg font-medium text-gray-700">Selecciona un periodo:</label>
+    <select id="periodo" [(ngModel)]="selectedPeriodo" (change)="onPeriodoChange()" class="mt-2 p-3 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:outline-none text-gray-800">
+      <option value="dia">Día</option>
+      <option value="semana">Semana</option>
+      <option value="mes">Mes</option>
+    </select>
+  </div>
+
+  <ul class="space-y-6">
+    <li *ngFor="let attempt of failedLoginAttempts" class="p-6 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition duration-300 ease-in-out">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div class="sm:w-3/5 mb-4">
+          <h3 class="text-xl font-semibold text-gray-800">{{ attempt.nombre }}</h3>
+          <p class="text-gray-600">{{ attempt.email }}</p>
+          <p class="text-gray-600">{{ attempt.estado }}</p>
+          <p class="text-gray-600">{{ attempt.fecha | date: 'short' }}</p>
+          <p class="text-gray-600">{{ attempt.tipo_usuario }}</p>
+        </div>
+        <div class="sm:w-1/5">
+          <span class="block text-sm text-gray-500">Intentos: <strong class="text-red-500">{{ attempt.numero_intentos }}</strong></span>
+          
+          <button *ngIf="attempt.estado === 'bloqueado'" 
+                  (click)="desbloquearUsuario(attempt.user_id)"
+                  class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center space-x-2 w-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3l4 4m0 0l4-4m-4 4l-4 4m4-4v4m0 0l-4 4M3 3h18v18H3V3z"/>
+            </svg>
+            <span>Desbloquear</span>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+

@@ -1,0 +1,49 @@
+<h2>Tipos de Email</h2>
+
+<!-- Formulario para agregar un nuevo tipo de email -->
+<form [formGroup]="emailTypeForm" (ngSubmit)="addEmailType()">
+  <label>Nombre:</label>
+  <input type="text" formControlName="name" required>
+
+  <label>Descripción:</label>
+  <input type="text" formControlName="description" required>
+
+  <label>Token:</label>
+  <input type="text" formControlName="token" required>
+
+  <button type="submit" [disabled]="emailTypeForm.invalid">Agregar</button>
+</form>
+
+<hr>
+
+<!-- Lista de tipos de email -->
+<ul *ngIf="emailTypes.length > 0; else noData">
+  <li *ngFor="let type of emailTypes">
+    <strong>{{ type.name }}</strong> - {{ type.description }}
+    <br>
+    <small><b>Token:</b> {{ type.token }}</small>
+  </li>
+</ul>
+
+<!-- Mensaje si no hay datos -->
+<ng-template #noData>
+  <p>No hay tipos de email disponibles.</p>
+</ng-template>
+<div>
+    <h2>Lista de Tipos de Email</h2>
+    <ul>
+      <li *ngFor="let emailType of emailTypes">
+        {{ emailType.name }}
+        <button (click)="getEmailTypeById(emailType.email_type_id)">Ver Detalles</button>
+        <button (click)="deleteEmailType(emailType.email_type_id)">Eliminar</button>
+      </li>
+    </ul>
+  
+    <div *ngIf="selectedEmailType">
+      <h3>Detalles del Tipo de Email</h3>
+      <p><strong>ID:</strong> {{ selectedEmailType.email_type_id }}</p>
+      <p><strong>Nombre:</strong> {{ selectedEmailType.name }}</p>
+      <p><strong>Descripción:</strong> {{ selectedEmailType.description }}</p>
+      <p><strong>Token:</strong> {{ selectedEmailType.token }}</p>
+    </div>
+  </div>

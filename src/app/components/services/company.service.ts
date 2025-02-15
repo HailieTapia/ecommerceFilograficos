@@ -12,20 +12,64 @@ export class CompanyService {
     private apiUrl = `${environment.baseUrl}`;
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
-    
+
+    // Crear nueva empresa(NO SE OCUPA)
+    createCompany(data: any): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.post<any>(`${this.apiUrl}/company/create`, data, { headers, withCredentials: true });
+            })
+        );
+    }
+    // Actualizar la información de la empresa
+    updateCompanyInfo(data: any): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.put<any>(`${this.apiUrl}/company/update`, data, { headers, withCredentials: true });
+            })
+        );
+    }
     // Obtener la información de la empresa
     getCompanyInfo(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get<any>(`${this.apiUrl}/company/`, {
-                    headers,
-                    withCredentials: true
-                });
+                return this.http.get<any>(`${this.apiUrl}/company`, { headers, withCredentials: true });
             })
         );
     }
 
+    // Método para eliminar enlaces a las redes sociales de la empresa
+    deleteSocialMediaLinks(data: any): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.put<any>(`${this.apiUrl}/company/delete-social-media-links`,  data , { headers, withCredentials: true });
+            })
+        );
+    }
+
+    //Borrado lógico de la informacion de la empresa (marcarlo como inactivo)(NO SE OCUPA)
+    deleteCompany(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.post<any>(`${this.apiUrl}/company/delete`, {}, { headers, withCredentials: true });
+            })
+        );
+    }
+    //Deshacer el borrado de la informacion de la compañia (activarlo)(NO SE OCUPA)
+    restoreCompany(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.post<any>(`${this.apiUrl}/company/restore`, {}, { headers, withCredentials: true });
+            })
+        );
+    }
+    //(?)
     uploadCompanyLogo(file: File): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -37,63 +81,6 @@ export class CompanyService {
                     headers,
                     withCredentials: true
                 });
-            })
-        );
-    }
-    
-    // Actualizar la información existente de la empresa
-    updateCompanyInfo(formData: FormData): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                // No establecer 'Content-Type' para que Angular lo maneje automáticamente
-                return this.http.put<any>(`${this.apiUrl}/company/update`, formData, {
-                    headers,
-                    withCredentials: true
-                });
-            })
-        );
-    }
-
-    // Eliminar enlaces de redes sociales
-    deleteSocialMediaLinks(redesSociales: any): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put<any>(`${this.apiUrl}/company/delete-social-media-links`,
-                    { redes_sociales: redesSociales },
-                    { headers, withCredentials: true });
-            })
-        );
-    }
-
-    //NO SE OCUPA
-    // Crear una nueva empresa
-    createCompany(companyData: any): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post<any>(`${this.apiUrl}/company/create`, companyData, { headers, withCredentials: true });
-            })
-        );
-    }
-
-    // Borrar la empresa (marcarla como inactiva)
-    deleteCompany(): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post<any>(`${this.apiUrl}/company/delete`, {}, { headers, withCredentials: true });
-            })
-        );
-    }
-
-    // Restaurar la empresa (activar de nuevo)
-    restoreCompany(): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post<any>(`${this.apiUrl}/company/restore`, {}, { headers, withCredentials: true });
             })
         );
     }
