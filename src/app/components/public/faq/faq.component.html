@@ -1,11 +1,16 @@
 <div class="faq-container">
+    <!-- Botón de menú en móviles -->
+    <button class="faq-menu-toggle" (click)="toggleSidebar()">
+      ☰ Categorías
+    </button>
+  
     <!-- Menú lateral de categorías -->
-    <div class="faq-sidebar">
+    <div class="faq-sidebar" [class.open]="isSidebarOpen">
       <ul>
-        <li 
-          *ngFor="let category of faqCategories" 
+        <li
+          *ngFor="let category of faqCategories"
           [class.active]="selectedCategory?.id === category.id"
-          (click)="selectCategory(category)">
+          (click)="selectCategory(category); toggleSidebar()">
           {{ category.name }}
         </li>
       </ul>

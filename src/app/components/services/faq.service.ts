@@ -43,6 +43,17 @@ export class FaqService {
     );
   }
 
+// Buscar preguntas frecuentes por término de búsqueda
+  searchFaqs(query: string): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        const encodedQuery = encodeURIComponent(query.trim()); // Codificar la consulta
+        return this.http.get(`${this.apiUrl}/search?q=${encodedQuery}`, { headers, withCredentials: true });
+      })
+    );
+  }
+
   // Actualizar una pregunta frecuente
   updateFaq(id: string, updatedData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(

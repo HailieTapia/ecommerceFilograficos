@@ -27,10 +27,11 @@ interface FaqCategory {
 export class FaqComponent implements OnInit {
   faqCategories: FaqCategory[] = [];
   selectedCategory: FaqCategory | null = null;
+  isSidebarOpen: boolean = false;
   
   // Variables para paginación
   currentPage: number = 1;
-  itemsPerPage: number = 10; // Máximo de preguntas por página
+  itemsPerPage: number = 10;
   totalPages: number = 1;
 
   constructor(private faqService: FaqService) {}
@@ -47,7 +48,7 @@ export class FaqComponent implements OnInit {
         console.log('[FaqComponent] Datos recibidos:', response);
         this.faqCategories = response;
         if (this.faqCategories.length > 0) {
-          this.selectCategory(this.faqCategories[0]); // Primera categoría seleccionada por defecto
+          this.selectCategory(this.faqCategories[0]);
         }
       },
       error: (err) => console.error('[FaqComponent] Error al obtener FAQs:', err)
@@ -56,8 +57,9 @@ export class FaqComponent implements OnInit {
 
   selectCategory(category: FaqCategory): void {
     this.selectedCategory = category;
-    this.currentPage = 1; // Reiniciar a la primera página
+    this.currentPage = 1;
     this.totalPages = Math.ceil(category.faqs.length / this.itemsPerPage);
+    this.isSidebarOpen = false; // Cerrar el menú después de seleccionar
     console.log('[FaqComponent] Categoría seleccionada:', category.name);
   }
 
@@ -74,5 +76,9 @@ export class FaqComponent implements OnInit {
     if (newPage >= 1 && newPage <= this.totalPages) {
       this.currentPage = newPage;
     }
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 }
