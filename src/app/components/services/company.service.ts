@@ -41,7 +41,7 @@ export class CompanyService {
         );
     }
 
-    // Método para eliminar enlaces a las redes sociales de la empresa(NO)
+    // Método para eliminar enlaces a las redes sociales de la empresa
     deleteSocialMediaLinks(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
