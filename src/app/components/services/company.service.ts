@@ -22,8 +22,7 @@ export class CompanyService {
             })
         );
     }
-
-    // Actualizar la información de la empresa(NO)
+    // Actualizar la información de la empresa
     updateCompanyInfo(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -47,7 +46,7 @@ export class CompanyService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put<any>(`${this.apiUrl}/company/delete-social-media-links`, { data }, { headers, withCredentials: true });
+                return this.http.put<any>(`${this.apiUrl}/company/delete-social-media-links`,  data , { headers, withCredentials: true });
             })
         );
     }
@@ -61,7 +60,6 @@ export class CompanyService {
             })
         );
     }
-
     //Deshacer el borrado de la informacion de la compañia (activarlo)(NO SE OCUPA)
     restoreCompany(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
