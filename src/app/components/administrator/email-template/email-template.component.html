@@ -1,35 +1,36 @@
-<div class="flex justify-between items-center p-4 mb-4">
+<!-- Encabezado -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 mb-6 bg-gray-100 rounded-lg shadow-sm">
   <div>
-    <h1 class="text-3xl font-bold">Plantillas de Email</h1>
-    <p class="py-2 text-gray-600">Gestiona las plantillas de correos electrónicos del sistema</p>
+    <h1 class="text-3xl font-bold text-gray-800">Plantillas de Email</h1>
+    <p class="mt-2 text-gray-600">Gestiona las plantillas de correos electrónicos del sistema.</p>
   </div>
   <button (click)="openModal()"
-    class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-    Crear Tipo
+    class="mt-4 sm:mt-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+    <i class="fas fa-plus"></i>
+    <span>Crear Plantilla</span>
   </button>
 </div>
 
-<div *ngIf="emailTemplate && emailTemplate.length">
-  <div class="bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">Plantillas de Correo Electrónico
-      Activos</h2>
-    <div *ngFor="let emailTemplate of emailTemplate"
-      class="bg-gray-50 p-4 rounded-lg shadow-md mb-4 border border-gray-200">
-      <h3 class="text-xl font-bold mb-2 text-gray-800">{{ emailTemplate.name }}</h3>
-      <p class="text-gray-700 text-sm"><strong>Asunto:</strong> {{ emailTemplate.subject }}</p>
-
+<!-- Listado de Plantillas -->
+<div *ngIf="emailTemplate && emailTemplate.length; else noTemplates">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let template of emailTemplate" class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow border border-gray-200">
+      <h3 class="text-xl font-bold mb-2 text-gray-800">{{ template.name }}</h3>
+      <p class="text-gray-700 text-sm mb-1"><strong>Asunto:</strong> {{ template.subject }}</p>
+      <!-- Puedes agregar más detalles aquí si es necesario -->
+      
       <!-- Botones de acción -->
-      <div class="flex justify-end gap-2">
-        <button (click)="getEmailTemplateById(emailTemplate.template_id)"
-          class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-300">
+      <div class="flex justify-end gap-2 mt-4">
+        <button (click)="getEmailTemplateById(template.template_id)"
+          class="px-3 py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors">
           <i class="fas fa-eye"></i>
         </button>
-        <button (click)="openModal(emailTemplate)"
-          class="px-4 py-2 text-yellow-600 border border-yellow-600 rounded-lg hover:bg-yellow-600 hover:text-white transition-all duration-300">
+        <button (click)="openModal(template)"
+          class="px-3 py-2 text-yellow-600 border border-yellow-600 rounded hover:bg-yellow-600 hover:text-white transition-colors">
           <i class="fas fa-edit"></i>
         </button>
-        <button (click)="deleteEmailTemplate(emailTemplate.template_id)"
-          class="px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all duration-300">
+        <button (click)="deleteEmailTemplate(template.template_id)"
+          class="px-3 py-2 text-red-600 border border-red-600 rounded hover:bg-red-600 hover:text-white transition-colors">
           <i class="fas fa-trash"></i>
         </button>
       </div>
@@ -37,9 +38,80 @@
   </div>
 </div>
 
-
-<div *ngIf="!emailTemplate || !emailTemplate.length">
+<!-- Template para cuando no hay plantillas -->
+<ng-template #noTemplates>
   <div class="bg-white p-6 rounded-lg shadow-lg">
-    <p class="text-center text-gray-500">No hay tipos de correo electrónico activos para mostrar.</p>
+    <p class="text-center text-gray-500">No hay plantillas de correo electrónico activas para mostrar.</p>
   </div>
-</div>
+</ng-template>
+
+<!-- Modal para crear/actualizar plantilla -->
+<app-modal #modal title="Plantilla de Correo">
+  <form [formGroup]="emailTemplateForm" (ngSubmit)="submitEmailTemplate()" class="grid grid-cols-2 gap-4">
+    <!-- name -->
+    <div>
+      <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+      <input id="name" formControlName="name" type="text" placeholder="Ingrese el nombre"
+        class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        required />
+    </div>
+  
+    <!-- email_type_id -->
+    <div>
+      <label for="email_type_id" class="block text-sm font-medium text-gray-700">Email Type ID</label>
+      <input id="email_type_id" formControlName="email_type_id" type="text" placeholder="Ingrese el email_type_id"
+        class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        required />
+    </div>
+  
+    <!-- subject -->
+    <div>
+      <label for="subject" class="block text-sm font-medium text-gray-700">Asunto</label>
+      <input id="subject" formControlName="subject" type="text" placeholder="Ingrese el subject"
+        class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        required />
+    </div>
+  
+    <!-- html_content -->
+    <div>
+      <label for="html_content" class="block text-sm font-medium text-gray-700">Contenido HTML</label>
+      <input id="html_content" formControlName="html_content" type="text" placeholder="Ingrese el html_content"
+        class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        required />
+    </div>
+  
+    <!-- text_content -->
+    <div>
+      <label for="text_content" class="block text-sm font-medium text-gray-700">Contenido de Texto</label>
+      <input id="text_content" formControlName="text_content" type="text" placeholder="Ingrese el text_content"
+        class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        required />
+    </div>
+  
+    <!-- Variables (Ocupa toda la fila) -->
+    <div class="col-span-2">
+      <label for="variables" class="block text-sm font-medium text-gray-700">Variables</label>
+      <input id="variables" formControlName="variables" type="text" placeholder="Ingrese las variables separadas por coma"
+        required class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" />
+    </div>
+  
+    <!-- Mensajes de éxito o error (col-span-2 para ocupar toda la fila) -->
+    <div class="col-span-2">
+      <div *ngIf="successMessage" class="text-green-600 text-sm">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="text-red-600 text-sm">
+        {{ errorMessage }}
+      </div>
+    </div>
+  
+    <!-- Botón de envío (col-span-2 para centrarlo) -->
+    <div class="col-span-2 flex justify-center">
+      <button type="submit" [disabled]="emailTemplateForm.invalid"
+        class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">
+        {{ emailTemplateId ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
+  </form>
+  
+</app-modal>

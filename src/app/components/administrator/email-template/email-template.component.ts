@@ -17,8 +17,9 @@ export class EmailTemplateComponent {
   successMessage: string = '';
   errorMessage: string = '';
   selectedEmailTemplate: any = null;
+  emailTemplateId: number | null = null;
+
   constructor(private templateService: TemplateService, private fb: FormBuilder) {
-    // Definir validaciones para cada campo
     this.emailTemplateForm = this.fb.group({
       name: ['', [Validators.required]],
       email_type_id: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
@@ -72,39 +73,69 @@ export class EmailTemplateComponent {
       }
     });
   }
+  submitEmailTemplate() {
+    if (this.emailTemplateForm.invalid) {
+      this.errorMessage = 'Por favor, completa todos los campos requeridos.';
+      return;
+    }
 
-  // Método para manejar el envío del formulario
-  crearPlantilla() {
-    if (this.emailTemplateForm.valid) {
-      const formData = this.emailTemplateForm.value;
-      formData.variables = formData.variables.split(',').map((variable: string) => variable.trim());
-      this.templateService.createEmailTemplate(formData).subscribe(
-        response => {
-          console.log('Plantilla creada con éxito:', response);
-        },
-        error => {
-          console.error('Error al crear plantilla:', error);
-        }
-      );
+    const formData = { ...this.emailTemplateForm.value };
+    formData.variables = formData.variables
+      .split(',')
+      .map((item: string) => item.trim());
+
+    if (this.emailTemplateId) {
+      this.actualizarPlantilla(this.emailTemplateId, formData);
     } else {
-      console.log('Formulario no válido');
+      this.crearPlantilla(formData);
     }
   }
-  actualizarPlantilla(id: number, data: any): void {
-    this.templateService.updateEmailTemplate(id, data).subscribe(
+
+  // Método para manejar el envío del formulario
+  private crearPlantilla(data: any) {
+    this.templateService.createEmailTemplate(data).subscribe(
       response => {
-        console.log('Plantilla actualizada con éxito:', response);
+        this.successMessage = 'Plantilla de correo electrónico creado exitosamente.';
         this.modal.close();
         this.getAllTemplates();
       },
       error => {
-        console.error('Error al actualizar plantilla:', error);
+        this.errorMessage = 'Error al crear la plantilla de correo electrónico: ' + error.message;
+      }
+    );
+  }
+  private actualizarPlantilla(id: number, data: any): void {
+    this.templateService.updateEmailTemplate(id, data).subscribe(
+      response => {
+        this.successMessage = 'Plantilla de correo electrónico actualizado exitosamente.';
+        this.modal.close();
+        this.getAllTemplates();
+      },
+      error => {
+        this.errorMessage = 'Error al actualizar la plantilla de correo electrónico: ' + error.message;
       }
     );
   }
   //MODAL
   @ViewChild('modal') modal!: ModalComponent;
-  openModal(emailType?: any) {
+  openModal(emailTemplate?: any) {
+    this.emailTemplateForm.reset();
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    if (emailTemplate) {
+      this.emailTemplateId = emailTemplate.email_type_id;
+      this.emailTemplateForm.patchValue({
+        name: emailTemplate.name,
+        email_type_id: emailTemplate.email_type_id,
+        subject: emailTemplate.subject,
+        html_content: emailTemplate.html_content,
+        text_content: emailTemplate.text_content,
+        variables: emailTemplate.variables?.join(', ') || ''
+      });
+    } else {
+      this.emailTemplateId = null;
+    }
 
     this.modal.open();
   }
