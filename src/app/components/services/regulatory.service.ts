@@ -8,7 +8,7 @@ import { CsrfService } from './csrf.service';
 @Injectable({
     providedIn: 'root'
 })
-export class TypeService {
+export class RegulatoryService {
     private apiUrl = `${environment.baseUrl}`;
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
@@ -57,7 +57,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/regulatory/`, { headers, withCredentials: true });
+                return this.http.get(`${this.apiUrl}/regulatory`, { headers, withCredentials: true });
             })
         );
     }
