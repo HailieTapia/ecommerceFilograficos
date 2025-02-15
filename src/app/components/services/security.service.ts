@@ -13,7 +13,7 @@ export class SecurityService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-    // Obtener intentos fallidos de inicio de sesión
+    // Obtener intentos fallidos de inicio de sesión(LISTO)
     getFailedLoginAttempts(periodo: string): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -24,7 +24,7 @@ export class SecurityService {
         );
     }
 
-    // Actualizar configuración de seguridad
+    // Actualizar configuración de seguridad NO VERIFICADO
     updateTokenLifetime(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -34,25 +34,22 @@ export class SecurityService {
         );
     }
 
-    // Desbloquear usuario como administrador
+    // Desbloquear usuario como administrador NECESITO EL ID
     adminUnlockUser(user_id: string): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                // Aquí reemplazamos ":user_id" con el valor real
                 return this.http.put(`${this.apiUrl}/security/unlock-user/${user_id}`, {}, { headers, withCredentials: true });
             })
         );
     }
 
-    // Obtener configuración del sistema
+    // Obtener configuración del sistema ERROR 500
     getConfig(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get<any>(`${this.apiUrl}/security/token-lifetime`,
-                    { headers, withCredentials: true }
-                );
+                return this.http.get<any>(`${this.apiUrl}/security/token-lifetime`, { headers, withCredentials: true });
             })
         );
     }

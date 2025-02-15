@@ -25,11 +25,21 @@ export class SecurityComponent {
     this.getFailedLoginAttempts(this.selectedPeriodo);
   }
 
+  desbloquearUsuario(user_id: string): void {
+    this.securityService.adminUnlockUser(user_id).subscribe(
+      (response) => {
+        console.log('Usuario desbloqueado con éxito:', response);
+      },
+      (error) => {
+        console.error('Error al desbloquear el usuario:', error);
+      }
+    );
+  }
+
   //usuario cambia el período seleccionado.
   onPeriodoChange(): void {
     this.getFailedLoginAttempts(this.selectedPeriodo);
   }
-
 
   // Obtener intentos fallidos de inicio de sesión
   //Hace una petición a un servicio para obtener los intentos fallidos de inicio de sesión del período especificado
