@@ -1,14 +1,25 @@
-<h2>Intentos fallidos de inicio de sesión</h2>
+<div class="max-w-4xl mx-auto mt-8 p-4 bg-white shadow-lg rounded-lg">
+  <!-- Título del Card -->
+  <h2 class="text-2xl font-semibold text-center mb-4">Intentos Fallidos de Inicio de Sesión</h2>
 
-<label for="periodo">Selecciona un periodo:</label>
-<select id="periodo" [(ngModel)]="selectedPeriodo" (change)="onPeriodoChange()">
-  <option value="dia">Día</option>
-  <option value="semana">Semana</option>
-  <option value="mes">Mes</option>
-</select>
+  <!-- Selector de Periodo -->
+  <div class="mb-6">
+    <label for="periodo" class="block text-lg font-medium mb-2">Selecciona un periodo:</label>
+    <select id="periodo" [(ngModel)]="selectedPeriodo" (change)="onPeriodoChange()" class="w-full p-2 border rounded-lg">
+      <option value="dia">Día</option>
+      <option value="semana">Semana</option>
+      <option value="mes">Mes</option>
+    </select>
+  </div>
 
-<ul>
-  <li *ngFor="let attempt of failedLoginAttempts">
-    <strong>{{ attempt.nombre }}</strong> - {{ attempt.email }} - Intentos: {{ attempt.numero_intentos }}
-  </li>
-</ul>
+  <!-- Lista de Intentos Fallidos -->
+  <ul class="space-y-4">
+    <li *ngFor="let attempt of failedLoginAttempts" class="p-4 border border-gray-200 rounded-lg shadow-sm">
+      <div class="flex justify-between items-center">
+        <strong class="text-xl">{{ attempt.nombre }}</strong>
+        <span class="text-sm text-gray-600">{{ attempt.email }}</span>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">Intentos fallidos: {{ attempt.numero_intentos }}</p>
+    </li>
+  </ul>
+</div>
