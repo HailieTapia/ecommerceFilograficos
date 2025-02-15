@@ -1,1 +1,26 @@
-<p>company works!</p>
+<div>
+    <h1>Información de la Empresa</h1>
+    
+    <div>
+      <h2>Datos Generales</h2>
+      <p><strong>Nombre:</strong> {{ company.name }}</p>
+      <p><strong>Slogan:</strong> {{ company.slogan }}</p>
+      <p><strong>Email:</strong> {{ company.email }}</p>
+      <p><strong>Teléfono:</strong> {{ company.phone_number }}</p>
+      <p><strong>Dirección:</strong> {{ company.address_street }}, {{ company.address_city }}, {{ company.address_state }}, {{ company.address_country }} - {{ company.address_postal_code }}</p>
+    </div>
+  
+    <div>
+      <h2>Redes Sociales</h2>
+      <p><strong>Facebook:</strong> <a href="{{ company.facebook }}" target="_blank">{{ company.facebook }}</a></p>
+      <p><strong>Instagram:</strong> <a href="{{ company.instagram }}" target="_blank">{{ company.instagram }}</a></p>
+      <p><strong>LinkedIn:</strong> <a href="{{ company.linkedin }}" target="_blank">{{ company.linkedin }}</a></p>
+      <p><strong>Twitter:</strong> <a href="{{ company.twitter }}" target="_blank">{{ company.twitter }}</a></p>
+    </div>
+  
+    <div>
+      <h2>Logo</h2>
+      <img [src]="company.logo" alt="Logo de la Empresa" width="200"/>
+    </div>
+  </div>
+  

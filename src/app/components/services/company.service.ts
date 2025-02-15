@@ -37,7 +37,7 @@ export class CompanyService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get<any>(`${this.apiUrl}/company/`, { headers, withCredentials: true });
+                return this.http.get<any>(`${this.apiUrl}/company`, { headers, withCredentials: true });
             })
         );
     }
@@ -52,7 +52,7 @@ export class CompanyService {
         );
     }
 
-    //Borrado lógico de la informacion de la empresa (marcarlo como inactivo)(NO)
+    //Borrado lógico de la informacion de la empresa (marcarlo como inactivo)(NO SE OCUPA)
     deleteCompany(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
