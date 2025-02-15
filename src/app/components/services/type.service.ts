@@ -13,7 +13,7 @@ export class TypeService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-    // Crear tipo de email (NO)
+    // Crear tipo de email
     createEmailType(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -40,7 +40,7 @@ export class TypeService {
             })
         );
     }
-    // Actualizar tipo de email(NO)
+    // Actualizar tipo de email
     updateEmailType(id: number, data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -55,7 +55,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put(`${this.apiUrl}/email-types/${id}`, {}, { headers, withCredentials: true });
+                return this.http.delete(`${this.apiUrl}/email-types/${id}`,{ headers, withCredentials: true });
             })
         );
     }

@@ -20,6 +20,22 @@
       <p class="text-gray-700"><strong>Creado el:</strong> {{ emailType.created_at | date }}</p>
       <p class="text-gray-700"><strong>Actualizado el:</strong> {{ emailType.updated_at | date }}</p>
       <hr class="my-4 border-gray-300" />
+
+      <!-- Botones de acción -->
+      <div class="flex justify-end space-x-2">
+        <button (click)="getEmailTypeById(emailType.email_type_id)"
+          class="px-3 py-1 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition">
+          Visualizar
+        </button>
+        <button
+          class="px-3 py-1 text-yellow-600 border border-yellow-600 rounded-lg hover:bg-yellow-600 hover:text-white transition">
+          Editar
+        </button>
+        <button (click)="deleteEmailType(emailType.email_type_id)"
+          class="px-3 py-1 text-red-600 border border-red-600 rounded-lg hover:bg-red-600 hover:text-white transition">
+          Eliminar
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -32,19 +48,21 @@
 
 
 <app-modal #modal title="Tipo de Correo">
-  <form [formGroup]="emailTypeForm" (ngSubmit)="onSubmit()" class="space-y-4">
+  <form [formGroup]="emailTypeForm" (ngSubmit)="createEmailType()" class="space-y-4">
     <!-- Token -->
     <div>
       <label for="token" class="block text-sm font-medium text-gray-700">Token</label>
       <input id="token" formControlName="token" placeholder="Ingrese el token"
-        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" required />
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        required />
     </div>
 
     <!-- Nombre -->
     <div>
       <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
       <input id="name" formControlName="name" type="text" placeholder="Ingrese el nombre"
-        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" required />
+        class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        required />
     </div>
 
     <!-- Descripción -->
