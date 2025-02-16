@@ -1,44 +1,91 @@
-<h2 mat-dialog-title>{{ isEdit ? 'Editar Pregunta Frecuente' : 'Nueva Pregunta Frecuente' }}</h2>
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        {{ isEdit ? 'Editar Pregunta Frecuente' : 'Nueva Pregunta Frecuente' }}
+      </h2>
+  
+      <form [formGroup]="faqForm" (ngSubmit)="saveFaq()" class="space-y-4">
 
-<mat-dialog-content class="modal-content">
-  <form [formGroup]="faqForm" (ngSubmit)="saveFaq()">
-    <!-- Selección de categoría -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Categoría</mat-label>
-      <mat-select formControlName="category_id" panelClass="custom-dropdown" [disableRipple]="true">
-        <mat-option *ngFor="let category of categories || []" [value]="category.id">
-          {{ category.name }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="faqForm.get('category_id')?.invalid && faqForm.get('category_id')?.touched">
-        Debe seleccionar una categoría.
-      </mat-error>
-    </mat-form-field>
+        <!-- Campo: Categoría -->
+        <div>
+            <label for="category_id" class="block text-sm font-medium text-gray-700">Categoría</label>
+            <select
+              id="category_id"
+              formControlName="category_id"
+              class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+            >
+              <option value="" disabled>Selecciona una categoría</option>
+              <option *ngFor="let category of categories" [value]="category.category_id">
+                {{ category.name }}
+              </option>
+            </select>
+            <p *ngIf="faqForm.get('category_id')?.invalid && faqForm.get('category_id')?.touched" class="text-red-500 text-sm mt-1">
+              La categoría es obligatoria.
+            </p>
+        </div>
 
-    <!-- Pregunta -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Pregunta</mat-label>
-      <input matInput formControlName="question" placeholder="Ej. ¿Cómo funciona el servicio?">
-      <mat-error *ngIf="faqForm.get('question')?.invalid && faqForm.get('question')?.touched">
-        La pregunta es obligatoria.
-      </mat-error>
-    </mat-form-field>
-
-    <!-- Respuesta -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Respuesta</mat-label>
-      <textarea matInput formControlName="answer" placeholder="Ej. Nuestro servicio funciona de la siguiente manera..."></textarea>
-      <mat-error *ngIf="faqForm.get('answer')?.invalid && faqForm.get('answer')?.touched">
-        La respuesta es obligatoria.
-      </mat-error>
-    </mat-form-field>
-
-    <!-- Botones de acción -->
-    <div class="actions">
-      <button mat-button type="button" (click)="dialogRef.close()">Cancelar</button>
-      <button mat-flat-button color="primary" type="submit" [disabled]="faqForm.invalid">
-        {{ isEdit ? 'Actualizar' : 'Crear' }}
-      </button>
+        <!-- Campo: Pregunta -->
+        <div>
+          <label for="question" class="block text-sm font-medium text-gray-700">Pregunta</label>
+          <input
+            id="question"
+            formControlName="question"
+            type="text"
+            placeholder="Ej. ¿Cómo puedo restablecer mi contraseña?"
+            class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+          />
+          <div *ngIf="faqForm.get('question')?.invalid && faqForm.get('question')?.touched">
+            <p *ngIf="faqForm.get('question')?.errors?.['required']" class="text-red-500 text-sm mt-1">
+              La pregunta es obligatoria.
+            </p>
+            <p *ngIf="faqForm.get('question')?.errors?.['minlength']" class="text-red-500 text-sm mt-1">
+              La pregunta debe tener al menos 3 caracteres.
+            </p>
+            <p *ngIf="faqForm.get('question')?.errors?.['maxlength']" class="text-red-500 text-sm mt-1">
+              La pregunta no puede exceder los 500 caracteres.
+            </p>
+          </div>
+        </div>
+  
+        <!-- Campo: Respuesta -->
+        <div>
+          <label for="answer" class="block text-sm font-medium text-gray-700">Respuesta</label>
+          <textarea
+            id="answer"
+            formControlName="answer"
+            placeholder="Ej. Para restablecer tu contraseña, sigue estos pasos..."
+            class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+          ></textarea>
+          <div *ngIf="faqForm.get('answer')?.invalid && faqForm.get('answer')?.touched">
+            <p *ngIf="faqForm.get('answer')?.errors?.['required']" class="text-red-500 text-sm mt-1">
+              La respuesta es obligatoria.
+            </p>
+            <p *ngIf="faqForm.get('answer')?.errors?.['minlength']" class="text-red-500 text-sm mt-1">
+              La respuesta debe tener al menos 3 caracteres.
+            </p>
+            <p *ngIf="faqForm.get('answer')?.errors?.['maxlength']" class="text-red-500 text-sm mt-1">
+              La respuesta no puede exceder los 500 caracteres.
+            </p>
+          </div>
+        </div>
+  
+        <!-- Botones de acción -->
+        <div class="flex justify-end gap-3 mt-6">
+          <button
+            type="button"
+            (click)="dialogRef.close()"
+            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="faqForm.invalid"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          >
+            {{ isEdit ? 'Actualizar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
     </div>
-  </form>
-</mat-dialog-content>
+  </div>

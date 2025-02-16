@@ -55,7 +55,7 @@ export class FaqService {
   }
 
   // Actualizar una pregunta frecuente
-  updateFaq(id: string, updatedData: any): Observable<any> {
+  updateFaq(id: number, updatedData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);

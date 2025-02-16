@@ -1,21 +1,34 @@
-import { Component, Inject, OnInit, EventEmitter, Output } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FaqService } from '../../../services/faq.service';
-import { FaqCategoryService } from '../../../services/faq-category.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDialogModule } from '@angular/material/dialog';
+import { FaqCategoryService } from '../../../services/faq-category.service';
 
+interface FaqCategory {
+  category_id: number; // Cambiado a number para coincidir con el backend
+  name: string;
+  description: string;
+  status: string;
+}
 
+interface Faq {
+  faq_id: number;  // Cambiado de 'id' a 'faq_id'
+  question: string;
+  category_id: number;
+  answer: string;
+  createdAt: string;
+  updatedAt: string;
+}
 @Component({
   selector: 'app-faq-form',
-  standalone: true,
   templateUrl: './faq-form.component.html',
+  standalone: true,
   styleUrls: ['./faq-form.component.css'],
   imports: [
     CommonModule,
@@ -23,78 +36,76 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSelectModule,
-    MatDialogModule
+    MatSelectModule
   ]
 })
 export class FaqFormComponent implements OnInit {
   faqForm: FormGroup;
   isEdit: boolean = false;
-  categories: any[] = [];
-
-  @Output() faqSaved = new EventEmitter<void>();
+  categories: FaqCategory[] = [];
 
   constructor(
     private fb: FormBuilder,
     private faqService: FaqService,
     private faqCategoryService: FaqCategoryService,
     public dialogRef: MatDialogRef<FaqFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: { faq?: Faq; category?: FaqCategory }
   ) {
     this.faqForm = this.fb.group({
-      category_id: ['', Validators.required],
-      question: ['', [Validators.required, Validators.minLength(5)]],
-      answer: ['', [Validators.required, Validators.minLength(5)]],
-      status: ['active', Validators.required]
+      question: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(500)]],
+      answer: ['', [Validators.required, Validators.minLength(3)]],
+      category_id: [null, [Validators.required]]
     });
   }
 
   ngOnInit(): void {
-    this.loadCategories();
-    if (this.data) {
+    this.getCategories();
+
+    if (this.data.faq) {
       this.isEdit = true;
-      this.faqForm.patchValue(this.data);
+      console.log(this.data)
+      
+      this.faqForm.patchValue({
+        question: this.data.faq.question,
+        answer: this.data.faq.answer,
+        category_id: Number(this.data.faq.category_id) || Number(this.data.category?.category_id)
+      });
+    } else if (this.data.category) {
+      this.faqForm.patchValue({
+        category_id: Number(this.data.category.category_id)
+      });
     }
   }
 
-  loadCategories(): void {
+  getCategories(): void {
     this.faqCategoryService.getAllCategories().subscribe({
       next: (response) => {
         if (response && Array.isArray(response.faqCategories)) {
-          this.categories = response.faqCategories;
+          this.categories = response.faqCategories; // Mapea las categorías desde la respuesta del backend
+          console.log(this.categories)
         } else {
-          console.error('Error: la API no devolvió un array válido', response);
-          this.categories = []; // Evita problemas en el template
+          console.error('Datos de categorías no válidos:', response);
         }
       },
-      error: (err) => {
-        console.error('Error al cargar categorías:', err);
-        this.categories = []; // Evita errores en la vista
-      }
+      error: (err) => console.error('Error obteniendo categorías:', err)
     });
   }
-  
 
   saveFaq(): void {
     if (this.faqForm.invalid) return;
 
     const faqData = this.faqForm.value;
 
-    if (this.isEdit) {
-      this.faqService.updateFaq(this.data.id, faqData).subscribe({
-        next: () => this.onSuccess(),
-        error: (err) => console.error('Error al actualizar la pregunta frecuente:', err)
+    if (this.isEdit && this.data.faq?.faq_id) {
+      this.faqService.updateFaq(Number(this.data.faq.faq_id), faqData).subscribe({
+        next: () => this.dialogRef.close(true),
+        error: (err) => console.error('Error actualizando FAQ:', err)
       });
     } else {
       this.faqService.createFaq(faqData).subscribe({
-        next: () => this.onSuccess(),
-        error: (err) => console.error('Error al crear la pregunta frecuente:', err)
+        next: () => this.dialogRef.close(true),
+        error: (err) => console.error('Error creando FAQ:', err)
       });
     }
-  }
-
-  private onSuccess(): void {
-    this.faqSaved.emit();
-    this.dialogRef.close(true);
   }
 }
