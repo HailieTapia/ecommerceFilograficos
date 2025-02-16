@@ -13,6 +13,11 @@
       placeholder="Buscar preguntas..."
       class="w-full p-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 md:mx-auto"
     />
+
+    <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="text-red-500 text-sm mt-1">
+      Escribe al menos 3 caracteres para buscar.
+    </p>
+
     <!-- Ícono de búsqueda -->
     <svg
       class="absolute left-3 top-2.5 h-5 w-5 text-gray-400"

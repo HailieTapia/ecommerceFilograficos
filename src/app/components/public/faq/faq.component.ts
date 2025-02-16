@@ -47,7 +47,7 @@ export class FaqComponent implements OnInit {
       this.isDesktopView = window.innerWidth >= 768;
     });
   }
-  
+
   ngOnInit(): void {
     console.log('[FaqComponent] Inicializando...');
     this.getAllFaqs();
@@ -95,7 +95,9 @@ export class FaqComponent implements OnInit {
   }
 
   onSearch(): void {
-    if (this.searchQuery.trim() === '') {
+    this.searchQuery = this.searchQuery.trim(); // Eliminar espacios en blanco
+
+    if (this.searchQuery.length < 3) {
       this.isSearchActive = false;
       this.filteredFaqs = [];
       this.updatePagination(); // Actualizar paginación cuando no hay búsqueda
@@ -105,7 +107,6 @@ export class FaqComponent implements OnInit {
     this.isSearchActive = true;
     const query = this.searchQuery.toLowerCase();
 
-    // Filtrar las FAQs en todas las categorías
     this.filteredFaqs = this.faqCategories
       .flatMap(category => category.faqs)
       .filter(faq => 
@@ -114,8 +115,8 @@ export class FaqComponent implements OnInit {
         this.faqCategories.find(cat => cat.id === faq.id)?.name.toLowerCase().includes(query)
       );
 
-    this.updatePagination(); // Actualizar paginación después de la búsqueda
-    this.currentPage = 1; // Resetear a la primera página después de la búsqueda
+    this.updatePagination();
+    this.currentPage = 1;
   }
 
   updatePagination(): void {

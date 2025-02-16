@@ -62,7 +62,7 @@ export class FaqCategoriesComponent implements OnInit {
   }
 
   deleteCategory(category_id: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
+    if (confirm('¿Estás seguro de que deseas eliminar esta categoría? Esta acción eliminará todas las preguntas frecuentes con esta categoría')) {
       this.faqCategoryService.deleteCategory(category_id).subscribe({
         next: () => this.getCategories(),
         error: (err) => console.error('Error al eliminar la categoría:', err)

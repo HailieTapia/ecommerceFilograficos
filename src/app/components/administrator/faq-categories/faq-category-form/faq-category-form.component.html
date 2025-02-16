@@ -19,9 +19,17 @@
           placeholder="Ej. General"
           class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
         />
-        <p *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched" class="text-red-500 text-sm mt-1">
-          El nombre es obligatorio y debe tener al menos 3 caracteres.
-        </p>
+        <div *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">
+          <p *ngIf="categoryForm.get('name')?.errors?.['required']" class="text-red-500 text-sm mt-1">
+            Este campo es obligatorio.
+          </p>
+          <p *ngIf="categoryForm.get('name')?.errors?.['minlength'] || categoryForm.get('name')?.errors?.['maxlength']" class="text-red-500 text-sm mt-1">
+            La longitud del texto no es válida.
+          </p>
+          <p *ngIf="categoryForm.get('name')?.errors?.['invalidContent']" class="text-red-500 text-sm mt-1">
+            El texto contiene caracteres o palabras no permitidas.
+          </p>
+        </div>
       </div>
 
       <!-- Campo: Descripción -->
@@ -34,9 +42,17 @@
           placeholder="Ej. Preguntas generales sobre el sistema"
           class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
         />
-        <p *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched" class="text-red-500 text-sm mt-1">
-          La descripción es obligatoria.
-        </p>
+        <div *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched">
+          <p *ngIf="categoryForm.get('description')?.errors?.['required']" class="text-red-500 text-sm mt-1">
+            Este campo es obligatorio.
+          </p>
+          <p *ngIf="categoryForm.get('description')?.errors?.['minlength'] || categoryForm.get('description')?.errors?.['maxlength']" class="text-red-500 text-sm mt-1">
+            La longitud del texto no es válida.
+          </p>
+          <p *ngIf="categoryForm.get('description')?.errors?.['invalidContent']" class="text-red-500 text-sm mt-1">
+            El texto contiene caracteres o palabras no permitidas.
+          </p>
+        </div>
       </div>
 
       <!-- Botones de acción -->
