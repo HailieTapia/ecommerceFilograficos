@@ -14,6 +14,9 @@
         <button routerLink="/faq-categories">Categorias de FAQ</button>
       </li>
       <li *ngIf="isLoggedIn && userRole === 'administrador'">
+        <button routerLink="/faqs">FAQ</button>
+      </li>
+      <li *ngIf="isLoggedIn && userRole === 'administrador'">
         <button routerLink="/security">Seguridad</button>
       </li>
       <li *ngIf="isLoggedIn && userRole === 'administrador'">

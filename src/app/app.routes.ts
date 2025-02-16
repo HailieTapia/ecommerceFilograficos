@@ -16,9 +16,8 @@ import { EmailTypeComponent } from './components/administrator/email-type/email-
 import { EmailTemplateComponent } from './components/administrator/email-template/email-template.component';
 import { SessionComponent } from './components/administrator/session/session.component';
 import { RegulatoryComponent } from './components/administrator/regulatory/regulatory.component';
-
 import { FaqCategoriesComponent } from './components/administrator/faq-categories/faq-categories.component';
-
+import { FaqComponentAdmin } from './components/administrator/faq/faq.component';
 
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -35,6 +34,7 @@ export const routes: Routes = [
   { path: 'session', component: SessionComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'regulatory', component: RegulatoryComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'faq-categories', component: FaqCategoriesComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'faqs', component: FaqComponentAdmin , canActivate: [AuthGuard], data: { role: 'administrador' } },
 
   //autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },
