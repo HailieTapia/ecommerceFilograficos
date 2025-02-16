@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CompanyService } from '../../services/company.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-company',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './company.component.html',
   styleUrl: './company.component.css'
 })
@@ -31,7 +30,6 @@ export class CompanyComponent implements OnInit {
       twitter: ['', [Validators.pattern('https?://.*')]],
       instagram: ['', [Validators.pattern('https?://.*')]],
     });
-    // Inicializamos el formulario para eliminar redes sociales (cada campo es booleano)
     this.deleteSocialForm = this.fb.group({
       facebook: [false],
       twitter: [false],

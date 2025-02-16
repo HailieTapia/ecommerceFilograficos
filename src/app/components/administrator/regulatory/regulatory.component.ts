@@ -7,6 +7,9 @@ import { Component } from '@angular/core';
   templateUrl: './regulatory.component.html',
   styleUrl: './regulatory.component.css'
 })
-export class RegulatoryComponent {
+export class RegulatoryComponent  {
+
+
 
 }
+
