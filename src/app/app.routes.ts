@@ -5,7 +5,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { RegisterComponent } from './components/public/register/register.component';
 import { RecoverComponent } from './components/public/recover/recover.component';
 import { LoginComponent } from './components/public/login/login.component';
-
+import { FaqComponent } from './components/public/faq/faq.component'; 
 //autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
 
@@ -16,6 +16,8 @@ import { EmailTypeComponent } from './components/administrator/email-type/email-
 import { EmailTemplateComponent } from './components/administrator/email-template/email-template.component';
 import { SessionComponent } from './components/administrator/session/session.component';
 import { RegulatoryComponent } from './components/administrator/regulatory/regulatory.component';
+
+import { FaqCategoriesComponent } from './components/administrator/faq-categories/faq-categories.component';
 
 
 //errores
@@ -32,12 +34,14 @@ export const routes: Routes = [
   { path: 'template', component: EmailTemplateComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'session', component: SessionComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'regulatory', component: RegulatoryComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
+  { path: 'faq-categories', component: FaqCategoriesComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
 
   //autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },
 
   //publicos
   { path: 'register', component: RegisterComponent },
+  { path: 'faq', component: FaqComponent },
   { path: 'login', component: LoginComponent },
   { path: 'recovery', component: RecoverComponent },
   { path: '', redirectTo: '/recovery', pathMatch: 'full' },
