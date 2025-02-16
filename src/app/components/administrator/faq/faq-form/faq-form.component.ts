@@ -18,7 +18,7 @@ interface FaqCategory {
 }
 
 interface Faq {
-  faq_id: number;  // Cambiado de 'id' a 'faq_id'
+  id: number;  // Cambiado de 'id' a 'faq_id'
   question: string;
   category_id: number;
   answer: string;
@@ -93,15 +93,21 @@ export class FaqFormComponent implements OnInit {
 
   saveFaq(): void {
     if (this.faqForm.invalid) return;
-
+  
     const faqData = this.faqForm.value;
+    console.log('Datos a enviar:', faqData);
+    console.log('Datos a enviar:',  this.data);
 
-    if (this.isEdit && this.data.faq?.faq_id) {
-      this.faqService.updateFaq(Number(this.data.faq.faq_id), faqData).subscribe({
+    if (this.isEdit && this.data.faq?.id) {
+      faqData.faq_id = this.data.faq.id;
+      console.log('Modo edición - Datos con faq_id:', faqData);
+  
+      this.faqService.updateFaq(this.data.faq.id, faqData).subscribe({
         next: () => this.dialogRef.close(true),
         error: (err) => console.error('Error actualizando FAQ:', err)
       });
     } else {
+      console.log('Modo creación - Datos:', faqData);
       this.faqService.createFaq(faqData).subscribe({
         next: () => this.dialogRef.close(true),
         error: (err) => console.error('Error creando FAQ:', err)
