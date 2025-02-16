@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Editar Pregunta Frecuente' : 'Nueva Pregunta Frecuente' }}</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="faqForm" (ngSubmit)="saveFaq()">
+    <!-- Selección de categoría -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Categoría</mat-label>
+      <mat-select formControlName="category_id" panelClass="custom-dropdown" [disableRipple]="true">
+        <mat-option *ngFor="let category of categories || []" [value]="category.id">
+          {{ category.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="faqForm.get('category_id')?.invalid && faqForm.get('category_id')?.touched">
+        Debe seleccionar una categoría.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Pregunta -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Pregunta</mat-label>
+      <input matInput formControlName="question" placeholder="Ej. ¿Cómo funciona el servicio?">
+      <mat-error *ngIf="faqForm.get('question')?.invalid && faqForm.get('question')?.touched">
+        La pregunta es obligatoria.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Respuesta -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Respuesta</mat-label>
+      <textarea matInput formControlName="answer" placeholder="Ej. Nuestro servicio funciona de la siguiente manera..."></textarea>
+      <mat-error *ngIf="faqForm.get('answer')?.invalid && faqForm.get('answer')?.touched">
+        La respuesta es obligatoria.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Botones de acción -->
+    <div class="actions">
+      <button mat-button type="button" (click)="dialogRef.close()">Cancelar</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="faqForm.invalid">
+        {{ isEdit ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>

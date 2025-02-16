@@ -1,0 +1,77 @@
+<!-- Fondo difuminado -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <!-- Contenedor del modal -->
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto p-6">
+    <!-- Título del modal -->
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+      {{ isEdit ? 'Editar Categoría' : 'Nueva Categoría' }}
+    </h2>
+
+    <!-- Formulario -->
+    <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="space-y-4">
+      <!-- Campo: Nombre -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700">Nombre de la Categoría</label>
+        <input
+          id="name"
+          formControlName="name"
+          type="text"
+          placeholder="Ej. General"
+          class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        />
+        <div *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">
+          <p *ngIf="categoryForm.get('name')?.errors?.['required']" class="text-red-500 text-sm mt-1">
+            Este campo es obligatorio.
+          </p>
+          <p *ngIf="categoryForm.get('name')?.errors?.['minlength'] || categoryForm.get('name')?.errors?.['maxlength']" class="text-red-500 text-sm mt-1">
+            La longitud del texto no es válida.
+          </p>
+          <p *ngIf="categoryForm.get('name')?.errors?.['invalidContent']" class="text-red-500 text-sm mt-1">
+            El texto contiene caracteres o palabras no permitidas.
+          </p>
+        </div>
+      </div>
+
+      <!-- Campo: Descripción -->
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700">Descripción de la Categoría</label>
+        <input
+          id="description"
+          formControlName="description"
+          type="text"
+          placeholder="Ej. Preguntas generales sobre el sistema"
+          class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        />
+        <div *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched">
+          <p *ngIf="categoryForm.get('description')?.errors?.['required']" class="text-red-500 text-sm mt-1">
+            Este campo es obligatorio.
+          </p>
+          <p *ngIf="categoryForm.get('description')?.errors?.['minlength'] || categoryForm.get('description')?.errors?.['maxlength']" class="text-red-500 text-sm mt-1">
+            La longitud del texto no es válida.
+          </p>
+          <p *ngIf="categoryForm.get('description')?.errors?.['invalidContent']" class="text-red-500 text-sm mt-1">
+            El texto contiene caracteres o palabras no permitidas.
+          </p>
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          type="button"
+          (click)="dialogRef.close()"
+          class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="categoryForm.invalid"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        >
+          {{ isEdit ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
