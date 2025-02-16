@@ -47,16 +47,16 @@ export class FaqCategoriesComponent implements OnInit {
 
   openFormDialog(category?: any): void {
     const dialogRef = this.dialog.open(FaqCategoryFormComponent, {
-      width: '500px', // Ajusta según necesites
-      maxHeight: '90vh', // Evita que el modal se corte
+      width: '500px', // Ancho del modal
+      maxHeight: '90vh', // Altura máxima
+      panelClass: 'custom-dialog-container', // Clase personalizada para estilos adicionales
       autoFocus: false, // Evita que el cursor mueva la pantalla
-      panelClass: 'custom-dialog-container',
-      data: category ? { ...category } : null
+      data: category ? { ...category } : null, // Datos para editar
     });
-
-    dialogRef.afterClosed().subscribe(result => {
+  
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.getCategories();
+        this.getCategories(); // Recargar categorías si se guardó algo
       }
     });
   }

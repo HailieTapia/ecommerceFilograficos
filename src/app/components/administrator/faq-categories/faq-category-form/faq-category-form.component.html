@@ -1,27 +1,61 @@
-<h2 mat-dialog-title>{{ isEdit ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+<!-- Fondo difuminado -->
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+  <!-- Contenedor del modal -->
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto p-6">
+    <!-- Título del modal -->
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+      {{ isEdit ? 'Editar Categoría' : 'Nueva Categoría' }}
+    </h2>
 
-<form [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
+    <!-- Formulario -->
+    <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="space-y-4">
+      <!-- Campo: Nombre -->
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700">Nombre de la Categoría</label>
+        <input
+          id="name"
+          formControlName="name"
+          type="text"
+          placeholder="Ej. General"
+          class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        />
+        <p *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched" class="text-red-500 text-sm mt-1">
+          El nombre es obligatorio y debe tener al menos 3 caracteres.
+        </p>
+      </div>
 
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Nombre de la Categoría</mat-label>
-    <input matInput formControlName="name" placeholder="Ej. General">
-    <mat-error *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">
-      El nombre es obligatorio y debe tener al menos 3 caracteres.
-    </mat-error>
-  </mat-form-field>
+      <!-- Campo: Descripción -->
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700">Descripción de la Categoría</label>
+        <input
+          id="description"
+          formControlName="description"
+          type="text"
+          placeholder="Ej. Preguntas generales sobre el sistema"
+          class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+        />
+        <p *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched" class="text-red-500 text-sm mt-1">
+          La descripción es obligatoria.
+        </p>
+      </div>
 
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Descripcion de la Categoría</mat-label>
-    <input matInput formControlName="description" placeholder="Ej. General">
-    <mat-error *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched">
-      La descripción es obligatoria.
-    </mat-error>
-  </mat-form-field>
-
-  <div class="actions">
-    <button mat-button type="button" (click)="dialogRef.close()">Cancelar</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="categoryForm.invalid">
-      {{ isEdit ? 'Actualizar' : 'Crear' }}
-    </button>
+      <!-- Botones de acción -->
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          type="button"
+          (click)="dialogRef.close()"
+          class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+        >
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          [disabled]="categoryForm.invalid"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        >
+          {{ isEdit ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </form>
   </div>
-</form>
+</div>
