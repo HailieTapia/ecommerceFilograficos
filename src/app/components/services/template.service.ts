@@ -13,7 +13,7 @@ export class TemplateService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-    // Crear tipo de email(NO)
+    // Crear tipo de email
     createEmailTemplate(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -40,7 +40,7 @@ export class TemplateService {
             })
         );
     }
-    // Actualizar plantilla de email(NO)
+    // Actualizar plantilla de email
     updateEmailTemplate(id: number, data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -50,7 +50,7 @@ export class TemplateService {
         );
     }
 
-    // Eliminación lógica(NO)
+    // Eliminación lógica
     deleteEmailTemplate(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
