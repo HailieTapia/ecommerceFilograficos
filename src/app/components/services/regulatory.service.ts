@@ -13,7 +13,7 @@ export class RegulatoryService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-    // Crear nuevo documento regulatorio
+    // Crear nuevo documento regulatorio YAAAAAA
     createRegulatoryDocument(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -22,7 +22,7 @@ export class RegulatoryService {
             })
         );
     }
-    // Eliminar documento (lógico)
+    // Eliminar documento (lógico) YAAAAAAAAAAA
     deleteRegulatoryDocument(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -31,7 +31,7 @@ export class RegulatoryService {
             })
         );
     }
-    // Eliminar versión específica
+    // Eliminar versión específica 
     deleteRegulatoryDocumentVersion(id: number, version_id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -40,7 +40,7 @@ export class RegulatoryService {
             })
         );
     }
-    // Actualizar documento (nueva versión)
+    // Actualizar documento (nueva versión) YAAAAAAAAA
     updateRegulatoryDocument(id: number, data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -49,7 +49,7 @@ export class RegulatoryService {
             })
         );
     }
-    // Obtener todas las versiones Vigentes (Público)
+    // Obtener todas las versiones Vigentes (Público) YAAAAAAAAA
     getAllCurrentVersions(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -67,7 +67,7 @@ export class RegulatoryService {
             })
         );
     }
-    // Obtener historial de versiones
+    // Obtener historial de versiones YAAAAAAAA
     getVersionHistory(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -85,7 +85,7 @@ export class RegulatoryService {
             })
         );
     }
-    // Restaurar documento
+    // Restaurar documento NO LAS VEO 
     restoreRegulatoryDocument(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -94,7 +94,7 @@ export class RegulatoryService {
             })
         );
     }
-    // Restaurar versión específica
+    // Restaurar versión específica NO SE HACE
     restoreRegulatoryDocumentVersion(id: number, version_id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {

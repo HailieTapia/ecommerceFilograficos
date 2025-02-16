@@ -1,17 +1,14 @@
 <div class="max-w-6xl mx-auto p-6">
-  <!-- Encabezado -->
   <div class="flex flex-col md:flex-row justify-between items-center p-4 mb-6 bg-white shadow-md rounded-lg">
     <div>
       <h1 class="text-3xl font-bold text-gray-800">Documentos Regulatorios</h1>
       <p class="text-gray-600">Gestiona los documentos regulatorios del sistema</p>
     </div>
-    <button (click)="openModal()" 
+    <button (click)="openModal()"
       class="mt-4 md:mt-0 px-5 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all">
       <i class="fas fa-plus-circle mr-2"></i> Crear Tipo
     </button>
   </div>
-
-  <!-- Tabla Responsiva -->
   <div class="bg-white shadow-md rounded-lg overflow-hidden">
     <div class="overflow-x-auto">
       <table class="min-w-full bg-white border border-gray-300">
@@ -29,18 +26,22 @@
             <td class="px-6 py-3 border-b hidden md:table-cell">{{ document.current_version }}</td>
             <td class="px-6 py-3 border-b hidden md:table-cell">{{ document.effective_date | date }}</td>
             <td class="px-6 py-3 border-b flex flex-wrap gap-2">
-              <button class="w-10 h-10 flex items-center justify-center text-blue-500 bg-blue-100 rounded-full hover:bg-blue-600 hover:text-white transition-all">
+              <button
+                class="w-10 h-10 flex items-center justify-center text-blue-500 bg-blue-100 rounded-full hover:bg-blue-600 hover:text-white transition-all">
                 <i class="fas fa-eye"></i>
               </button>
-              
-              <button (click)="openModal(document)" 
+              <button (click)="openModal(document)"
                 class="w-10 h-10 flex items-center justify-center text-yellow-500 bg-yellow-100 rounded-full hover:bg-yellow-600 hover:text-white transition-all">
                 <i class="fas fa-edit"></i>
               </button>
-              <button (click)="deleteRegulatoryDocument(document.document_id)" 
+              <button (click)="deleteRegulatoryDocument(document.document_id)"
                 class="w-10 h-10 flex items-center justify-center text-red-500 bg-red-100 rounded-full hover:bg-red-600 hover:text-white transition-all">
                 <i class="fas fa-trash"></i>
               </button>
+              <button (click)="openHistoryModal(document.document_id)"
+              class="w-10 h-10 flex items-center justify-center text-green-500 bg-green-100 rounded-full hover:bg-green-600 hover:text-white transition-all">
+              <i class="fas fa-history"></i>
+            </button>
             </td>
           </tr>
         </tbody>
@@ -49,33 +50,46 @@
   </div>
 </div>
 
-<!-- Modal Mejorado -->
+<!-- Modal Historial  -->
+<app-modal #historyModal title="Historial de Versiones">
+  <div class="space-y-4 p-4">
+    <div *ngIf="versionHistory.length > 0; else noHistory">
+      <div *ngFor="let version of versionHistory" class="p-4 border-b border-gray-200">
+        <p class="text-gray-700"><strong>Versión:</strong> {{ version.version }}</p>
+        <p class="text-gray-700"><strong>Contenido:</strong> {{ version.content }}</p>
+        <p class="text-gray-700"><strong>Fecha de creación:</strong> {{ version.created_at | date }}</p>
+      </div>
+    </div>
+    <ng-template #noHistory>
+      <p class="text-gray-700">No hay historial de versiones disponible.</p>
+    </ng-template>
+  </div>
+</app-modal>
+
 <app-modal #modal title="Documento Regulatorio">
   <form [formGroup]="documentForm" (ngSubmit)="saveRegulatoryDocument()" class="space-y-4 p-4">
     <div>
       <label for="title" class="block text-gray-700">Título</label>
-      <input id="title" formControlName="title" type="text" 
+      <input id="title" formControlName="title" type="text"
         class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
     </div>
 
     <div>
       <label for="content" class="block text-gray-700">Contenido</label>
-      <textarea id="content" formControlName="content" rows="4" 
+      <textarea id="content" formControlName="content" rows="4"
         class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500"></textarea>
     </div>
 
     <div>
       <label for="effective_date" class="block text-gray-700">Fecha de vigencia</label>
-      <input id="effective_date" formControlName="effective_date" type="date" 
+      <input id="effective_date" formControlName="effective_date" type="date"
         class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500">
     </div>
 
-    <button type="submit" 
-      class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all">
+    <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all">
       <i class="fas fa-save mr-2"></i> {{ documentId ? 'Actualizar Documento' : 'Crear Documento' }}
     </button>
   </form>
 </app-modal>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-

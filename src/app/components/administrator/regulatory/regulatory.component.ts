@@ -17,6 +17,8 @@ export class RegulatoryComponent implements OnInit {
   documentId: number | null = null;
   successMessage: string = '';
   errorMessage: string = '';
+  versionHistory: any[] = [];
+  documentData: any = {};
 
   constructor(
     private fb: FormBuilder,
@@ -45,18 +47,26 @@ export class RegulatoryComponent implements OnInit {
       }
     );
   }
-
+  // Obtener historial de versiones
+  getVersionHistory(documentId: number): void {
+    this.regulatoryService.getVersionHistory(documentId).subscribe({
+      next: (data) => {
+        this.versionHistory = data.DocumentVersions;
+      },
+      error: (error) => {
+        console.error('Error al obtener el historial:', error);
+        this.versionHistory = [];
+      }
+    });
+  }
   // Guardar documento (Crear o Actualizar)
   saveRegulatoryDocument(): void {
     if (this.documentForm.invalid) {
       console.log('Por favor, complete todos los campos requeridos.');
       return;
     }
-
     const formData = this.documentForm.value;
-
     if (this.documentId) {
-      // Actualizar documento existente
       this.regulatoryService.updateRegulatoryDocument(this.documentId, formData).subscribe({
         next: () => {
           console.log('Documento actualizado exitosamente.');
@@ -68,7 +78,6 @@ export class RegulatoryComponent implements OnInit {
         }
       });
     } else {
-      // Crear nuevo documento
       this.regulatoryService.createRegulatoryDocument(formData).subscribe({
         next: () => {
           console.log('Documento creado exitosamente.');
@@ -82,14 +91,11 @@ export class RegulatoryComponent implements OnInit {
       });
     }
   }
-
-
   // Eliminar documento (lógico)
   deleteRegulatoryDocument(documentId: number): void {
     if (!confirm('¿Estás seguro de que deseas eliminar este documento?')) {
       return;
     }
-
     this.regulatoryService.deleteRegulatoryDocument(documentId).subscribe({
       next: () => {
         console.log('Documento eliminado exitosamente.');
@@ -100,15 +106,18 @@ export class RegulatoryComponent implements OnInit {
       }
     });
   }
+  // MODALES
+  @ViewChild('historyModal') historyModal!: ModalComponent;
+  openHistoryModal(documentId: number): void {
+    this.getVersionHistory(documentId);
+    this.historyModal.open();
+  }
 
-  // MODAL
   @ViewChild('modal') modal!: ModalComponent;
-
   openModal(document?: any) {
     this.documentForm.reset();
     this.successMessage = '';
     this.errorMessage = '';
-
     if (document) {
       this.documentId = document.document_id;
       this.documentForm.patchValue({
@@ -119,8 +128,6 @@ export class RegulatoryComponent implements OnInit {
     } else {
       this.documentId = null;
     }
-
     this.modal.open();
   }
-
 }
