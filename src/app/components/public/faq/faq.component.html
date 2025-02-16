@@ -1,0 +1,123 @@
+<div class="search-bar mb-6 mx-4 md:mx-auto md:max-w-7xl md:px-6">
+  <!-- Texto "¿Con qué podemos ayudarte?" -->
+  <h2 class="text-3xl font-bold text-gray-800 mb-3 pt-8 md:text-center">
+    ¿Con qué podemos ayudarte?
+  </h2>
+
+  <!-- Input con ícono de búsqueda -->
+  <div class="relative">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      (input)="onSearch()"
+      placeholder="Buscar preguntas..."
+      class="w-full p-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 md:mx-auto"
+    />
+
+    <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="text-red-500 text-sm mt-1">
+      Escribe al menos 3 caracteres para buscar.
+    </p>
+
+    <!-- Ícono de búsqueda -->
+    <svg
+      class="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+      ></path>
+    </svg>
+  </div>
+</div>
+
+<div class="faq-container flex flex-col md:flex-row w-full max-w-7xl mx-auto pt-8 font-sans relative">
+  <!-- Botón de menú en móviles -->
+  <button
+    class="faq-menu-toggle md:hidden bg-blue-600 text-white border-none py-2 px-4 text-lg cursor-pointer mb-4 rounded-lg"
+    (click)="toggleSidebar()"
+  >
+    ☰ Categorías
+  </button>
+
+  <!-- Menú lateral de categorías -->
+  <div
+    class="faq-sidebar w-full md:w-64 bg-gray-50 rounded-lg shadow-md md:sticky md:top-4 md:mr-6 transition-transform duration-300 ease-in-out transform md:transform-none overflow-y-auto md:max-h-[80vh]"
+    [class.open]="isSidebarOpen"
+    [class.hidden]="!isSidebarOpen && !isDesktopView"
+    [class.block]="isSidebarOpen || isDesktopView"
+  >
+    <ul class="list-none p-0 m-0">
+      <li
+        *ngFor="let category of faqCategories"
+        [class.active]="selectedCategory?.id === category.id"
+        (click)="selectCategory(category); toggleSidebar()"
+        class="p-3 cursor-pointer rounded-lg text-center transition-colors duration-300 hover:bg-blue-600 hover:text-white"
+        [class.bg-blue-700]="selectedCategory?.id === category.id"
+        [class.text-white]="selectedCategory?.id === category.id"
+      >
+        {{ category.name }}
+      </li>
+    </ul>
+  </div>
+
+  <!-- Contenido de preguntas frecuentes -->
+  <div class="faq-content flex-grow p-5 text-left">
+    <!-- Mostrar nombre y descripción de la categoría solo si no hay búsqueda activa -->
+    <div *ngIf="!isSearchActive">
+      <h2 class="text-2xl font-bold text-gray-800 mb-3">{{ selectedCategory?.name }}</h2>
+      <p class="category-description italic text-gray-600 text-base mb-4">
+        {{ selectedCategory?.description }}
+      </p>
+    </div>
+  
+    <!-- Mensaje si no hay preguntas en la categoría -->
+    <p *ngIf="!selectedCategory || (selectedCategory.faqs.length === 0 && !isSearchActive)" class="text-gray-600">
+      No hay preguntas en esta categoría.
+    </p>
+  
+    <!-- Mostrar FAQs paginadas -->
+    <div *ngFor="let faq of getPaginatedFaqs()" class="faq-item bg-gray-50 p-4 rounded-lg shadow-sm mb-4 text-left">
+      <h3 class="text-xl font-bold mb-2">{{ faq.question }}</h3>
+      <p class="text-base mb-2">{{ faq.answer }}</p>
+      <p class="text-sm text-gray-600">
+        <em>Última actualización: {{ faq.updatedAt | date:'longDate' }}</em>
+      </p>
+    </div>
+  
+    <!-- Mensaje cuando no hay resultados de búsqueda -->
+    <div *ngIf="isSearchActive && filteredFaqs.length === 0" class="text-center">
+      <p class="font-semibold text-gray-800 mb-2">No encontramos resultados para tu búsqueda.</p>
+      <p class="text-gray-600">Revisa que esté bien escrita, o prueba con una frase más general y vuelve a intentar.</p>
+    </div>
+  
+    <!-- Controles de paginación -->
+    <div
+      class="pagination flex justify-center items-center mt-6"
+      *ngIf="(selectedCategory && selectedCategory.faqs.length > itemsPerPage) || (isSearchActive && filteredFaqs.length > itemsPerPage)"
+    >
+      <button
+        (click)="changePage(-1)"
+        [disabled]="currentPage === 1"
+        class="bg-blue-600 text-white border-none py-2 px-4 rounded-lg cursor-pointer transition-colors duration-300 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+      >
+        Anterior
+      </button>
+      <span class="mx-4 text-base font-bold text-gray-800">
+        Página {{ currentPage }} de {{ totalPages }}
+      </span>
+      <button
+        (click)="changePage(1)"
+        [disabled]="currentPage === totalPages"
+        class="bg-blue-600 text-white border-none py-2 px-4 rounded-lg cursor-pointer transition-colors duration-300 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
+</div>
