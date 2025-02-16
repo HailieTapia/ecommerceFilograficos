@@ -5,7 +5,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { RegisterComponent } from './components/public/register/register.component';
 import { RecoverComponent } from './components/public/recover/recover.component';
 import { LoginComponent } from './components/public/login/login.component';
-
+import { FaqComponent } from './components/public/faq/faq.component'; 
 //autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
 
@@ -41,6 +41,7 @@ export const routes: Routes = [
 
   //publicos
   { path: 'register', component: RegisterComponent },
+  { path: 'faq', component: FaqComponent },
   { path: 'login', component: LoginComponent },
   { path: 'recovery', component: RecoverComponent },
   { path: '', redirectTo: '/recovery', pathMatch: 'full' },
