@@ -11,9 +11,6 @@
         <button routerLink="/company">Empresa</button>
       </li>
       <li *ngIf="isLoggedIn && userRole === 'administrador'">
-        <button routerLink="/faq-categories">Categorias de FAQ</button>
-      </li>
-      <li *ngIf="isLoggedIn && userRole === 'administrador'">
         <button routerLink="/faqs">FAQ</button>
       </li>
       <li *ngIf="isLoggedIn && userRole === 'administrador'">
@@ -44,9 +41,6 @@
       </li>
       <li *ngIf="!isLoggedIn">
         <button routerLink="/register">Register</button>
-      </li>
-      <li *ngIf="!isLoggedIn">
-        <button routerLink="/faq">Preguntas Frecuentes</button>
       </li>
     </ul>
   </nav>
