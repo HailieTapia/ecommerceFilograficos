@@ -39,7 +39,6 @@ export class RegulatoryComponent implements OnInit {
   getAllCurrentVersions(): void {
     this.regulatoryService.getAllCurrentVersions().subscribe(
       (response) => {
-        console.log('Obtención con éxito:', response);
         this.documents = response;
       },
       (error) => {
@@ -47,8 +46,10 @@ export class RegulatoryComponent implements OnInit {
       }
     );
   }
+
   // Obtener historial de versiones
   getVersionHistory(documentId: number): void {
+    this.documentId = documentId;
     this.regulatoryService.getVersionHistory(documentId).subscribe({
       next: (data) => {
         this.versionHistory = data.DocumentVersions;
@@ -56,6 +57,24 @@ export class RegulatoryComponent implements OnInit {
       error: (error) => {
         console.error('Error al obtener el historial:', error);
         this.versionHistory = [];
+      }
+    });
+  }
+
+  // Eliminar versión
+  deleteVersion(versionId: number) {
+    if (!this.documentId) {
+      console.error('No se ha seleccionado un documento.');
+      return;
+    }
+
+    this.regulatoryService.deleteRegulatoryDocumentVersion(this.documentId, versionId).subscribe({
+      next: () => {
+        this.versionHistory = this.versionHistory.filter(v => v.id !== versionId);
+        console.log(`Versión ${versionId} eliminada con éxito.`);
+      },
+      error: (error) => {
+        console.error('Error al eliminar la versión:', error);
       }
     });
   }
@@ -106,6 +125,7 @@ export class RegulatoryComponent implements OnInit {
       }
     });
   }
+  
   // MODALES
   @ViewChild('historyModal') historyModal!: ModalComponent;
   openHistoryModal(documentId: number): void {

@@ -50,7 +50,6 @@
   </div>
 </div>
 
-<!-- Modal Historial  -->
 <app-modal #historyModal title="Historial de Versiones">
   <div class="space-y-4 p-4">
     <div *ngIf="versionHistory.length > 0; else noHistory">
@@ -58,6 +57,9 @@
         <p class="text-gray-700"><strong>Versión:</strong> {{ version.version }}</p>
         <p class="text-gray-700"><strong>Contenido:</strong> {{ version.content }}</p>
         <p class="text-gray-700"><strong>Fecha de creación:</strong> {{ version.created_at | date }}</p>
+        <button (click)="deleteVersion(version.version_id)" class="text-red-500 hover:text-red-700">
+          Eliminar
+        </button>        
       </div>
     </div>
     <ng-template #noHistory>
