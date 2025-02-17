@@ -1,4 +1,4 @@
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard'; 
 
 //publicos
@@ -15,7 +15,6 @@ import { CompanyComponent } from './components/administrator/company/company.com
 import { SecurityComponent } from './components/administrator/security/security.component';
 import { EmailTypeComponent } from './components/administrator/email-type/email-type.component';
 import { EmailTemplateComponent } from './components/administrator/email-template/email-template.component';
-import { SessionComponent } from './components/administrator/session/session.component';
 import { RegulatoryComponent } from './components/administrator/regulatory/regulatory.component';
 import { FaqCategoriesComponent } from './components/administrator/faq-categories/faq-categories.component';
 import { FaqComponentAdmin } from './components/administrator/faq/faq.component';
@@ -32,7 +31,6 @@ export const routes: Routes = [
   { path: 'security', component: SecurityComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'type', component: EmailTypeComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'template', component: EmailTemplateComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'session', component: SessionComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'regulatory', component: RegulatoryComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'faq-categories', component: FaqCategoriesComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
   { path: 'faqs', component: FaqComponentAdmin , canActivate: [AuthGuard], data: { role: 'administrador' } },
