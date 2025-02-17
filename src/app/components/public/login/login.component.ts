@@ -11,7 +11,7 @@ import { environment } from '../../../environments/config';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements AfterViewInit {
   loginForm: FormGroup;
@@ -19,7 +19,11 @@ export class LoginComponent implements AfterViewInit {
   message = '';
   siteKey = environment.recaptchaSiteKey;
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
@@ -52,25 +56,34 @@ export class LoginComponent implements AfterViewInit {
     if (this.loginForm.invalid) {
       return;
     }
-  
+
     this.loading = true;
+    this.message = ''; // Limpiar mensajes anteriores
+
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        this.message = response.message;
         this.loading = false;
-        alert('Te has logeado');
-        this.router.navigate(['/profile']);
+
+        if (response.mfaRequired) {
+          // Redirigir a la verificación de MFA con el userId como parámetro de consulta
+          this.router.navigate(['/mfa-verification'], {
+            queryParams: { userId: response.userId }
+          });
+        } else {
+          // Inicio de sesión exitoso sin MFA
+          this.message = response.message;
+          this.loginForm.reset(); // Limpiar el formulario
+          this.router.navigate(['/profile']); // Redirigir al perfil
+        }
       },
       error: (error) => {
         this.loading = false;
-  
-        // Si el error tiene un mensaje, imprímelo directamente
+
         if (error.error?.message) {
           console.log('Mensaje de error del backend:', error.error.message);
-          this.message = error.error.message; // Asignar el mensaje para mostrarlo en el frontend
+          this.message = error.error.message;
         } else {
-          // Si no hay mensaje, muestra un error genérico
-          console.log('error desconocidooooooooooo');
+          console.log('Error desconocido');
           this.message = 'Error en el inicio de sesión. Intenta de nuevo.';
         }
       }

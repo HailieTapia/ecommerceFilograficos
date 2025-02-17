@@ -6,6 +6,7 @@ import { RegisterComponent } from './components/public/register/register.compone
 import { RecoverComponent } from './components/public/recover/recover.component';
 import { LoginComponent } from './components/public/login/login.component';
 import { FaqComponent } from './components/public/faq/faq.component'; 
+import { MfaVerificationComponent } from './components/public/mfa-verification/mfa-verification.component'; 
 //autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
 
@@ -44,6 +45,7 @@ export const routes: Routes = [
   { path: 'faq', component: FaqComponent },
   { path: 'login', component: LoginComponent },
   { path: 'recovery', component: RecoverComponent },
+  { path: 'mfa-verification', component: MfaVerificationComponent },
   { path: '', redirectTo: '/recovery', pathMatch: 'full' },
   
 
