@@ -47,29 +47,27 @@ export class CompanyComponent implements OnInit {
       },
       (error) => {
         console.error('Error al obtener:', error);
-        // Aquí podrías mostrar un mensaje de error al usuario
       }
     );
   }
 
   // Método para eliminar un enlace de red social individualmente
   deleteSocialMedia(platform: string): void {
-    this.isUpdating = true;  // Indicar que estamos en proceso de actualización
+    this.isUpdating = true; 
 
-    this.companyForm.get(platform)?.setValue('');  // Eliminar el valor del campo
+    this.companyForm.get(platform)?.setValue('');  
 
     this.companyService.deleteSocialMediaLinks({ [platform]: true }).subscribe(
       (response) => {
         console.log(`${platform} eliminado correctamente`);
         this.company = response.company;
-        this.companyForm.patchValue(response.company);  // Actualizar el formulario con los datos del servidor
+        this.companyForm.patchValue(response.company); 
 
-        // Restaurar el estado de actualización
         this.isUpdating = false;
       },
       (error) => {
         console.error(`Error al eliminar ${platform}:`, error);
-        this.isUpdating = false;  // Asegurar que la bandera se resetee en caso de error
+        this.isUpdating = false;  
       }
     );
   }
@@ -86,21 +84,18 @@ export class CompanyComponent implements OnInit {
 
   // Método para actualizar la información de la empresa
   updateCompanyInfo(): void {
-    if (this.companyForm.valid && !this.isUpdating) {  // Comprobar que no estamos en proceso de actualización
+    if (this.companyForm.valid && !this.isUpdating) {  
       console.log('Datos enviados para actualizar:', this.companyForm.value);
       this.companyService.updateCompanyInfo(this.companyForm.value).subscribe(
         (response) => {
           console.log('Información de la empresa actualizada:', response);
-          // Aquí podrías mostrar un mensaje de éxito al usuario
         },
         (error) => {
           console.error('Error al actualizar:', error);
-          // Aquí podrías mostrar un mensaje de error al usuario
         }
       );
     } else {
       console.log('Formulario no válido o en proceso de actualización');
-      // Aquí podrías mostrar un mensaje de error al usuario indicando que el formulario no es válido
     }
   }
 }
