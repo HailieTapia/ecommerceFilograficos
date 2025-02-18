@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/config';
 import { CsrfService } from './csrf.service';
-import { throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,18 +13,18 @@ export class AuthService {
   private userSubject = new BehaviorSubject<any>(null);
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {
-    this.loadUserFromStorage(); 
+    this.loadUserFromStorage();
   }
 
   // Cargar usuario desde el localStorage al iniciar la aplicación
   private loadUserFromStorage() {
     const userData = localStorage.getItem('userData');
     if (userData) {
-      this.userSubject.next(JSON.parse(userData));  // Establecer el usuario en el BehaviorSubject
+      this.userSubject.next(JSON.parse(userData));
     }
   }
 
-// Registro de usuarios
+  // Registro de usuarios
   register(data: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -35,7 +34,7 @@ export class AuthService {
     );
   }
 
-// Inicio de sesión
+  // Inicio de sesión
   login(data: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -43,15 +42,39 @@ export class AuthService {
         return this.http.post(`${this.apiUrl}/auth/login`, data, { headers, withCredentials: true });
       }),
       tap((user: any) => {
-        console.log('Usuario logueado:', user);
-
-        // Al hacer login, guarda la información del usuario en LocalStorage y actualiza el BehaviorSubject
-        localStorage.setItem('userData', JSON.stringify(user));
-        this.userSubject.next(user); // Almacena el usuario en el servicio
+        if (!user.mfaRequired) {
+          localStorage.setItem('userData', JSON.stringify(user));
+          this.userSubject.next(user);
+        }
       })
     );
   }
-// Cerrar sesión del usuario (elimina el token de la sesión actual)
+
+  // Enviar OTP para MFA
+  sendOtpMfa(userId: string): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.post(`${this.apiUrl}/auth/mfa/send-otp`, { userId }, { headers, withCredentials: true });
+      })
+    );
+  }
+
+  // Verificar OTP para MFA
+  verifyMfaOtp(userId: string, otp: string): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.post(`${this.apiUrl}/auth/mfa/verify-otp`, { userId, otp }, { headers, withCredentials: true });
+      }),
+      tap((user: any) => {
+        localStorage.setItem('userData', JSON.stringify(user));
+        this.userSubject.next(user);
+      })
+    );
+  }
+
+  // Cerrar sesión del usuario (elimina el token de la sesión actual)
   logout(): Observable<any> {
     console.log('Cerrando sesión del usuario');
     return this.csrfService.getCsrfToken().pipe(
@@ -63,8 +86,7 @@ export class AuthService {
             this.userSubject.next(null); // Resetear el estado del usuario
             console.log('Sesión cerrada exitosamente');
           }),
-          catchError((error) => {
-            console.error('Error al cerrar sesión:', error);
+          catchError(error => {
             return throwError(() => new Error('No se pudo cerrar sesión.'));
           })
         );

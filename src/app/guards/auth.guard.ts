@@ -20,13 +20,13 @@ export class AuthGuard implements CanActivate {
           this.router.navigate(['/login']);
           return false;
         }
-
+  
         const expectedRole = route.data['role'];
         if (expectedRole && user.tipo !== expectedRole) {
           this.router.navigate(['/403']); // Página de acceso denegado si es necesario
           return false;
         }
-
+  
         return true;
       }),
       tap(allowed => {

@@ -1,0 +1,168 @@
+<div class="w-full max-w-4xl mx-auto p-4">
+    <!-- Información del Negocio -->
+    <div class="mb-8">
+      <div class="w-full bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Información de Contacto</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Horario de Atención -->
+          <div class="space-y-4">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-clock text-blue-500 mt-1"></i>
+              <div>
+                <h3 class="font-medium mb-2">Horario de Atención</h3>
+                <ul class="space-y-1 text-sm">
+                  <li>Lunes a Viernes: 9:00 AM - 6:00 PM</li>
+                  <li>Sábado: 9:00 AM - 2:00 PM</li>
+                  <li>Domingo: Cerrado</li>
+                </ul>
+              </div>
+            </div>
+  
+            <!-- Canales de Contacto -->
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <i class="fas fa-phone text-blue-500"></i>
+                <span>{{ companyInfo?.phone_number || '+1 234 567 890' }}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <i class="fas fa-envelope text-blue-500"></i>
+                <span>{{ companyInfo?.email || 'soporte@ejemplo.com' }}</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <i class="fab fa-whatsapp text-blue-500"></i>
+                <span>WhatsApp: {{ companyInfo?.phone_number || '+1 234 567 890' }}</span>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Ubicación -->
+          <div>
+            <div class="flex items-start gap-3 mb-3">
+              <i class="fas fa-map-marker-alt text-blue-500 mt-1"></i>
+              <div>
+                <h3 class="font-medium mb-2">Ubicación</h3>
+                <p class="text-sm mb-2">
+                  {{ companyInfo?.address_street || '123 Calle Principal' }}, 
+                  {{ companyInfo?.address_city || 'Ciudad' }}, 
+                  {{ companyInfo?.address_country || 'País' }}
+                </p>
+                <a 
+                  href="https://maps.app.goo.gl/kS1qnSQX1f7YfB9r9"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-block bg-gray-100 text-blue-600 px-4 py-2 rounded-md text-sm hover:bg-gray-200 transition-colors"
+                >
+                  Ver en Google Maps
+                </a>
+              </div>
+            </div>
+            <!-- Recuadro de Google Maps -->
+            <div class="border rounded-lg overflow-hidden h-48">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3742.123456789012!2d-98.73384268456789!3d20.123456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85d1a123456789ab%3A0x1234567890abcdef!2sCalle%20Plaza%20Ju%C3%A1rez%2C%20Centro%2C%2042000%20Pachuca%20de%20Soto%2C%20Hidalgo!5e0!3m2!1ses!2smx!4v1234567890123!5m2!1ses!2smx"
+                width="100%"
+                height="100%"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Formulario de Soporte -->
+    <div class="w-full bg-white shadow-md rounded-lg p-6">
+      <h2 class="text-xl font-bold mb-4">Formulario de Soporte Técnico</h2>
+      <!-- Mensaje de éxito -->
+      <div *ngIf="submitted" class="bg-green-50 border border-green-200 text-green-800 p-4 rounded-md mb-4 flex items-center gap-3">
+        <i class="fas fa-check-circle text-green-600"></i>
+        <div>
+          <p>Tu mensaje ha sido enviado exitosamente. Te contactaremos pronto durante nuestro horario de atención.</p>
+        </div>
+      </div>
+      <form [formGroup]="supportForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Nombre</label>
+          <input
+            type="text"
+            formControlName="user_name"
+            class="w-full p-2 border rounded-md"
+            placeholder="Ingresa tu nombre"
+          />
+          <div *ngIf="supportForm.get('user_name')?.invalid && supportForm.get('user_name')?.touched" class="text-red-500 text-sm">
+            El nombre es requerido y debe tener al menos 2 caracteres.
+          </div>
+        </div>
+  
+        <div>
+          <label class="block text-sm font-medium mb-1">Email</label>
+          <input
+            type="email"
+            formControlName="user_email"
+            class="w-full p-2 border rounded-md"
+            placeholder="Ingresa tu email"
+          />
+          <div *ngIf="supportForm.get('user_email')?.invalid && supportForm.get('user_email')?.touched" class="text-red-500 text-sm">
+            Ingresa un email válido.
+          </div>
+        </div>
+  
+        <div>
+          <label class="block text-sm font-medium mb-1">Asunto</label>
+          <input
+            type="text"
+            formControlName="subject"
+            class="w-full p-2 border rounded-md"
+            placeholder="Ingresa el asunto"
+          />
+          <div *ngIf="supportForm.get('subject')?.invalid && supportForm.get('subject')?.touched" class="text-red-500 text-sm">
+            El asunto es requerido y debe tener al menos 5 caracteres.
+          </div>
+        </div>
+  
+        <div>
+          <label class="block text-sm font-medium mb-1">Mensaje</label>
+          <textarea
+            formControlName="message"
+            class="w-full p-2 border rounded-md h-32"
+            placeholder="Escribe tu mensaje"
+            maxlength="500"
+          ></textarea>
+          <div *ngIf="supportForm.get('message')?.invalid && supportForm.get('message')?.touched" class="text-red-500 text-sm">
+            El mensaje es requerido y no debe exceder 500 caracteres.
+          </div>
+        </div>
+  
+       <!-- reCAPTCHA -->
+        <div class="form-group text-center">
+          <label class="block text-sm font-medium mb-1">Verificación</label>
+          <div id="support-recaptcha-container" class="flex justify-center"></div>
+          <div *ngIf="supportForm.get('recaptchaToken')?.invalid && supportForm.get('recaptchaToken')?.touched" 
+              class="text-red-500 text-sm mt-1">
+            Debes completar el reCAPTCHA.
+          </div>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div *ngIf="errorMessage" class="bg-red-50 border border-red-200 text-red-800 p-4 rounded-md mb-4 flex items-center gap-3">
+          <i class="fas fa-exclamation-circle text-red-600"></i>
+          <div>
+            {{ errorMessage }}
+          </div>
+        </div>
+  
+        <button
+          type="submit"
+          class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+          [disabled]="supportForm.invalid"
+        >
+          Enviar Consulta
+        </button>
+      </form>
+    </div>
+    <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </div>
