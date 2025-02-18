@@ -8,10 +8,11 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
   templateUrl: './company.component.html',
   styleUrl: './company.component.css'
 })
+
 export class CompanyComponent implements OnInit {
   company: any;
   companyForm: FormGroup;
-  deleteSocialForm: FormGroup;
+  isUpdating: boolean = false;
 
   constructor(private fb: FormBuilder, private companyService: CompanyService) {
     this.companyForm = this.fb.group({
@@ -30,17 +31,12 @@ export class CompanyComponent implements OnInit {
       twitter: ['', [Validators.pattern('https?://.*')]],
       instagram: ['', [Validators.pattern('https?://.*')]],
     });
-    this.deleteSocialForm = this.fb.group({
-      facebook: [false],
-      twitter: [false],
-      linkedin: [false],
-      instagram: [false]
-    });
   }
 
   ngOnInit(): void {
     this.getCompanyInfo();
   }
+
   // Obtener la información de la empresa
   getCompanyInfo(): void {
     this.companyService.getCompanyInfo().subscribe(
@@ -51,24 +47,32 @@ export class CompanyComponent implements OnInit {
       },
       (error) => {
         console.error('Error al obtener:', error);
+        // Aquí podrías mostrar un mensaje de error al usuario
       }
     );
   }
-  // Método para eliminar los enlaces de redes sociales seleccionados
-  onDeleteSocialMediaLinks(): void {
-    const payload = this.deleteSocialForm.value;
-    this.companyService.deleteSocialMediaLinks(payload).subscribe(
+
+  // Método para eliminar un enlace de red social individualmente
+  deleteSocialMedia(platform: string): void {
+    this.isUpdating = true;  // Indicar que estamos en proceso de actualización
+
+    this.companyForm.get(platform)?.setValue('');  // Eliminar el valor del campo
+
+    this.companyService.deleteSocialMediaLinks({ [platform]: true }).subscribe(
       (response) => {
-        console.log(response.message);
-        this.company = response.company; 
-        this.companyForm.patchValue(response.company);
+        console.log(`${platform} eliminado correctamente`);
+        this.company = response.company;
+        this.companyForm.patchValue(response.company);  // Actualizar el formulario con los datos del servidor
+
+        // Restaurar el estado de actualización
+        this.isUpdating = false;
       },
       (error) => {
-        console.error('Error al eliminar enlaces de redes sociales:', error);
+        console.error(`Error al eliminar ${platform}:`, error);
+        this.isUpdating = false;  // Asegurar que la bandera se resetee en caso de error
       }
     );
   }
-  
   // Método para actualizar el formulario con los valores de la empresa de forma dinámica
   patchFormValues(company: any): void {
     if (company) {
@@ -79,19 +83,24 @@ export class CompanyComponent implements OnInit {
       });
     }
   }
-  // Actualizar la información de la empresa
+
+  // Método para actualizar la información de la empresa
   updateCompanyInfo(): void {
-    if (this.companyForm.valid) {
+    if (this.companyForm.valid && !this.isUpdating) {  // Comprobar que no estamos en proceso de actualización
+      console.log('Datos enviados para actualizar:', this.companyForm.value);
       this.companyService.updateCompanyInfo(this.companyForm.value).subscribe(
         (response) => {
           console.log('Información de la empresa actualizada:', response);
+          // Aquí podrías mostrar un mensaje de éxito al usuario
         },
         (error) => {
           console.error('Error al actualizar:', error);
+          // Aquí podrías mostrar un mensaje de error al usuario
         }
       );
     } else {
-      console.log('Formulario no válido');
+      console.log('Formulario no válido o en proceso de actualización');
+      // Aquí podrías mostrar un mensaje de error al usuario indicando que el formulario no es válido
     }
   }
 }
