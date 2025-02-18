@@ -37,34 +37,40 @@
                 <label for="address_city" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <i class="fas fa-city text-gray-500"></i> Ciudad
                 </label>
-                <input id="address_city" formControlName="address_city"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese la ciudad">
+                <select id="address_city" formControlName="address_city"
+                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
+                </select>
             </div>
             <div>
-                <label for="address_state" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                <label for="addressState" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <i class="fas fa-map text-gray-500"></i> Estado
                 </label>
-                <input id="address_state" formControlName="address_state"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese el estado">
+                <select id="addressState" formControlName="address_state"
+                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
+                </select>
             </div>
+
             <div>
                 <label for="address_postal_code"
                     class="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <i class="fas fa-mail-bulk text-gray-500"></i> Código Postal
                 </label>
-                <input id="address_postal_code" formControlName="address_postal_code"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese el código postal">
+                <select id="address_postal_code" formControlName="address_postal_code"
+                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">{{
+                        postal.postal_code }}</option>
+                </select>
             </div>
             <div>
                 <label for="address_country" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <i class="fas fa-globe text-gray-500"></i> País
                 </label>
-                <input id="address_country" formControlName="address_country"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese el país">
+                <select id="address_country" formControlName="address_country"
+                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option *ngFor="let country of address.countries" [value]="country.name">{{ country.name }}</option>
+                </select>
             </div>
         </div>
 
