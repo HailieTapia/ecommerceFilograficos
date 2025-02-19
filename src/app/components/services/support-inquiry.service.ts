@@ -23,6 +23,16 @@ export class SupportInquiryService {
     );
   }
 
+  // Obtener el número total de consultas por cada estado (requiere autenticación y rol de administrador)
+  getConsultationCountsByStatus(): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/counts-by-status`, { headers, withCredentials: true });
+      })
+    );
+  }
+
   // Obtener todas las consultas de soporte (requiere autenticación y rol de administrador)
   getAllConsultations(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
