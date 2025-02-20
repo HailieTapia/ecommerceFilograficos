@@ -1,0 +1,57 @@
+{
+    "address": [
+      {
+        "address_street": "",
+        "address_city": "",
+        "address_state": "",
+        "address_postal_code": "",
+        "address_country": ""
+      }
+    ],
+    "cities": [
+      { "id": 1, "name": "Huejutla", "state": "Hidalgo" },
+      { "id": 2, "name": "Pachuca", "state": "Hidalgo" },
+      { "id": 3, "name": "Tulancingo", "state": "Hidalgo" },
+      { "id": 4, "name": "Tula", "state": "Hidalgo" },
+      { "id": 5, "name": "Puebla", "state": "Puebla" },
+      { "id": 6, "name": "Veracruz", "state": "Veracruz" },
+      { "id": 7, "name": "Tuxpan", "state": "Veracruz" },
+      { "id": 8, "name": "Xalapa", "state": "Veracruz" },
+      { "id": 9, "name": "CDMX", "state": "CDMX" },
+      { "id": 10, "name": "Ecatepec", "state": "Estado de México" },
+      { "id": 11, "name": "Toluca", "state": "Estado de México" },
+      { "id": 12, "name": "Guadalajara", "state": "Jalisco" },
+      { "id": 13, "name": "Monterrey", "state": "Nuevo León" },
+      { "id": 14, "name": "Mérida", "state": "Yucatán" }
+    ],
+    "states": [
+      { "id": 1, "name": "Hidalgo", "country": "México" },
+      { "id": 2, "name": "CDMX", "country": "México" },
+      { "id": 3, "name": "Puebla", "country": "México" },
+      { "id": 4, "name": "Veracruz", "country": "México" },
+      { "id": 5, "name": "Estado de México", "country": "México" },
+      { "id": 6, "name": "Jalisco", "country": "México" },
+      { "id": 7, "name": "Nuevo León", "country": "México" },
+      { "id": 8, "name": "Yucatán", "country": "México" }
+    ],
+    "countries": [
+      { "id": 1, "name": "México" }
+    ],
+    "postal_codes": [
+      { "city": "Huejutla", "postal_code": "43000" },
+      { "city": "Pachuca", "postal_code": "42000" },
+      { "city": "Tulancingo", "postal_code": "43600" },
+      { "city": "Tula", "postal_code": "42800" },
+      { "city": "Puebla", "postal_code": "72000" },
+      { "city": "Veracruz", "postal_code": "91700" },
+      { "city": "Tuxpan", "postal_code": "92800" },
+      { "city": "Xalapa", "postal_code": "91000" },
+      { "city": "CDMX", "postal_code": "01000" },
+      { "city": "Ecatepec", "postal_code": "55000" },
+      { "city": "Toluca", "postal_code": "50000" },
+      { "city": "Guadalajara", "postal_code": "44100" },
+      { "city": "Monterrey", "postal_code": "64000" },
+      { "city": "Mérida", "postal_code": "97000" }
+    ]
+  }
+  
