@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient,HttpParams,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
@@ -39,6 +39,26 @@ export class SupportInquiryService {
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         return this.http.get(`${this.apiUrl}/`, { headers, withCredentials: true });
+      })
+    );
+  }
+
+  // Obtener todas las consultas de soporte con paginación (requiere autenticación y rol de administrador)
+  getAllConsultationsForPagination(page: number = 1, pageSize: number = 10): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        
+        // Parámetros de paginación
+        const params = new HttpParams()
+          .set('page', page.toString())
+          .set('pageSize', pageSize.toString());
+
+        return this.http.get(`${this.apiUrl}/pagination`, { 
+          headers, 
+          params, 
+          withCredentials: true 
+        });
       })
     );
   }

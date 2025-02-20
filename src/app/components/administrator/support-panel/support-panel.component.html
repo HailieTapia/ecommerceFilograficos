@@ -38,8 +38,22 @@
 
   <!-- Tabla de Consultas -->
   <div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="p-4 border-b">
+    <div class="p-4 border-b flex justify-between items-center">
       <h2 class="text-lg font-semibold">Tickets de Soporte</h2>
+      <div class="flex items-center gap-2">
+        <label for="itemsPerPage" class="text-sm text-gray-600">Elementos por página:</label>
+        <select 
+          id="itemsPerPage" 
+          [(ngModel)]="itemsPerPage" 
+          (change)="onItemsPerPageChange()"
+          class="p-1 border rounded-md text-sm"
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
     </div>
     
     <div class="overflow-x-auto">
@@ -97,6 +111,13 @@
           </tr>
         </tbody>
       </table>
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalItems]="totalItems"
+        [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)"
+        class="mt-4 p-4 border-t"
+      ></app-pagination>
     </div>
   </div>
 
