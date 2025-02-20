@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SecurityService } from '../../services/security.service';
 import { FormsModule } from '@angular/forms';
@@ -26,15 +26,23 @@ export class SecurityComponent {
   }
 
   desbloquearUsuario(user_id: string): void {
+    if (!confirm('¿Estás seguro de que deseas desbloquear este usuario?')) {
+      return;
+    }
+  
     this.securityService.adminUnlockUser(user_id).subscribe(
       (response) => {
         console.log('Usuario desbloqueado con éxito:', response);
+        alert('Usuario desbloqueado con éxito');
+        this.getFailedLoginAttempts(this.selectedPeriodo); 
       },
       (error) => {
         console.error('Error al desbloquear el usuario:', error);
+        alert('Error al desbloquear el usuario: ' + (error?.error?.message || 'Intente de nuevo'));
       }
     );
   }
+  
 
   //usuario cambia el período seleccionado.
   onPeriodoChange(): void {
