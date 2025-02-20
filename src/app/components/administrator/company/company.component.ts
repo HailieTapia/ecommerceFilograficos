@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CompanyService } from '../../services/company.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import * as addressData from '../../direccion.json';
-import { CommonModule } from '@angular/common'; // Importing CommonModule
+import * as addressData from '../shared/direccion.json';
+import { CommonModule } from '@angular/common'; 
+import { noXSSValidator } from '../shared/validators';
+
 @Component({
   selector: 'app-company',
   standalone: true,
@@ -19,20 +21,19 @@ export class CompanyComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private companyService: CompanyService) {
     this.companyForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      slogan: ['', [Validators.maxLength(100)]],
-      page_title: ['', Validators.required],
-      address_street: ['', [Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ0-9,.:]+( [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ0-9,.:]+)*$/), Validators.minLength(3), Validators.maxLength(100)]],
-      address_city: ['', Validators.required],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100),noXSSValidator()]],
+      slogan: ['', [Validators.maxLength(100),noXSSValidator()]],
+      address_street: ['', [Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ0-9,.:]+( [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ0-9,.:]+)*$/), Validators.minLength(3), Validators.maxLength(100),noXSSValidator()]],
+      address_city: ['', Validators.required,],
       address_state: ['', Validators.required],
       address_postal_code: ['', Validators.required],
-      address_country: ['', Validators.required],
-      phone_number: ['', [Validators.pattern(/^\d{10}$/)]],
-      email: ['', [Validators.email]],
-      facebook: ['', [Validators.pattern('https?://.*')]],
-      linkedin: ['', [Validators.pattern('https?://.*')]],
-      twitter: ['', [Validators.pattern('https?://.*')]],
-      instagram: ['', [Validators.pattern('https?://.*')]],
+      address_country: ['', Validators.required,],
+      phone_number: ['', [Validators.pattern(/^\d{10}$/),noXSSValidator()]],
+      email: ['', [Validators.email,noXSSValidator()]],
+      facebook: ['', [Validators.pattern('https?://.*'),noXSSValidator()]],
+      linkedin: ['', [Validators.pattern('https?://.*'),noXSSValidator()]],
+      twitter: ['', [Validators.pattern('https?://.*'),noXSSValidator()]],
+      instagram: ['', [Validators.pattern('https?://.*'),noXSSValidator()]],
     });
   }
 
