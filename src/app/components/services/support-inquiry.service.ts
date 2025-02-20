@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient,HttpParams,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
@@ -23,12 +23,42 @@ export class SupportInquiryService {
     );
   }
 
+  // Obtener el número total de consultas por cada estado (requiere autenticación y rol de administrador)
+  getConsultationCountsByStatus(): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/counts-by-status`, { headers, withCredentials: true });
+      })
+    );
+  }
+
   // Obtener todas las consultas de soporte (requiere autenticación y rol de administrador)
   getAllConsultations(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         return this.http.get(`${this.apiUrl}/`, { headers, withCredentials: true });
+      })
+    );
+  }
+
+  // Obtener todas las consultas de soporte con paginación (requiere autenticación y rol de administrador)
+  getAllConsultationsForPagination(page: number = 1, pageSize: number = 10): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        
+        // Parámetros de paginación
+        const params = new HttpParams()
+          .set('page', page.toString())
+          .set('pageSize', pageSize.toString());
+
+        return this.http.get(`${this.apiUrl}/pagination`, { 
+          headers, 
+          params, 
+          withCredentials: true 
+        });
       })
     );
   }
@@ -72,4 +102,36 @@ export class SupportInquiryService {
       })
     );
   }
+
+  // Añadir estas funciones al servicio
+  getStatusText(status: string): string {
+    const statusMap: { [key: string]: string } = {
+      'pending': 'Pendiente',
+      'in_progress': 'En Proceso',
+      'resolved': 'Resuelto',
+      'closed': 'Cerrado'
+    };
+    return statusMap[status] || status;
+  }
+
+  getStatusClass(status: string): string {
+    const classes: { [key: string]: string } = {
+      'pending': 'bg-yellow-100 text-yellow-800',
+      'in_progress': 'bg-blue-100 text-blue-800',
+      'resolved': 'bg-green-100 text-green-800',
+      'closed': 'bg-gray-100 text-gray-800'
+    };
+    return `${classes[status]} px-2 py-1 rounded-full text-sm`;
+  }
+
+  isValidStatusTransition(currentStatus: string, newStatus: string): boolean {
+    const validTransitions: { [key: string]: string[] } = {
+      pending: ['in_progress', 'resolved', 'closed'], // Puede avanzar a cualquier estado
+      in_progress: ['resolved', 'closed'], // No puede volver a 'pending'
+      resolved: ['closed'], // No puede volver a 'pending' o 'in_progress'
+      closed: [] // No puede cambiar de estado
+    };
+  
+    return validTransitions[currentStatus]?.includes(newStatus) || false;
+  }  
 }

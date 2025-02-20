@@ -1,0 +1,138 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="w-full p-4">
+  <!-- Sección de Estadísticas -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <!-- Pendientes -->
+    <app-status-cards
+      iconContainerClass="bg-yellow-100 p-3 rounded-full"
+      iconClass="fas fa-clock text-yellow-500 text-xl"
+      title="Pendientes"
+      [count]="consultationCounts['pending'] || 0">
+    </app-status-cards>
+
+    <!-- En Proceso -->
+    <app-status-cards
+      iconContainerClass="bg-blue-100 p-3 rounded-full"
+      iconClass="fas fa-comments text-blue-500 text-xl"
+      title="En Proceso"
+      [count]="consultationCounts['in_progress'] || 0">
+    </app-status-cards>
+
+    <!-- Resueltos -->
+    <app-status-cards
+      iconContainerClass="bg-green-100 p-3 rounded-full"
+      iconClass="fas fa-check-circle text-green-500 text-xl"
+      title="Resueltos"
+      [count]="consultationCounts['resolved'] || 0">
+    </app-status-cards>
+
+    <!-- Cerrados -->
+    <app-status-cards
+      iconContainerClass="bg-red-100 p-3 rounded-full"
+      iconClass="fas fa-times-circle text-red-500 text-xl"
+      title="Cerrados"
+      [count]="consultationCounts['closed'] || 0">
+    </app-status-cards>
+  </div>
+
+  <!-- Tabla de Consultas -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="p-4 border-b flex justify-between items-center">
+      <h2 class="text-lg font-semibold">Tickets de Soporte</h2>
+      <div class="flex items-center gap-2">
+        <label for="itemsPerPage" class="text-sm text-gray-600">Elementos por página:</label>
+        <select 
+          id="itemsPerPage" 
+          [(ngModel)]="itemsPerPage" 
+          (change)="onItemsPerPageChange()"
+          class="p-1 border rounded-md text-sm"
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">ID</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Usuario</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Asunto</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Estado</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Fecha Creación</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Última Actualización</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let consultation of consultations" class="hover:bg-gray-50">
+            <td class="p-3">#{{ consultation.inquiry_id }}</td>
+            <td class="p-3">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-user text-gray-600"></i>
+                <div>
+                  <div class="flex items-center gap-1">
+                    <p class="font-medium">{{ consultation.user_name }}</p>
+                    <div class="relative group">
+                      <i 
+                        [class]="consultation.user_id ? 'fas fa-check-circle text-green-500 cursor-pointer' : ''"
+                        class="text-sm"
+                      ></i>
+                      <!-- Tooltip personalizado -->
+                      <div *ngIf="consultation.user_id" class="absolute left-0 -bottom-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-normal sm:whitespace-nowrap">
+                        Este usuario está registrado en la aplicación
+                      </div>
+                    </div>
+                  </div>
+                  <p class="text-sm text-gray-500">{{ consultation.user_email }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="p-3">{{ consultation.subject }}</td>
+            <td class="p-3">
+              <app-status-badge [status]="consultation.status"></app-status-badge>
+            </td>
+            <td class="p-3 text-sm">{{ consultation.created_at | date:'short' }}</td>
+            <td class="p-3 text-sm">{{ consultation.updated_at | date:'short' }}</td>
+            <td class="p-3">
+              <button (click)="openModal(consultation.inquiry_id)" class="text-blue-500 mr-2 hover:text-blue-700">
+                Ver
+              </button>
+              <app-consultation-row 
+                [consultation]="consultation"
+                (saved)="loadData()">
+              </app-consultation-row>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalItems]="totalItems"
+        [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)"
+        class="mt-4 p-4 border-t"
+      ></app-pagination>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
+        <h2 class="text-xl font-bold">Detalles de la Consulta</h2>
+        <button (click)="closeModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="p-4">
+        <app-consultation-details *ngIf="selectedConsultationId" [consultationId]="selectedConsultationId"></app-consultation-details>
+      </div>
+    </div>
+  </div>
+</div>
