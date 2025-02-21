@@ -4,13 +4,15 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
+import { noXSSValidator } from '../../administrator/shared/validators';
 
 @Component({
   selector: 'app-register',
   standalone: true, 
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
-  imports: [CommonModule, ReactiveFormsModule,FormsModule] 
+  imports: [PasswordToggleComponent,CommonModule, ReactiveFormsModule,FormsModule] 
 })
 export class RegisterComponent {
   registerForm: FormGroup;
@@ -19,11 +21,11 @@ export class RegisterComponent {
 
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.registerForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      user_type: ['cliente', [Validators.required]],
+      name: ['', [ Validators.required,  Validators.pattern(/^(?! )[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+(?: [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+)*$/), Validators.minLength(3), Validators.maxLength(50), noXSSValidator()]],
+      email: ['', [Validators.required, Validators.email,noXSSValidator()]],
+      phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/), noXSSValidator()]],
+      password: ['', [Validators.required, Validators.minLength(8),noXSSValidator()]],
+      user_type: ['cliente'],
     });
   }
 
