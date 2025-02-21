@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
+import { CompanyService } from '../services/company.service';
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -13,10 +14,14 @@ import { Router } from '@angular/router';
 export class HeaderComponent implements OnInit {
   userRole: string | null = null;
   isLoggedIn: boolean = false;
+  company: any;
 
-  constructor(private router: Router, private authService: AuthService) { }
+  logoPreview: string | ArrayBuffer | null = null;
+
+  constructor(private router: Router, private authService: AuthService, private companyService: CompanyService) { }
 
   ngOnInit(): void {
+    this.getCompanyInfo();
     this.authService.getUser().subscribe(user => {
       if (user) {
         this.userRole = user.tipo;
@@ -27,12 +32,25 @@ export class HeaderComponent implements OnInit {
       }
     });
   }
-
+  // Obtener la información de la empresa
+  getCompanyInfo(): void {
+    this.companyService.getCompanyInfo().subscribe(
+      (response) => {
+        this.company = response.company;
+        if (this.company.logo) {
+          this.logoPreview = this.company.logo;
+        }
+      },
+      (error) => {
+        console.error('Error al obtener:', error);
+      }
+    );
+  }
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
         console.log('Redirigiendo a la página de login...');
-        this.router.navigate(['login']); // Redirige al login después de cerrar sesión
+        this.router.navigate(['login']); 
       },
       error: (err) => {
         console.error(err);
