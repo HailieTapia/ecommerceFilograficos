@@ -5,18 +5,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/config';
+import { noXSSValidator } from '../../administrator/shared/validators';
+import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [PasswordToggleComponent,CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements AfterViewInit {
   loginForm: FormGroup;
-  loading = false;
-  message = '';
   siteKey = environment.recaptchaSiteKey;
 
   constructor(
@@ -25,9 +25,9 @@ export class LoginComponent implements AfterViewInit {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      recaptchaToken: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email, noXSSValidator()]],
+      password: ['', [Validators.required, Validators.minLength(8), noXSSValidator()]],
+      recaptchaToken: ['', [Validators.required, noXSSValidator()]],
     });
   }
 
@@ -57,34 +57,23 @@ export class LoginComponent implements AfterViewInit {
       return;
     }
 
-    this.loading = true;
-    this.message = ''; // Limpiar mensajes anteriores
-
     this.authService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        this.loading = false;
 
         if (response.mfaRequired) {
-          // Redirigir a la verificación de MFA con el userId como parámetro de consulta
           this.router.navigate(['/mfa-verification'], {
             queryParams: { userId: response.userId }
           });
         } else {
-          // Inicio de sesión exitoso sin MFA
-          this.message = response.message;
-          this.loginForm.reset(); // Limpiar el formulario
-          this.router.navigate(['/profile']); // Redirigir al perfil
+          this.loginForm.reset();
+          this.router.navigate(['/profile']);
         }
       },
       error: (error) => {
-        this.loading = false;
-
         if (error.error?.message) {
           console.log('Mensaje de error del backend:', error.error.message);
-          this.message = error.error.message;
         } else {
           console.log('Error desconocido');
-          this.message = 'Error en el inicio de sesión. Intenta de nuevo.';
         }
       }
     });
