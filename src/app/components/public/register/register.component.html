@@ -14,11 +14,13 @@
           <input id="name" formControlName="name" type="text"
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="Ingresa tu nombre" />
-          <div *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid"
-            class="text-red-500 text-sm mt-1">
-            <small *ngIf="registerForm.get('name')?.hasError('required')">El nombre es obligatorio.</small>
-            <small *ngIf="registerForm.get('name')?.hasError('minlength')">El nombre debe tener al menos 3
-              caracteres.</small>
+          <div class="text-red-500 text-xs mt-1"
+            *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
+            <span *ngIf="registerForm.get('name')?.hasError('required')">Campo requerido</span>
+            <span *ngIf="registerForm.get('name')?.hasError('minlength')">El nombre debe tener al menos 3
+              caracteres.</span>
+            <span *ngIf="registerForm.get('name')?.hasError('noXSSValidator')">El campo contiene caracteres no
+              permitidos</span>
           </div>
         </div>
 
@@ -27,10 +29,12 @@
           <input id="email" formControlName="email" type="email"
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             placeholder="Ingresa tu correo" />
-          <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid"
-            class="text-red-500 text-sm mt-1">
-            <small *ngIf="registerForm.get('email')?.hasError('required')">El correo es obligatorio.</small>
-            <small *ngIf="registerForm.get('email')?.hasError('email')">El correo no es válido.</small>
+          <div class="text-red-500 text-xs mt-1"
+            *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+            <span *ngIf="registerForm.get('email')?.hasError('required')">El correo es requerido</span>
+            <span *ngIf="registerForm.get('email')?.hasError('email')">Correo no válido</span>
+            <span *ngIf="registerForm.get('email')?.hasError('noXSSValidator')">El campo contiene caracteres no
+              permitidos</span>
           </div>
         </div>
 
