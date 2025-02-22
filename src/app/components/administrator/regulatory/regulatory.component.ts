@@ -19,15 +19,18 @@ export class RegulatoryComponent implements OnInit {
   errorMessage: string = '';
   versionHistory: any[] = [];
   documentData: any = {};
+  file: File | null = null; // Variable para almacenar el archivo seleccionado
+  titleOptions = ['Política de privacidad', 'Términos y condiciones', 'Deslinde legal']; // Opciones para el select
+  currentVersion: any = null; // Variable para almacenar la versión actual
 
   constructor(
     private fb: FormBuilder,
     private regulatoryService: RegulatoryService
   ) {
     this.documentForm = this.fb.group({
-      title: ['', Validators.required],
-      content: ['', Validators.required],
-      effective_date: ['']
+      title: ['', Validators.required], // Select para el título
+      effective_date: ['', Validators.required], // Fecha efectiva
+      file: [null, Validators.required] // Campo para el archivo
     });
   }
 
@@ -68,48 +71,32 @@ export class RegulatoryComponent implements OnInit {
       return;
     }
 
+    // Pedir confirmación antes de eliminar
+    const confirmDelete = confirm('¿Estás seguro de que deseas eliminar esta versión?');
+    if (!confirmDelete) {
+      return; // Si el usuario cancela, no hacer nada
+    }
+
     this.regulatoryService.deleteRegulatoryDocumentVersion(this.documentId, versionId).subscribe({
       next: () => {
-        this.versionHistory = this.versionHistory.filter(v => v.id !== versionId);
+        // Filtrar la versión eliminada del historial
+        this.versionHistory = this.versionHistory.filter(v => v.version_id !== versionId);
         console.log(`Versión ${versionId} eliminada con éxito.`);
+
+        // Actualizar la lista de documentos en la tabla
+        this.getAllCurrentVersions();
+
+        // Si el historial está vacío, cerrar el modal
+        if (this.versionHistory.length === 0) {
+          this.historyModal.close();
+        }
       },
       error: (error) => {
         console.error('Error al eliminar la versión:', error);
       }
     });
   }
-  // Guardar documento (Crear o Actualizar)
-  saveRegulatoryDocument(): void {
-    if (this.documentForm.invalid) {
-      console.log('Por favor, complete todos los campos requeridos.');
-      return;
-    }
-    const formData = this.documentForm.value;
-    if (this.documentId) {
-      this.regulatoryService.updateRegulatoryDocument(this.documentId, formData).subscribe({
-        next: () => {
-          console.log('Documento actualizado exitosamente.');
-          this.getAllCurrentVersions();
-          this.modal.close();
-        },
-        error: (error) => {
-          console.error('Error al actualizar documento:', error);
-        }
-      });
-    } else {
-      this.regulatoryService.createRegulatoryDocument(formData).subscribe({
-        next: () => {
-          console.log('Documento creado exitosamente.');
-          this.getAllCurrentVersions();
-          this.documentForm.reset();
-          this.modal.close();
-        },
-        error: (error) => {
-          console.error('Error al crear documento:', error);
-        }
-      });
-    }
-  }
+
   // Eliminar documento (lógico)
   deleteRegulatoryDocument(documentId: number): void {
     if (!confirm('¿Estás seguro de que deseas eliminar este documento?')) {
@@ -126,6 +113,63 @@ export class RegulatoryComponent implements OnInit {
     });
   }
   
+  // RegulatoryComponent (saveRegulatoryDocument method)
+  saveRegulatoryDocument(): void {
+    if (this.documentForm.invalid) {
+      console.log('Por favor, complete todos los campos requeridos y seleccione un archivo.');
+      return;
+    }
+
+    const formData = this.documentForm.value;
+    const title = formData.title;
+    const effective_date = formData.effective_date;
+    const file = formData.file; // Obtener el archivo desde el FormGroup
+
+    if (this.documentId) {
+      // Lógica para actualizar un documento existente
+      this.regulatoryService.updateRegulatoryDocument(this.documentId, file, effective_date).subscribe({
+        next: () => {
+          console.log('Documento actualizado exitosamente.');
+          this.getAllCurrentVersions(); // Refrescar la lista de documentos
+          this.modal.close(); // Cerrar el modal
+          this.documentForm.reset(); // Reiniciar el formulario
+        },
+        error: (error) => {
+          console.error('Error al actualizar documento:', error);
+        }
+      });
+    } else {
+      // Lógica para crear un nuevo documento
+      this.regulatoryService.createRegulatoryDocument(file, title, effective_date).subscribe({
+        next: () => {
+          console.log('Documento creado exitosamente.');
+          this.getAllCurrentVersions(); // Refrescar la lista de documentos
+          this.documentForm.reset(); // Reiniciar el formulario
+          this.modal.close(); // Cerrar el modal
+        },
+        error: (error) => {
+          console.error('Error al crear documento:', error);
+        }
+      });
+    }
+  }
+
+  // Manejar la selección de archivos
+  onFileChange(event: any): void {
+    const fileList: FileList = event.target.files;
+    if (fileList.length > 0) {
+      const file = fileList[0];
+      if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        this.file = file;
+        this.documentForm.get('file')?.setValue(file); // Actualizar el control 'file' en el FormGroup
+      } else {
+        alert('Por favor, selecciona un archivo .docx válido.');
+        this.file = null;
+        this.documentForm.get('file')?.setValue(null); // Limpiar el control 'file' en el FormGroup
+      }
+    }
+  }
+
   // MODALES
   @ViewChild('historyModal') historyModal!: ModalComponent;
   openHistoryModal(documentId: number): void {
@@ -133,16 +177,30 @@ export class RegulatoryComponent implements OnInit {
     this.historyModal.open();
   }
 
+  @ViewChild('currentVersionModal') currentVersionModal!: ModalComponent;
+  viewCurrentVersion(documentId: number): void {
+    this.currentVersion = null; // Reiniciar la variable
+    this.regulatoryService.getCurrentVersionById(documentId).subscribe({
+      next: (response) => {
+        this.currentVersion = response.DocumentVersions[0]; // Asignar la versión actual
+        this.currentVersionModal.open(); // Abrir el modal
+      },
+      error: (error) => {
+        console.error('Error al obtener la versión vigente:', error);
+      }
+    });
+  }
+
   @ViewChild('modal') modal!: ModalComponent;
   openModal(document?: any) {
     this.documentForm.reset();
     this.successMessage = '';
     this.errorMessage = '';
+    this.file = null; // Reiniciar el archivo seleccionado
     if (document) {
       this.documentId = document.document_id;
       this.documentForm.patchValue({
         title: document.title,
-        content: document.content,
         effective_date: document.effective_date
       });
     } else {
