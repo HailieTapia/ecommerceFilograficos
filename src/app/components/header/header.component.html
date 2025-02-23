@@ -2,7 +2,7 @@
   <!-- Sidebar -->
   <aside  *ngIf="isLoggedIn && userRole === 'administrador'" 
     [ngClass]="{'w-64': sidebarOpen, 'w-20': !sidebarOpen}"
-    class="bg-green-600 text-white min-h-screen p-4 transition-all duration-300"
+    class="bg-gray-100 text-black min-h-screen p-4 transition-all duration-300"
   >
     <div class="p-4 flex items-center justify-between">
       <h2 *ngIf="sidebarOpen" class="font-bold text-xl">Administración</h2>
@@ -123,7 +123,7 @@
     </header>
 
     <!-- Navegación -->
-    <nav *ngIf="!isLoggedIn && isLoggedIn && userRole === 'cliente'" class="bg-gray-100 py-3">
+    <nav *ngIf="!isLoggedIn || (isLoggedIn && userRole === 'cliente')" class="bg-gray-100 py-3 px-6 ">
       <div class="container mx-auto flex justify-between items-center">
         <!-- Categorías principales -->
         <ul class="flex space-x-6 text-gray-700 font-medium">
