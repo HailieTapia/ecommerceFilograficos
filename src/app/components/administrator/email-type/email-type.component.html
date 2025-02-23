@@ -42,7 +42,6 @@
   </div>
 </div>
 
-
 <div *ngIf="!emailTypes || !emailTypes.length">
   <div class="bg-white p-6 rounded-lg shadow-lg">
     <p class="text-center text-gray-500">No hay tipos de correo electrónico activos para mostrar.</p>
@@ -54,14 +53,14 @@
     <div class="grid grid-cols-2 gap-4">
       <div>
         <label for="token" class="block text-sm font-medium text-gray-700">Token</label>
-        <input id="token" formControlName="token" placeholder="Ingrese el token"
+        <input id="token" formControlName="token" placeholder="Ejemplo: WELCOME_EMAIL"
           class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
           required />
       </div>
 
       <div>
         <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
-        <input id="name" formControlName="name" type="text" placeholder="Ingrese el nombre"
+        <input id="name" formControlName="name" type="text" placeholder="Ejemplo: Correo de Bienvenida"
           class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
           required />
       </div>
@@ -69,15 +68,25 @@
 
     <div>
       <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
-      <textarea id="description" formControlName="description" placeholder="Ingrese la descripción (opcional)"
+      <textarea id="description" formControlName="description" placeholder="Ejemplo: Correo enviado a nuevos usuarios"
         class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"></textarea>
     </div>
 
     <div>
       <label for="required_variables" class="block text-sm font-medium text-gray-700">Variables Requeridas</label>
-      <input id="required_variables" formControlName="required_variables" type="text"
-        placeholder="Ingrese las variables separadas por coma" required
-        class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" />
+      <div class="flex gap-2">
+        <input id="required_variables" [formControl]="variableControl" type="text" placeholder="Ejemplo: USER_NAME"
+          class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500" />
+        <button type="button" (click)="addVariable()"
+          class="mt-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          Agregar
+        </button>
+      </div>
+      <div class="mt-2">
+        <div *ngFor="let variable of variablesList" class="inline-block bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full mr-2 mb-2">
+          {{ variable }} <button type="button" (click)="removeVariable(variable)" class="ml-1 text-blue-800 hover:text-blue-900">&times;</button>
+        </div>
+      </div>
     </div>
 
     <!-- Mensajes de éxito o error -->
