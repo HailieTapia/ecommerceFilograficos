@@ -1,11 +1,12 @@
-<div class="flex justify-between items-center p-4 mb-4">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 mb-6 bg-gray-100 shadow-sm">
   <div>
-    <h1 class="text-3xl font-bold">Tipos de Email</h1>
-    <p class="py-2 text-gray-600">Gestiona los tipos de correos electrónicos del sistema</p>
+    <h1 class="text-2xl font-bold text-gray-800">Tipos de Email</h1>
+    <p class="mt-2 text-gray-500">Gestiona los tipos de correos electrónicos del sistema.</p>
   </div>
   <button (click)="openModal()"
-    class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-    Crear Tipo
+    class="mt-4 sm:mt-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+    <i class="fas fa-plus"></i>
+    <span>Crear Tipo</span>
   </button>
 </div>
 
