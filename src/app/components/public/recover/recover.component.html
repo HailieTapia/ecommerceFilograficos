@@ -1,48 +1,51 @@
 <div class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-  <div class="password-recovery-container bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+  <div class="password-recovery-container bg-white rounded-lg shadow-lg p-8 w-full max-w-xl ">
 
-<!-- Progress Steps -->
-<div class="flex justify-center mb-8">
-  <div class="flex items-center space-x-1">
-    <!-- Etapa 1 -->
-    <div [ngClass]="{'bg-green-600': stage === 1, 'bg-gray-300': stage !== 1}"
-      class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
-      1
+    <!-- Progress Steps -->
+    <div class="flex justify-center mb-8">
+      <div class="flex items-center space-x-1">
+        <!-- Etapa 1 -->
+        <div [ngClass]="{'bg-green-600': stage === 1, 'bg-gray-300': stage !== 1}"
+          class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
+          1
+        </div>
+        <div class="w-16 h-1" [ngClass]="{'bg-green-600': stage > 1, 'bg-gray-300': stage <= 1}"></div>
+
+        <!-- Etapa 2 -->
+        <div [ngClass]="{'bg-green-600': stage === 2, 'bg-gray-300': stage !== 2}"
+          class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
+          2
+        </div>
+        <div class="w-16 h-1" [ngClass]="{'bg-green-600': stage > 2, 'bg-gray-300': stage <= 2}"></div>
+
+        <!-- Etapa 3 -->
+        <div [ngClass]="{'bg-green-600': stage === 3, 'bg-gray-300': stage !== 3}"
+          class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
+          3
+        </div>
+      </div>
     </div>
-    <div class="w-16 h-1" [ngClass]="{'bg-green-600': stage > 1, 'bg-gray-300': stage <= 1}"></div>
-
-    <!-- Etapa 2 -->
-    <div [ngClass]="{'bg-green-600': stage === 2, 'bg-gray-300': stage !== 2}"
-      class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
-      2
-    </div>
-    <div class="w-16 h-1" [ngClass]="{'bg-green-600': stage > 2, 'bg-gray-300': stage <= 2}"></div>
-
-    <!-- Etapa 3 -->
-    <div [ngClass]="{'bg-green-600': stage === 3, 'bg-gray-300': stage !== 3}"
-      class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
-      3
-    </div>
-  </div>
-</div>
-
 
     <!-- Etapa 1: Iniciar recuperación -->
     <div *ngIf="stage === 1" class="space-y-6">
       <div class="text-center">
         <h2 class="text-xl font-bold text-gray-800 mb-2">Recuperación de Contraseña</h2>
+        <p class="text-sm text-gray-500">Ingresa tu correo electrónico para verificar tu identidad. Te enviaremos un
+          código de verificación.</p>
       </div>
-
       <form (ngSubmit)="initiateRecovery()" [formGroup]="recoveryForm" class="space-y-4">
         <div class="space-y-2">
           <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-          <input id="email" type="email" placeholder="Correo electrónico" formControlName="email"
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            required>
+          <div class="relative">
+            <input id="email" type="email" placeholder="Correo electrónico" formControlName="email"
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              required>
+            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
         </div>
         <button type="submit" [disabled]="recoveryForm.invalid"
           class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-          Enviar código OTP
+          Enviar código
         </button>
       </form>
     </div>
@@ -50,19 +53,19 @@
     <!-- Etapa 2: Verificar OTP -->
     <div *ngIf="stage === 2" class="space-y-6">
       <div class="text-center">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Verificar Código OTP</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Verificación de código</h2>
+        <p class="text-sm text-gray-500">Introduce el código de 8 dígitos enviado a tu correo electrónico.</p>
       </div>
-
       <form (ngSubmit)="verifyOTP()" [formGroup]="otpForm" class="space-y-4">
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Código OTP</label>
-          <input type="text" placeholder="Código OTP" formControlName="otp"
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center tracking-widest"
+        <div class="flex justify-center space-x-2">
+          <input *ngFor="let i of [0,1,2,3,4,5,6,7]" type="text" maxlength="1" formControlName="otp{{i}}"
+            (input)="moveFocus(i, $event)"
+            class="w-12 h-12 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-lg font-semibold"
             required>
         </div>
         <button type="submit" [disabled]="otpForm.invalid"
           class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-          Verificar OTP
+          Verificar
         </button>
       </form>
     </div>
@@ -74,18 +77,13 @@
       </div>
 
       <form (ngSubmit)="resetPassword()" [formGroup]="resetForm" class="space-y-4">
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
-          <input type="password" placeholder="Nueva contraseña" formControlName="newPassword"
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-            required>
-        </div>
-        <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
-          <input type="password" placeholder="Confirmar contraseña" formControlName="confirmPassword"
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-            required>
-        </div>
+
+
+        <!-- Campo de Contraseña (usando el componente reutilizable) -->
+        <app-password-toggle [control]="resetForm.get('password')" placeholder="Ingresa tu contraseña">
+        </app-password-toggle>
+
+
         <button type="submit"
           [disabled]="resetForm.invalid || resetForm.value.newPassword !== resetForm.value.confirmPassword"
           class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
@@ -95,3 +93,6 @@
     </div>
   </div>
 </div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<app-toast></app-toast>
