@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PasswordService } from '../../services/password.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-recover',
   standalone: true,
@@ -19,7 +19,7 @@ export class RecoverComponent {
   email: string = "";
   recoveryToken: string = "";
 
-  constructor(private fb: FormBuilder, private passwordService: PasswordService) {
+  constructor(private router: Router,private fb: FormBuilder, private passwordService: PasswordService) {
     // Formulario para iniciar la recuperación de contraseña
     this.recoveryForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
@@ -58,7 +58,7 @@ export class RecoverComponent {
   }
 
 
-  //metodo para verificar el codigo otp para recuperacion de contraseña(NO)
+  //metodo para verificar el codigo otp para recuperacion de contraseña
   verifyOTP() {
     if (this.otpForm.invalid) {
       console.error('Por favor ingresa un código OTP válido');
@@ -86,7 +86,7 @@ export class RecoverComponent {
     );
   }
 
-  //metodo para reestablecer una contraseña(NO)
+  //metodo para reestablecer una contraseña
   resetPassword() {
     if (this.resetForm.invalid || this.resetForm.value.newPassword !== this.resetForm.value.confirmPassword) {
       console.error('Las contraseñas no coinciden o son inválidas');
@@ -100,7 +100,7 @@ export class RecoverComponent {
     this.passwordService.resetPassword(credentials).subscribe(
       (response) => {
         console.error('Contraseña restablecida exitosamente');
-        this.stage = 1; // Volver al inicio del proceso
+        this.router.navigate(['login']); 
         this.recoveryForm.reset();
         this.otpForm.reset();
         this.resetForm.reset();

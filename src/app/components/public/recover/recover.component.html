@@ -1,30 +1,97 @@
-<div class="password-recovery-container">
+<div class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="password-recovery-container bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+
+<!-- Progress Steps -->
+<div class="flex justify-center mb-8">
+  <div class="flex items-center space-x-1">
+    <!-- Etapa 1 -->
+    <div [ngClass]="{'bg-green-600': stage === 1, 'bg-gray-300': stage !== 1}"
+      class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
+      1
+    </div>
+    <div class="w-16 h-1" [ngClass]="{'bg-green-600': stage > 1, 'bg-gray-300': stage <= 1}"></div>
+
+    <!-- Etapa 2 -->
+    <div [ngClass]="{'bg-green-600': stage === 2, 'bg-gray-300': stage !== 2}"
+      class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
+      2
+    </div>
+    <div class="w-16 h-1" [ngClass]="{'bg-green-600': stage > 2, 'bg-gray-300': stage <= 2}"></div>
+
+    <!-- Etapa 3 -->
+    <div [ngClass]="{'bg-green-600': stage === 3, 'bg-gray-300': stage !== 3}"
+      class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg transition-all duration-300">
+      3
+    </div>
+  </div>
+</div>
+
+
     <!-- Etapa 1: Iniciar recuperación -->
-    <div *ngIf="stage === 1">
-      <h2>Recuperación de Contraseña</h2>
-      <form [formGroup]="recoveryForm" (ngSubmit)="initiateRecovery()">
-        <input formControlName="email" placeholder="Correo electrónico" type="email" />
-        <button type="submit" [disabled]="recoveryForm.invalid">Enviar código OTP</button>
+    <div *ngIf="stage === 1" class="space-y-6">
+      <div class="text-center">
+        <h2 class="text-xl font-bold text-gray-800 mb-2">Recuperación de Contraseña</h2>
+      </div>
+
+      <form (ngSubmit)="initiateRecovery()" [formGroup]="recoveryForm" class="space-y-4">
+        <div class="space-y-2">
+          <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+          <input id="email" type="email" placeholder="Correo electrónico" formControlName="email"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            required>
+        </div>
+        <button type="submit" [disabled]="recoveryForm.invalid"
+          class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+          Enviar código OTP
+        </button>
       </form>
     </div>
-  
+
     <!-- Etapa 2: Verificar OTP -->
-    <div *ngIf="stage === 2">
-      <h2>Verificar Código OTP</h2>
-      <form [formGroup]="otpForm" (ngSubmit)="verifyOTP()">
-        <input formControlName="otp" placeholder="Código OTP" type="text" />
-        <button type="submit" [disabled]="otpForm.invalid">Verificar OTP</button>
+    <div *ngIf="stage === 2" class="space-y-6">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Verificar Código OTP</h2>
+      </div>
+
+      <form (ngSubmit)="verifyOTP()" [formGroup]="otpForm" class="space-y-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Código OTP</label>
+          <input type="text" placeholder="Código OTP" formControlName="otp"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center tracking-widest"
+            required>
+        </div>
+        <button type="submit" [disabled]="otpForm.invalid"
+          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+          Verificar OTP
+        </button>
       </form>
     </div>
-  
+
     <!-- Etapa 3: Restablecer Contraseña -->
-    <div *ngIf="stage === 3">
-      <h2>Restablecer Contraseña</h2>
-      <form [formGroup]="resetForm" (ngSubmit)="resetPassword()">
-        <input formControlName="newPassword" placeholder="Nueva contraseña" type="password" />
-        <input formControlName="confirmPassword" placeholder="Confirmar contraseña" type="password" />
-        <button type="submit" [disabled]="resetForm.invalid">Restablecer Contraseña</button>
+    <div *ngIf="stage === 3" class="space-y-6">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Restablecer Contraseña</h2>
+      </div>
+
+      <form (ngSubmit)="resetPassword()" [formGroup]="resetForm" class="space-y-4">
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+          <input type="password" placeholder="Nueva contraseña" formControlName="newPassword"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            required>
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
+          <input type="password" placeholder="Confirmar contraseña" formControlName="confirmPassword"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            required>
+        </div>
+        <button type="submit"
+          [disabled]="resetForm.invalid || resetForm.value.newPassword !== resetForm.value.confirmPassword"
+          class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+          Restablecer Contraseña
+        </button>
       </form>
     </div>
   </div>
-  
+</div>
