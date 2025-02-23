@@ -99,6 +99,11 @@ export class AuthService {
     return this.userSubject.asObservable(); // Permite obtener la información del usuario desde otros componentes
   }
 
+  // En el AuthService
+  resetAuthState(): void {
+    localStorage.removeItem('userData'); // Eliminar el usuario del LocalStorage
+    this.userSubject.next(null); // Resetear el estado del usuario
+  }
   // Método para verificar si el usuario está logueado
   isLoggedIn(): boolean {
     return !!localStorage.getItem('userData'); // Verifica si hay un usuario logueado

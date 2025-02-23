@@ -10,7 +10,10 @@ export const errorInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, n
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 400) {
+      if (error.status === 401) {
+        // Redirigir al login sin llamar a logout()
+        router.navigate(['/login']);
+      } else if (error.status === 400) {
         router.navigate(['/400']);
       } else if (error.status === 404) {
         router.navigate(['/404']);
