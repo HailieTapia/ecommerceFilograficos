@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -11,11 +11,11 @@ import { PasswordToggleComponent } from '../../administrator/shared/password-tog
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [PasswordToggleComponent,CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [PasswordToggleComponent, CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent implements OnInit, AfterViewInit {
   loginForm: FormGroup;
   siteKey = environment.recaptchaSiteKey;
 
@@ -29,6 +29,11 @@ export class LoginComponent implements AfterViewInit {
       password: ['', [Validators.required, Validators.minLength(8), noXSSValidator()]],
       recaptchaToken: ['', [Validators.required, noXSSValidator()]],
     });
+  }
+
+  // Limpiar el estado de autenticación al cargar el componente
+  ngOnInit(): void {
+    this.clearAuthState();
   }
 
   // Inicializar reCAPTCHA cuando la vista esté lista
@@ -50,6 +55,11 @@ export class LoginComponent implements AfterViewInit {
   // Almacenar el token del reCAPTCHA
   onCaptchaResolved(token: string) {
     this.loginForm.patchValue({ recaptchaToken: token });
+  }
+
+  // Limpiar el estado de autenticación
+  clearAuthState(): void {
+    this.authService.resetAuthState(); // Llama al método del servicio
   }
 
   onSubmit() {

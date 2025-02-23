@@ -33,18 +33,8 @@ export class SupportInquiryService {
     );
   }
 
-  // Obtener todas las consultas de soporte (requiere autenticación y rol de administrador)
-  getAllConsultations(): Observable<any> {
-    return this.csrfService.getCsrfToken().pipe(
-      switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get(`${this.apiUrl}/`, { headers, withCredentials: true });
-      })
-    );
-  }
-
   // Obtener todas las consultas de soporte con paginación (requiere autenticación y rol de administrador)
-  getAllConsultationsForPagination(page: number = 1, pageSize: number = 10): Observable<any> {
+  getAllConsultations(page: number = 1, pageSize: number = 10): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
@@ -54,7 +44,7 @@ export class SupportInquiryService {
           .set('page', page.toString())
           .set('pageSize', pageSize.toString());
 
-        return this.http.get(`${this.apiUrl}/pagination`, { 
+        return this.http.get(`${this.apiUrl}/`, { 
           headers, 
           params, 
           withCredentials: true 
@@ -63,6 +53,54 @@ export class SupportInquiryService {
     );
   }
 
+  // Obtener consultas filtradas según los parámetros proporcionados
+  getFilteredConsultations(
+    filters: {
+      status?: string;
+      contact_channel?: string;
+      response_channel?: string;
+      startDate?: string;
+      endDate?: string;
+      user_id?: string; // "null" para no registrados, "registered" para registrados
+    },
+    page: number = 1,
+    pageSize: number = 10
+  ): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap((csrfToken) => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+  
+        // Parámetros de filtrado y paginación
+        let params = new HttpParams()
+          .set('page', page.toString()) // Cambiar a 'page'
+          .set('pageSize', pageSize.toString()); // Cambiar a 'pageSize'
+  
+        if (filters.status) {
+          params = params.set('status', filters.status);
+        }
+        if (filters.contact_channel) {
+          params = params.set('contact_channel', filters.contact_channel);
+        }
+        if (filters.response_channel) {
+          params = params.set('response_channel', filters.response_channel);
+        }
+        if (filters.startDate && filters.endDate) {
+          params = params.set('startDate', filters.startDate);
+          params = params.set('endDate', filters.endDate);
+        }
+        if (filters.user_id) {
+          params = params.set('user_id', filters.user_id);
+        }
+  
+        return this.http.get(`${this.apiUrl}/filtered`, {
+          headers,
+          params,
+          withCredentials: true,
+        });
+      })
+    );
+  }
+  
   // Obtener una consulta específica por ID (requiere autenticación)
   getConsultationById(id: string): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
