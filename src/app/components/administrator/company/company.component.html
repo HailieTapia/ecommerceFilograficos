@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto p-4 space-y-6">
     <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-        <i class="fas fa-building text-blue-500"></i> Información de la Empresa
+        <i class="fas fa-building text-green-500"></i> Información de la Empresa
     </h2>
     <form [formGroup]="companyForm" (ngSubmit)="updateCompanyInfo()">
         <!-- Nombre y Slogan -->
@@ -156,7 +156,7 @@
 
         <!-- Botón de Envío -->
         <button type="submit" [disabled]="companyForm.invalid"
-            class="w-full py-3 mt-6 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 transition-all duration-300 flex items-center justify-center gap-2">
+            class="w-full py-3 mt-6 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-400 transition-all duration-300 flex items-center justify-center gap-2">
             Actualizar Información
         </button>
     </form>

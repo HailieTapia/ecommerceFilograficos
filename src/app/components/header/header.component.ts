@@ -15,6 +15,7 @@ export class HeaderComponent implements OnInit {
   userRole: string | null = null;
   isLoggedIn: boolean = false;
   company: any;
+  sidebarOpen = false; // Estado inicial del sidebar (abierto)
 
   logoPreview: string | ArrayBuffer | null = null;
 
@@ -31,6 +32,10 @@ export class HeaderComponent implements OnInit {
         this.isLoggedIn = false;
       }
     });
+  }
+   // Función para alternar el estado del sidebar
+   toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
   }
   // Obtener la información de la empresa
   getCompanyInfo(): void {

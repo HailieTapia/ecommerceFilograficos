@@ -1,0 +1,4 @@
+/* En tu archivo styles.css o styles.scss */
+  .flex-1.collapsed {
+    margin-left: 5rem; /* Ancho del sidebar colapsado */
+  }
