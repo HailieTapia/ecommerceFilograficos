@@ -1,23 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-
+import { ToastComponent } from '../../administrator/shared/toast/toast.component';
+import { ToastService } from '../../services/toastService';
+import { ModalComponent } from '../../../modal/modal.component';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, CommonModule],
+  imports: [ModalComponent, ToastComponent, FormsModule, ReactiveFormsModule, CommonModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
-  userProfile: any;
+  userProfile: any = {};
   addressForm: FormGroup;
   profileForm: FormGroup;
   successMessage: string = '';
   errorMessage: string = '';
+  activeTab: string = 'addresses';
+  addAddressId: number | null = null;
 
   constructor(
+    private toastService: ToastService,
     private userService: UserService,
     private fb: FormBuilder
   ) {
@@ -30,24 +35,29 @@ export class ProfileComponent implements OnInit {
 
     this.profileForm = this.fb.group({
       name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
       phone: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
-    // Llamar al método del servicio para obtener el perfil
+    this.getUserInfo();
+  }
+  // Obtener la información de la empresa
+  getUserInfo(): void {
     this.userService.getProfile().subscribe(
       (profile) => {
         this.userProfile = profile;
-        console.log('Perfil del usuario:', this.userProfile);
+        this.profileForm.patchValue({
+          name: this.userProfile.name,
+          phone: this.userProfile.phone
+        });
       },
       (error) => {
-        console.error('Error al obtener el perfil:', error);
+        const errorMessage = error?.error?.message || 'Error al obtener el perfil';
+        this.toastService.showToast(errorMessage, 'error');
       }
     );
   }
-
   // Método para actualizar el perfil del usuario
   updateProfile(): void {
     if (this.profileForm.invalid) {
@@ -57,12 +67,13 @@ export class ProfileComponent implements OnInit {
 
     this.userService.updateProfile(this.profileForm.value).subscribe(
       (response) => {
-        this.successMessage = 'Perfil actualizado exitosamente.';
-        console.log('Perfil actualizado:', response);
+        const successMessage = response?.message || 'Perfil actualizado exitosamente.';
+        this.toastService.showToast(successMessage, 'success');
+        this.getUserInfo();
       },
       (error) => {
-        this.errorMessage = 'Error al actualizar el perfil.';
-        console.error('Error al actualizar perfil:', error);
+        const errorMessage = error?.error?.message || 'Error al actualizar el perfil';
+        this.toastService.showToast(errorMessage, 'error');
       }
     );
   }
@@ -76,24 +87,70 @@ export class ProfileComponent implements OnInit {
 
     this.userService.addAddress(this.addressForm.value).subscribe(
       (response) => {
-        this.successMessage = 'Dirección agregada exitosamente.';
-        console.log('Dirección agregada:', response);
+        const successMessage = response?.message || 'Dirección agregada exitosamente.';
+        this.toastService.showToast(successMessage, 'success');
+        this.modal.close();  // Cerrar el modal después de agregar
+        this.getUserInfo();
       },
       (error) => {
-        this.errorMessage = 'Error al agregar la dirección.';
-        console.error('Error al agregar dirección:', error);
+        const errorMessage = error?.error?.message || 'Error al agregar la dirección.';
+        this.toastService.showToast(errorMessage, 'error');
       }
     );
   }
 
-  // Método para editar dirección
-  editAddress(): void {
+  // Método para actualizar dirección
+  updateAddress(): void {
+    if (this.addressForm.invalid) {
+      this.errorMessage = 'Por favor, complete todos los campos correctamente.';
+      return;
+    }
+
+    // Empaquetamos la dirección dentro de un objeto 'direccion' como se espera en el servicio
+    const direccion = this.addressForm.value;
+
+    this.userService.updateUserProfile(direccion).subscribe(
+      (response) => {
+        const successMessage = response?.message || 'Dirección actualizada exitosamente.';
+        this.toastService.showToast(successMessage, 'success');
+        this.modal.close();  // Cerrar el modal después de actualizar
+        this.getUserInfo();
+      },
+      (error) => {
+        const errorMessage = error?.error?.message || 'Error al actualizar la dirección.';
+        this.toastService.showToast(errorMessage, 'error');
+      }
+    );
+  }
+
+  // Método para editar dirección (cuando se selecciona una dirección para actualizar)
+  editAddress(address: any): void {
     this.addressForm.patchValue({
-      street: this.userProfile.Addresses[0].street,
-      city: this.userProfile.Addresses[0].city,
-      state: this.userProfile.Addresses[0].state,
-      postal_code: this.userProfile.Addresses[0].postal_code
+      street: address.street,
+      city: address.city,
+      state: address.state,
+      postal_code: address.postal_code
     });
+    this.addAddressId = address.id;  // Si usas un id para diferenciar la dirección
+  }
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
+  }
+  //MODAL
+  @ViewChild('modal') modal!: ModalComponent;
+  openModal(address?: any): void {
+    this.addressForm.reset();
+    this.successMessage = '';
+    this.errorMessage = '';
+  
+    if (address) {
+      this.addAddressId = address.id;  // Asigna el ID de la dirección al valor de addAddressId
+      this.editAddress(address);  // Cargar la dirección para editar
+    } else {
+      this.addAddressId = null;  // Si es nueva, no hay ID, por lo que debería mostrar "Agregar"
+    }
+  
+    this.modal.open();
   }
 }
-
