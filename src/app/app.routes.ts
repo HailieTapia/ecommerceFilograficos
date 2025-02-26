@@ -9,6 +9,11 @@ import { FaqComponent } from './components/public/faq/faq.component';
 import { MfaVerificationComponent } from './components/public/mfa-verification/mfa-verification.component'; 
 import { SupportInquiryComponent} from './components/public/support-inquiry/support-inquiry.component'; 
 
+import { DisclaimerComponent } from './components/public/disclaimer/disclaimer.component'; 
+import { TermsComponent } from './components/public/terms/terms.component'; 
+import { PolicyComponent} from './components/public/policy/policy.component'; 
+
+
 //autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
 
@@ -49,6 +54,9 @@ export const routes: Routes = [
   { path: 'recovery', component: RecoverComponent },
   { path: 'mfa-verification', component: MfaVerificationComponent },
   { path: 'support-inquiry', component: SupportInquiryComponent },
+  { path: 'disclaimer', component: DisclaimerComponent },
+  { path: 'terms', component: TermsComponent },
+  { path: 'policy', component: PolicyComponent },
   { path: '', redirectTo: '/recovery', pathMatch: 'full' },
   
 
