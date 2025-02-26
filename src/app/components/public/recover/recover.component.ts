@@ -4,13 +4,12 @@ import { PasswordService } from '../../services/password.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
 import { ToastComponent } from '../../administrator/shared/toast/toast.component';
 import { ToastService } from '../../services/toastService';
 @Component({
   selector: 'app-recover',
   standalone: true,
-  imports: [ToastComponent, PasswordToggleComponent, CommonModule, ReactiveFormsModule],
+  imports: [ToastComponent, CommonModule, ReactiveFormsModule],
   templateUrl: './recover.component.html',
   styleUrl: './recover.component.css'
 })
@@ -18,7 +17,7 @@ export class RecoverComponent {
   recoveryForm: FormGroup;
   otpForm: FormGroup;
   resetForm: FormGroup;
-  stage: number = 1;
+  stage: number = 3;
   email: string = "";
   recoveryToken: string = "";
 

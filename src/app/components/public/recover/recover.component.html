@@ -71,18 +71,42 @@
     </div>
 
     <!-- Etapa 3: Restablecer Contraseña -->
+    <!-- Etapa 3: Restablecer Contraseña -->
     <div *ngIf="stage === 3" class="space-y-6">
       <div class="text-center">
         <h2 class="text-2xl font-bold text-gray-800 mb-2">Restablecer Contraseña</h2>
+        <p class="text-sm text-gray-500">Ingresa tu nueva contraseña y confírmala para completar el proceso.</p>
       </div>
 
       <form (ngSubmit)="resetPassword()" [formGroup]="resetForm" class="space-y-4">
+        <div class="space-y-2">
+          <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+          <div class="relative">
+            <input id="newPassword" type="password" placeholder="Nueva contraseña" formControlName="newPassword"
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              required>
+            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+          <div *ngIf="resetForm.get('newPassword')?.invalid && resetForm.get('newPassword')?.touched"
+            class="text-red-500 text-sm">
+            La contraseña debe tener al menos 8 caracteres.
+          </div>
+        </div>
 
-
-        <!-- Campo de Contraseña (usando el componente reutilizable) -->
-        <app-password-toggle [control]="resetForm.get('password')" placeholder="Ingresa tu contraseña">
-        </app-password-toggle>
-
+        <div class="space-y-2">
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
+          <div class="relative">
+            <input id="confirmPassword" type="password" placeholder="Confirmar contraseña"
+              formControlName="confirmPassword"
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              required>
+            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+          <div *ngIf="resetForm.get('confirmPassword')?.invalid && resetForm.get('confirmPassword')?.touched"
+            class="text-red-500 text-sm">
+            Las contraseñas no coinciden.
+          </div>
+        </div>
 
         <button type="submit"
           [disabled]="resetForm.invalid || resetForm.value.newPassword !== resetForm.value.confirmPassword"

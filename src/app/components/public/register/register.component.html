@@ -9,11 +9,15 @@
       </div>
 
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <!-- Nombre -->
         <div class="mb-6">
           <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-          <input id="name" formControlName="name" type="text"
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            placeholder="Ingresa tu nombre" />
+          <div class="relative">
+            <input id="name" formControlName="name" type="text"
+              class="mt-1 block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Ingresa tu nombre" />
+            <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
           <div class="text-red-500 text-xs mt-1"
             *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
             <span *ngIf="registerForm.get('name')?.hasError('required')">Campo requerido</span>
@@ -24,11 +28,15 @@
           </div>
         </div>
 
+        <!-- Correo Electrónico -->
         <div class="mb-6">
           <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
-          <input id="email" formControlName="email" type="email"
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            placeholder="Ingresa tu correo" />
+          <div class="relative">
+            <input id="email" formControlName="email" type="email"
+              class="mt-1 block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Ingresa tu correo" />
+            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
           <div class="text-red-500 text-xs mt-1"
             *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
             <span *ngIf="registerForm.get('email')?.hasError('required')">El correo es requerido</span>
@@ -38,28 +46,71 @@
           </div>
         </div>
 
+        <!-- Teléfono -->
         <div class="mb-6">
           <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-          <input id="phone" formControlName="phone" type="text"
-            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            placeholder="Ingresa tu teléfono" />
+          <div class="relative">
+            <input id="phone" formControlName="phone" type="text"
+              class="mt-1 block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Ingresa tu teléfono" />
+            <i class="fas fa-phone-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
           <div *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid"
             class="text-red-500 text-sm mt-1">
             <small *ngIf="registerForm.get('phone')?.hasError('required')">El teléfono es obligatorio.</small>
           </div>
         </div>
 
-        <!-- Campo de Contraseña -->
-        <!-- Campo de Contraseña (usando el componente reutilizable) -->
-        <app-password-toggle [control]="registerForm.get('password')" placeholder="Ingresa tu contraseña">
-        </app-password-toggle>
+        <!-- Contraseña -->
+        <div class="mb-6">
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+          <div class="relative">
+            <input id="password" formControlName="password" [type]="passwordVisible ? 'text' : 'password'"
+              class="mt-1 block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Ingresa tu contraseña" />
+            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <button type="button" (click)="togglePasswordVisibility()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">
+              <i [class]="passwordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          <div class="text-red-500 text-xs mt-1"
+            *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+            <span *ngIf="registerForm.get('password')?.hasError('required')">La contraseña es requerida</span>
+            <span *ngIf="registerForm.get('password')?.hasError('minlength')">La contraseña debe tener al menos 8
+              caracteres</span>
+            <span *ngIf="registerForm.get('password')?.hasError('noXSSValidator')">El campo contiene caracteres no
+              permitidos</span>
+          </div>
+        </div>
 
+        <!-- Confirmar Contraseña -->
+        <div class="mb-6">
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+          <div class="relative">
+            <input id="confirmPassword" formControlName="confirmPassword"
+              [type]="confirmPasswordVisible ? 'text' : 'password'"
+              class="mt-1 block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Confirmar contraseña" />
+            <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <button type="button" (click)="toggleConfirmPasswordVisibility()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">
+              <i [class]="confirmPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+          <div
+            *ngIf="registerForm.get('confirmPassword')?.hasError('mismatch') && registerForm.get('confirmPassword')?.touched"
+            class="text-red-500 text-sm mt-1">
+            Las contraseñas no coinciden.
+          </div>
+        </div>
+
+        <!-- Botón de Registro -->
         <button type="submit"
           class="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none transition-all"
           [disabled]="registerForm.invalid">
-          {{'Registrar' }}
+          Registrar
         </button>
-
       </form>
     </div>
   </div>
