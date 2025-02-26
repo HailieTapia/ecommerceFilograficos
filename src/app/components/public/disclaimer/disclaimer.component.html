@@ -1,1 +1,78 @@
-<p>disclaimer works!</p>
+<main class="flex-grow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="lg:flex lg:gap-8">
+            <!-- Barra lateral con navegación -->
+            <div class="lg:w-1/4">
+                <div class="bg-white shadow-lg rounded-lg p-5 sticky top-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-6">Documentos Legales</h2>
+                    <nav class="space-y-2" aria-label="Navigation">
+                        <a (click)="loadDocument('Política de privacidad')"
+                            [ngClass]="{'bg-blue-50 text-blue-900': selectedDocument === 'Política de privacidad', 'text-gray-600 hover:bg-gray-50 hover:text-gray-900': selectedDocument !== 'Política de privacidad'}"
+                            class="cursor-pointer flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200">
+                            <i class="fas fa-shield-alt w-5 h-5 mr-3 text-blue-500"></i>
+                            <span>Política de Privacidad</span>
+                        </a>
+
+                        <a (click)="loadDocument('Términos y condiciones')"
+                            [ngClass]="{'bg-blue-50 text-blue-900': selectedDocument === 'Términos y condiciones', 'text-gray-600 hover:bg-gray-50 hover:text-gray-900': selectedDocument !== 'Términos y condiciones'}"
+                            class="cursor-pointer flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200">
+                            <i class="fas fa-file-contract w-5 h-5 mr-3 text-blue-500"></i>
+                            <span>Términos y Condiciones</span>
+                        </a>
+
+                        <a (click)="loadDocument('Deslinde legal')"
+                            [ngClass]="{'bg-blue-50 text-blue-900': selectedDocument === 'Deslinde legal', 'text-gray-600 hover:bg-gray-50 hover:text-gray-900': selectedDocument !== 'Deslinde legal'}"
+                            class="cursor-pointer flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200">
+                            <i class="fas fa-gavel w-5 h-5 mr-3 text-blue-500"></i>
+                            <span>Deslinde Legal</span>
+                        </a>
+                    </nav>
+
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-500 mb-4">¿Necesitas ayuda?</h3>
+                        <div class="space-y-3">
+                            <a href="https://wa.me/7711983714"
+                                class="text-gray-600 hover:text-blue-600 flex items-center text-sm transition-all duration-200">
+                                <i class="fab fa-whatsapp text-lg mr-3 text-blue-500"></i>
+                                <span>Contáctanos por WhatsApp</span>
+                            </a>
+                            <a href="mailto:htapiahailie@gmail.com"
+                                class="text-gray-600 hover:text-blue-600 flex items-center text-sm transition-all duration-200">
+                                <i class="fas fa-envelope text-lg mr-3 text-blue-500"></i>
+                                <span>Envíanos un correo</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido del documento legal seleccionado -->
+            <div class="lg:w-3/4 mt-6 lg:mt-0">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <!-- Encabezado del documento -->
+                    <div class="border-b border-gray-200 bg-gray-50 px-8 py-6 flex items-center justify-between">
+                        <div *ngIf="documentVersion || effectiveDate || updatedAt">
+                            <h1 class="text-2xl font-bold text-gray-900">{{ documentTitle }}</h1>
+                            <p class="mt-2 text-sm text-gray-500">Versión {{ documentVersion }} • Vigente hasta:
+                                <time>{{ effectiveDate }}</time>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Contenido del documento -->
+                    <div class="px-8 py-8 prose max-w-none">
+                        <section id="seccion1" class="mb-8">
+                            <p class="text-gray-700 leading-relaxed" [innerHTML]="documentContent"></p>
+                        </section>
+                    </div>
+
+                    <div class="bg-gray-50 px-8 py-6 border-t border-gray-200">
+                        <div class="flex flex-col sm:flex-row justify-between items-center">
+                            <p class="text-sm text-gray-500">Última actualización: <time>{{ updatedAt }}</time></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
