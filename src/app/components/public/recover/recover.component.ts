@@ -17,9 +17,11 @@ export class RecoverComponent {
   recoveryForm: FormGroup;
   otpForm: FormGroup;
   resetForm: FormGroup;
-  stage: number = 3;
+  stage: number = 1;
   email: string = "";
   recoveryToken: string = "";
+  passwordVisible = false; 
+  confirmPasswordVisible = false; 
 
   constructor(private toastService: ToastService, private router: Router, private fb: FormBuilder, private passwordService: PasswordService) {
     this.recoveryForm = this.fb.group({
@@ -40,6 +42,15 @@ export class RecoverComponent {
       confirmPassword: ['', [Validators.required, Validators.minLength(8)]]
     });
   }
+  // Método para alternar la visibilidad de la contraseña
+  togglePasswordVisibility() {
+    this.passwordVisible = !this.passwordVisible;
+  }
+
+  // Método para alternar la visibilidad de la confirmación de la contraseña
+  toggleConfirmPasswordVisibility() {
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;
+  }
   // Método para iniciar el proceso de recuperación de contraseña
   initiateRecovery() {
     if (this.recoveryForm.invalid) {
@@ -52,7 +63,7 @@ export class RecoverComponent {
         this.toastService.showToast(successMessage, 'success');
 
         this.email = this.recoveryForm.value.email;
-        this.stage = 2; 
+        this.stage = 2;
       },
       (error) => {
         const errorMessage = error?.error?.message || 'Error al iniciar el proceso de recuperación';

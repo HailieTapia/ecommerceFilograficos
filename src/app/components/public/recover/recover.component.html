@@ -71,7 +71,6 @@
     </div>
 
     <!-- Etapa 3: Restablecer Contraseña -->
-    <!-- Etapa 3: Restablecer Contraseña -->
     <div *ngIf="stage === 3" class="space-y-6">
       <div class="text-center">
         <h2 class="text-2xl font-bold text-gray-800 mb-2">Restablecer Contraseña</h2>
@@ -82,13 +81,17 @@
         <div class="space-y-2">
           <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
           <div class="relative">
-            <input id="newPassword" type="password" placeholder="Nueva contraseña" formControlName="newPassword"
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+            <input id="newPassword" type="password" placeholder="Nueva contraseña" formControlName="newPassword" [type]="passwordVisible ? 'text' : 'password'"
+              class="mt-1 block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               required>
             <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <button type="button" (click)="togglePasswordVisibility()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">
+              <i [class]="passwordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
           </div>
           <div *ngIf="resetForm.get('newPassword')?.invalid && resetForm.get('newPassword')?.touched"
-            class="text-red-500 text-sm">
+            class="text-red-500 text-sm mt-1">
             La contraseña debe tener al menos 8 caracteres.
           </div>
         </div>
@@ -97,13 +100,17 @@
           <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
           <div class="relative">
             <input id="confirmPassword" type="password" placeholder="Confirmar contraseña"
-              formControlName="confirmPassword"
-              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              formControlName="confirmPassword"       [type]="confirmPasswordVisible ? 'text' : 'password'"
+              class="mt-1 block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               required>
             <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            <button type="button" (click)="toggleConfirmPasswordVisibility()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none">
+              <i [class]="confirmPasswordVisible ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
           </div>
           <div *ngIf="resetForm.get('confirmPassword')?.invalid && resetForm.get('confirmPassword')?.touched"
-            class="text-red-500 text-sm">
+            class="text-red-500 text-sm mt-1">
             Las contraseñas no coinciden.
           </div>
         </div>
