@@ -1,0 +1,77 @@
+<div class="bg-white shadow-md rounded-lg p-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-4 flex justify-between items-center">
+        Mis Direcciones
+        <button (click)="openModal()"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ml-auto">
+            <i class="fas fa-plus mr-2"></i> Agregar dirección
+        </button>
+    </h2>
+
+    <!-- Lista de direcciones -->
+    <div *ngIf="userProfile?.Addresses?.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div *ngFor="let address of userProfile.Addresses"
+            class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div class="flex justify-between">
+                <h3 class="text-md font-medium">{{ address.alias || 'Dirección' }}</h3>
+                <span *ngIf="address.isPrimary"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Principal
+                </span>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">
+                {{ address.street }}<br>
+                {{ address.city }}, {{ address.state }}<br>
+                {{ address.postal_code }}
+            </p>
+            <div class="mt-4 flex space-x-3">
+                <button (click)="openModal(address)"
+                    class="text-sm text-indigo-600 hover:text-indigo-800">Editar</button>
+                <button class="text-sm text-gray-500 hover:text-gray-700">Eliminar</button>
+                <button *ngIf="!address.isPrimary" class="text-sm text-indigo-600 hover:text-indigo-800">Hacer
+                    principal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Si no hay direcciones registradas -->
+    <div *ngIf="userProfile?.Addresses?.length === 0" class="text-center text-gray-500">
+        <p>No tienes una dirección registrada.</p>
+    </div>
+</div>
+
+<app-toast></app-toast>
+
+<app-modal #modal title="Agregar dirección">
+    <form [formGroup]="addressForm" (ngSubmit)="addAddress()" class="grid grid-cols-2 gap-4">
+        <div>
+            <label for="street" class="block text-sm font-medium text-gray-700">Calle</label>
+            <input id="street" formControlName="street" type="text" placeholder="Ingrese la calle"
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                required />
+        </div>
+        <div>
+            <label for="city" class="block text-sm font-medium text-gray-700">Ciudad</label>
+            <input id="city" formControlName="city" type="text" placeholder="Ingrese la ciudad"
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                required />
+        </div>
+        <div>
+            <label for="state" class="block text-sm font-medium text-gray-700">Estado</label>
+            <input id="state" formControlName="state" type="text" placeholder="Ingrese el estado"
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                required />
+        </div>
+        <div>
+            <label for="postal_code" class="block text-sm font-medium text-gray-700">Codigo postal</label>
+            <input id="postal_code" formControlName="postal_code" type="text" placeholder="Ingrese el codigo postal"
+                class="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                required />
+        </div>
+        <div class="col-span-2 flex justify-center">
+            <button type="submit" [disabled]="addressForm.invalid"
+                class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300">
+                {{ addAddressId ? 'Actualizar' : 'Agregar' }}
+            </button>
+        </div>
+    </form>
+</app-modal>

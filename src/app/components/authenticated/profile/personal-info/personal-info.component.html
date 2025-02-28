@@ -1,0 +1,33 @@
+<div class="bg-white shadow-md rounded-lg p-6">
+    <h2 class="text-lg font-medium text-gray-900 mb-4">Información Personal</h2>
+    <form [formGroup]="profileForm">
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            <!-- Nombre -->
+            <div class="sm:col-span-3">
+                <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" formControlName="name"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border" />
+            </div>
+
+            <!-- Correo electrónico -->
+            <div class="sm:col-span-6">
+                <label for="email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
+                <p class="mt-1 text-sm text-gray-500">{{ userProfile.email }}</p>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="sm:col-span-3">
+                <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
+                <input type="tel" formControlName="phone"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border" />
+            </div>
+        </div>
+        <!-- Botones de acción -->
+        <div class="mt-6 flex justify-end">
+            <button (click)="updateProfile()"
+                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Guardar cambios
+            </button>
+        </div>
+    </form>
+</div>
