@@ -31,33 +31,33 @@ import { ServerErrorComponent } from './components/errors/server-error/server-er
 
 export const routes: Routes = [
 
-  //administrador
-  { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'security', component: SecurityComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'type', component: EmailTypeComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'template', component: EmailTemplateComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'regulatory', component: RegulatoryComponent, canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'faq-categories', component: FaqCategoriesComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'faqs', component: FaqComponentAdmin , canActivate: [AuthGuard], data: { role: 'administrador' } },
-  { path: 'support-panel', component: SupportPanelComponent , canActivate: [AuthGuard], data: { role: 'administrador' } },
+  // Administrador
+  { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Empresa' } },
+  { path: 'security', component: SecurityComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Seguridad' } },
+  { path: 'type', component: EmailTypeComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Tipos de Correo' } },
+  { path: 'template', component: EmailTemplateComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Plantillas' } },
+  { path: 'regulatory', component: RegulatoryComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Regulatorio' } },
+  { path: 'faq-categories', component: FaqCategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Categorías FAQ' } },
+  { path: 'faqs', component: FaqComponentAdmin, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'FAQ (Admin)' } },
+  { path: 'support-panel', component: SupportPanelComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Panel de Soporte' } },
 
-  //autenticados
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },
+  // Autenticados
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
 
-  //publicos
-  { path: 'register', component: RegisterComponent },
-  { path: 'faq', component: FaqComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'recovery', component: RecoverComponent },
-  { path: 'mfa-verification', component: MfaVerificationComponent },
-  { path: 'support-inquiry', component: SupportInquiryComponent },
-  { path: 'legal', component: LegalComponent },
-  { path: '', redirectTo: '/recovery', pathMatch: 'full' },
+  // Públicos
+  { path: 'register', component: RegisterComponent, data: { breadcrumb: 'Registrar' } },
+  { path: 'faq', component: FaqComponent, data: { breadcrumb: 'FAQ' } },
+  { path: 'login', component: LoginComponent, data: { breadcrumb: 'Iniciar sesión' } },
+  { path: 'recovery', component: RecoverComponent, data: { breadcrumb: 'Recuperar cuenta' } },
+  { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },
+  { path: 'support-inquiry', component: SupportInquiryComponent, data: { breadcrumb: 'Consulta Soporte' } },
+  { path: 'legal', component: LegalComponent, data: { breadcrumb: 'Legal' } },
   
+  // Rutas de error
+  { path: '400', component: BadRequestComponent, data: { breadcrumb: 'Solicitud incorrecta' } },
+  { path: '404', component: NotFoundComponent, data: { breadcrumb: 'Página no encontrada' } },
+  { path: '500', component: ServerErrorComponent, data: { breadcrumb: 'Error de servidor' } },
 
-  { path: '400', component: BadRequestComponent },
-  { path: '404', component: NotFoundComponent },
-  { path: '500', component: ServerErrorComponent },
   // Ruta comodín para otros errores 404
-  { path: '**', component: NotFoundComponent },
+  { path: '**', component: NotFoundComponent, data: { breadcrumb: 'Página no encontrada' } },
 ];
