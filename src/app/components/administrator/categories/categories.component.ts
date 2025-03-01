@@ -3,20 +3,20 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { CategorieService } from '../../services/categorieService';
 import { ModalComponent } from '../../../modal/modal.component';
 import { CommonModule } from '@angular/common';
-
+import { PaginationComponent } from '../pagination/pagination.component';
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [CommonModule, ModalComponent, ReactiveFormsModule],
+  imports: [PaginationComponent, CommonModule, ModalComponent, ReactiveFormsModule],
   templateUrl: './categories.component.html',
   styleUrl: './categories.component.css'
 })
 export class CategoriesComponent implements OnInit, AfterViewInit {
   @ViewChild('modal') modal!: ModalComponent;
   categories: any[] = [];
-  total: number = 0; // Total de categorías
-  page: number = 1; // Página actual
-  pageSize: number = 10; // Tamaño de página
+  total: number = 0;
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
   categoryForm!: FormGroup;
   selectedCategoryId: number | null = null;
 
@@ -36,14 +36,14 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       console.error("El modal no está inicializado correctamente.");
     }
   }
-
+  //traer por paginacion 
   getAllCategories(): void {
-    this.categoriesService.getAllCategories(this.page, this.pageSize).subscribe({
+    this.categoriesService.getAllCategories(this.currentPage, this.itemsPerPage).subscribe({
       next: (data) => {
-        this.categories = data.categories; // Ajustado para la nueva estructura
+        this.categories = data.categories;
         this.total = data.total;
-        this.page = data.page;
-        this.pageSize = data.pageSize;
+        this.currentPage = data.page;
+        this.itemsPerPage = data.pageSize;
       },
       error: (err) => {
         console.error('Error al obtener categorías:', err);
@@ -51,23 +51,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Métodos de navegación para paginación
-  nextPage(): void {
-    if (this.page * this.pageSize < this.total) {
-      this.page++;
-      this.getAllCategories();
-    }
-  }
-
-  previousPage(): void {
-    if (this.page > 1) {
-      this.page--;
-      this.getAllCategories();
-    }
-  }
-
-  totalPages(): number {
-    return Math.ceil(this.total / this.pageSize);
+  // Maneja el cambio de página desde PaginationComponent
+  onPageChange(newPage: number): void {
+    this.currentPage = newPage;
+    this.getAllCategories();
   }
 
   // Métodos existentes sin cambios
@@ -76,7 +63,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     this.categoryForm.reset();
     this.modal.open();
   }
-
+  //abrir modal
   openEditModal(categoryId: number): void {
     this.selectedCategoryId = categoryId;
     this.categoriesService.getCategoryById(categoryId).subscribe({
@@ -93,15 +80,13 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
+  //envir guardado-actualizar
   saveCategory(): void {
     if (this.categoryForm.invalid) {
       alert('Formulario inválido. Revisa los campos.');
       return;
     }
-
     const categoryData = this.categoryForm.value;
-
     if (this.selectedCategoryId) {
       this.categoriesService.updateCategory(this.selectedCategoryId, categoryData).subscribe({
         next: () => {
@@ -126,10 +111,9 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       });
     }
   }
-
+  //eliminar categoria logicamente
   deleteCategory(categoryId: number): void {
     if (!confirm('¿Estás seguro de que deseas desactivar esta categoría?')) return;
-
     this.categoriesService.deleteCategory(categoryId).subscribe({
       next: () => {
         alert('Categoría desactivada exitosamente');

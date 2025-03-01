@@ -1,8 +1,7 @@
 <div class="container mx-auto p-6">
   <h1 class="text-3xl font-semibold text-gray-800 mb-6">Gestión de Categorías</h1>
 
-  <button (click)="openCreateModal()"
-          class="mb-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+  <button (click)="openCreateModal()" class="mb-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
     + Agregar Categoría
   </button>
 
@@ -26,11 +25,11 @@
               <td class="border border-gray-300 px-4 py-2">{{ category.description }}</td>
               <td class="border border-gray-300 px-4 py-2 text-center space-x-2">
                 <button (click)="openEditModal(category.category_id)"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                   Editar
                 </button>
                 <button (click)="deleteCategory(category.category_id)"
-                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                  class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
                   Eliminar
                 </button>
               </td>
@@ -39,23 +38,8 @@
         </table>
       </div>
 
-      <!-- Controles de paginación -->
-      <div class="mt-4 flex justify-between items-center text-gray-700">
-        <div>
-          <p>Total de categorías: {{ total }}</p>
-        </div>
-        <div class="flex space-x-2">
-          <button (click)="previousPage()" [disabled]="page === 1"
-                  class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400">
-            Anterior
-          </button>
-          <span class="self-center">Página {{ page }} de {{ totalPages() }}</span>
-          <button (click)="nextPage()" [disabled]="page * pageSize >= total"
-                  class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400">
-            Siguiente
-          </button>
-        </div>
-      </div>
+      <app-pagination [currentPage]="currentPage" [totalItems]="total" [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)"></app-pagination>
     </div>
     <ng-template #noCategories>
       <p class="text-gray-500">No hay categorías registradas.</p>
@@ -65,15 +49,24 @@
 
 <!-- Modal para Crear/Editar Categoría -->
 <app-modal #modal title="{{ selectedCategoryId ? 'Editar Categoría' : 'Nueva Categoría' }}">
-  <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="p-6">
-    <label class="block text-gray-700 font-semibold mb-1">Nombre</label>
-    <input formControlName="name" type="text" required class="input-field">
+  <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="p-6 space-y-4">
 
-    <label class="block text-gray-700 font-semibold mb-1">Descripción</label>
-    <textarea formControlName="description" class="input-field"></textarea>
+    <div>
+      <label class="block text-gray-800 font-medium mb-2">Nombre</label>
+      <input formControlName="name" type="text" required
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+    </div>
 
-    <button type="submit" class="btn-primary mt-4">
+    <div>
+      <label class="block text-gray-800 font-medium mb-2">Descripción</label>
+      <textarea formControlName="description" rows="3"
+        class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
+    </div>
+
+    <button type="submit"
+      class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
       {{ selectedCategoryId ? 'Actualizar' : 'Crear' }}
     </button>
+
   </form>
 </app-modal>
