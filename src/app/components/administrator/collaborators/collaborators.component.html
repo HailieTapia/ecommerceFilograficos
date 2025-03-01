@@ -1,0 +1,42 @@
+<div class="collaborators-container">
+    <h2>Crear Colaborador</h2>
+    
+    <form (ngSubmit)="createCollaborator()">
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" [(ngModel)]="newCollaborator.name" name="name" required>
+  
+      <label for="collaborator_type">Tipo de Colaborador:</label>
+      <select id="collaborator_type" [(ngModel)]="newCollaborator.collaborator_type" name="collaborator_type" required>
+        <option value="individual">Individual</option>
+        <option value="marca">Marca</option>
+      </select>
+  
+      <label for="email">Correo electrónico:</label>
+      <input type="email" id="email" [(ngModel)]="newCollaborator.email" name="email" required>
+  
+      <label for="phone">Teléfono (opcional):</label>
+      <input type="text" id="phone" [(ngModel)]="newCollaborator.phone" name="phone">
+  
+      <label for="logo">Logo (opcional):</label>
+      <input type="text" id="logo" [(ngModel)]="newCollaborator.logo" name="logo">
+  
+      <button type="submit" [disabled]="!newCollaborator.name || !newCollaborator.collaborator_type || !newCollaborator.email">Crear Colaborador</button>
+    </form>
+  </div>
+  
+  <div class="collaborators-container">
+    <h2>Colaborador Detalles</h2>
+  
+    <div *ngIf="collaborator; else loading">
+      <p><strong>Nombre:</strong> {{ collaborator.name }}</p>
+      <p><strong>Tipo de Colaborador:</strong> {{ collaborator.collaborator_type }}</p>
+      <p><strong>Correo electrónico:</strong> {{ collaborator.email }}</p>
+      <p><strong>Teléfono:</strong> {{ collaborator.phone || 'No disponible' }}</p>
+      <p><strong>Logo:</strong> <img [src]="collaborator.logo" alt="Logo" *ngIf="collaborator.logo"></p>
+    </div>
+  
+    <ng-template #loading>
+      <p>Cargando datos del colaborador...</p>
+    </ng-template>
+  </div>
+  
