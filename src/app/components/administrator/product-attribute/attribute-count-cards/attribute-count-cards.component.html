@@ -1,0 +1,12 @@
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let category of categoryCounts" 
+        (click)="selectCategory(category)"
+        class="p-4 hover:bg-gray-50 cursor-pointer flex items-center justify-between transition-all duration-200"
+        [ngClass]="{'bg-indigo-50 border-l-4 border-indigo-600': category.categoryId === selectedCategoryId}">
+    <div>
+        <h4 class="font-medium text-gray-800">{{ category.name }}</h4>
+        <p class="text-sm text-gray-500">{{ category.attributeCount }} atributos</p>
+    </div>
+    <i class="fas fa-chevron-right text-gray-400"></i>
+    </div>
+</div>
