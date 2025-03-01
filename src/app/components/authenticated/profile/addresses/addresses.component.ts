@@ -15,7 +15,6 @@ import { ModalComponent } from '../../../../modal/modal.component';
 export class AddressesComponent  implements OnInit {
     userProfile: any = {};
     addressForm: FormGroup;
-    profileForm: FormGroup;
     successMessage: string = '';
     errorMessage: string = '';
 
@@ -31,11 +30,6 @@ export class AddressesComponent  implements OnInit {
         city: ['', Validators.required],
         state: ['', Validators.required],
         postal_code: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]]
-      });
-  
-      this.profileForm = this.fb.group({
-        name: ['', Validators.required],
-        phone: ['', Validators.required]
       });
     }
   

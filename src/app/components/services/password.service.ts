@@ -19,7 +19,7 @@ export class PasswordService {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post(`${this.apiUrl}/password/change-password`, data, { headers, withCredentials: true });
+        return this.http.put(`${this.apiUrl}/password/change-password`, data, { headers, withCredentials: true });
       })
     );
   }

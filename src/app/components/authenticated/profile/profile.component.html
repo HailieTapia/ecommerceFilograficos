@@ -36,6 +36,11 @@
         (click)="setActiveTab('addresses')">
         Direcciones
       </button>
+      <button class="relative py-4 px-6 text-gray-600 font-semibold hover:text-indigo-600 transition"
+        [ngClass]="{ 'text-indigo-600 border-b-2 border-indigo-600': activeTab === 'password' }"
+        (click)="setActiveTab('password')">
+        Cambio de Contraseña
+      </button>
     </nav>
   </div>
 
@@ -47,6 +52,7 @@
       <div>
         <app-personal-info *ngIf="activeTab === 'info'" [userProfile]="userProfile"></app-personal-info>
         <app-addresses *ngIf="activeTab === 'addresses'"></app-addresses>
+        <app-change-password *ngIf="activeTab === 'password'"></app-change-password>
       </div>
     </div>
 
@@ -86,7 +92,7 @@
             </div>
             <i class="fas fa-chevron-right text-gray-400"></i>
           </button>
-          <button
+          <button (click)="deleteAccount()" 
             class="flex w-full items-center justify-between px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md">
             <div class="flex items-center">
               <i class="fas fa-trash-alt mr-3"></i>
