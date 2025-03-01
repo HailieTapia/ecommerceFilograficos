@@ -43,13 +43,16 @@
         <span *ngIf="sidebarOpen">Regulaciones</span>
       </a>
       <a routerLink="/collaborators" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-balance-scale mr-2"></i>
-        <span *ngIf="sidebarOpen">Colaboladores</span>
+        <i class="fas fa-users mr-2"></i>
+        <span *ngIf="sidebarOpen">Colaboradores</span>
       </a>
-      <a
-        routerLink="/product-attributes"
-        class="flex items-center p-2 hover:bg-gray-700 rounded"
-      >
+
+      <a routerLink="/category" class="flex items-center p-2 hover:bg-gray-700 rounded">
+        <i class="fas fa-tags mr-2"></i>
+        <span *ngIf="sidebarOpen">Categorías</span>
+      </a>
+
+      <a routerLink="/product-attributes" class="flex items-center p-2 hover:bg-gray-700 rounded">
         <i class="fas fa-list mr-2"></i>
         <span *ngIf="sidebarOpen">Atributos de productos</span>
       </a>
