@@ -24,6 +24,7 @@ import { FaqCategoriesComponent } from './components/administrator/faq-categorie
 import { FaqComponentAdmin } from './components/administrator/faq/faq.component';
 import { SupportPanelComponent } from './components/administrator/support-panel/support-panel.component';
 import { ProductAttributeComponent } from './components/administrator/product-attribute/product-attribute.component';
+import { CollaboratorsComponent } from './components/administrator/collaborators/collaborators.component';
 
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -42,6 +43,7 @@ export const routes: Routes = [
   { path: 'faqs', component: FaqComponentAdmin, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'FAQ (Admin)' } },
   { path: 'support-panel', component: SupportPanelComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Panel de Soporte' } },
   { path: 'product-attributes', component: ProductAttributeComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Atributos de productos' } },
+  { path: 'collaborators', component: CollaboratorsComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Colaboradores' } },
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
