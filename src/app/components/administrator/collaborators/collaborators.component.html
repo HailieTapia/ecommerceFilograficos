@@ -1,42 +1,109 @@
-<div class="collaborators-container">
-    <h2>Crear Colaborador</h2>
-    
-    <form (ngSubmit)="createCollaborator()">
-      <label for="name">Nombre:</label>
-      <input type="text" id="name" [(ngModel)]="newCollaborator.name" name="name" required>
-  
-      <label for="collaborator_type">Tipo de Colaborador:</label>
-      <select id="collaborator_type" [(ngModel)]="newCollaborator.collaborator_type" name="collaborator_type" required>
-        <option value="individual">Individual</option>
-        <option value="marca">Marca</option>
-      </select>
-  
-      <label for="email">Correo electrónico:</label>
-      <input type="email" id="email" [(ngModel)]="newCollaborator.email" name="email" required>
-  
-      <label for="phone">Teléfono (opcional):</label>
-      <input type="text" id="phone" [(ngModel)]="newCollaborator.phone" name="phone">
-  
-      <label for="logo">Logo (opcional):</label>
-      <input type="text" id="logo" [(ngModel)]="newCollaborator.logo" name="logo">
-  
-      <button type="submit" [disabled]="!newCollaborator.name || !newCollaborator.collaborator_type || !newCollaborator.email">Crear Colaborador</button>
-    </form>
-  </div>
-  
-  <div class="collaborators-container">
-    <h2>Colaborador Detalles</h2>
-  
-    <div *ngIf="collaborator; else loading">
-      <p><strong>Nombre:</strong> {{ collaborator.name }}</p>
-      <p><strong>Tipo de Colaborador:</strong> {{ collaborator.collaborator_type }}</p>
-      <p><strong>Correo electrónico:</strong> {{ collaborator.email }}</p>
-      <p><strong>Teléfono:</strong> {{ collaborator.phone || 'No disponible' }}</p>
-      <p><strong>Logo:</strong> <img [src]="collaborator.logo" alt="Logo" *ngIf="collaborator.logo"></p>
+<div class="container mx-auto p-6">
+    <!-- Encabezado -->
+    <h1 class="text-3xl font-semibold text-gray-800 mb-6">Gestión de Colaboradores</h1>
+
+    <!-- Botón para abrir el modal -->
+    <button (click)="openModal()" class="mb-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+        + Agregar Colaborador
+    </button>
+
+    <!-- 🔹 Lista de Colaboradores en Tabla -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Lista de Colaboradores</h2>
+        <div *ngIf="collaborators.length > 0; else noCollaborators">
+            <div class="overflow-x-auto">
+                <table class="min-w-full border-collapse border border-gray-300">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="border border-gray-300 px-4 py-2 text-left">ID</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Nombre</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Email</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Tipo</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Contacto</th>
+                            <th class="border border-gray-300 px-4 py-2 text-left">Teléfono</th>
+                            <th class="border border-gray-300 px-4 py-2 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let collaborator of collaborators" class="hover:bg-gray-100">
+                            <td class="border border-gray-300 px-4 py-2">{{ collaborator.collaborator_id }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ collaborator.name }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ collaborator.email }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ collaborator.collaborator_type }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ collaborator.contact }}</td>
+                            <td class="border border-gray-300 px-4 py-2">{{ collaborator.phone }}</td>
+                            <td class="border border-gray-300 px-4 py-2 text-center">
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    Ver Detalles
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <ng-template #noCollaborators>
+            <p class="text-gray-500">No hay colaboradores registrados.</p>
+        </ng-template>
     </div>
-  
-    <ng-template #loading>
-      <p>Cargando datos del colaborador...</p>
-    </ng-template>
-  </div>
-  
+</div>
+<app-modal #modal title="Nuevo Colaborador">
+    <form [formGroup]="collaboratorNew" (ngSubmit)="createCollaborator()" class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Nombre -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Nombre</label>
+                <input formControlName="name" type="text" required
+                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Tipo de Colaborador -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Tipo</label>
+                <select formControlName="collaborator_type" required
+                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="individual">Individual</option>
+                    <option value="marca">Marca</option>
+                </select>
+            </div>
+
+            <!-- Correo -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Correo</label>
+                <input formControlName="email" type="email" required
+                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Teléfono</label>
+                <input formControlName="phone" type="text"
+                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Logo -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Logo (URL)</label>
+                <input formControlName="logo" type="text"
+                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Contacto -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Contacto</label>
+                <input formControlName="contact" type="text"
+                    class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+        </div>
+
+        <!-- Botón de Crear -->
+        <div class="flex justify-end mt-6">
+            <button type="submit"
+                class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition-all duration-300">
+                Crear Colaborador
+            </button>
+        </div>
+    </form>
+</app-modal>

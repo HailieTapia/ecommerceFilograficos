@@ -1,79 +1,78 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators ,ReactiveFormsModule} from '@angular/forms';
 import { CollaboratorsService } from '../../services/collaborators.service';
-import { FormsModule } from '@angular/forms'; 
+import { ModalComponent } from '../../../modal/modal.component';
 import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-collaborators',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule,ModalComponent,ReactiveFormsModule],
   templateUrl: './collaborators.component.html',
   styleUrl: './collaborators.component.css'
 })
-export class CollaboratorsComponent implements OnInit {
-  collaborator: any; // Variable para almacenar el colaborador
-  collaboratorId: number = 1; // ID del colaborador que deseas obtener (puedes modificarlo según el caso)
+export class CollaboratorsComponent implements OnInit, AfterViewInit {
+  @ViewChild('modal') modal!: ModalComponent; 
 
-  newCollaborator = {
-    name: '',
-    collaborator_type: '',
-    email: '',
-    phone: '',
-    logo: ''
-  };
-  constructor(private collaboratorsService: CollaboratorsService) { }
-  ngOnInit(): void {
-    this.getCollaboratorById(this.collaboratorId);
-  }
+  collaborators: any[] = []; 
+  collaboratorNew!: FormGroup;
 
-  // Obtener colaborador por ID
-  getCollaboratorById(id: number): void {
-    this.collaboratorsService.getCollaboratorById(id).subscribe({
-      next: (data) => {
-        console.log('Colaborador encontrado:', data);
-        this.collaborator = data.collaborator; // Asegúrate de ajustar el nombre de la propiedad de acuerdo con tu respuesta
-      },
-      error: (err) => {
-        console.error('Error al obtener el colaborador:', err);
-        alert('Hubo un error al obtener al colaborador');
-      }
+  constructor(private collaboratorsService: CollaboratorsService, private fb: FormBuilder) {
+    this.collaboratorNew = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
+      collaborator_type: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.pattern('^[0-9]+$'), Validators.minLength(8), Validators.maxLength(15)]],
+      logo: ['', [Validators.pattern('https?://.+')]], 
+      contact: ['', [Validators.maxLength(255)]]
     });
   }
 
-  // Obtener todos los tipos activos
+  ngOnInit(): void {
+    this.getAllCollaborators(); 
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.modal) {
+      console.error("El modal no está inicializado correctamente.");
+    }
+  }
+
+  // 🔹 Obtener todos los colaboradores
   getAllCollaborators(): void {
     this.collaboratorsService.getAllCollaborators().subscribe({
       next: (data) => {
-        console.log(data);
+        this.collaborators = data;
       },
       error: (err) => {
-        console.error('Error al obtener los tipos de correo electrónico:', err);
+        console.error('Error al obtener colaboradores:', err);
       }
     });
   }
 
-  // Crear colaborador
+  // 🔹 Abrir el Modal
+  openModal(): void {
+    this.collaboratorNew.reset(); // Limpiar formulario antes de abrir el modal
+    this.modal.open();
+  }
+
+  // 🔹 Crear Colaborador
   createCollaborator(): void {
-    this.collaboratorsService.createCollaborator(this.newCollaborator).subscribe({
+    if (this.collaboratorNew.invalid) {
+      alert('Formulario inválido. Revisa los campos.');
+      return;
+    }
+
+    const collaboratorData = this.collaboratorNew.value;
+  
+    this.collaboratorsService.createCollaborator(collaboratorData).subscribe({
       next: (data) => {
-        console.log('Colaborador creado con éxito:', data);
         alert('Colaborador creado exitosamente');
-        this.resetForm();
+        this.getAllCollaborators(); // Refrescar lista de colaboradores
+        this.modal.close(); // Cerrar modal después de crear
       },
       error: (err) => {
         console.error('Error al crear colaborador:', err);
-        alert('Hubo un error al crear al colaborador');
       }
     });
-  }
-
-  // Limpiar el formulario
-  resetForm(): void {
-    this.newCollaborator = {
-      name: '',
-      collaborator_type: '',
-      email: '',
-      phone: '',
-      logo: ''
-    };
   }
 }
