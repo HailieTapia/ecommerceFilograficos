@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpParams,HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
@@ -13,15 +13,18 @@ export class CategorieService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
-  // Obtener todas las categorías
-  getAllCategories(): Observable<any> {
-    return this.csrfService.getCsrfToken().pipe(
-      switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<any>(`${this.apiUrl}`, { headers, withCredentials: true });
-      })
-    );
-  }
+// Obtener todas las categorías con paginación
+getAllCategories(page: number = 1, pageSize: number = 10): Observable<any> {
+  return this.csrfService.getCsrfToken().pipe(
+    switchMap(csrfToken => {
+      const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+      const params = new HttpParams()
+        .set('page', page.toString())
+        .set('pageSize', pageSize.toString());
+      return this.http.get<any>(`${this.apiUrl}`, { headers, params, withCredentials: true });
+    })
+  );
+}
 
   // Obtener una categoría por ID
   getCategoryById(id: number): Observable<any> {

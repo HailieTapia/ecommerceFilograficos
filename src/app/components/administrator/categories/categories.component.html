@@ -1,56 +1,79 @@
 <div class="container mx-auto p-6">
-    <h1 class="text-3xl font-semibold text-gray-800 mb-6">Gestión de Categorías</h1>
-  
-    <button (click)="openModal()"
-            class="mb-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-      + Agregar Categoría
-    </button>
-  
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Lista de Categorías</h2>
-      <div *ngIf="categories.length > 0; else noCategories">
-        <div class="overflow-x-auto">
-          <table class="min-w-full border-collapse border border-gray-300">
-            <thead class="bg-gray-100">
-              <tr>
-                <th class="border border-gray-300 px-4 py-2 text-left">ID</th>
-                <th class="border border-gray-300 px-4 py-2 text-left">Nombre</th>
-                <th class="border border-gray-300 px-4 py-2 text-left">Descripción</th>
-                <th class="border border-gray-300 px-4 py-2 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let category of categories" class="hover:bg-gray-100">
-                <td class="border border-gray-300 px-4 py-2">{{ category.category_id }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ category.name }}</td>
-                <td class="border border-gray-300 px-4 py-2">{{ category.description }}</td>
-                <td class="border border-gray-300 px-4 py-2 text-center">
-                  <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                          >
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+  <h1 class="text-3xl font-semibold text-gray-800 mb-6">Gestión de Categorías</h1>
+
+  <button (click)="openCreateModal()"
+          class="mb-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+    + Agregar Categoría
+  </button>
+
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Lista de Categorías</h2>
+    <div *ngIf="categories.length > 0; else noCategories">
+      <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse border border-gray-300">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="border border-gray-300 px-4 py-2 text-left">ID</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">Nombre</th>
+              <th class="border border-gray-300 px-4 py-2 text-left">Descripción</th>
+              <th class="border border-gray-300 px-4 py-2 text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let category of categories" class="hover:bg-gray-100">
+              <td class="border border-gray-300 px-4 py-2">{{ category.category_id }}</td>
+              <td class="border border-gray-300 px-4 py-2">{{ category.name }}</td>
+              <td class="border border-gray-300 px-4 py-2">{{ category.description }}</td>
+              <td class="border border-gray-300 px-4 py-2 text-center space-x-2">
+                <button (click)="openEditModal(category.category_id)"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  Editar
+                </button>
+                <button (click)="deleteCategory(category.category_id)"
+                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Controles de paginación -->
+      <div class="mt-4 flex justify-between items-center text-gray-700">
+        <div>
+          <p>Total de categorías: {{ total }}</p>
+        </div>
+        <div class="flex space-x-2">
+          <button (click)="previousPage()" [disabled]="page === 1"
+                  class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400">
+            Anterior
+          </button>
+          <span class="self-center">Página {{ page }} de {{ totalPages() }}</span>
+          <button (click)="nextPage()" [disabled]="page * pageSize >= total"
+                  class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-400">
+            Siguiente
+          </button>
         </div>
       </div>
-      <ng-template #noCategories>
-        <p class="text-gray-500">No hay categorías registradas.</p>
-      </ng-template>
     </div>
+    <ng-template #noCategories>
+      <p class="text-gray-500">No hay categorías registradas.</p>
+    </ng-template>
   </div>
-  
-  <!-- Modal para Crear Categoría -->
-  <app-modal #modal title="Nueva Categoría">
-    <form [formGroup]="categoryForm" (ngSubmit)="createCategory()" class="p-6">
-      <label class="block text-gray-700 font-semibold mb-1">Nombre</label>
-      <input formControlName="name" type="text" required class="input-field">
-  
-      <label class="block text-gray-700 font-semibold mb-1">Descripción</label>
-      <textarea formControlName="description" class="input-field"></textarea>
-  
-      <button type="submit" class="btn-primary mt-4">Crear</button>
-    </form>
-  </app-modal>
-  
+</div>
+
+<!-- Modal para Crear/Editar Categoría -->
+<app-modal #modal title="{{ selectedCategoryId ? 'Editar Categoría' : 'Nueva Categoría' }}">
+  <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="p-6">
+    <label class="block text-gray-700 font-semibold mb-1">Nombre</label>
+    <input formControlName="name" type="text" required class="input-field">
+
+    <label class="block text-gray-700 font-semibold mb-1">Descripción</label>
+    <textarea formControlName="description" class="input-field"></textarea>
+
+    <button type="submit" class="btn-primary mt-4">
+      {{ selectedCategoryId ? 'Actualizar' : 'Crear' }}
+    </button>
+  </form>
+</app-modal>
