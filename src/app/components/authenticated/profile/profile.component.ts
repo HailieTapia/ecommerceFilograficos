@@ -26,7 +26,7 @@ export class ProfileComponent implements OnInit {
     private toastService: ToastService,
     private userService: UserService,
     private fb: FormBuilder,
-    private router: Router // Inyectamos Router para redirigir
+    private router: Router 
   ) {
   }
 
@@ -51,21 +51,22 @@ export class ProfileComponent implements OnInit {
   }
   // Eliminar la cuenta del usuario
   deleteAccount() {
-    const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.');
-  
-    if (confirmDelete) {
-      this.userService.deleteMyAccount().subscribe(
-        (response) => {
-          console.log(response.message); // Muestra un mensaje de éxito
-          this.toastService.showToast('Cuenta eliminada exitosamente', 'success');
-          // Redirigir al usuario a la página de login después de eliminar la cuenta
-          this.router.navigate(['/login']);
-        },
-        (error) => {
-          console.log(error.message); // Muestra el mensaje de error
-          this.toastService.showToast('Hubo un error al eliminar tu cuenta', 'error');
-        }
-      );
-    }
+    this.toastService.showToast(
+      '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',
+      'warning',
+      'Confirmar',
+      () => {
+        this.userService.deleteMyAccount().subscribe(
+          (response) => {
+            this.toastService.showToast('Cuenta eliminada exitosamente', 'success');
+            this.router.navigate(['/login']);
+          },
+          (error) => {
+            const errorMessage = error?.error?.message || 'Error al eliminar tu cuenta';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        );
+      }
+    );
   }  
 }
