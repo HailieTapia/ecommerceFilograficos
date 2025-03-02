@@ -5,7 +5,7 @@ import { ToastService } from '../../../services/toastService';
 @Component({
   selector: 'app-toast',
   standalone: true,
-  imports: [CommonModule], // Importa CommonModule para usar directivas como *ngIf
+  imports: [CommonModule], 
   template: `
     <div *ngIf="toast" class="toast {{ toast.type }}">
       {{ toast.message }}
@@ -24,10 +24,11 @@ import { ToastService } from '../../../services/toastService';
     .success { background-color: green; }
     .error { background-color: red; }
     .info { background-color: blue; }
+    .warning { background-color: orange; } 
   `]
 })
 export class ToastComponent implements OnInit {
-  toast: { message: string, type: 'success' | 'error' | 'info' } | null = null;
+  toast: { message: string, type: 'success' | 'error' | 'info' | 'warning' } | null = null;
 
   constructor(private toastService: ToastService) {}
 

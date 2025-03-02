@@ -7,11 +7,13 @@ import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/config';
 import { noXSSValidator } from '../../administrator/shared/validators';
 import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
+import { ToastComponent } from '../../administrator/shared/toast/toast.component';
+import { ToastService } from '../../services/toastService';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [PasswordToggleComponent, CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [ToastComponent, PasswordToggleComponent, CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -20,6 +22,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   siteKey = environment.recaptchaSiteKey;
 
   constructor(
+    private toastService: ToastService,
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
@@ -59,33 +62,32 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   // Limpiar el estado de autenticación
   clearAuthState(): void {
-    this.authService.resetAuthState(); // Llama al método del servicio
+    this.authService.resetAuthState(); 
   }
 
   onSubmit() {
     if (this.loginForm.invalid) {
+      this.toastService.showToast('Por favor, completa los campos correctamente.', 'warning');
       return;
     }
 
-    this.authService.login(this.loginForm.value).subscribe({
-      next: (response) => {
-
+    this.authService.login(this.loginForm.value).subscribe(
+      (response) => {
         if (response.mfaRequired) {
+          this.toastService.showToast('Se requiere autenticación de dos factores.', 'info');
           this.router.navigate(['/mfa-verification'], {
             queryParams: { userId: response.userId }
           });
         } else {
+          this.toastService.showToast('Inicio de sesión exitoso.', 'success');
           this.loginForm.reset();
           this.router.navigate(['/profile']);
         }
       },
-      error: (error) => {
-        if (error.error?.message) {
-          console.log('Mensaje de error del backend:', error.error.message);
-        } else {
-          console.log('Error desconocido');
-        }
+      (error) => {
+        const errorMessage = error?.error?.message || 'Error al iniciar sesión';
+        this.toastService.showToast(errorMessage, 'error');
       }
-    });
+    );
   }
 }
