@@ -26,6 +26,16 @@ getAllCategories(page: number = 1, pageSize: number = 10): Observable<any> {
   );
 }
 
+  //obtener el id y nombre de todas las categorias 
+  getCategories(): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/get-categories`, { headers, withCredentials: true });
+      })
+    );
+  }
+  
   // Obtener una categoría por ID
   getCategoryById(id: number): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
