@@ -1,27 +1,33 @@
 <div class="min-h-screen bg-gray-50 p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Gestión de Atributos de Productos</h1>
-  
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Lista de categorías (Cards) -->
-      <div class="md:col-span-1 bg-white rounded-lg shadow-sm">
-        <div class="p-4 border-b">
-          <h3 class="text-lg font-semibold text-gray-800">Categorías de Productos</h3>
-        </div>
-        <div class="divide-y max-h-96 overflow-y-auto">
-          <app-attribute-count-cards 
-            [categoryCounts]="categoryCounts" 
-            [selectedCategoryId]="selectedCategory?.categoryId" 
-            (categorySelected)="selectCategory($event)">
-          </app-attribute-count-cards>
-        </div>
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">Gestión de Atributos de Productos</h1>
+
+  <button (click)="openCreateModal()" 
+          class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+    + Agregar Atributo
+  </button>
+          
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Lista de categorías (Cards) -->
+    <div class="md:col-span-1 bg-white rounded-lg shadow-sm">
+      <div class="p-4 border-b">
+        <h3 class="text-lg font-semibold text-gray-800">Categorías de Productos</h3>
       </div>
-  
-      <!-- Tabla de atributos -->
-      <div class="md:col-span-2 bg-white rounded-lg shadow overflow-hidden">
-        <div class="p-4 border-b flex justify-between items-center">
-          <h2 class="text-lg font-semibold text-gray-800">
-            {{ selectedCategory?.name || 'Selecciona una categoría' }} Atributos
-          </h2>
+      <div class="divide-y max-h-96 overflow-y-auto">
+        <app-attribute-count-cards 
+          [categoryCounts]="categoryCounts" 
+          [selectedCategoryId]="selectedCategory?.categoryId" 
+          (categorySelected)="selectCategory($event)">
+        </app-attribute-count-cards>
+      </div>
+    </div>
+
+    <!-- Tabla de atributos -->
+    <div class="md:col-span-2 bg-white rounded-lg shadow overflow-hidden">
+      <div class="p-4 border-b flex justify-between items-center">
+        <h2 class="text-lg font-semibold text-gray-800">
+          {{ selectedCategory?.name || 'Selecciona una categoría' }} Atributos
+        </h2>
+        <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <label for="itemsPerPage" class="text-sm text-gray-600">Elementos por página:</label>
             <select
@@ -37,51 +43,123 @@
             </select>
           </div>
         </div>
-  
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead class="bg-gray-50">
-              <tr>
-                <th class="p-3 text-left text-sm font-medium text-gray-600">Nombre del Atributo</th>
-                <th class="p-3 text-left text-sm font-medium text-gray-600">Tipo de Dato</th>
-                <th class="p-3 text-left text-sm font-medium text-gray-600">Valores Permitidos</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr *ngFor="let attribute of attributes" class="hover:bg-gray-50">
-                <td class="p-3">
-                  <div class="text-sm font-medium text-gray-900">{{ attribute.attribute_name }}</div>
-                </td>
-                <td class="p-3">
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                        [ngClass]="{
-                          'bg-blue-100 text-blue-800': attribute.data_type === 'texto',
-                          'bg-green-100 text-green-800': attribute.data_type === 'numero',
-                          'bg-yellow-100 text-yellow-800': attribute.data_type === 'boolean',
-                          'bg-purple-100 text-purple-800': attribute.data_type === 'lista'
-                        }">
-                    {{ attribute.data_type }}
-                  </span>
-                </td>
-                <td class="p-3">
-                  <div class="text-sm text-gray-500">{{ attribute.allowed_values || 'N/A' }}</div>
-                </td>
-              </tr>
-              <tr *ngIf="attributes.length === 0">
-                <td colspan="3" class="p-3 text-center text-gray-500">No hay atributos disponibles</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-  
-        <!-- Componente de paginación reutilizable -->
-        <app-pagination
-          [currentPage]="currentPage"
-          [totalItems]="totalItems"
-          [itemsPerPage]="itemsPerPage"
-          (pageChange)="onPageChange($event)"
-          class="mt-4 p-4 border-t"
-        ></app-pagination>
       </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="p-3 text-left text-sm font-medium text-gray-600">Nombre del Atributo</th>
+              <th class="p-3 text-left text-sm font-medium text-gray-600">Tipo de Dato</th>
+              <th class="p-3 text-left text-sm font-medium text-gray-600">Valores Permitidos</th>
+              <th class="p-3 text-left text-sm font-medium text-gray-600">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let attribute of attributes" class="hover:bg-gray-50">
+              <td class="p-3">
+                <div class="text-sm font-medium text-gray-900">{{ attribute.attribute_name }}</div>
+              </td>
+              <td class="p-3">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                      [ngClass]="{
+                        'bg-blue-100 text-blue-800': attribute.data_type === 'texto',
+                        'bg-green-100 text-green-800': attribute.data_type === 'numero',
+                        'bg-yellow-100 text-yellow-800': attribute.data_type === 'boolean',
+                        'bg-purple-100 text-purple-800': attribute.data_type === 'lista'
+                      }">
+                  {{ attribute.data_type }}
+                </span>
+              </td>
+              <td class="p-3">
+                <div class="text-sm text-gray-500">{{ attribute.allowed_values || 'N/A' }}</div>
+              </td>
+              <td class="p-3 text-center space-x-2">
+                <button (click)="openEditModal(attribute.attribute_id)"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  Editar
+                </button>
+                <button (click)="deleteAttribute(attribute.attribute_id)"
+                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="attributes.length === 0">
+              <td colspan="4" class="p-3 text-center text-gray-500">No hay atributos disponibles</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalItems]="totalItems"
+        [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)"
+        class="mt-4 p-4 border-t"
+      ></app-pagination>
     </div>
   </div>
+</div>
+
+<!-- Modal para Crear/Editar Atributo -->
+<app-modal #modal title="{{ selectedAttributeId ? 'Editar Atributo' : 'Nuevo Atributo' }}">
+  <form [formGroup]="attributeForm" (ngSubmit)="saveAttribute()" class="p-6 space-y-4">
+    <div>
+      <label class="block text-gray-800 font-medium mb-2">Categoría</label>
+      <select formControlName="category_id"
+              class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              [ngClass]="{'border-red-500': attributeForm.get('category_id')?.touched && attributeForm.get('category_id')?.invalid}">
+        <option value="" disabled>Selecciona una categoría</option>
+        <option *ngFor="let category of allCategories" [value]="category.category_id">
+          {{ category.name }}
+        </option>
+      </select>
+      <p *ngIf="attributeForm.get('category_id')?.touched && attributeForm.get('category_id')?.hasError('required')"
+         class="text-red-500 text-sm mt-1">La categoría es obligatoria</p>
+    </div>
+
+    <div>
+      <label class="block text-gray-800 font-medium mb-2">Nombre del Atributo</label>
+      <input formControlName="attribute_name" type="text" required
+             class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+             [ngClass]="{'border-red-500': attributeForm.get('attribute_name')?.touched && attributeForm.get('attribute_name')?.invalid}">
+      <p *ngIf="attributeForm.get('attribute_name')?.touched && attributeForm.get('attribute_name')?.hasError('required')"
+         class="text-red-500 text-sm mt-1">El nombre es obligatorio</p>
+      <p *ngIf="attributeForm.get('attribute_name')?.touched && attributeForm.get('attribute_name')?.hasError('minlength')"
+         class="text-red-500 text-sm mt-1">Mínimo 3 caracteres</p>
+      <p *ngIf="attributeForm.get('attribute_name')?.touched && attributeForm.get('attribute_name')?.hasError('maxlength')"
+         class="text-red-500 text-sm mt-1">Máximo 255 caracteres</p>
+    </div>
+
+    <div>
+      <label class="block text-gray-800 font-medium mb-2">Tipo de Dato</label>
+      <select formControlName="data_type"
+              class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+        <option value="lista">Lista</option>
+        <option value="texto">Texto</option>
+        <option value="numero">Número</option>
+        <option value="boolean">Boolean</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-gray-800 font-medium mb-2">Valores Permitidos</label>
+      <input formControlName="allowed_values" type="text"
+             class="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+             [ngClass]="{'border-red-500': attributeForm.get('allowed_values')?.touched && attributeForm.get('allowed_values')?.invalid}"
+             placeholder="Ej. Small, Medium, Large">
+      <p *ngIf="attributeForm.get('allowed_values')?.touched && attributeForm.get('allowed_values')?.hasError('invalidNumber')"
+         class="text-red-500 text-sm mt-1">{{ attributeForm.get('allowed_values')?.errors?.['invalidNumber'] }}</p>
+      <p *ngIf="attributeForm.get('allowed_values')?.touched && attributeForm.get('allowed_values')?.hasError('invalidBoolean')"
+         class="text-red-500 text-sm mt-1">{{ attributeForm.get('allowed_values')?.errors?.['invalidBoolean'] }}</p>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+            [disabled]="attributeForm.invalid">
+      {{ selectedAttributeId ? 'Actualizar' : 'Crear' }}
+    </button>
+  </form>
+</app-modal>
