@@ -4,12 +4,11 @@ import { PasswordService } from '../../services/password.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ToastComponent } from '../../administrator/shared/toast/toast.component';
 import { ToastService } from '../../services/toastService';
 @Component({
   selector: 'app-recover',
   standalone: true,
-  imports: [ToastComponent, CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './recover.component.html',
   styleUrl: './recover.component.css'
 })

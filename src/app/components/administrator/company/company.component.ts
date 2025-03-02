@@ -4,13 +4,12 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import * as addressData from '../shared/direccion.json';
 import { CommonModule } from '@angular/common';
 import { noXSSValidator } from '../shared/validators';
-import { ToastComponent } from '../../administrator/shared/toast/toast.component';
 import { ToastService } from '../../services/toastService';
 
 @Component({
   selector: 'app-company',
   standalone: true,
-  imports: [ToastComponent, CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './company.component.html',
   styleUrl: './company.component.css'
 })

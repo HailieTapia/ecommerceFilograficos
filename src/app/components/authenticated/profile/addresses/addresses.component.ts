@@ -2,14 +2,13 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserService } from '../../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ToastComponent } from '../../../administrator/shared/toast/toast.component';
 import { ToastService } from '../../../services/toastService';
 import { ModalComponent } from '../../../../modal/modal.component';
 import * as addressData from '../../../administrator/shared/direccion.json';
 @Component({
   selector: 'app-addresses',
   standalone: true,
-  imports: [ModalComponent, ToastComponent, CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [ModalComponent, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './addresses.component.html',
   styleUrl: './addresses.component.css'
 })
