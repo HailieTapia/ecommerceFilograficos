@@ -4,9 +4,16 @@
         <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
             <!-- Nombre -->
             <div class="sm:col-span-3">
-                <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                <label for="name" class="block text-sm font-medium text-gray-700">Nombre <span class="text-red-500">*</span></label>
                 <input type="text" formControlName="name"
                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border" />
+                <div *ngIf="profileForm.controls['name'].touched && profileForm.controls['name'].invalid"
+                    class="text-red-500 text-xs mt-1">
+                    <span *ngIf="profileForm.controls['name'].errors?.['required']">El nombre es obligatorio. </span>
+                    <span *ngIf="profileForm.controls['name'].errors?.['minlength']">Mínimo 2 caracteres. </span>
+                    <span *ngIf="profileForm.controls['name'].errors?.['maxlength']">Máximo 100 caracteres. </span>
+                    <span *ngIf="profileForm.controls['name'].errors?.['pattern']">Solo letras, espacios, guiones y apóstrofes son permitidos. </span>
+                </div>
             </div>
 
             <!-- Correo electrónico -->
@@ -17,10 +24,18 @@
 
             <!-- Teléfono -->
             <div class="sm:col-span-3">
-                <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono</label>
-                <input type="tel" formControlName="phone"
+                <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono<span class="text-red-500">*</span></label>
+                <input type="tel" maxlength="10" formControlName="phone"
                     class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2 border" />
+                <div *ngIf="profileForm.controls['phone'].touched && profileForm.controls['phone'].invalid"
+                    class="text-red-500 text-xs mt-1">
+                    <span *ngIf="profileForm.controls['phone'].errors?.['required']">El teléfono es obligatorio.</span>
+                    <span *ngIf="profileForm.controls['phone'].errors?.['maxlength']">Máximo 15 caracteres.</span>
+                    <span *ngIf="profileForm.controls['phone'].errors?.['pattern']">Solo números y el signo + son
+                        permitidos.</span>
+                </div>
             </div>
+
         </div>
         <!-- Botones de acción -->
         <div class="mt-6 flex justify-end">

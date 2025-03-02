@@ -15,14 +15,11 @@ export class PersonalInfoComponent {
   profileForm: FormGroup;
   errorMessage: string = '';
 
-  constructor(
-    private toastService: ToastService,
-    private userService: UserService,
-    private fb: FormBuilder
+  constructor(private toastService: ToastService, private userService: UserService, private fb: FormBuilder
   ) {
     this.profileForm = this.fb.group({
-      name: ['', Validators.required],
-      phone: ['', Validators.required],
+      name: ['', [Validators.required,Validators.minLength(2),Validators.maxLength(100), Validators.pattern(/^[a-zA-ZáéíóúüÁÉÍÓÚÜñÑ\s'-]+$/), ]],
+      phone: ['', [Validators.required, Validators.maxLength(10), Validators.pattern(/^[0-9+]+$/)]],
     });
   }
 

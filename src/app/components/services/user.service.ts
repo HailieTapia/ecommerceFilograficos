@@ -35,15 +35,14 @@ export class UserService {
     }
 
     // Actualizar solo la dirección del usuario
-    updateUserProfile(direccion: any): Observable<any> {
+    updateUserProfile(address: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put(`${this.apiUrl}/users/change-address`, { direccion }, { headers, withCredentials: true });
+                return this.http.put(`${this.apiUrl}/users/change-address`, { address }, { headers, withCredentials: true });
             })
         );
     }
-
     // Función para obtener el perfil del usuario autenticado
     getProfile(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(

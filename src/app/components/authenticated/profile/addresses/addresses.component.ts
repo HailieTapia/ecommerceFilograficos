@@ -5,118 +5,115 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { ToastComponent } from '../../../administrator/shared/toast/toast.component';
 import { ToastService } from '../../../services/toastService';
 import { ModalComponent } from '../../../../modal/modal.component';
+import * as addressData from '../../../administrator/shared/direccion.json';
 @Component({
   selector: 'app-addresses',
   standalone: true,
-  imports: [ModalComponent,ToastComponent,CommonModule,FormsModule,ReactiveFormsModule],
+  imports: [ModalComponent, ToastComponent, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './addresses.component.html',
   styleUrl: './addresses.component.css'
 })
-export class AddressesComponent  implements OnInit {
-    userProfile: any = {};
-    addressForm: FormGroup;
-    successMessage: string = '';
-    errorMessage: string = '';
+export class AddressesComponent implements OnInit {
+  @ViewChild('modal') modal!: ModalComponent;
+  userProfile: any = {};
+  addressForm: FormGroup;
+  address: any = addressData;
 
-    addAddressId: number | null = null;
-  
-    constructor(
-      private toastService: ToastService,
-      private userService: UserService,
-      private fb: FormBuilder
-    ) {
-      this.addressForm = this.fb.group({
-        street: ['', Validators.required],
-        city: ['', Validators.required],
-        state: ['', Validators.required],
-        postal_code: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]]
-      });
-    }
-  
-    ngOnInit(): void {
-      this.getUserInfo();
-    }
-    // Obtener la información de la empresa
-    getUserInfo(): void {
-      this.userService.getProfile().subscribe(
-        (profile) => {
-          this.userProfile = profile;
-        },
-        (error) => {
-          const errorMessage = error?.error?.message || 'Error al obtener el perfil';
-          this.toastService.showToast(errorMessage, 'error');
-        }
-      );
-    }
-    // Método para agregar dirección
-    addAddress(): void {
-      if (this.addressForm.invalid) {
-        this.errorMessage = 'Por favor, complete todos los campos correctamente.';
-        return;
-      }
-  
-      this.userService.addAddress(this.addressForm.value).subscribe(
-        (response) => {
-          const successMessage = response?.message || 'Dirección agregada exitosamente.';
-          this.toastService.showToast(successMessage, 'success');
-          this.modal.close();  // Cerrar el modal después de agregar
-          this.getUserInfo();
-        },
-        (error) => {
-          const errorMessage = error?.error?.message || 'Error al agregar la dirección.';
-          this.toastService.showToast(errorMessage, 'error');
-        }
-      );
-    }
-  
-    // Método para actualizar dirección
-    updateAddress(): void {
-      if (this.addressForm.invalid) {
-        this.errorMessage = 'Por favor, complete todos los campos correctamente.';
-        return;
-      }
-  
-      // Empaquetamos la dirección dentro de un objeto 'direccion' como se espera en el servicio
-      const direccion = this.addressForm.value;
-  
-      this.userService.updateUserProfile(direccion).subscribe(
-        (response) => {
-          const successMessage = response?.message || 'Dirección actualizada exitosamente.';
-          this.toastService.showToast(successMessage, 'success');
-          this.modal.close();  // Cerrar el modal después de actualizar
-          this.getUserInfo();
-        },
-        (error) => {
-          const errorMessage = error?.error?.message || 'Error al actualizar la dirección.';
-          this.toastService.showToast(errorMessage, 'error');
-        }
-      );
-    }
-  
-    // Método para editar dirección (cuando se selecciona una dirección para actualizar)
-    editAddress(address: any): void {
-      this.addressForm.patchValue({
-        street: address.street,
-        city: address.city,
-        state: address.state,
-        postal_code: address.postal_code
-      });
-      this.addAddressId = address.id;  // Si usas un id para diferenciar la dirección
-    }
-    //MODAL
-    @ViewChild('modal') modal!: ModalComponent;
-    openModal(address?: any): void {
-      this.addressForm.reset();
-      this.successMessage = '';
-      this.errorMessage = '';
-    
-      if (address) {
-        this.addAddressId = address.id;  // Asigna el ID de la dirección al valor de addAddressId
-        this.editAddress(address);  // Cargar la dirección para editar
-      } else {
-        this.addAddressId = null;  // Si es nueva, no hay ID, por lo que debería mostrar "Agregar"
-      }
-    
-      this.modal.open();
+  constructor(
+    private toastService: ToastService,
+    private userService: UserService,
+    private fb: FormBuilder
+  ) {
+    this.addressForm = this.fb.group({
+      street: ['', [Validators.required, Validators.maxLength(100),Validators.minLength(3), Validators.pattern(/^[a-zA-Z0-9\sáéíóúÁÉÍÓÚñÑ.,-]+$/)]],
+      city: ['',Validators.required],
+      state: ['',Validators.required],
+      postal_code: ['',Validators.required],
+    });
+  }
+
+  ngOnInit(): void {
+    this.getUserInfo();
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.modal) {
+      console.error('El modal no está inicializado correctamente.');
     }
   }
+
+  openCreateModal(): void {
+    this.addressForm.reset();
+    this.modal.open();
+  }
+
+  getUserInfo(): void {
+    this.userService.getProfile().subscribe({
+      next: (profile) => {
+        this.userProfile = profile;
+      },
+      error: (error) => {
+        this.toastService.showToast(error?.error?.message || 'Error al obtener el perfil', 'error');
+      },
+    });
+  }
+
+  openEditModal(): void {
+    this.userService.getProfile().subscribe({
+      next: (response) => {
+        if (response.Addresses && response.Addresses.length > 0) {
+          const address = response.Addresses[0]; // Usamos la primera dirección AJUSTES DE BACKEND SI SE NECESITARA LAS DIRECCIOENS
+          this.addressForm.patchValue({
+            street: address.street,
+            city: address.city,
+            state: address.state,
+            postal_code: address.postal_code,
+          });
+          this.modal.open();
+        } else {
+          this.toastService.showToast('No hay dirección para editar', 'error');
+        }
+      },
+      error: (err) => {
+        console.error('Error al obtener la dirección:', err);
+        this.toastService.showToast('Error al cargar la dirección', 'error');
+      },
+    });
+  }
+  savePerfil(): void {
+    if (this.addressForm.invalid) {
+      this.toastService.showToast('Formulario inválido. Revisa los campos.', 'error');
+      return;
+    }
+
+    const addressData = this.addressForm.value;
+
+    if (this.userProfile.Addresses && this.userProfile.Addresses.length > 0) {
+      this.userService.updateUserProfile(addressData).subscribe({
+        next: () => {
+          console.log(addressData);
+          this.toastService.showToast('Dirección actualizada exitosamente', 'success');
+          this.getUserInfo();
+          this.modal.close();
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al actualizar la dirección';
+          this.toastService.showToast(errorMessage, 'error');
+        },
+      });
+    } else {
+      this.userService.addAddress(addressData).subscribe({
+        next: () => {
+          console.log(addressData);
+          this.toastService.showToast('Dirección creada exitosamente', 'success');
+          this.getUserInfo();
+          this.modal.close();
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al crear la dirección';
+          this.toastService.showToast(errorMessage, 'error');
+        },
+      });
+    }
+  }
+}
