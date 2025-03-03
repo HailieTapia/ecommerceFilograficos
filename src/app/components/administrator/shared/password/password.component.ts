@@ -1,12 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule, ValidatorFn, AbstractControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule, ValidatorFn, AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
 import { noXSSValidator } from '../../shared/validators';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http'; 
+import { Observable, of } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
+import * as CryptoJS from 'crypto-js';
 
 @Component({
   selector: 'app-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule], 
   templateUrl: './password.component.html',
   styleUrls: ['./password.component.css']
 })
@@ -18,15 +22,19 @@ export class PasswordComponent implements OnInit {
 
   passwordVisible = false;
   confirmPasswordVisible = false;
-  strength: number = 0; 
-  strengthClass: string = ''; 
+  strength: number = 0;
+  strengthClass: string = '';
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private http: HttpClient) {}
 
   ngOnInit() {
     this.parentForm.addControl(
       this.passwordControlName,
-      this.fb.control('', [Validators.required, Validators.minLength(8), noXSSValidator()])
+      this.fb.control('', {
+        validators: [Validators.required, Validators.minLength(8), noXSSValidator()],
+        asyncValidators: [this.checkHIBPValidator()], // Agrega validador asíncrono
+        updateOn: 'blur'
+      })
     );
 
     if (this.showConfirmPassword) {
@@ -37,7 +45,6 @@ export class PasswordComponent implements OnInit {
       this.parentForm.setValidators(this.passwordsMatchValidator());
     }
 
-    // Suscripción al cambio de valor para calcular la fuerza
     this.parentForm.get(this.passwordControlName)?.valueChanges.subscribe(value => {
       this.calculateStrength(value);
     });
@@ -52,7 +59,7 @@ export class PasswordComponent implements OnInit {
   }
 
   passwordsMatchValidator(): ValidatorFn {
-    return (formGroup: AbstractControl): { [key: string]: any } | null => {
+    return (formGroup: AbstractControl): ValidationErrors | null => {
       const password = formGroup.get(this.passwordControlName)?.value;
       const confirmPassword = formGroup.get(this.confirmPasswordControlName)?.value;
 
@@ -79,5 +86,34 @@ export class PasswordComponent implements OnInit {
     if (/[^A-Za-z0-9]/.test(password)) score += 25;
     this.strength = Math.min(score, 100);
     this.strengthClass = this.strength < 40 ? 'weak' : this.strength < 80 ? 'medium' : 'strong';
+  }
+
+  // ✅ Validador asíncrono mejorado para HIBP
+  private checkHIBPValidator(): AsyncValidatorFn {
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+      const password = control.value;
+      if (!password) return of(null); // No validar si el campo está vacío
+
+      const sha1 = this.sha1(password);
+      const prefix = sha1.substring(0, 5);
+      const suffix = sha1.substring(5).toUpperCase();
+
+      return this.http.get(`https://api.pwnedpasswords.com/range/${prefix}`, { responseType: 'text' })
+        .pipe(
+          switchMap(response => {
+            const isPwned = response.split('\n').some(line => {
+              const [hashSuffix, count] = line.split(':');
+              return hashSuffix === suffix && parseInt(count, 10) > 0;
+            });
+            return of(isPwned ? { pwned: true } : null);
+          }),
+          catchError(() => of(null)) // Evita errores en caso de fallo de API
+        );
+    };
+  }
+
+  // ✅ Método SHA-1 con CryptoJS correctamente importado
+  private sha1(password: string): string {
+    return CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex).toUpperCase();
   }
 }
