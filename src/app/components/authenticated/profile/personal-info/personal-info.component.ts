@@ -18,7 +18,7 @@ export class PersonalInfoComponent {
   constructor(private toastService: ToastService, private userService: UserService, private fb: FormBuilder
   ) {
     this.profileForm = this.fb.group({
-      name: ['', [Validators.required,Validators.minLength(2),Validators.maxLength(100), Validators.pattern(/^[a-zA-ZáéíóúüÁÉÍÓÚÜñÑ\s'-]+$/), ]],
+      name: ['', [Validators.required,Validators.minLength(2),Validators.maxLength(100), Validators.pattern(/^(?! )[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+(?: [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+)*$/), ]],
       phone: ['', [Validators.required, Validators.maxLength(10), Validators.pattern(/^[0-9+]+$/)]],
     });
   }

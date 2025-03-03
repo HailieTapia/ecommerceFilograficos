@@ -1,62 +1,36 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators ,FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { noXSSValidator } from '../../administrator/shared/validators';
 import { ToastService } from '../../services/toastService';
-
+import { PasswordComponent } from '../../administrator/shared/password/password.component';
 @Component({
   selector: 'app-register',
   standalone: true,
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
-  imports: [CommonModule, ReactiveFormsModule, FormsModule]
+  imports: [PasswordComponent,CommonModule, ReactiveFormsModule, FormsModule]
 })
 export class RegisterComponent {
   registerForm: FormGroup;
   loading = false;
   message = '';
-  passwordVisible = false; 
-  confirmPasswordVisible = false;
-  
-  constructor(    private toastService: ToastService,private fb: FormBuilder, private authService: AuthService, private router: Router) {
+
+  constructor(private toastService: ToastService,private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.registerForm = this.fb.group({
-      name: ['', [Validators.required, Validators.pattern(/^(?! )[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+(?: [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+)*$/), Validators.minLength(3), Validators.maxLength(50), noXSSValidator()]],
+      name: ['', [Validators.required, Validators.pattern(/^(?! )[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+(?: [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+)*$/), Validators.minLength(3), Validators.maxLength(100), noXSSValidator()]],
       email: ['', [Validators.required, Validators.email, noXSSValidator()]],
-      phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/), noXSSValidator()]],
-      password: ['', [Validators.required, Validators.minLength(8), noXSSValidator()]],
-      confirmPassword: ['', [Validators.required]],
+      phone: ['', [Validators.required, Validators.maxLength(10), Validators.pattern(/^[0-9+]+$/)]],
       user_type: ['cliente'],
-    }, { validator: this.passwordsMatchValidator });
-  }
-
-  togglePasswordVisibility() {
-    this.passwordVisible = !this.passwordVisible;
-  }
-
-  toggleConfirmPasswordVisibility() {
-    this.confirmPasswordVisible = !this.confirmPasswordVisible;
-  }
-  passwordsMatchValidator(formGroup: FormGroup) {
-    const password = formGroup.get('password')?.value;
-    const confirmPassword = formGroup.get('confirmPassword')?.value;
-    
-    if (password !== confirmPassword) {
-      formGroup.get('confirmPassword')?.setErrors({ mismatch: true });
-    } else {
-      // Si coinciden, se asegura de que no haya errores
-      formGroup.get('confirmPassword')?.setErrors(null);
-    }
-    return null; // Siempre retorna null
+    });
   }
 
   onSubmit() {
     if (this.registerForm.invalid) {
       return;
     }
-
     this.loading = true;
     this.authService.register(this.registerForm.value).subscribe({
       next: (response) => {
