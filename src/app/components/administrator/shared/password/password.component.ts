@@ -4,7 +4,7 @@ import { noXSSValidator } from '../../shared/validators';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http'; 
 import { Observable, of } from 'rxjs';
-import { map, switchMap, catchError } from 'rxjs/operators';
+import { switchMap, catchError } from 'rxjs/operators';
 import * as CryptoJS from 'crypto-js';
 
 @Component({
@@ -88,11 +88,10 @@ export class PasswordComponent implements OnInit {
     this.strengthClass = this.strength < 40 ? 'weak' : this.strength < 80 ? 'medium' : 'strong';
   }
 
-  // ✅ Validador asíncrono mejorado para HIBP
   private checkHIBPValidator(): AsyncValidatorFn {
     return (control: AbstractControl): Observable<ValidationErrors | null> => {
       const password = control.value;
-      if (!password) return of(null); // No validar si el campo está vacío
+      if (!password) return of(null);
 
       const sha1 = this.sha1(password);
       const prefix = sha1.substring(0, 5);
@@ -107,12 +106,11 @@ export class PasswordComponent implements OnInit {
             });
             return of(isPwned ? { pwned: true } : null);
           }),
-          catchError(() => of(null)) // Evita errores en caso de fallo de API
+          catchError(() => of(null)) 
         );
     };
   }
 
-  // ✅ Método SHA-1 con CryptoJS correctamente importado
   private sha1(password: string): string {
     return CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex).toUpperCase();
   }
