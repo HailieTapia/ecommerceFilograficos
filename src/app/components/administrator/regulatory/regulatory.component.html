@@ -1,89 +1,67 @@
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 mb-6 bg-gray-100 shadow-sm">
-  <div>
-    <h1 class="text-2xl font-bold text-gray-800">Documentos Regulatorios</h1>
-    <p class="mt-2 text-gray-500">Gestiona los documentos regulatorios del sistema.</p>
+<div class="max-w-7xl mx-auto p-6">
+  <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-lg shadow-md">
+    <div>
+      <h1 class="text-2xl font-bold text-cyan-500 flex items-center gap-2">
+        <i class="fas fa-file-alt text-red-600"></i> Documentos Regulatorios
+      </h1>
+      <p class="mt-2 text-gray-500">Gestiona los documentos regulatorios del sistema.</p>
+    </div>
+    <button (click)="openModal()" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all duration-300">
+      <i class="fas fa-plus"></i>
+      <span>Crear</span>
+    </button>
   </div>
-  <button (click)="openModal()"
-    class="mt-4 sm:mt-0 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-    <i class="fas fa-plus"></i>
-    <span>Crear</span>
-  </button>
-</div>
-<div class="px-7">
-  <div class="overflow-x-auto">
-    <table class="w-full border border-gray-300 text-sm text-gray-700">
-      <thead class="bg-gray-100 text-gray-900 uppercase text-xs tracking-wider">
-        <tr>
-          <th class="px-6 py-4 text-left border-b">Título</th>
-          <th class="px-6 py-4 text-left border-b hidden md:table-cell">Versión Actual</th>
-          <th class="px-6 py-4 text-left border-b hidden md:table-cell">Fecha de Efectividad</th>
-          <th class="px-6 py-4 text-center border-b">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let document of documents" class="border-b hover:bg-gray-50 transition">
-          <td class="px-6 py-4">{{ document.title }}</td>
-          <td class="px-6 py-4 hidden md:table-cell">{{ document.current_version }}</td>
-          <td class="px-6 py-4 hidden md:table-cell">{{ document.effective_date | date }}</td>
-          <td class="px-6 py-4 flex flex-wrap md:flex-nowrap justify-center gap-2">
-            <!-- Botón Ver -->
-            <div class="flex items-center gap-2">
-              <!-- Botón Ver -->
-              <div class="relative group">
-                <button (click)="viewCurrentVersion(document.document_id)"
-                  class="text-blue-600 hover:text-blue-800 transition duration-200 px-2">
-                  <i class="fas fa-file-alt text-lg"></i>
-                </button>
-                <!-- Tooltip -->
-                <div
-                  class="absolute left-1/2 -translate-x-1/2 -top-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                  Ver Documento
-                </div>
-              </div>
 
-              <!-- Botón Editar -->
-              <div class="relative group">
-                <button (click)="openModal(document)"
-                  class="text-yellow-500 hover:text-yellow-600 transition duration-200 px-2">
-                  <i class="fas fa-edit text-lg"></i>
-                </button>
-                <!-- Tooltip -->
-                <div
-                  class="absolute left-1/2 -translate-x-1/2 -top-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                  Editar Documento
-                </div>
-              </div>
-
-              <!-- Botón Eliminar -->
-              <div class="relative group">
-                <button (click)="deleteRegulatoryDocument(document.document_id)"
-                  class="text-red-600 hover:text-red-700 transition duration-200 px-2">
-                  <i class="fas fa-trash text-lg"></i>
-                </button>
-                <!-- Tooltip -->
-                <div
-                  class="absolute left-1/2 -translate-x-1/2 -top-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                  Eliminar Documento
-                </div>
-              </div>
-
-              <!-- Botón Historial -->
-              <div class="relative group">
-                <button (click)="openHistoryModal(document.document_id)"
-                  class="text-gray-500 hover:text-gray-600 transition duration-200 px-2">
-                  <i class="fas fa-history text-lg"></i>
-                </button>
-                <!-- Tooltip -->
-                <div
-                  class="absolute left-1/2 -translate-x-1/2 -top-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                  Ver Historial
-                </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <div class="border-t-2 border-red-600 pt-6">
+      <h2 class="text-lg font-medium text-gray-800 mb-4">Lista de Documentos</h2>
+      <div *ngIf="documents.length > 0; else noDocuments">
+        <div class="overflow-x-auto">
+          <table class="min-w-full border-collapse border border-gray-200">
+            <thead class="bg-red-50">
+              <tr>
+                <th class="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Título</th>
+                <th class="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Versión Actual</th>
+                <th class="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Fecha de Efectividad</th>
+                <th class="border border-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-700">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let document of documents" class="hover:bg-gray-100 transition-all duration-300">
+                <td class="border border-gray-200 px-4 py-2 text-gray-700">{{ document.title }}</td>
+                <td class="border border-gray-200 px-4 py-2 text-gray-700">{{ document.current_version }}</td>
+                <td class="border border-gray-200 px-4 py-2 text-gray-700">{{ document.effective_date | date }}</td>
+                <td class="border border-gray-200 px-4 py-2">
+                  <div class="flex justify-center items-center gap-4">
+                    <!-- Botón Ver -->
+                    <button (click)="viewCurrentVersion(document.document_id)" class="bg-blue-600 bg-opacity-10 text-blue-600 p-1.5 rounded-md hover:bg-blue-600 hover:text-white transition-all duration-300">
+                      <i class="fas fa-file-alt"></i>
+                    </button>
+                    <!-- Botón Editar -->
+                    <button (click)="openModal(document)" class="bg-yellow-600 bg-opacity-10 text-yellow-600 p-1.5 rounded-md hover:bg-yellow-600 hover:text-white transition-all duration-300">
+                      <i class="fas fa-edit "></i>
+                    </button>
+                    <!-- Botón Eliminar -->
+                    <button (click)="deleteRegulatoryDocument(document.document_id)" class="bg-red-600 bg-opacity-10 text-red-600 p-1.5 rounded-md hover:bg-red-700 hover:text-white transition-all duration-300">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                    <!-- Botón Historial -->
+                    <button (click)="openHistoryModal(document.document_id)" class="bg-gray-600 bg-opacity-10 text-gray-600 p-1.5 rounded-md hover:bg-gray-600 hover:text-white transition-all duration-300">
+                      <i class="fas fa-history "></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <ng-template #noDocuments>
+        <p class="text-gray-500 flex items-center gap-2">
+          <i class="fas fa-exclamation-triangle text-red-600"></i> No hay documentos registrados.
+        </p>
+      </ng-template>
+    </div>
   </div>
 </div>
 <app-modal #historyModal title="Historial de Versiones">

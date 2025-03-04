@@ -1,129 +1,123 @@
 <div class="flex">
   <!-- Sidebar -->
   <aside *ngIf="isLoggedIn && userRole === 'administrador'" [ngClass]="{'w-64': sidebarOpen, 'w-20': !sidebarOpen}"
-    class="bg-gray-100 text-black min-h-screen p-4 transition-all duration-300">
-    <div class="p-4 flex items-center justify-between">
-      <h2 *ngIf="sidebarOpen" class="font-bold text-xl">Administración</h2>
-      <button (click)="toggleSidebar()" class="p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-bars text-xl"></i>
-      </button>
-    </div>
+  class="bg-white text-black min-h-screen p-4 transition-all duration-300 shadow-lg">
+  <div class="p-4 flex items-center justify-between border-b">
+    <h2 *ngIf="sidebarOpen" class="text-xl font-bold bg-gradient-to-r from-cyan-500 to-green-400 bg-clip-text text-transparent">Administración</h2>
+    <button (click)="toggleSidebar()" class="p-2 hover:bg-red-50 rounded">
+      <i class="fas fa-bars text-xl text-gray-600 hover:text-red-600 transition-all duration-300"></i>
+    </button>
+  </div>
 
-    <nav class="mt-8">
-      <a routerLink="/company" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-building mr-2"></i>
-        <span *ngIf="sidebarOpen">Empresa</span>
-      </a>
-      <a routerLink="/support-panel" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-headset mr-2"></i>
-        <span *ngIf="sidebarOpen">Soporte</span>
-      </a>
-      <a routerLink="/faq-categories" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-list mr-2"></i>
-        <span *ngIf="sidebarOpen">Categorías FAQ</span>
-      </a>
-      <a routerLink="/faqs" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-question-circle mr-2"></i>
-        <span *ngIf="sidebarOpen">FAQs</span>
-      </a>
-      <a routerLink="/security" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-shield-alt mr-2"></i>
-        <span *ngIf="sidebarOpen">Seguridad</span>
-      </a>
-      <a routerLink="/type" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-tags mr-2"></i>
-        <span *ngIf="sidebarOpen">Tipos</span>
-      </a>
-      <a routerLink="/template" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-file-alt mr-2"></i>
-        <span *ngIf="sidebarOpen">Plantillas</span>
-      </a>
-      <a routerLink="/regulatory" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-balance-scale mr-2"></i>
-        <span *ngIf="sidebarOpen">Regulaciones</span>
-      </a>
-      <a routerLink="/collaborators" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-users mr-2"></i>
-        <span *ngIf="sidebarOpen">Colaboradores</span>
-      </a>
-
-      <a routerLink="/category" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-tags mr-2"></i>
-        <span *ngIf="sidebarOpen">Categorías</span>
-      </a>
-
-      <a routerLink="/product-attributes" class="flex items-center p-2 hover:bg-gray-700 rounded">
-        <i class="fas fa-list mr-2"></i>
-        <span *ngIf="sidebarOpen">Atributos de productos</span>
-      </a>
-    </nav>
-  </aside>
+  <nav class="mt-8">
+    <a routerLink="/company" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-building mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Empresa</span>
+    </a>
+    <a routerLink="/support-panel" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-headset mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Soporte</span>
+    </a>
+    <a routerLink="/faq-categories" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-list mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Categorías FAQ</span>
+    </a>
+    <a routerLink="/faqs" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-question-circle mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">FAQs</span>
+    </a>
+    <a routerLink="/security" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-shield-alt mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Seguridad</span>
+    </a>
+    <a routerLink="/type" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-tags mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Tipos</span>
+    </a>
+    <a routerLink="/template" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-file-alt mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Plantillas</span>
+    </a>
+    <a routerLink="/regulatory" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-balance-scale mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Regulaciones</span>
+    </a>
+    <a routerLink="/collaborators" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-users mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Colaboradores</span>
+    </a>
+    <a routerLink="/category" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-tags mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Categorías</span>
+    </a>
+    <a routerLink="/product-attributes" class="flex items-center p-3 hover:bg-red-50 rounded transition-all duration-300">
+      <i class="fas fa-list mr-3 text-gray-600 hover:text-red-600"></i>
+      <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Atributos de productos</span>
+    </a>
+  </nav>
+</aside>
 
   <!-- Contenido principal -->
   <div class="flex-1">
     <header class="bg-white shadow-md px-6 py-4 flex items-center justify-between">
       <!-- LOGO Y NOMBRE EMPRESA -->
-      <div class="flex items-center space-x-2">
+      <div class="flex items-center space-x-3">
         <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="h-12 w-12">
-        <span
-          class="text-2xl font-bold bg-gradient-to-r from-sky-600 to-green-500 bg-clip-text text-transparent font-sans">
+        <span class="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-green-400 bg-clip-text text-transparent font-sans">
           {{ company?.name || 'Filográficos' }}
         </span>
       </div>
-
+  
       <!-- Barra de búsqueda -->
-      <div class="flex-grow mx-4">
+      <div class="flex-grow mx-6">
         <div class="relative">
           <input type="text" placeholder="Buscar productos..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <i class="fas fa-search absolute right-4 top-2.5 text-gray-500"></i>
+            class="w-full px-4 py-2 border border-gray-200 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-600 transition-all duration-300" />
+          <i class="fas fa-search absolute right-4 top-3 text-gray-500"></i>
         </div>
       </div>
-
+  
       <!-- Público -->
       <div *ngIf="!isLoggedIn" class="flex items-center space-x-4">
         <button routerLink="/login">
-          <i class="fas fa-sign-in-alt text-2xl text-gray-600 cursor-pointer"></i>
+          <i class="fas fa-sign-in-alt text-2xl text-gray-600 hover:text-red-600 cursor-pointer transition-all duration-300"></i>
         </button>
         <button routerLink="/register">
-          <i class="fas fa-heart text-2xl text-gray-600 cursor-pointer"></i>
+          <i class="fas fa-heart text-2xl text-gray-600 hover:text-red-600 cursor-pointer transition-all duration-300"></i>
         </button>
         <button routerLink="/recovery">
-          <i class="fas fa-shopping-cart text-2xl text-gray-600 cursor-pointer"></i>
+          <i class="fas fa-shopping-cart text-2xl text-gray-600 hover:text-red-600 cursor-pointer transition-all duration-300"></i>
         </button>
       </div>
-
+  
       <!-- Usuario autenticado (cliente) -->
       <div *ngIf="isLoggedIn && userRole === 'cliente'" class="flex items-center space-x-4">
         <button routerLink="/profile">
-          <i class="fas fa-user text-2xl text-gray-600 cursor-pointer"></i>
+          <i class="fas fa-user text-2xl text-gray-600 hover:text-red-600 cursor-pointer transition-all duration-300"></i>
         </button>
       </div>
-
+  
       <!-- Botón de cerrar sesión -->
       <div *ngIf="isLoggedIn" class="flex items-center space-x-4">
         <button (click)="logout()">
-          <i class="fas fa-sign-out-alt text-2xl text-gray-600 cursor-pointer"></i>
+          <i class="fas fa-sign-out-alt text-2xl text-gray-600 hover:text-red-600 cursor-pointer transition-all duration-300"></i>
         </button>
       </div>
     </header>
-
+  
     <!-- Navegación -->
-    <nav *ngIf="!isLoggedIn || (isLoggedIn && userRole === 'cliente')" class="bg-gray-100 py-3 px-6 ">
+    <nav *ngIf="!isLoggedIn || (isLoggedIn && userRole === 'cliente')" class="bg-gray-50 py-3 px-6">
       <div class="container mx-auto flex justify-between items-center">
         <!-- Categorías principales -->
         <ul class="flex space-x-6 text-gray-700 font-medium">
-          <li><a href="#" class="hover:text-blue-600">Cuadros</a></li>
-          <li><a href="#" class="hover:text-blue-600">Fotografías</a></li>
-          <li><a href="#" class="hover:text-blue-600">Decoración</a></li>
-          <li><a href="#" class="hover:text-blue-600">Personalizados</a></li>
+          <li><a href="#" class="hover:text-red-600 transition-all duration-300">Cuadros</a></li>
+          <li><a href="#" class="hover:text-red-600 transition-all duration-300">Fotografías</a></li>
+          <li><a href="#" class="hover:text-red-600 transition-all duration-300">Decoración</a></li>
+          <li><a href="#" class="hover:text-red-600 transition-all duration-300">Personalizados</a></li>
         </ul>
       </div>
     </nav>
-
+  
     <!-- Contenido dinámico -->
     <router-outlet></router-outlet>
   </div>
-</div>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

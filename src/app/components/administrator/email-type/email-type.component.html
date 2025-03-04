@@ -21,7 +21,6 @@
       <p class="text-gray-700 text-sm"><strong>Token:</strong> {{ emailType.token }}</p>
       <p class="text-gray-700 text-sm"><strong>Descripción:</strong> {{ emailType.description }}</p>
 
-      <!-- Botones de acción -->
       <div class="flex justify-end gap-3 mt-4">
         <button (click)="getEmailTypeById(emailType.email_type_id)"
           class="p-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition duration-300">
@@ -48,7 +47,6 @@
     <p class="text-center text-gray-500">No hay tipos de correo electrónico activos para mostrar.</p>
   </div>
 </div>
-
 <app-modal #modal title="Tipo de Correo">
   <form [formGroup]="emailTypeForm" (ngSubmit)="submitEmailType()" class="space-y-4">
     <div class="grid grid-cols-2 gap-4">
@@ -105,5 +103,3 @@
     </button>
   </form>
 </app-modal>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
