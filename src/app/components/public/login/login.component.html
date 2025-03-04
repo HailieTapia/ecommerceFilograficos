@@ -55,8 +55,7 @@
 
 
           <!-- Campo de Contraseña -->
-          <app-password-toggle [control]="loginForm.get('password')" placeholder="Ingresa tu contraseña">
-          </app-password-toggle>
+          <app-password-toggle label="Contraseña" [control]="loginForm.get('password')"></app-password-toggle>
 
           <label class="block text-sm font-medium text-gray-700 mb-1">Verificación</label>
           <div id="recaptcha-container" class="mt-1"></div>
