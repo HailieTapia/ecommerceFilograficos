@@ -44,14 +44,15 @@
               class="mt-1 block w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-md focus:outline-none focus:border-gray-400"
               placeholder="Ingresa tu email" />
             <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
-            <div class="text-red-500 text-xs mt-1"
-              *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-              <span *ngIf="loginForm.get('email')?.hasError('required')">El correo es requerido</span>
-              <span *ngIf="loginForm.get('email')?.hasError('email')">Correo no válido</span>
-              <span *ngIf="loginForm.get('email')?.hasError('noXSSValidator')">El campo contiene caracteres no
-                permitidos</span>
-            </div>
           </div>
+          <div class="text-red-500 text-xs mt-1"
+            *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            <span *ngIf="loginForm.get('email')?.hasError('required')">El correo es requerido</span>
+            <span *ngIf="loginForm.get('email')?.hasError('email')">Correo no válido</span>
+            <span *ngIf="loginForm.get('email')?.hasError('noXSSValidator')">El campo contiene caracteres no
+              permitidos</span>
+          </div>
+
 
           <!-- Campo de Contraseña -->
           <app-password-toggle [control]="loginForm.get('password')" placeholder="Ingresa tu contraseña">
