@@ -53,24 +53,24 @@
               permitidos</span>
           </div>
 
-
           <!-- Campo de Contraseña -->
           <app-password-toggle label="Contraseña" [control]="loginForm.get('password')"></app-password-toggle>
 
-          <label class="block text-sm font-medium text-gray-700 mb-1">Verificación</label>
-          <div id="recaptcha-container" class="mt-1"></div>
-          <div class="text-red-500 text-xs mt-1"
-            *ngIf="loginForm.get('recaptchaToken')?.invalid && loginForm.get('recaptchaToken')?.touched">
-            <span>Debes completar el reCAPTCHA.</span>
-          </div>
-          <div class="flex justify-right gap-4 mt-4">
-            <p class="text-gray-600 justify-right">
-              <a href="/recovery" class="text-red-600 hover:text-red-700 hover:underline">¿Olvidaste tu
-                contraseña?</a>
-            </p>
-          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Verificación</label>
+            <div id="recaptcha-container" class="mt-1"></div>
 
-          <div class="flex flex-col items-center space-y-4">
+            <div *ngIf="loginForm.get('recaptchaToken')?.invalid && loginForm.get('recaptchaToken')?.touched"
+              class="text-red-500 text-xs mt-1">
+              <span>Debes completar el reCAPTCHA.</span>
+            </div>
+          </div>
+          <div class="flex justify-end mt-4">
+            <a href="/recovery" class="text-red-600 hover:text-red-700 hover:underline">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+          <div class=" mt-4 flex flex-col items-center space-y-4">
             <button type="submit"
               class="relative w-full bg-red-600 text-white py-2 px-6 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden"
               [disabled]="loginForm.invalid">
