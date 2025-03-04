@@ -1,56 +1,55 @@
 <div class="bg-white shadow-md rounded-lg p-6">
-    <h2 class="text-lg font-medium text-gray-900 mb-4">Información Personal</h2>
-    <form [formGroup]="profileForm">
+    <div class="border-t-2 border-red-600 pt-6">
+      <h2 class="text-lg font-medium text-gray-800 mb-4">Información Personal</h2>
+      <form [formGroup]="profileForm">
         <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-
-            <div class="sm:col-span-3">
-                <label for="name" class="block text-sm font-medium text-gray-700">Nombre <span
-                        class="text-red-500">*</span></label>
-                <div class="relative">
-                    <input type="text" formControlName="name"
-                        class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <div *ngIf="profileForm.controls['name'].touched && profileForm.controls['name'].invalid"
-                        class="text-red-500 text-xs mt-1">
-                        <span *ngIf="profileForm.controls['name'].errors?.['required']">El nombre es obligatorio.
-                        </span>
-                        <span *ngIf="profileForm.controls['name'].errors?.['minlength']">Mínimo 2 caracteres. </span>
-                        <span *ngIf="profileForm.controls['name'].errors?.['maxlength']">Máximo 100 caracteres. </span>
-                        <span *ngIf="profileForm.controls['name'].errors?.['pattern']">Solo letras, espacios, guiones y
-                            apóstrofes son permitidos. </span>
-                    </div>
-                </div>
+          <div class="sm:col-span-3">
+            <label for="name" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              Nombre <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input type="text" formControlName="name"
+                class="mt-1 p-2 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+              <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+              <div *ngIf="profileForm.controls['name'].touched && profileForm.controls['name'].invalid"
+                class="text-red-500 text-xs mt-1">
+                <span *ngIf="profileForm.controls['name'].errors?.['required']">El nombre es obligatorio.</span>
+                <span *ngIf="profileForm.controls['name'].errors?.['minlength']">Mínimo 2 caracteres.</span>
+                <span *ngIf="profileForm.controls['name'].errors?.['maxlength']">Máximo 100 caracteres.</span>
+                <span *ngIf="profileForm.controls['name'].errors?.['pattern']">Solo letras, espacios, guiones y apóstrofes son permitidos.</span>
+              </div>
             </div>
-
-            <div class="sm:col-span-6">
-                <label for="email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
-                <p class="mt-1 text-sm text-gray-500">{{ userProfile.email }}</p>
+          </div>
+  
+          <div class="sm:col-span-6">
+            <label for="email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
+            <p class="mt-1 text-sm text-gray-500">{{ userProfile.email }}</p>
+          </div>
+  
+          <div class="sm:col-span-3">
+            <label for="phone" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              Teléfono <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <input type="tel" maxlength="10" formControlName="phone"
+                class="mt-1 p-2 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+              <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+              <div *ngIf="profileForm.controls['phone'].touched && profileForm.controls['phone'].invalid"
+                class="text-red-500 text-xs mt-1">
+                <span *ngIf="profileForm.controls['phone'].errors?.['required']">El teléfono es obligatorio.</span>
+                <span *ngIf="profileForm.controls['phone'].errors?.['maxlength']">Máximo 15 caracteres.</span>
+                <span *ngIf="profileForm.controls['phone'].errors?.['pattern']">Solo números y el signo + son permitidos.</span>
+              </div>
             </div>
-
-            <div class="sm:col-span-3">
-                <label for="phone" class="block text-sm font-medium text-gray-700">Teléfono<span
-                        class="text-red-500">*</span></label>
-                <div class="relative">
-                    <input type="tel" maxlength="10" formControlName="phone"
-                        class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <div *ngIf="profileForm.controls['phone'].touched && profileForm.controls['phone'].invalid"
-                        class="text-red-500 text-xs mt-1">
-                        <span *ngIf="profileForm.controls['phone'].errors?.['required']">El teléfono es
-                            obligatorio.</span>
-                        <span *ngIf="profileForm.controls['phone'].errors?.['maxlength']">Máximo 15 caracteres.</span>
-                        <span *ngIf="profileForm.controls['phone'].errors?.['pattern']">Solo números y el signo + son
-                            permitidos.</span>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-
+  
         <div class="mt-6 flex justify-end">
-            <button (click)="updateProfile()"
-                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Guardar cambios
-            </button>
+          <button (click)="updateProfile()"
+            class="ml-3 inline-flex items-center gap-2 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-300">
+            <i class="fas fa-save"></i> Guardar cambios
+          </button>
         </div>
-    </form>
-</div>
+      </form>
+    </div>
+  </div>

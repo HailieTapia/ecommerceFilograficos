@@ -1,113 +1,120 @@
 <div class="bg-white shadow-md rounded-lg p-6">
-    <h2 class="text-lg font-medium text-gray-900 mb-4 flex justify-between items-center">
+    <div class="border-t-2 border-red-600 pt-6">
+      <h2 class="text-lg font-medium text-gray-800 mb-4 flex justify-between items-center">
         Mis Direcciones
         <button (click)="openCreateModal()"
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ml-auto">
-            <i class="fas fa-plus mr-2"></i> Agregar dirección
+          class="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-300 ml-auto">
+          <i class="fas fa-plus"></i> Agregar dirección
         </button>
-    </h2>
-
-    <div *ngIf="userProfile?.Addresses?.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      </h2>
+  
+      <div *ngIf="userProfile?.Addresses?.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div *ngFor="let address of userProfile.Addresses"
-            class="border rounded-lg p-4 hover:shadow-md transition-shadow">
-            <div class="flex justify-between">
-                <h3 class="text-md font-medium">{{ address.alias || 'Dirección' }}</h3>
-                <span *ngIf="address.is_primary"
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Principal
-                </span>
-            </div>
-            <p class="text-sm text-gray-500 mt-2">
-                {{ address.street }}<br>
-                {{ address.city }}, {{ address.state }}<br>
-                {{ address.postal_code }}
-            </p>
-            <div class="mt-4 flex space-x-3">
-                <button (click)="openEditModal()" class="text-sm text-indigo-600 hover:text-indigo-800">Editar</button>
-            </div>
-        </div>
-    </div>
-
-    <div *ngIf="userProfile?.Addresses?.length === 0 || !userProfile?.Addresses" class="text-center text-gray-500">
-        <p>No tienes una dirección registrada.</p>
-    </div>
-</div>
-
-<app-modal #modal title="Dirección">
-    <form [formGroup]="addressForm" (ngSubmit)="savePerfil()" class="grid grid-cols-2 gap-4">
-        <div>
-            <label for="street" class="block text-sm font-medium text-gray-700">Calle <span
-                    class="text-red-500">*</span></label>
-            <div class="relative">
-                <input type="text" formControlName="street"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese la calle">
-                <i class="fas fa-road absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <div *ngIf="addressForm.controls['street'].touched && addressForm.controls['street'].invalid"
-                    class="text-red-500 text-xs mt-1">
-                    <span *ngIf="addressForm.controls['street'].errors?.['required']">La calle es obligatoria. </span>
-                    <span *ngIf="addressForm.controls['street'].errors?.['maxlength']">Máximo 100 caracteres. </span>
-                    <span *ngIf="addressForm.controls['street'].errors?.['minlength']">Mínimo 3 caracteres. </span>
-                    <span *ngIf="addressForm.controls['street'].errors?.['pattern']">Solo letras, números, espacios y
-                        algunos caracteres (.,-). </span>
-                </div>
-            </div>
-        </div>
-         <div>
-            <label for="city" class="block text-sm font-medium text-gray-700">Ciudad <span
-                    class="text-red-500">*</span></label>
-            <div class="relative">
-                <i class="fas fa-city absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <select id="city" formControlName="city"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Seleccione una ciudad</option>
-                    <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
-                </select>
-                <div *ngIf="addressForm.controls['city'].touched && addressForm.controls['city'].invalid"
-                    class="text-red-500 text-xs mt-1">
-                    <span *ngIf="addressForm.controls['city'].errors?.['required']">La ciudad es obligatoria.</span>
-                </div>
-            </div>
-        </div>
-        <div>
-            <label for="state" class="block text-sm font-medium text-gray-700">Estado <span
-                    class="text-red-500">*</span></label>
-            <div class="relative">
-                <i class="fas fa-map absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <select id="state" formControlName="state"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Seleccione un estado</option>
-                    <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
-                </select>
-                <div *ngIf="addressForm.controls['state'].touched && addressForm.controls['state'].invalid"
-                    class="text-red-500 text-xs mt-1">
-                    <span *ngIf="addressForm.controls['state'].errors?.['required']">El estado es obligatorio.</span>
-                </div>
-            </div>
-        </div>
-        <div>
-            <label for="postal_code" class="block text-sm font-medium text-gray-700">Código postal <span
-                    class="text-red-500">*</span></label>
-            <div class="relative">
-                <i class="fas fa-mail-bulk absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <select id="postal_code" formControlName="postal_code"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Seleccione un código</option>
-                    <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">{{
-                        postal.postal_code }}</option>
-                </select>
-                <div *ngIf="addressForm.controls['postal_code'].touched && addressForm.controls['postal_code'].invalid"
-                    class="text-red-500 text-xs mt-1">
-                    <span *ngIf="addressForm.controls['postal_code'].errors?.['required']">El código postal es
-                        obligatorio.</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-span-2 mt-4 flex justify-end">
-            <button type="submit" [disabled]="addressForm.invalid"
-                class="w-full py-2 mt-4 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-400 transition-all duration-300 flex items-center justify-center gap-2">
-                Guardar dirección
+          class="border border-gray-200 rounded-md p-4 hover:shadow-md transition-shadow">
+          <div class="flex justify-between">
+            <h3 class="text-md font-medium text-gray-800">{{ address.alias || 'Dirección' }}</h3>
+            <span *ngIf="address.is_primary"
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              Principal
+            </span>
+          </div>
+          <p class="text-sm text-gray-500 mt-2">
+            {{ address.street }}<br>
+            {{ address.city }}, {{ address.state }}<br>
+            {{ address.postal_code }}
+          </p>
+          <div class="mt-4 flex justify-end space-x-3">
+            <button (click)="openEditModal()" class="bg-yellow-600 bg-opacity-10 text-yellow-600 p-1.5 rounded-md hover:bg-yellow-600 hover:text-white transition-all duration-300">
+              <i class="fas fa-edit text-sm"></i>
             </button>
+          </div>
         </div>
+      </div>
+  
+      <div *ngIf="userProfile?.Addresses?.length === 0 || !userProfile?.Addresses" class="text-center text-gray-500">
+        <p class="flex justify-center items-center gap-2">
+          <i class="fas fa-exclamation-triangle text-red-600"></i> No tienes una dirección registrada.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <app-modal #modal title="Dirección">
+    <form [formGroup]="addressForm" (ngSubmit)="savePerfil()" class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="street" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+          Calle <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <input type="text" formControlName="street"
+            class="mt-1 p-2 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+            placeholder="Ingrese la calle">
+          <i class="fas fa-road absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+          <div *ngIf="addressForm.controls['street'].touched && addressForm.controls['street'].invalid"
+            class="text-red-500 text-xs mt-1">
+            <span *ngIf="addressForm.controls['street'].errors?.['required']">La calle es obligatoria.</span>
+            <span *ngIf="addressForm.controls['street'].errors?.['maxlength']">Máximo 100 caracteres.</span>
+            <span *ngIf="addressForm.controls['street'].errors?.['minlength']">Mínimo 3 caracteres.</span>
+            <span *ngIf="addressForm.controls['street'].errors?.['pattern']">Solo letras, números, espacios y algunos caracteres (.,-).</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label for="city" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+          Ciudad <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <i class="fas fa-city absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+          <select id="city" formControlName="city"
+            class="mt-1 p-2 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+            <option value="">Seleccione una ciudad</option>
+            <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
+          </select>
+          <div *ngIf="addressForm.controls['city'].touched && addressForm.controls['city'].invalid"
+            class="text-red-500 text-xs mt-1">
+            <span *ngIf="addressForm.controls['city'].errors?.['required']">La ciudad es obligatoria.</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label for="state" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+          Estado <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <i class="fas fa-map absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+          <select id="state" formControlName="state"
+            class="mt-1 p-2 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+            <option value="">Seleccione un estado</option>
+            <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
+          </select>
+          <div *ngIf="addressForm.controls['state'].touched && addressForm.controls['state'].invalid"
+            class="text-red-500 text-xs mt-1">
+            <span *ngIf="addressForm.controls['state'].errors?.['required']">El estado es obligatorio.</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label for="postal_code" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+          Código postal <span class="text-red-500">*</span>
+        </label>
+        <div class="relative">
+          <i class="fas fa-mail-bulk absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+          <select id="postal_code" formControlName="postal_code"
+            class="mt-1 p-2 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+            <option value="">Seleccione un código</option>
+            <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">{{ postal.postal_code }}</option>
+          </select>
+          <div *ngIf="addressForm.controls['postal_code'].touched && addressForm.controls['postal_code'].invalid"
+            class="text-red-500 text-xs mt-1">
+            <span *ngIf="addressForm.controls['postal_code'].errors?.['required']">El código postal es obligatorio.</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-span-2 mt-4 flex justify-end">
+        <button type="submit" [disabled]="addressForm.invalid"
+          class="w-full py-2 mt-4 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 transition-all duration-300 flex items-center justify-center gap-2">
+          <i class="fas fa-save"></i> Guardar dirección
+        </button>
+      </div>
     </form>
-</app-modal>
+  </app-modal>
