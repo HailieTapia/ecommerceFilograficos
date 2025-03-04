@@ -4,6 +4,8 @@ import { CategorieService } from '../../services/categorieService';
 import { ModalComponent } from '../../../modal/modal.component';
 import { CommonModule } from '@angular/common';
 import { PaginationComponent } from '../pagination/pagination.component';
+import { ToastService } from '../../services/toastService';
+
 @Component({
   selector: 'app-categories',
   standalone: true,
@@ -20,7 +22,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   categoryForm!: FormGroup;
   selectedCategoryId: number | null = null;
 
-  constructor(private categoriesService: CategorieService, private fb: FormBuilder) {
+  constructor(    private toastService: ToastService,private categoriesService: CategorieService, private fb: FormBuilder) {
     this.categoryForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]]
@@ -95,7 +97,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
           this.modal.close();
         },
         error: (err) => {
-          console.error('Error al actualizar la categoría:', err);
+          const errorMessage = err?.error?.message || 'Error al actualizar la categoría';
+          this.toastService.showToast(errorMessage, 'error');
         }
       });
     } else {
@@ -106,7 +109,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
           this.modal.close();
         },
         error: (err) => {
-          console.error('Error al crear categoría:', err);
+          const errorMessage = err?.error?.message || 'Error al crear categoría';
+          this.toastService.showToast(errorMessage, 'error');
         }
       });
     }
@@ -120,7 +124,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
         this.getAllCategories();
       },
       error: (err) => {
-        console.error('Error al desactivar la categoría:', err);
+        const errorMessage = err?.error?.message || 'Error al eliminar la categoría';
+        this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
