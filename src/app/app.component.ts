@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/public/footer/footer.component';
 import { ToastComponent } from '../app/components/administrator/shared/toast/toast.component';
+import { ThemeService } from '.././app/components/services/theme.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -12,5 +13,11 @@ import { ToastComponent } from '../app/components/administrator/shared/toast/toa
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  constructor() {}
+  constructor(
+
+    private themeService: ThemeService
+  ) {
+   
+  }
+
 }

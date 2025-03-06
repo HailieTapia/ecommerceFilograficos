@@ -1,15 +1,14 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { CategorieService } from '../../services/categorieService';
 import { ModalComponent } from '../../../modal/modal.component';
 import { CommonModule } from '@angular/common';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ToastService } from '../../services/toastService';
-
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [PaginationComponent, CommonModule, ModalComponent, ReactiveFormsModule],
+  imports: [FormsModule, PaginationComponent, CommonModule, ModalComponent, ReactiveFormsModule],
   templateUrl: './categories.component.html',
   styleUrl: './categories.component.css'
 })
@@ -22,7 +21,17 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   categoryForm!: FormGroup;
   selectedCategoryId: number | null = null;
 
-  constructor(    private toastService: ToastService,private categoriesService: CategorieService, private fb: FormBuilder) {
+  // Nuevas propiedades para los filtros y ordenamiento
+  filterActive: boolean | undefined = undefined; // undefined = todas, true = activas, false = desactivadas
+  filterName: string = ''; // Filtro por nombre
+  sortBy: string = 'name'; // Campo por defecto para ordenar
+  sortOrder: 'ASC' | 'DESC' = 'ASC'; // Dirección por defecto del ordenamiento
+
+  constructor(
+    private toastService: ToastService,
+    private categoriesService: CategorieService,
+    private fb: FormBuilder,
+  ) {
     this.categoryForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]]
@@ -38,19 +47,29 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       console.error("El modal no está inicializado correctamente.");
     }
   }
-  //traer por paginacion 
+
+  // Método ajustado para traer categorías con filtros y ordenamiento
   getAllCategories(): void {
-    this.categoriesService.getAllCategories(this.currentPage, this.itemsPerPage).subscribe({
-      next: (data) => {
-        this.categories = data.categories;
-        this.total = data.total;
-        this.currentPage = data.page;
-        this.itemsPerPage = data.pageSize;
-      },
-      error: (err) => {
-        console.error('Error al obtener categorías:', err);
-      }
-    });
+    this.categoriesService
+      .getAllCategories(
+        this.currentPage,
+        this.itemsPerPage,
+        this.filterActive, // Filtro por estado
+        this.filterName,   // Filtro por nombre
+        this.sortBy,       // Campo de ordenamiento
+        this.sortOrder     // Dirección del ordenamiento
+      )
+      .subscribe({
+        next: (data) => {
+          this.categories = data.categories;
+          this.total = data.total;
+          this.currentPage = data.page;
+          this.itemsPerPage = data.pageSize;
+        },
+        error: (err) => {
+          this.toastService.showToast('Error al obtener categorías', 'error');
+        }
+      });
   }
 
   // Maneja el cambio de página desde PaginationComponent
@@ -65,7 +84,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     this.categoryForm.reset();
     this.modal.open();
   }
-  //abrir modal
+
   openEditModal(categoryId: number): void {
     this.selectedCategoryId = categoryId;
     this.categoriesService.getCategoryById(categoryId).subscribe({
@@ -82,7 +101,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  //envir guardado-actualizar
+
   saveCategory(): void {
     if (this.categoryForm.invalid) {
       alert('Formulario inválido. Revisa los campos.');
@@ -115,7 +134,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       });
     }
   }
-  //eliminar categoria logicamente
+
   deleteCategory(categoryId: number): void {
     if (!confirm('¿Estás seguro de que deseas desactivar esta categoría?')) return;
     this.categoriesService.deleteCategory(categoryId).subscribe({
@@ -128,5 +147,24 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
         this.toastService.showToast(errorMessage, 'error');
       }
     });
+  }
+  // Método para manejar el cambio en el filtro por nombre
+  onNameFilterChange(name: string): void {
+    this.filterName = name;
+    this.currentPage = 1; // Resetear a la primera página al filtrar
+    this.getAllCategories();
+  }
+
+  // Método para manejar el cambio en el filtro de estado
+  onActiveFilterChange(active: boolean | undefined): void {
+    this.filterActive = active;
+    this.currentPage = 1; // Resetear a la primera página al filtrar
+    this.getAllCategories();
+  }
+
+  // Método para alternar el ordenamiento
+  toggleSortOrder(): void {
+    this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC';
+    this.getAllCategories();
   }
 }
