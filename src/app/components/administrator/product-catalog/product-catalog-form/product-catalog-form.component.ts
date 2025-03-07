@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, AfterViewInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -31,7 +31,8 @@ export class ProductCatalogFormComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private productService: ProductService,
-    private productAttributeService: ProductAttributeService
+    private productAttributeService: ProductAttributeService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngAfterViewInit(): void {
@@ -47,15 +48,18 @@ export class ProductCatalogFormComponent implements AfterViewInit, OnDestroy {
 
   preloadAttributes(): void {
     this.isLoading = true;
+    this.cdr.detectChanges(); // Necesario para mostrar el spinner inmediatamente
     const sub = this.productAttributeService.getAttributesByActiveCategories().subscribe({
       next: () => {
         this.attributesLoaded = true;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al precargar atributos:', err);
         alert('No se pudieron cargar los atributos. Intenta de nuevo.');
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
     this.subscriptions.add(sub);
@@ -79,6 +83,7 @@ export class ProductCatalogFormComponent implements AfterViewInit, OnDestroy {
 
   private loadProductData(productId: number): void {
     this.isLoading = true;
+    this.cdr.detectChanges();
     const sub = this.productService.getProductById(productId).subscribe({
       next: (response: DetailedProductResponse) => {
         const product = response.product;
@@ -101,11 +106,13 @@ export class ProductCatalogFormComponent implements AfterViewInit, OnDestroy {
           images: []
         }));
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar los datos del producto:', err);
         alert('No se pudo cargar el producto para edición.');
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
     this.subscriptions.add(sub);
@@ -113,10 +120,12 @@ export class ProductCatalogFormComponent implements AfterViewInit, OnDestroy {
 
   onGeneralInfoChange(data: Partial<NewProduct>): void {
     this.generalInfoData = { ...this.generalInfoData, ...data, category_id: Number(data.category_id) };
+    // Eliminamos detectChanges aquí para evitar ciclos infinitos
   }
 
   onVariantsChange(data: Variant[]): void {
     this.variantsData = [...data];
+    // Eliminamos detectChanges aquí
   }
 
   nextStep(): void {
@@ -193,6 +202,7 @@ export class ProductCatalogFormComponent implements AfterViewInit, OnDestroy {
     }
 
     this.isLoading = true;
+    this.cdr.detectChanges();
     const save$ = this.productId
       ? this.productService.updateProduct(this.productId, productData)
       : this.productService.createProduct(productData);
@@ -203,11 +213,13 @@ export class ProductCatalogFormComponent implements AfterViewInit, OnDestroy {
         this.productSaved.emit();
         this.modal.close();
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al guardar producto:', err);
         alert(`Error al guardar el producto: ${err.error?.message || 'Desconocido'}`);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     }));
   }
