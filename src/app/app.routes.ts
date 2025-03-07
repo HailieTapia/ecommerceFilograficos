@@ -26,6 +26,7 @@ import { SupportPanelComponent } from './components/administrator/support-panel/
 import { ProductAttributeComponent } from './components/administrator/product-attribute/product-attribute.component';
 import { CollaboratorsComponent } from './components/administrator/collaborators/collaborators.component';
 import { CategoriesComponent } from './components/administrator/categories/categories.component';
+import { ProductCatalogComponent } from './components/administrator/product-catalog/product-catalog.component';
 
 //errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -46,7 +47,7 @@ export const routes: Routes = [
   { path: 'product-attributes', component: ProductAttributeComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Atributos de productos' } },
   { path: 'collaborators', component: CollaboratorsComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Colaboradores' } },
   { path: 'category', component: CategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Colaboradores' } },
-
+  { path: 'product-catalog', component: ProductCatalogComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Catalogo de productos' } },
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
 

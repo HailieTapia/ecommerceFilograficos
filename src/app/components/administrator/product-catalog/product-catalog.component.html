@@ -1,0 +1,135 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="w-full p-4">
+  <!-- Encabezado con título y botón de crear -->
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-lg font-semibold">Catálogo de Productos</h2>
+    <button 
+      (click)="openCreateModal()" 
+      class="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition-colors"
+    >
+      <i class="fas fa-plus"></i>
+      Crear Producto
+    </button>
+  </div>
+
+  <!-- Tabla de Productos -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="p-4 border-b flex justify-between items-center">
+      <h3 class="text-md font-medium">Lista de Productos</h3>
+      <div class="flex items-center gap-2">
+        <label for="itemsPerPage" class="text-sm text-gray-600">Elementos por página:</label>
+        <select
+          id="itemsPerPage"
+          [(ngModel)]="itemsPerPage"
+          (change)="onItemsPerPageChange()"
+          class="p-1 border rounded-md text-sm"
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Imagen</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('product_id')">
+              ID
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'product_id'}" aria-hidden="true"></i>
+              <span *ngIf="sortColumn === 'product_id'" class="ml-1">
+                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('name')">
+              Nombre
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'name'}" aria-hidden="true"></i>
+              <span *ngIf="sortColumn === 'name'" class="ml-1">
+                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Categoría</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Tipo</th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('variant_count')">
+              Variantes
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'variant_count'}" aria-hidden="true"></i>
+              <span *ngIf="sortColumn === 'variant_count'" class="ml-1">
+                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('min_price')">
+              Precio Mín.
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'min_price'}" aria-hidden="true"></i>
+              <span *ngIf="sortColumn === 'min_price'" class="ml-1">
+                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('max_price')">
+              Precio Máx.
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'max_price'}" aria-hidden="true"></i>
+              <span *ngIf="sortColumn === 'max_price'" class="ml-1">
+                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('total_stock')">
+              Stock Total
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'total_stock'}" aria-hidden="true"></i>
+              <span *ngIf="sortColumn === 'total_stock'" class="ml-1">
+                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-sm font-medium text-gray-600">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let product of products" class="hover:bg-gray-50">
+            <td class="p-3">
+              <img
+                *ngIf="product.image_url"
+                [src]="product.image_url"
+                [alt]="product.name"
+                class="w-12 h-12 object-cover rounded"
+              />
+              <span *ngIf="!product.image_url" class="text-gray-500">Sin imagen</span>
+            </td>
+            <td class="p-3">{{ product.product_id }}</td>
+            <td class="p-3">{{ product.name }}</td>
+            <td class="p-3">{{ product.category || 'Sin categoría' }}</td>
+            <td class="p-3">{{ product.product_type }}</td>
+            <td class="p-3">{{ product.variant_count }}</td>
+            <td class="p-3">${{ product.min_price.toFixed(2) }} MXN</td>
+            <td class="p-3">${{ product.max_price.toFixed(2) }} MXN</td>
+            <td class="p-3">{{ product.total_stock }}</td>
+            <td class="p-3">
+              <div class="flex gap-2">
+                <button (click)="editProduct(product.product_id)" class="text-blue-500 hover:text-blue-700" title="Editar">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button (click)="deleteProduct(product)" class="text-red-500 hover:text-red-700" title="Eliminar">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="products.length === 0">
+            <td colspan="10" class="p-3 text-center text-gray-500">No hay productos disponibles</td>
+          </tr>
+        </tbody>
+      </table>
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalItems]="totalItems"
+        [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)"
+        class="mt-4 p-4 border-t"
+      ></app-pagination>
+    </div>
+  </div>
+
+  <!-- Modal del formulario -->
+  <app-product-catalog-form (productSaved)="onProductSaved()"></app-product-catalog-form>
+</div>

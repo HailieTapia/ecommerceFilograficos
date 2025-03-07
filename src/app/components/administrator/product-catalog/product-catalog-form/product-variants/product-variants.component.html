@@ -1,0 +1,259 @@
+<form [formGroup]="variantsForm" class="space-y-6">
+  <div formArrayName="variants" [ngClass]="{'opacity-50 pointer-events-none': isLoadingAttributes}">
+    <!-- Loading State -->
+    <div *ngIf="isLoadingAttributes" class="text-center py-8 text-gray-500">
+      <i class="fas fa-spinner fa-spin mr-2" aria-hidden="true"></i>
+      <span>Cargando atributos...</span>
+    </div>
+
+    <!-- No Variants State -->
+    <div *ngIf="!isLoadingAttributes && variants.length === 0" 
+         class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+      <p class="text-gray-500">No hay variantes. Haz clic en "Agregar Variante" para comenzar.</p>
+    </div>
+
+    <!-- Variants List -->
+    <div *ngFor="let variant of variants.controls; let i=index; trackBy: trackByIndex" 
+         [formGroupName]="i" 
+         class="bg-gray-50 rounded-lg p-4 border border-gray-200 space-y-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-medium text-gray-700">Variante #{{ i + 1 }}</h3>
+        <div class="flex space-x-2">
+          <button 
+            type="button" 
+            (click)="duplicateVariant(i)" 
+            class="text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+            title="Duplicar variante"
+            aria-label="Duplicar variante">
+            <i class="fas fa-copy" aria-hidden="true"></i>
+          </button>
+          <button 
+            type="button" 
+            (click)="removeVariant(i)" 
+            class="text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
+            title="Eliminar variante"
+            aria-label="Eliminar variante">
+            <i class="fas fa-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- SKU Input -->
+      <div class="space-y-1">
+        <label [for]="'sku-' + i" class="block text-sm font-bold flex items-center gap-2">
+          SKU <span class="text-red-500" aria-hidden="true">*</span>
+          <div class="tooltip-container">
+            <i class="fas fa-info-circle text-gray-400 tooltip-icon" aria-hidden="true"></i>
+            <span class="tooltip-text">Código único para identificar la variante del producto.</span>
+          </div>
+        </label>
+        <input 
+          [id]="'sku-' + i"
+          formControlName="sku" 
+          type="text" 
+          class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          [attr.aria-required]="true"
+          [attr.aria-invalid]="variant.get('sku')?.invalid && variant.get('sku')?.touched || false">
+        <div *ngIf="variant.get('sku')?.touched && variant.get('sku')?.errors" 
+             class="text-red-500 text-sm">
+          <span *ngIf="variant.get('sku')?.errors?.['required']">El SKU es obligatorio.</span>
+          <span *ngIf="variant.get('sku')?.errors?.['maxlength']">Máximo 50 caracteres.</span>
+        </div>
+      </div>
+
+      <!-- Attributes -->
+      <div formGroupName="attributes" class="grid grid-cols-2 gap-3">
+        <div *ngFor="let attr of attributes; trackBy: trackById" class="space-y-1">
+          <label [for]="'attr-' + attr.attribute_id + '-' + i" 
+                 class="block text-sm font-bold flex items-center gap-2">
+            {{ attr.attribute_name }}
+            <span *ngIf="attr.is_required" class="text-red-500" aria-hidden="true">*</span>
+            <div class="tooltip-container">
+              <i class="fas fa-info-circle text-gray-400 tooltip-icon" aria-hidden="true"></i>
+              <span class="tooltip-text">
+                {{ attr.data_type === 'lista' ? 'Selecciona un valor de la lista.' : 
+                   attr.data_type === 'texto' ? 'Ingresa un texto descriptivo.' : 
+                   'Ingresa un valor numérico.' }}
+              </span>
+            </div>
+          </label>
+          
+          <ng-container [ngSwitch]="attr.data_type">
+            <select 
+              *ngSwitchCase="'lista'"
+              [id]="'attr-' + attr.attribute_id + '-' + i"
+              [formControlName]="attr.attribute_id.toString()"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [attr.aria-required]="attr.is_required">
+              <option value="">Selecciona</option>
+              <option *ngFor="let option of getAttributeOptions(attr)" [value]="option">
+                {{ option }}
+              </option>
+            </select>
+
+            <input 
+              *ngSwitchCase="'texto'"
+              [id]="'attr-' + attr.attribute_id + '-' + i"
+              [formControlName]="attr.attribute_id.toString()"
+              type="text"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [attr.aria-required]="attr.is_required">
+
+            <input 
+              *ngSwitchCase="'numero'"
+              [id]="'attr-' + attr.attribute_id + '-' + i"
+              [formControlName]="attr.attribute_id.toString()"
+              type="number"
+              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              [attr.aria-required]="attr.is_required">
+          </ng-container>
+
+          <div *ngIf="variant.get('attributes')?.get(attr.attribute_id.toString())?.touched && 
+                     variant.get('attributes')?.get(attr.attribute_id.toString())?.errors" 
+               class="text-red-500 text-sm">
+            <span *ngIf="variant.get('attributes')?.get(attr.attribute_id.toString())?.errors?.['required']">
+              Este atributo es obligatorio.
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Section -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="space-y-1">
+          <label [for]="'production-cost-' + i" class="block text-sm font-bold flex items-center gap-2">
+            Costo ($) <span class="text-red-500" aria-hidden="true">*</span>
+            <div class="tooltip-container">
+              <i class="fas fa-info-circle text-gray-400 tooltip-icon" aria-hidden="true"></i>
+              <span class="tooltip-text">Costo de producción de esta variante en dólares.</span>
+            </div>
+          </label>
+          <input 
+            [id]="'production-cost-' + i"
+            formControlName="production_cost"
+            type="number"
+            step="0.01"
+            min="0.01"
+            class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [attr.aria-required]="true">
+          <div *ngIf="variant.get('production_cost')?.touched && variant.get('production_cost')?.errors" 
+               class="text-red-500 text-sm">
+            <span *ngIf="variant.get('production_cost')?.errors?.['required']">El costo es obligatorio.</span>
+            <span *ngIf="variant.get('production_cost')?.errors?.['min']">El costo mínimo es $0.01.</span>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label [for]="'profit-margin-' + i" class="block text-sm font-bold flex items-center gap-2">
+            Margen (%) <span class="text-red-500" aria-hidden="true">*</span>
+            <div class="tooltip-container">
+              <i class="fas fa-info-circle text-gray-400 tooltip-icon" aria-hidden="true"></i>
+              <span class="tooltip-text">Margen de ganancia en porcentaje sobre el costo.</span>
+            </div>
+          </label>
+          <input 
+            [id]="'profit-margin-' + i"
+            formControlName="profit_margin"
+            type="number"
+            step="0.01"
+            min="0.01"
+            class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            [attr.aria-required]="true">
+          <div *ngIf="variant.get('profit_margin')?.touched && variant.get('profit_margin')?.errors" 
+               class="text-red-500 text-sm">
+            <span *ngIf="variant.get('profit_margin')?.errors?.['required']">El margen es obligatorio.</span>
+            <span *ngIf="variant.get('profit_margin')?.errors?.['min']">El margen mínimo es 0.01%.</span>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label [for]="'price-' + i" class="block text-sm font-bold flex items-center gap-2">
+            Precio ($)
+            <div class="tooltip-container">
+              <i class="fas fa-info-circle text-gray-400 tooltip-icon" aria-hidden="true"></i>
+              <span class="tooltip-text">Precio final calculado: Costo × (1 + Margen/100).</span>
+            </div>
+          </label>
+          <input 
+            [id]="'price-' + i"
+            [value]="getPrice(i)"
+            type="text"
+            readonly
+            class="w-full p-2 bg-gray-100 border rounded-lg"
+            aria-readonly="true">
+        </div>
+      </div>
+
+      <!-- Image Upload -->
+      <div class="space-y-1">
+        <label [for]="'image-upload-' + i" class="block text-sm font-bold flex items-center gap-2">
+          Imágenes ({{ (existingImages[i].length || 0) + (variant.get('images')?.value?.length || 0) }}/10)
+          <div class="tooltip-container">
+            <i class="fas fa-info-circle text-gray-400 tooltip-icon" aria-hidden="true"></i>
+            <span class="tooltip-text">Sube hasta 10 imágenes en formato JPEG, PNG o WebP.</span>
+          </div>
+        </label>
+        <div class="border border-dashed border-gray-300 rounded-md p-4 h-48 overflow-y-auto">
+          <div class="grid grid-cols-3 gap-2">
+            <!-- Existing Images -->
+            <div *ngFor="let img of existingImages[i]; let imgIndex=index; trackBy: trackByIndex" class="relative group">
+              <img 
+                [src]="img.image_url"
+                [alt]="'Imagen existente ' + (imgIndex + 1)"
+                class="w-full h-16 object-cover rounded">
+            </div>
+
+            <!-- New Images -->
+            <div *ngFor="let preview of imagePreviews[i]; let previewIndex=index; trackBy: trackByIndex" 
+                 class="relative group">
+              <img 
+                [src]="preview"
+                [alt]="'Imagen nueva ' + (previewIndex + 1)"
+                class="w-full h-16 object-cover rounded">
+              <button 
+                type="button"
+                (click)="removeImage(i, previewIndex)"
+                class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                aria-label="Eliminar imagen">
+                <i class="fas fa-times text-xs" aria-hidden="true"></i>
+              </button>
+            </div>
+
+            <!-- Upload Button -->
+            <div *ngIf="(existingImages[i]?.length || 0) + (variant.get('images')?.value?.length || 0) < 10">
+              <input 
+                type="file"
+                [id]="'image-upload-' + i"
+                (change)="onFileChange($event, i)"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                class="hidden">
+              <label 
+                [for]="'image-upload-' + i"
+                class="flex flex-col items-center justify-center h-16 w-full border border-gray-300 rounded bg-white text-gray-500 hover:bg-gray-50 cursor-pointer">
+                <i class="fas fa-upload" aria-hidden="true"></i>
+                <span class="text-xs mt-1">Subir</span>
+              </label>
+            </div>
+          </div>
+          <div *ngIf="!existingImages[i]?.length && !variant.get('images')?.value?.length" 
+               class="flex flex-col items-center justify-center h-32 text-gray-400">
+            <i class="fas fa-upload text-2xl mb-2" aria-hidden="true"></i>
+            <p class="text-sm">Arrastra imágenes aquí o haz clic en Subir</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Variant Button -->
+  <button 
+    type="button"
+    (click)="addVariant()"
+    class="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center mt-4 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+    [disabled]="isLoadingAttributes"
+    aria-label="Agregar nueva variante">
+    <i class="fas fa-plus mr-2" aria-hidden="true"></i>
+    Agregar Variante
+  </button>
+</form>

@@ -171,6 +171,7 @@ export class ProductAttributeComponent implements OnInit, AfterViewInit {
           allowed_values: attr.allowed_values
         }));
         this.totalItems = response.total || 0;
+        console.log(this.attributes)
       },
       error: (err) => {
         console.error('Error al cargar atributos de la categoría:', err);
