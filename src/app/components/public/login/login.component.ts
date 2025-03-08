@@ -7,13 +7,12 @@ import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/config';
 import { noXSSValidator } from '../../administrator/shared/validators';
 import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
-import { ToastComponent } from '../../administrator/shared/toast/toast.component';
 import { ToastService } from '../../services/toastService';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ToastComponent, PasswordToggleComponent, CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [PasswordToggleComponent, CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })

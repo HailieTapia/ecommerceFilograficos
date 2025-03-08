@@ -20,7 +20,6 @@ export class FooterComponent {
     this.companyService.getCompanyInfo().subscribe(
       (response) => {
         this.companyInfo = response.company;
-        console.log('footer:', response);
       },
       (error) => {
         console.error('Error al obtener:', error);

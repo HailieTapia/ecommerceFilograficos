@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams,HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
@@ -11,20 +11,42 @@ import { environment } from '../../environments/config';
 export class CategorieService {
   private apiUrl = `${environment.baseUrl}/categories`;
 
-  constructor(private csrfService: CsrfService, private http: HttpClient) {}
+  constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-// Obtener todas las categorías con paginación
-getAllCategories(page: number = 1, pageSize: number = 10): Observable<any> {
-  return this.csrfService.getCsrfToken().pipe(
-    switchMap(csrfToken => {
-      const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-      const params = new HttpParams()
-        .set('page', page.toString())
-        .set('pageSize', pageSize.toString());
-      return this.http.get<any>(`${this.apiUrl}`, { headers, params, withCredentials: true });
-    })
-  );
-}
+  // Obtener todas las categorías con paginación
+  getAllCategories(
+    page: number = 1,
+    pageSize: number = 10,
+    active?: boolean, // Opcional: true (activas), false (desactivadas), undefined (todas)
+    name?: string,    // Opcional: filtro por nombre
+    sortBy?: string,  // Opcional: campo para ordenar (en este caso solo 'name')
+    sortOrder?: 'ASC' | 'DESC' // Opcional: dirección del ordenamiento
+  ): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        let params = new HttpParams()
+          .set('page', page.toString())
+          .set('pageSize', pageSize.toString());
+
+        // Agregar parámetros opcionales si están definidos
+        if (active !== undefined) {
+          params = params.set('active', active.toString());
+        }
+        if (name) {
+          params = params.set('name', name);
+        }
+        if (sortBy) {
+          params = params.set('sortBy', sortBy);
+        }
+        if (sortOrder) {
+          params = params.set('sortOrder', sortOrder);
+        }
+
+        return this.http.get<any>(`${this.apiUrl}`, { headers, params, withCredentials: true });
+      })
+    );
+  }
 
   //obtener el id y nombre de todas las categorias 
   getCategories(): Observable<any> {
@@ -35,7 +57,7 @@ getAllCategories(page: number = 1, pageSize: number = 10): Observable<any> {
       })
     );
   }
-  
+
   // Obtener una categoría por ID
   getCategoryById(id: number): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(

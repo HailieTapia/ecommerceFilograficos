@@ -4,12 +4,12 @@ import { PasswordService } from '../../services/password.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ToastComponent } from '../../administrator/shared/toast/toast.component';
 import { ToastService } from '../../services/toastService';
+import { PasswordComponent } from '../../administrator/shared/password/password.component';
 @Component({
   selector: 'app-recover',
   standalone: true,
-  imports: [ToastComponent, CommonModule, ReactiveFormsModule],
+  imports: [PasswordComponent,CommonModule, ReactiveFormsModule],
   templateUrl: './recover.component.html',
   styleUrl: './recover.component.css'
 })
@@ -20,8 +20,6 @@ export class RecoverComponent {
   stage: number = 1;
   email: string = "";
   recoveryToken: string = "";
-  passwordVisible = false; 
-  confirmPasswordVisible = false; 
 
   constructor(private toastService: ToastService, private router: Router, private fb: FormBuilder, private passwordService: PasswordService) {
     this.recoveryForm = this.fb.group({
@@ -37,19 +35,8 @@ export class RecoverComponent {
       otp6: ['', [Validators.required]],
       otp7: ['', [Validators.required]]
     });
-    this.resetForm = this.fb.group({
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required, Validators.minLength(8)]]
-    });
-  }
-  // Método para alternar la visibilidad de la contraseña
-  togglePasswordVisibility() {
-    this.passwordVisible = !this.passwordVisible;
-  }
-
-  // Método para alternar la visibilidad de la confirmación de la contraseña
-  toggleConfirmPasswordVisibility() {
-    this.confirmPasswordVisible = !this.confirmPasswordVisible;
+    // Inicializamos resetForm vacío; PasswordComponent agregará los controles
+    this.resetForm = this.fb.group({});
   }
   // Método para iniciar el proceso de recuperación de contraseña
   initiateRecovery() {
@@ -103,20 +90,20 @@ export class RecoverComponent {
 
   //metodo para reestablecer una contraseña
   resetPassword() {
-    if (this.resetForm.invalid || this.resetForm.value.newPassword !== this.resetForm.value.confirmPassword) {
-      console.error('Las contraseñas no coinciden o son inválidas');
+    if (this.resetForm.invalid) {
+      this.toastService.showToast('Por favor, corrige los errores en el formulario', 'error');
       return;
     }
+
     const credentials = {
       email: this.email,
-      newPassword: this.resetForm.value.newPassword
+      newPassword: this.resetForm.value.password // Ajustado al nombre por defecto del PasswordComponent
     };
 
     this.passwordService.resetPassword(credentials).subscribe(
       (response) => {
         const successMessage = response?.message || 'Contraseña restablecida exitosamente';
         this.toastService.showToast(successMessage, 'success');
-
         this.router.navigate(['login']);
         this.recoveryForm.reset();
         this.otpForm.reset();

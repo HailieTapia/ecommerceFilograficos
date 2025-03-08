@@ -3,6 +3,7 @@ import { ModalComponent } from '../../../modal/modal.component';
 import { TemplateService } from '../../services/template.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ToastService } from '../../services/toastService';
 
 @Component({
   selector: 'app-email-template',
@@ -19,7 +20,7 @@ export class EmailTemplateComponent {
   selectedEmailTemplate: any = null;
   emailTemplateId: number | null = null;
 
-  constructor(private templateService: TemplateService, private fb: FormBuilder) {
+  constructor(    private toastService: ToastService,private templateService: TemplateService, private fb: FormBuilder) {
     this.emailTemplateForm = this.fb.group({
       name: ['', [Validators.required]],
       email_type_id: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
@@ -55,8 +56,8 @@ export class EmailTemplateComponent {
           this.getAllTemplates();
         },
         error: (error) => {
-          this.errorMessage = 'Error al eliminar el tipo de correo electrónico: ' + error.message;
-          console.error("Error en la llamada API:", error);
+          const errorMessage = error?.error?.message || 'Error al eliminar el tipo de correo electrónico';
+          this.toastService.showToast(errorMessage, 'error');
         }
       });
     }

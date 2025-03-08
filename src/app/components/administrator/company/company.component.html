@@ -1,165 +1,206 @@
-<div class="max-w-7xl mx-auto p-4 space-y-6">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-        <i class="fas fa-building text-green-500"></i> Información de la Empresa
+<div class="max-w-7xl mx-auto p-6">
+    <h2
+        class="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-green-400 bg-clip-text text-transparent mb-6 flex items-center gap-2">
+        <i class="fas fa-building text-red-600"></i> Información de la Empresa
     </h2>
-    <form [formGroup]="companyForm" (ngSubmit)="updateCompanyInfo()">
-        <!-- Nombre y Slogan -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-signature text-gray-500"></i> Nombre de la Empresa
-                </label>
-                <input id="name" formControlName="name"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese el nombre">
-            </div>
-            <div>
-                <label for="slogan" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-quote-left text-gray-500"></i> Slogan
-                </label>
-                <input id="slogan" formControlName="slogan"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese el slogan">
+    <form [formGroup]="companyForm" (ngSubmit)="updateCompanyInfo()"
+        class="bg-white shadow-md rounded-lg p-6 space-y-8">
+
+        <div class="border-t-2 border-red-600 pt-6">
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Nombre y Slogan</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Nombre de la Empresa <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input id="name" formControlName="name"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese el nombre">
+                        <i class="fas fa-signature absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="slogan" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Slogan
+                    </label>
+                    <div class="relative">
+                        <input id="slogan" formControlName="slogan"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese el slogan">
+                        <i
+                            class="fas fa-quote-left absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Dirección -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            <div>
-                <label for="address_street" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-road text-gray-500"></i> Calle
-                </label>
-                <input id="address_street" formControlName="address_street"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese la calle">
-            </div>
-            <div>
-                <label for="address_city" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-city text-gray-500"></i> Ciudad
-                </label>
-                <select id="address_city" formControlName="address_city"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
-                </select>
-            </div>
-            <div>
-                <label for="addressState" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-map text-gray-500"></i> Estado
-                </label>
-                <select id="addressState" formControlName="address_state"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
-                </select>
-            </div>
-
-            <div>
-                <label for="address_postal_code"
-                    class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-mail-bulk text-gray-500"></i> Código Postal
-                </label>
-                <select id="address_postal_code" formControlName="address_postal_code"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">{{
-                        postal.postal_code }}</option>
-                </select>
-            </div>
-            <div>
-                <label for="address_country" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-globe text-gray-500"></i> País
-                </label>
-                <select id="address_country" formControlName="address_country"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option *ngFor="let country of address.countries" [value]="country.name">{{ country.name }}</option>
-                </select>
+        <div class="border-t-2 border-red-600 pt-6">
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Contacto</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="phone_number" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Número de Teléfono
+                    </label>
+                    <div class="relative">
+                        <input id="phone_number" formControlName="phone_number" maxlength="10"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese el teléfono">
+                        <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Correo Electrónico <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input id="email" formControlName="email"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese el correo">
+                        <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Contacto -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <div>
-                <label for="phone_number" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-phone text-gray-500"></i> Número de Teléfono
-                </label>
-                <input id="phone_number" formControlName="phone_number"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese el teléfono">
-            </div>
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <i class="fas fa-envelope text-gray-500"></i> Correo Electrónico
-                </label>
-                <input id="email" formControlName="email"
-                    class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Ingrese el correo">
+        <div class="border-t-2 border-red-600 pt-6">
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Dirección</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="address_street" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Calle
+                    </label>
+                    <div class="relative">
+                        <input id="address_street" formControlName="address_street"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese la calle">
+                        <i class="fas fa-road absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="address_city" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Ciudad
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-city absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                        <select id="address_city" formControlName="address_city"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+                            <option value="">Seleccione una ciudad</option>
+                            <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="addressState" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Estado
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-map absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                        <select id="addressState" formControlName="address_state"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+                            <option value="">Seleccione un estado</option>
+                            <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="address_postal_code"
+                        class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        Código Postal
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-mail-bulk absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                        <select id="address_postal_code" formControlName="address_postal_code"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+                            <option value="">Seleccione un código</option>
+                            <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">{{
+                                postal.postal_code }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="address_country"
+                        class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                        País
+                    </label>
+                    <div class="relative">
+                        <i class="fas fa-globe absolute left-3 top-1/2 transform -translate-y-1/2 text-red-600"></i>
+                        <select id="address_country" formControlName="address_country"
+                            class="mt-1 p-3 pl-10 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300">
+                            <option value="">Seleccione un país</option>
+                            <option *ngFor="let country of address.countries" [value]="country.name">{{ country.name }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Redes Sociales -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <div class="flex items-center gap-2">
-                <div class="w-full">
-                    <label for="facebook" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                        <i class="fab fa-facebook text-blue-600"></i> Facebook
-                    </label>
-                    <input id="facebook" formControlName="facebook"
-                        class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ingrese el enlace">
+        <div class="border-t-2 border-red-600 pt-6">
+            <h3 class="text-lg font-medium text-gray-800 mb-4">Redes Sociales</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-full">
+                        <label for="linkedin" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <i class="fab fa-linkedin text-gray-400"></i> LinkedIn
+                        </label>
+                        <input id="linkedin" formControlName="linkedin"
+                            class="mt-2 p-3 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese el enlace">
+                    </div>
+                    <button type="button" (click)="deleteSocialMedia('linkedin')"
+                        class="mt-6 p-2 bg-red-600 text-white rounded-full hover:shadow-md transition-all duration-300">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
                 </div>
-                <button (click)="deleteSocialMedia('facebook')"
-                    class="px-4 py-2 text-red-600 rounded-lg hover:bg-red-50 transition-all duration-300">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="w-full">
-                    <label for="linkedin" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                        <i class="fab fa-linkedin text-blue-700"></i> LinkedIn
-                    </label>
-                    <input id="linkedin" formControlName="linkedin"
-                        class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ingrese el enlace">
+                <div class="flex items-center gap-3">
+                    <div class="w-full">
+                        <label for="twitter" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <i class="fab fa-twitter text-black-600"></i> Twitter
+                        </label>
+                        <input id="twitter" formControlName="twitter"
+                            class="mt-2 p-3 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese el enlace">
+                    </div>
+                    <button type="button" (click)="deleteSocialMedia('twitter')"
+                        class="mt-6 p-2 bg-red-600 text-white rounded-full hover:shadow-md transition-all duration-300">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
                 </div>
-                <button (click)="deleteSocialMedia('linkedin')"
-                    class="px-4 py-2 text-red-600 rounded-lg hover:bg-red-50 transition-all duration-300">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="w-full">
-                    <label for="twitter" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                        <i class="fab fa-twitter text-blue-400"></i> Twitter
-                    </label>
-                    <input id="twitter" formControlName="twitter"
-                        class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ingrese el enlace">
+                <div class="flex items-center gap-3">
+                    <div class="w-full">
+                        <label for="facebook" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <i class="fab fa-facebook text-blue-600"></i> Facebook
+                        </label>
+                        <input id="facebook" formControlName="facebook"
+                            class="mt-2 p-3 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese el enlace">
+                    </div>
+                    <button type="button" (click)="deleteSocialMedia('facebook')"
+                        class="mt-6 p-2 bg-red-600 text-white rounded-full hover:shadow-md transition-all duration-300">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
                 </div>
-                <button (click)="deleteSocialMedia('twitter')"
-                    class="px-4 py-2 text-red-600 rounded-lg hover:bg-red-50 transition-all duration-300">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="w-full">
-                    <label for="instagram" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
-                        <i class="fab fa-instagram text-pink-500"></i> Instagram
-                    </label>
-                    <input id="instagram" formControlName="instagram"
-                        class="mt-1 p-2 pl-10 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ingrese el enlace">
+                <div class="flex items-center gap-3">
+                    <div class="w-full">
+                        <label for="instagram" class="block text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <i class="fab fa-instagram text-red-600"></i> Instagram
+                        </label>
+                        <input id="instagram" formControlName="instagram"
+                            class="mt-2 p-3 block w-full bg-gray-50 border border-gray-200 rounded-md shadow-sm focus:ring-2 focus:ring-red-600 focus:border-red-600 transition-all duration-300"
+                            placeholder="Ingrese el enlace">
+                    </div>
+                    <button type="button" (click)="deleteSocialMedia('instagram')"
+                        class="mt-6 p-2 bg-red-600 text-white rounded-full hover:shadow-md transition-all duration-300">
+                        <i class="fas fa-trash text-sm"></i>
+                    </button>
                 </div>
-                <button (click)="deleteSocialMedia('instagram')"
-                    class="px-4 py-2 text-red-600 rounded-lg hover:bg-red-50 transition-all duration-300">
-                    <i class="fas fa-trash"></i>
-                </button>
             </div>
         </div>
 
-        <!-- Botón de Envío -->
         <button type="submit" [disabled]="companyForm.invalid"
-            class="w-full py-3 mt-6 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:bg-gray-400 transition-all duration-300 flex items-center justify-center gap-2">
+            class="w-full py-3 mt-6 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 transition-all duration-300 flex items-center justify-center gap-2">
             Actualizar Información
         </button>
     </form>
 </div>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

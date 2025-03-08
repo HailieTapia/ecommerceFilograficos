@@ -2,13 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CompanyService } from '../../services/company.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import * as addressData from '../shared/direccion.json';
-import { CommonModule } from '@angular/common'; 
+import { CommonModule } from '@angular/common';
 import { noXSSValidator } from '../shared/validators';
+import { ToastService } from '../../services/toastService';
 
 @Component({
   selector: 'app-company',
   standalone: true,
-  imports: [CommonModule,ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './company.component.html',
   styleUrl: './company.component.css'
 })
@@ -16,24 +17,28 @@ import { noXSSValidator } from '../shared/validators';
 export class CompanyComponent implements OnInit {
   company: any;
   companyForm: FormGroup;
-  isUpdating: boolean = false;
   address: any = addressData;
+  isLoading: boolean = true; 
 
-  constructor(private fb: FormBuilder, private companyService: CompanyService) {
+  constructor(
+    private fb: FormBuilder,
+    private toastService: ToastService,
+    private companyService: CompanyService
+  ) {
     this.companyForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100),noXSSValidator()]],
-      slogan: ['', [Validators.maxLength(100),noXSSValidator()]],
-      address_street: ['', [Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ0-9,.:]+( [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ0-9,.:]+)*$/), Validators.minLength(3), Validators.maxLength(100),noXSSValidator()]],
-      address_city: ['', Validators.required,],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100), noXSSValidator()]],
+      slogan: ['', [Validators.maxLength(100), noXSSValidator()]],
+      address_street: ['', [Validators.pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ0-9,.:]+( [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ0-9,.:]+)*$/), Validators.minLength(3), Validators.maxLength(100), noXSSValidator()]],
+      address_city: ['', Validators.required],
       address_state: ['', Validators.required],
       address_postal_code: ['', Validators.required],
-      address_country: ['', Validators.required,],
-      phone_number: ['', [Validators.pattern(/^\d{10}$/),noXSSValidator()]],
-      email: ['', [Validators.email,noXSSValidator()]],
-      facebook: ['', [Validators.pattern('https?://.*'),noXSSValidator()]],
-      linkedin: ['', [Validators.pattern('https?://.*'),noXSSValidator()]],
-      twitter: ['', [Validators.pattern('https?://.*'),noXSSValidator()]],
-      instagram: ['', [Validators.pattern('https?://.*'),noXSSValidator()]],
+      address_country: ['', Validators.required],
+      phone_number: ['', [Validators.pattern(/^\d{10}$/), noXSSValidator()]],
+      email: ['', [Validators.email, noXSSValidator()]],
+      facebook: ['', [Validators.pattern('https?://.*'), noXSSValidator()]],
+      linkedin: ['', [Validators.pattern('https?://.*'), noXSSValidator()]],
+      twitter: ['', [Validators.pattern('https?://.*'), noXSSValidator()]],
+      instagram: ['', [Validators.pattern('https?://.*'), noXSSValidator()]],
     });
   }
 
@@ -41,65 +46,77 @@ export class CompanyComponent implements OnInit {
     this.getCompanyInfo();
   }
 
-  // Obtener la información de la empresa
   getCompanyInfo(): void {
+    this.isLoading = true;
     this.companyService.getCompanyInfo().subscribe(
       (response) => {
         this.company = response.company;
-        this.patchFormValues(this.company);
-        console.log('Obtención con éxito:', response);
+        this.companyForm.patchValue({
+          name: this.company.name || '',
+          slogan: this.company.slogan || '',
+          address_street: this.company.address_street || '',
+          address_city: this.company.address_city || '',
+          address_state: this.company.address_state || '',
+          address_postal_code: this.company.address_postal_code || '',
+          address_country: this.company.address_country || '',
+          phone_number: this.company.phone_number || '',
+          email: this.company.email || '',
+          facebook: this.company.facebook || '',
+          linkedin: this.company.linkedin || '',
+          twitter: this.company.twitter || '',
+          instagram: this.company.instagram || ''
+        });
+        this.isLoading = false;
       },
       (error) => {
-        console.error('Error al obtener:', error);
+        this.isLoading = false;
+        const errorMessage = error?.error?.message || 'Error al obtener la información de la empresa';
+        this.toastService.showToast(errorMessage, 'error');
+        console.error('Error:', error);
       }
     );
   }
 
-  // Método para eliminar un enlace de red social individualmente
   deleteSocialMedia(platform: string): void {
-    this.isUpdating = true;
-
+    this.toastService.showToast(
+      `¿Estás seguro de eliminar ${platform}?`,
+      'warning',
+      'Eliminar',
+      () => this.confirmDeletion(platform)
+    );
+  }
+  
+  confirmDeletion(platform: string): void {
+    this.isLoading = true;
     this.companyForm.get(platform)?.setValue('');
-
+  
     this.companyService.deleteSocialMediaLinks({ [platform]: true }).subscribe(
       (response) => {
-        console.log(`${platform} eliminado correctamente`);
         this.company = response.company;
         this.companyForm.patchValue(response.company);
-
-        this.isUpdating = false;
+        this.isLoading = false;
+        this.toastService.showToast(`${platform} eliminado correctamente.`, 'success');
       },
       (error) => {
-        console.error(`Error al eliminar ${platform}:`, error);
-        this.isUpdating = false;
+        this.isLoading = false;
+        const errorMessage = `Error al eliminar ${platform}: ${error?.error?.message || 'Inténtalo de nuevo'}`;
+        this.toastService.showToast(errorMessage, 'error');
       }
     );
   }
-  // Método para actualizar el formulario con los valores de la empresa de forma dinámica
-  patchFormValues(company: any): void {
-    if (company) {
-      Object.keys(company).forEach(key => {
-        if (this.companyForm.contains(key)) {
-          this.companyForm.get(key)?.setValue(company[key]);
-        }
-      });
-    }
-  }
-
-  // Método para actualizar la información de la empresa
+  
   updateCompanyInfo(): void {
-    if (this.companyForm.valid && !this.isUpdating) {
-      console.log('Datos enviados para actualizar:', this.companyForm.value);
+    if (this.companyForm.valid) {
       this.companyService.updateCompanyInfo(this.companyForm.value).subscribe(
         (response) => {
-          console.log('Información de la empresa actualizada:', response);
+          this.toastService.showToast('Información actualizada correctamente.', 'success');
+          this.getCompanyInfo(); 
         },
         (error) => {
-          console.error('Error al actualizar:', error);
+          const errorMessage = error?.error?.message || 'Error al actualizar la información';
+          this.toastService.showToast(errorMessage, 'error');
         }
       );
-    } else {
-      console.log('Formulario no válido o en proceso de actualización');
     }
   }
 }
