@@ -1,5 +1,4 @@
 <div class="bg-light-background dark:bg-dark-background max-full mx-auto p-6 font-sans">
-  <!-- Encabezado -->
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
       <i class="fas fa-list text-light-primary dark:text-dark-primary"></i> Gestión de Categorías
@@ -9,34 +8,34 @@
       <i class="fas fa-plus"></i> Agregar Categoría
     </button>
   </div>
-  
+
   <!-- Filtros -->
   <div class="flex justify-between items-center mb-6 gap-4">
     <!-- Filtro por nombre -->
     <div class="relative w-full">
-      <input type="text" 
-             [(ngModel)]="filterName" 
-             (ngModelChange)="onNameFilterChange($event)"
-             placeholder="Buscar categoría..."
-             class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg placeholder-light-secondary dark:placeholder-dark-secondary text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200">
-      <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
+      <input type="text" [(ngModel)]="filterName" (ngModelChange)="onNameFilterChange($event)"
+        placeholder="Buscar categoría..."
+        class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg placeholder-light-secondary dark:placeholder-dark-secondary text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200">
+      <i
+        class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
     </div>
 
     <!-- Filtro por estado -->
     <div class="relative">
-      <select [(ngModel)]="filterActive" 
-              (ngModelChange)="onActiveFilterChange($event)"
-              class="appearance-none pl-4 pr-8 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200 text-light-text dark:text-dark-text">
+      <select [(ngModel)]="filterActive" (ngModelChange)="onActiveFilterChange($event)"
+        class="appearance-none pl-4 pr-8 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200 text-light-text dark:text-dark-text">
         <option [ngValue]="undefined">Todos los estados</option>
         <option [ngValue]="true">Activo</option>
         <option [ngValue]="false">Inactivo</option>
       </select>
-      <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
+      <i
+        class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
     </div>
   </div>
 
   <!-- Contenedor Principal -->
-  <div class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
+  <div
+    class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
     <h2 class="text-center font-medium text-light-text dark:text-dark-text mb-4 text-lg">Lista de Categorías</h2>
     <div *ngIf="categories.length > 0; else noCategories">
       <div class="overflow-x-auto">
@@ -47,7 +46,8 @@
               <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">
                 <div class="flex items-center gap-2">
                   Nombre
-                  <button (click)="toggleSortOrder()" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+                  <button (click)="toggleSortOrder()"
+                    class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
                     <i class="fas fa-sort"></i>
                   </button>
                 </div>
@@ -58,29 +58,31 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let category of categories" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
+            <tr *ngFor="let category of categories"
+              class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
               <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ category.category_id }}</td>
               <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ category.name }}</td>
               <td class="px-4 py-3 text-light-text dark:text-dark-text">
                 <span class="px-3 py-1 text-xs font-medium rounded-full"
-                      [ngClass]="{'bg-light-success text-light-success-text': category.active === true, 'bg-light-danger text-light-danger-text dark:bg-dark-danger dark:text-dark-danger-text': category.active === false}">
+                  [ngClass]="{'bg-light-success text-light-success-text': category.active === true, 'bg-light-danger text-light-danger-text dark:bg-dark-danger dark:text-dark-danger-text': category.active === false}">
                   {{ category.active === true ? 'Activo' : 'Inactivo' }}
                 </span>
               </td>
               <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ category.description }}</td>
               <td class="px-4 py-3">
                 <div class="flex justify-center items-center gap-4">
-
-                  <button (click)="openEditModal(category.category_id)" class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                  <button (click)="openEditModal(category.category_id)"
+                    class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                     <i class="fas fa-edit"></i>
-                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                    <span
+                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
                   </button>
-
-                  <button (click)="deleteCategory(category.category_id)" class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
+                  <button (click)="deleteCategory(category.category_id)"
+                    class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
                     <i class="fas fa-trash"></i>
-                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                    <span
+                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
                   </button>
-
                 </div>
               </td>
             </tr>

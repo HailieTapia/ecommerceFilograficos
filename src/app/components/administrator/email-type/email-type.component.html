@@ -1,13 +1,16 @@
-<div class="bg-light-background dark:bg-dark-background max-full mx-auto p-6 font-sans">
+<div class="bg-light-background dark:bg-dark-background max-w-full mx-auto p-6 font-sans">
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
-      <i class="fas fa-list text-light-primary dark:text-dark-primary"></i>Tipos de Email
-    </h1>
-    <p class="mt-2 text-light-secondary dark:text-dark-secondary">Gestiona los tipos de correos electrónicos del
-      sistema.</p>
+    <div>
+      <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
+        <i class="fas fa-paper-plane text-light-primary dark:text-dark-primary"></i> Tipos de Email
+      </h1>
+      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Gestiona los tipos de correos electrónicos
+        del
+        sistema.</p>
+    </div>
     <button (click)="openModal()"
       class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
-      <i class="fas fa-plus"></i> Agregar Tipo
+      <i class="fas fa-plus "></i> Agregar Tipo
     </button>
   </div>
 
@@ -35,10 +38,10 @@
 
                 <div class="flex justify-center items-center gap-4">
                   <button (click)="getEmailTypeById(emailType.email_type_id)"
-                  class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
+                    class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
                     <i class="fas fa-eye"></i>
                     <span
-                    class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
+                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
                   </button>
 
                   <button (click)="openModal(emailType)"
@@ -49,10 +52,10 @@
                   </button>
 
                   <button (click)="deleteEmailType(emailType.email_type_id)"
-                  class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                    class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
                     <i class="fas fa-trash"></i>
                     <span
-                    class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
                   </button>
                 </div>
               </td>
@@ -61,18 +64,13 @@
         </table>
       </div>
     </div>
-  </div>
-
-  <!-- Mensaje cuando no hay datos -->
-  <ng-template #noEmailTypes>
-    <div
-      class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
+    <ng-template #noEmailTypes>
       <p class="text-light-secondary dark:text-dark-secondary flex items-center gap-2">
         <i class="fas fa-exclamation-triangle text-red-500"></i> No hay tipos de correo
         electrónico activos para mostrar.
       </p>
-    </div>
-  </ng-template>
+    </ng-template>
+  </div>
 </div>
 
 <app-modal #modal title="Tipo de Correo">
