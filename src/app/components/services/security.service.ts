@@ -24,7 +24,7 @@ export class SecurityService {
         );
     }
 
-    // Actualizar configuración de seguridad NO VERIFICADO
+    // Actualizar configuración de seguridad
     updateTokenLifetime(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
