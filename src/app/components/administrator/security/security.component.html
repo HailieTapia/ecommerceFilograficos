@@ -1,141 +1,233 @@
 <div class="bg-light-background dark:bg-dark-background max-w-full mx-auto p-6 font-sans">
-  <div class="flex justify-between items-center mb-8">
-    <div class="flex flex-col justify-center">
-      <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
-        <i class="fas fa-lock text-light-primary dark:text-dark-primary"></i> Accesos Fallidos
-      </h1>
-      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-2">Gestiona los accesos del sistema.</p>
+  <!-- Encabezado -->
+  <div class="flex items-center mb-4">
+    <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
+      <i class="fas fa-cogs text-light-primary dark:text-dark-primary"></i> Configuración de Seguridad
+    </h1>
+  </div>
+
+  <!-- Pestañas de Navegación -->
+  <div class="flex border-b border-gray-200 dark:border-gray-600 mb-6">
+    <button (click)="selectTab('seguridad')" 
+      [class.text-light-primary]="selectedTab === 'seguridad'" 
+      [class.text-dark-primary]="selectedTab === 'seguridad'" 
+      [class.border-b-2]="selectedTab === 'seguridad'" 
+      [class.border-light-primary]="selectedTab === 'seguridad'" 
+      [class.border-dark-primary]="selectedTab === 'seguridad'" 
+      class="px-6 py-2 text-sm font-semibold text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+      Seguridad
+    </button>
+
+    <button (click)="selectTab('listas')" 
+      [class.text-light-primary]="selectedTab === 'listas'" 
+      [class.text-dark-primary]="selectedTab === 'listas'" 
+      [class.border-b-2]="selectedTab === 'listas'" 
+      [class.border-light-primary]="selectedTab === 'listas'" 
+      [class.border-dark-primary]="selectedTab === 'listas'" 
+      class="px-6 py-2 text-sm font-semibold text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+      Listas
+    </button>
+
+    <button (click)="selectTab('bloqueos')" 
+      [class.text-light-primary]="selectedTab === 'bloqueos'" 
+      [class.text-dark-primary]="selectedTab === 'bloqueos'" 
+      [class.border-b-2]="selectedTab === 'bloqueos'" 
+      [class.border-light-primary]="selectedTab === 'bloqueos'" 
+      [class.border-dark-primary]="selectedTab === 'bloqueos'" 
+      class="px-6 py-2 text-sm font-semibold text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+      Bloqueos
+    </button>
+  </div>
+
+  <!-- Sub-Sección Seguridad -->
+  <div *ngIf="selectedTab === 'seguridad'" class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
+    <div class="flex items-center gap-3 mb-6">
+      <i class="fas fa-shield-alt text-light-primary dark:text-dark-primary text-xl"></i>
+      <h2 class="font-semibold text-light-text dark:text-dark-text">Configuración de Seguridad</h2>
     </div>
-  
-    <!-- Selector de Periodo -->
-    <div class="flex items-center gap-4">
-        <select id="periodo" [(ngModel)]="selectedPeriodo" (change)="onPeriodoChange()"
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Período de Bloqueo -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Período de Bloqueo</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.block_period_days }} días</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.block_period_days" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Máximos Intentos Fallidos -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Máximos Intentos Fallidos</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.max_failed_login_attempts }}</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.max_failed_login_attempts" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Bloqueos Máximos -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Bloqueos Máximos</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.max_blocks_in_n_days }}</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.max_blocks_in_n_days" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Duración de la verificación del correo -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Duración de la verificación del correo</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.email_verification_lifetime }}</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.email_verification_lifetime" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Duración de la sesión -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Duración de la Sesión</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.session_lifetime }}</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.session_lifetime" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Tiempo de Vida OTP -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Tiempo de Vida OTP</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.otp_lifetime }} segundos</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.otp_lifetime" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Tiempo de Vida del JWT -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Tiempo de Vida del JWT</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.jwt_lifetime }} segundos</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.jwt_lifetime" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Tiempo de Vida del Cookie -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Tiempo de Vida del Cookie</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.cookie_lifetime }} segundos</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.cookie_lifetime" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+
+      <!-- Umbral de Caducidad -->
+      <div class="p-4 rounded-lg shadow-sm bg-light-row-hover dark:bg-dark-row-hover">
+        <p class="text-sm font-semibold text-light-secondary dark:text-dark-secondary">Umbral de Caducidad</p>
+        <div class="flex items-center gap-4 mt-2">
+          <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.expiration_threshold_lifetime }} segundos</span>
+          <input *ngIf="isEditing" [(ngModel)]="config.expiration_threshold_lifetime" type="number"
+            class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200" />
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-4 mt-6">
+      <button *ngIf="!isEditing" (click)="editConfig()"
         class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
-          <option value="dia">Día</option>
-          <option value="semana">Semana</option>
-          <option value="mes">Mes</option>
-        </select>
+        <i class="fas fa-edit"></i> Editar
+      </button>
+      <button *ngIf="isEditing" (click)="saveConfig()"
+        class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
+        <i class="fas fa-save"></i> Guardar
+      </button>
     </div>
   </div>
-  
-  <div *ngIf="failedLoginAttempts.length > 0; else noData">
-    <table class="min-w-full border-collapse">
-      <thead class="bg-light-table-header dark:bg-dark-table-header">
-        <tr>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Nombre</th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Email</th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Estado</th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Fecha</th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Tipo de Usuario
-          </th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Intentos</th>
-          <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let attempt of failedLoginAttempts"
-          class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
-          <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ attempt.nombre }}</td>
-          <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ attempt.email }}</td>
-          <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ attempt.estado }}</td>
-          <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ attempt.fecha | date: 'short' }}</td>
-          <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ attempt.tipo_usuario }}</td>
-          <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ attempt.numero_intentos }}</td>
-          <td>
-            <button *ngIf="attempt.estado === 'bloqueado_permanente'" (click)="desbloquearUsuario(attempt.user_id)"
-              class="group text-light-primary hover:text-light-primary-hover dark:text-dark-primary dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+
+  <!-- Sub-Sección Listas -->
+  <div *ngIf="selectedTab === 'listas'" class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
+    <div class="flex items-center gap-3 mb-6">
+      <i class="fas fa-lock text-light-danger dark:text-dark-danger text-xl"></i>
+      <h2 class="font-semibold text-light-text dark:text-dark-text">Intentos Fallidos de Inicio</h2>
+    </div>
+    
+    <div class="flex justify-center gap-4 mb-6">
+      <button *ngFor="let option of ['dia', 'semana', 'mes']" (click)="selectedPeriodo = option; onPeriodoChange()"
+        [class.bg-light-in-progress]="selectedPeriodo === option" 
+        [class.bg-dark-in-progress-text]="selectedPeriodo === option" 
+        [class.text-white]="selectedPeriodo === option"
+        class="px-5 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-light-secondary dark:text-dark-secondary hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">
+        {{ option | titlecase }}
+      </button>
+    </div>
+
+    <div *ngIf="failedLoginAttempts.length > 0; else noData" class="space-y-4">
+      <div *ngFor="let attempt of failedLoginAttempts" class="bg-light-row-hover dark:bg-dark-row-hover p-4 rounded-lg shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-lg font-semibold text-light-text dark:text-dark-text">{{ attempt.nombre }}</p>
+            <p class="text-sm text-light-secondary dark:text-dark-secondary">{{ attempt.email }}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-medium text-light-text dark:text-dark-text">
+              <i class="fas fa-exclamation-circle text-light-danger dark:text-dark-danger"></i> {{ attempt.estado }}
+            </p>
+            <p class="text-sm text-light-secondary dark:text-dark-secondary">Intentos: <strong class="text-light-danger dark:text-dark-danger">{{ attempt.numero_intentos }}</strong></p>
+          </div>
+        </div>
+        <div class="mt-3 text-sm text-light-secondary dark:text-dark-secondary flex justify-between">
+          <span><i class="fas fa-clock"></i> {{ attempt.fecha | date: 'short' }}</span>
+          <span><i class="fas fa-user"></i> {{ attempt.tipo_usuario }}</span>
+        </div>
+      </div>
+    </div>
+    <ng-template #noData>
+      <p class="text-center text-light-secondary dark:text-dark-secondary flex justify-center items-center gap-2">
+        <i class="fas fa-exclamation-triangle text-light-danger dark:text-dark-danger"></i> No hay intentos fallidos registrados.
+      </p>
+    </ng-template>
+  </div>
+
+  <!-- Sub-Sección Bloqueos -->
+  <div *ngIf="selectedTab === 'bloqueos'" class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
+    <div class="flex items-center gap-3 mb-4 border-b pb-3 border-gray-200 dark:border-gray-600">
+      <i class="fas fa-lock text-light-danger dark:text-dark-danger text-xl"></i>
+      <h2 class="font-semibold text-light-text dark:text-dark-text">Usuarios Bloqueados</h2>
+    </div>
+    <div *ngIf="blockedUsers.length > 0; else noData" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div *ngFor="let user of blockedUsers"
+        class="p-4 border-light-danger dark:border-dark-danger bg-light-row-hover dark:bg-dark-row-hover rounded-lg shadow-sm hover:shadow-md transition-all">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div class="flex items-center justify-center sm:justify-start gap-3 sm:w-2/3">
+            <div class="bg-light-danger dark:bg-dark-danger bg-opacity-10 p-2 rounded-full">
+              <i class="fas fa-user-lock"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-light-text dark:text-dark-text">{{ user.nombre }}</p>
+              <p class="text-xs text-light-secondary dark:text-dark-secondary"><i class="fas fa-envelope"></i> {{ user.email }}</p>
+            </div>
+          </div>
+          <div class="sm:w-1/3 text-right">
+            <button (click)="desbloquearUsuario(user.user_id)"
+              class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
               <i class="fas fa-unlock"></i>
               <span
                 class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Desbloquear</span>
             </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <ng-template #noData>
-    <p class="text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-      <i class="fas fa-exclamation-triangle text-red-500"></i> No hay intentos fallidos registrados.
-    </p>
-  </ng-template>
-</div>
-
-<div class="bg-light-background dark:bg-dark-background max-w-full mx-auto p-6 font-sans">
-  <!-- Cabecera y selector de período para configuraciones -->
-  <div class="flex justify-between items-center mb-8">
-    <div class="flex flex-col justify-center">
-      <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
-        <i class="fas fa-cogs text-light-primary dark:text-dark-primary"></i> Configuraciones
-      </h1>
-      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-2">Gestiona las configuraciones del sistema.</p>
-    </div>
-  </div>
-
-  <!-- Sección de configuración de bloqueo -->
-  <div class="config-info">
-    <div class="mb-6">
-      <p class="text-light-text dark:text-dark-text text-sm font-semibold">Período de Bloqueo</p>
-      <div class="flex items-center gap-4">
-        <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.block_period_days }} días</span>
-        <input *ngIf="isEditing" [(ngModel)]="config.block_period_days" type="number" class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg" />
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Configuración del tiempo de vida del cookie -->
-    <div class="mb-6">
-      <p class="text-light-text dark:text-dark-text text-sm font-semibold">Tiempo de Vida del Cookie</p>
-      <div class="flex items-center gap-4">
-        <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.cookie_lifetime }} segundos</span>
-        <input *ngIf="isEditing" [(ngModel)]="config.cookie_lifetime" type="number" class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg" />
-      </div>
-    </div>
-
-    <!-- Configuración del tiempo de vida del JWT -->
-    <div class="mb-6">
-      <p class="text-light-text dark:text-dark-text text-sm font-semibold">Tiempo de Vida del JWT</p>
-      <div class="flex items-center gap-4">
-        <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.jwt_lifetime }} segundos</span>
-        <input *ngIf="isEditing" [(ngModel)]="config.jwt_lifetime" type="number" class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg" />
-      </div>
-    </div>
-
-    <!-- Configuración de intentos fallidos -->
-    <div class="mb-6">
-      <p class="text-light-text dark:text-dark-text text-sm font-semibold">Máximos Intentos Fallidos</p>
-      <div class="flex items-center gap-4">
-        <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.max_failed_login_attempts }}</span>
-        <input *ngIf="isEditing" [(ngModel)]="config.max_failed_login_attempts" type="number" class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg" />
-      </div>
-    </div>
-
-    <!-- Configuración del tiempo de vida de OTP -->
-    <div class="mb-6">
-      <p class="text-light-text dark:text-dark-text text-sm font-semibold">Tiempo de Vida de OTP</p>
-      <div class="flex items-center gap-4">
-        <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.otp_lifetime }} segundos</span>
-        <input *ngIf="isEditing" [(ngModel)]="config.otp_lifetime" type="number" class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg" />
-      </div>
-    </div>
-
-    <!-- Configuración del tiempo de sesión -->
-    <div class="mb-6">
-      <p class="text-light-text dark:text-dark-text text-sm font-semibold">Tiempo de Sesión</p>
-      <div class="flex items-center gap-4">
-        <span *ngIf="!isEditing" class="text-light-text dark:text-dark-text">{{ config.session_lifetime }} segundos</span>
-        <input *ngIf="isEditing" [(ngModel)]="config.session_lifetime" type="number" class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg" />
-      </div>
-    </div>
-
-    <!-- Botones para editar y guardar -->
-    <div class="flex justify-between items-center gap-4">
-      <button *ngIf="!isEditing" (click)="editConfig()"
-        class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300">
-        Editar
-      </button>
-      <button *ngIf="isEditing" (click)="saveConfig()"
-        class="bg-light-success dark:bg-dark-success text-white px-5 py-2 rounded-lg hover:bg-light-success-hover dark:hover:bg-dark-success-hover transition-all duration-300">
-        Guardar
-      </button>
-    </div>
+    <ng-template #noData>
+      <p class="text-center text-light-secondary dark:text-dark-secondary flex justify-center items-center gap-2">
+        <i class="fas fa-exclamation-triangle text-light-danger dark:text-dark-danger"></i> No hay usuarios bloqueados actualmente.
+      </p>
+    </ng-template>
   </div>
 </div>

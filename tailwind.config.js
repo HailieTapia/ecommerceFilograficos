@@ -18,12 +18,9 @@ module.exports = {
             'row-hover': '#EFF6FF',
             success: '#DCFCE7',          // Activo
             'success-text': '#166534',
-
             danger: '#E63946 ',           // Inactivo
             'danger-text': '#6D1B1B  ', 
             'danger-hover': '#FF6B6B  ',
-
-
             pending: '#FACC15',          // Pendiente (amarillo suave)
             'pending-text': '#92400E',
             closed: '#E5E7EB',           // Cerrado (gris claro)
@@ -44,13 +41,9 @@ module.exports = {
             'row-hover': '#4B5563',
             success: '#34D399',          // Activo
             'success-text': '#064E3B',
-
-
             danger: '#C53030 ',           // Inactivo
             'danger-text': '#FF9E9E    ',
             'danger-hover': '#E53E3E ',
-
-            
             pending: '#D97706',          // Pendiente (amarillo oscuro)
             'pending-text': '#FEF3C7',
             closed: '#6B7280',           // Cerrado (gris medio)
