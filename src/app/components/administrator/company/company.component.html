@@ -1,238 +1,281 @@
 <div class="bg-light-background dark:bg-dark-background max-w-7xl mx-auto p-6 font-sans">
-  <h2 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6 flex items-center gap-2">
-    <i class="fas fa-building text-light-primary dark:text-dark-primary"></i> Información de la Empresa
-  </h2>
-  <form [formGroup]="companyForm" (ngSubmit)="updateCompanyInfo()"
-    class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 space-y-8 border border-gray-200 dark:border-gray-600">
+    <h2 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6 flex items-center gap-2">
+        <i class="fas fa-building text-light-primary dark:text-dark-primary"></i> Información de la Empresa
+    </h2>
+    <form [formGroup]="companyForm" (ngSubmit)="updateCompanyInfo()"
+        class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 space-y-8 border border-gray-200 dark:border-gray-600">
 
-    <!-- Nombre y Slogan -->
-    <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-      <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Nombre y Slogan</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label for="name" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            Nombre de la Empresa <span class="text-light-danger dark:text-dark-danger">*</span>
-          </label>
-          <div class="relative">
-            <input id="name" formControlName="name"
-              class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese el nombre">
-            <i class="fas fa-signature absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-          </div>
+        <!-- Nombre y Slogan -->
+        <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
+            <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Nombre y Slogan</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="name"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        Nombre de la Empresa <span class="text-light-danger dark:text-dark-danger">*</span>
+                    </label>
+                    <div class="relative">
+                        <input id="name" formControlName="name"
+                            class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese el nombre">
+                        <i
+                            class="fas fa-signature absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="slogan"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        Slogan
+                    </label>
+                    <div class="relative">
+                        <input id="slogan" formControlName="slogan"
+                            class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese el slogan">
+                        <i
+                            class="fas fa-quote-left absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div>
-          <label for="slogan" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            Slogan
-          </label>
-          <div class="relative">
-            <input id="slogan" formControlName="slogan"
-              class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese el slogan">
-            <i class="fas fa-quote-left absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-          </div>
-        </div>
-      </div>
-    </div>
+        <!-- Logo -->
+        <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
+            <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Logo de la empresa</h3>
+            <div class="flex flex-col md:flex-row items-center gap-6">
+                <!-- Vista previa del logo -->
+                <div
+                    class="relative w-40 h-40 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm overflow-hidden group transition-all duration-300">
+                    <img *ngIf="logoPreview" [src]="logoPreview" alt="Vista previa del logo"
+                        class="w-full h-full object-contain p-2">
+                    <div *ngIf="!logoPreview"
+                        class="flex items-center justify-center w-full h-full text-light-secondary dark:text-dark-secondary">
+                        <i class="fas fa-image text-3xl"></i>
+                    </div>
+                    <!-- Overlay para indicar cambio -->
+                    <div
+                        class="absolute inset-0 bg-gray-900 bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center transition-all duration-300">
+                        <span class="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">Cambiar
+                            Logo</span>
+                    </div>
+                </div>
 
-    <!-- Contacto -->
-    <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-      <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Contacto</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label for="phone_number" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            Número de Teléfono
-          </label>
-          <div class="relative">
-            <input id="phone_number" formControlName="phone_number" maxlength="10"
-              class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese el teléfono">
-            <i class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-          </div>
-        </div>
-        <div>
-          <label for="email" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            Correo Electrónico <span class="text-light-danger dark:text-dark-danger">*</span>
-          </label>
-          <div class="relative">
-            <input id="email" formControlName="email"
-              class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese el correo">
-            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-          </div>
-        </div>
-      </div>
-    </div>
+                <!-- Botón para seleccionar un nuevo logo -->
+                <div class="flex flex-col gap-2">
+                    <button type="button" (click)="triggerFileInput(fileInput)"
+                        class="cursor-pointer inline-flex items-center justify-center px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 shadow-md">
+                        <i class="fas fa-upload mr-2"></i> Seleccionar Logo
+                    </button>
 
-    <!-- Dirección -->
-    <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-      <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Dirección</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <label for="address_street" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            Calle
-          </label>
-          <div class="relative">
-            <input id="address_street" formControlName="address_street"
-              class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese la calle">
-            <i class="fas fa-road absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-          </div>
-        </div>
-        <div>
-          <label for="address_city" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            Ciudad
-          </label>
-          <div class="relative">
-            <i class="fas fa-city absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-            <select id="address_city" formControlName="address_city"
-              class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none">
-              <option value="">Seleccione una ciudad</option>
-              <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
-            </select>
-            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"></i>
-          </div>
-        </div>
-        <div>
-          <label for="addressState" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            Estado
-          </label>
-          <div class="relative">
-            <i class="fas fa-map absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-            <select id="addressState" formControlName="address_state"
-              class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none">
-              <option value="">Seleccione un estado</option>
-              <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
-            </select>
-            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"></i>
-          </div>
-        </div>
-        <div>
-          <label for="address_postal_code" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            Código Postal
-          </label>
-          <div class="relative">
-            <i class="fas fa-mail-bulk absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-            <select id="address_postal_code" formControlName="address_postal_code"
-              class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none">
-              <option value="">Seleccione un código</option>
-              <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">{{ postal.postal_code }}</option>
-            </select>
-            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"></i>
-          </div>
-        </div>
-        <div>
-          <label for="address_country" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-            País
-          </label>
-          <div class="relative">
-            <i class="fas fa-globe absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
-            <select id="address_country" formControlName="address_country"
-              class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none">
-              <option value="">Seleccione un país</option>
-              <option *ngFor="let country of address.countries" [value]="country.name">{{ country.name }}</option>
-            </select>
-            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"></i>
-          </div>
-        </div>
-      </div>
-    </div>
+                    <!-- Input oculto para seleccionar el archivo -->
+                    <input type="file" #fileInput (change)="onLogoSelected($event)" accept="image/*" class="hidden">
 
-    <!-- Redes Sociales -->
-    <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-      <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Redes Sociales</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="flex items-center gap-3">
-          <div class="w-full">
-            <label for="linkedin" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-              <i class="fab fa-linkedin text-light-primary dark:text-dark-primary"></i> LinkedIn
-            </label>
-            <input id="linkedin" formControlName="linkedin"
-              class="mt-2 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese el enlace">
-          </div>
-          <button type="button" (click)="deleteSocialMedia('linkedin')"
-            class="mt-6 group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative">
-            <i class="fas fa-trash text-sm"></i>
-            <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-          </button>
+                    <p class="text-xs text-light-secondary dark:text-dark-secondary">
+                        Formatos aceptados: JPG, PNG, SVG. Tamaño máximo: 2MB.
+                    </p>
+                </div>
+            </div>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="w-full">
-            <label for="twitter" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-              <i class="fab fa-twitter text-light-primary dark:text-dark-primary"></i> Twitter
-            </label>
-            <input id="twitter" formControlName="twitter"
-              class="mt-2 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese el enlace">
-          </div>
-          <button type="button" (click)="deleteSocialMedia('twitter')"
-            class="mt-6 group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative">
-            <i class="fas fa-trash text-sm"></i>
-            <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-          </button>
+        <!-- Contacto -->
+        <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
+            <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Contacto</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="phone_number"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        Número de Teléfono
+                    </label>
+                    <div class="relative">
+                        <input id="phone_number" formControlName="phone_number" maxlength="10"
+                            class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese el teléfono">
+                        <i
+                            class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="email"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        Correo Electrónico <span class="text-light-danger dark:text-dark-danger">*</span>
+                    </label>
+                    <div class="relative">
+                        <input id="email" formControlName="email"
+                            class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese el correo">
+                        <i
+                            class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="flex items-center gap-3">
-          <div class="w-full">
-            <label for="facebook" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-              <i class="fab fa-facebook text-light-primary dark:text-dark-primary"></i> Facebook
-            </label>
-            <input id="facebook" formControlName="facebook"
-              class="mt-2 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese el enlace">
-          </div>
-          <button type="button" (click)="deleteSocialMedia('facebook')"
-            class="mt-6 group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative">
-            <i class="fas fa-trash text-sm"></i>
-            <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-          </button>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="w-full">
-            <label for="instagram" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-              <i class="fab fa-instagram text-light-primary dark:text-dark-primary"></i> Instagram
-            </label>
-            <input id="instagram" formControlName="instagram"
-              class="mt-2 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-              placeholder="Ingrese el enlace">
-          </div>
-          <button type="button" (click)="deleteSocialMedia('instagram')"
-            class="mt-6 group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative">
-            <i class="fas fa-trash text-sm"></i>
-            <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-          </button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Botón de envío -->
-    <button type="submit" [disabled]="companyForm.invalid"
-      class="w-full py-3 mt-6 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover disabled:bg-light-secondary dark:disabled:bg-dark-secondary transition-all duration-300 flex items-center justify-center gap-2 shadow-md">
-      <i class="fas fa-save"></i> Actualizar Información
-    </button>
-  </form>
-</div>
-<div class="flex flex-col items-center">
-    <label class="block text-sm font-medium text-light-secondary dark:text-dark-secondary mb-2">
-        Logo de la Empresa
-    </label>
-
-    <!-- Vista previa del logo -->
-    <div
-        class="relative w-24 h-24 border border-gray-300 dark:border-gray-600 rounded-full overflow-hidden shadow-md">
-        <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo de la empresa"
-            class="w-full h-full object-cover">
-        <div *ngIf="!logoPreview"
-            class="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-500">
-            <i class="fas fa-image text-3xl"></i>
+        <!-- Dirección -->
+        <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
+            <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Dirección</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="address_street"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        Calle
+                    </label>
+                    <div class="relative">
+                        <input id="address_street" formControlName="address_street"
+                            class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese la calle">
+                        <i
+                            class="fas fa-road absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="address_city"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        Ciudad
+                    </label>
+                    <div class="relative">
+                        <i
+                            class="fas fa-city absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                        <select id="address_city" formControlName="address_city"
+                            class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none">
+                            <option value="">Seleccione una ciudad</option>
+                            <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
+                        </select>
+                        <i
+                            class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="addressState"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        Estado
+                    </label>
+                    <div class="relative">
+                        <i
+                            class="fas fa-map absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                        <select id="addressState" formControlName="address_state"
+                            class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none">
+                            <option value="">Seleccione un estado</option>
+                            <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
+                        </select>
+                        <i
+                            class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="address_postal_code"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        Código Postal
+                    </label>
+                    <div class="relative">
+                        <i
+                            class="fas fa-mail-bulk absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                        <select id="address_postal_code" formControlName="address_postal_code"
+                            class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none">
+                            <option value="">Seleccione un código</option>
+                            <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">{{
+                                postal.postal_code }}</option>
+                        </select>
+                        <i
+                            class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"></i>
+                    </div>
+                </div>
+                <div>
+                    <label for="address_country"
+                        class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                        País
+                    </label>
+                    <div class="relative">
+                        <i
+                            class="fas fa-globe absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+                        <select id="address_country" formControlName="address_country"
+                            class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none">
+                            <option value="">Seleccione un país</option>
+                            <option *ngFor="let country of address.countries" [value]="country.name">{{ country.name }}
+                            </option>
+                        </select>
+                        <i
+                            class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"></i>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- Input oculto para seleccionar el archivo -->
-    <input type="file" #fileInput (change)="onLogoSelected($event)" accept="image/*" class="hidden">
+        <!-- Redes Sociales -->
+        <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
+            <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Redes Sociales</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-full">
+                        <label for="linkedin"
+                            class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                            <i class="fab fa-linkedin text-light-primary dark:text-dark-primary"></i> LinkedIn
+                        </label>
+                        <input id="linkedin" formControlName="linkedin"
+                            class="mt-2 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese el enlace">
+                    </div>
+                    <button type="button" (click)="deleteSocialMedia('linkedin')"
+                        class="mt-6 group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                        <i class="fas fa-trash text-sm"></i>
+                        <span
+                            class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-full">
+                        <label for="twitter"
+                            class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                            <i class="fab fa-twitter text-light-primary dark:text-dark-primary"></i> Twitter
+                        </label>
+                        <input id="twitter" formControlName="twitter"
+                            class="mt-2 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese el enlace">
+                    </div>
+                    <button type="button" (click)="deleteSocialMedia('twitter')"
+                        class="mt-6 group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                        <i class="fas fa-trash text-sm"></i>
+                        <span
+                            class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-full">
+                        <label for="facebook"
+                            class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                            <i class="fab fa-facebook text-light-primary dark:text-dark-primary"></i> Facebook
+                        </label>
+                        <input id="facebook" formControlName="facebook"
+                            class="mt-2 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese el enlace">
+                    </div>
+                    <button type="button" (click)="deleteSocialMedia('facebook')"
+                        class="mt-6 group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                        <i class="fas fa-trash text-sm"></i>
+                        <span
+                            class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-full">
+                        <label for="instagram"
+                            class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2">
+                            <i class="fab fa-instagram text-light-primary dark:text-dark-primary"></i> Instagram
+                        </label>
+                        <input id="instagram" formControlName="instagram"
+                            class="mt-2 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                            placeholder="Ingrese el enlace">
+                    </div>
+                    <button type="button" (click)="deleteSocialMedia('instagram')"
+                        class="mt-6 group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                        <i class="fas fa-trash text-sm"></i>
+                        <span
+                            class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <!-- Botón para seleccionar un nuevo logo -->
-    <button type="button" (click)="triggerFileInput(fileInput)"
-        class="mt-2 px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md shadow-sm hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300">
-        Cambiar Logo
-    </button>
+        <!-- Botón de envío -->
+        <button type="submit" [disabled]="companyForm.invalid"
+            class="w-full py-3 mt-6 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover disabled:bg-light-secondary dark:disabled:bg-dark-secondary transition-all duration-300 flex items-center justify-center gap-2 shadow-md">
+            <i class="fas fa-save"></i> Actualizar Información
+        </button>
+    </form>
 </div>
