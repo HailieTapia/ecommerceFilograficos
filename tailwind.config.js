@@ -24,7 +24,7 @@ module.exports = {
             'danger-hover': '#FF6B6B  ',
 
 
-            pending: '#FEF3C7',          // Pendiente (amarillo suave)
+            pending: '#FACC15',          // Pendiente (amarillo suave)
             'pending-text': '#92400E',
             closed: '#E5E7EB',           // Cerrado (gris claro)
             'closed-text': '#4B5563',
