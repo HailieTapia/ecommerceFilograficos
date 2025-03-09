@@ -64,13 +64,13 @@ export class SecurityComponent {
   //desbloquear
   desbloquearUsuario(user_id: string): void {
     this.toastService.showToast(
-      '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',
+      '¿Estás seguro de que deseas desbloquear a este usuario? Esta acción no se puede deshacer.',
       'warning',
       'Confirmar',
       () => {
         this.securityService.adminUnlockUser(user_id).subscribe(
           (response) => {
-            this.toastService.showToast('Usuario desbloqueado con éxito', 'success');
+            this.toastService.showToast(response.message || 'Usuario desbloqueado con éxito', 'success');
             this.getFailedLoginAttempts(this.selectedPeriodo);
           },
           (error) => {

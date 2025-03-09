@@ -137,17 +137,23 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   }
 
   deleteCategory(categoryId: number): void {
-    if (!confirm('¿Estás seguro de que deseas desactivar esta categoría?')) return;
-    this.categoriesService.deleteCategory(categoryId).subscribe({
-      next: () => {
-        alert('Categoría desactivada exitosamente');
-        this.getAllCategories();
-      },
-      error: (err) => {
-        const errorMessage = err?.error?.message || 'Error al eliminar la categoría';
-        this.toastService.showToast(errorMessage, 'error');
+    this.toastService.showToast(
+      '¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.',
+      'warning',
+      'Confirmar',
+      () => {
+        this.categoriesService.deleteCategory(categoryId).subscribe({
+          next: (response) => {
+            this.toastService.showToast(response.message || 'Categoría eliminada exitosamente', 'success');
+            this.getAllCategories();
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || 'Error al eliminar la categoría';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        });
       }
-    });
+    );
   }
   // Método para manejar el cambio en el filtro por nombre
   onNameFilterChange(name: string): void {

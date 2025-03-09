@@ -57,7 +57,7 @@ export class ProfileComponent implements OnInit {
       () => {
         this.userService.deleteMyAccount().subscribe(
           (response) => {
-            this.toastService.showToast('Cuenta eliminada exitosamente', 'success');
+            this.toastService.showToast(response.message || 'Cuenta eliminada exitosamente', 'success');
             this.router.navigate(['/login']);
           },
           (error) => {

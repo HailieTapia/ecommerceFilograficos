@@ -62,7 +62,7 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
             this.getAllTemplates();
           },
           error: (error) => {
-            const errorMessage = error?.error?.message || 'Error al eliminar el tipo de correo electrónico';
+            const errorMessage = error?.error?.message || 'Error al eliminar plantilla de correo electrónico';
             this.toastService.showToast(errorMessage, 'error');
           }
         });

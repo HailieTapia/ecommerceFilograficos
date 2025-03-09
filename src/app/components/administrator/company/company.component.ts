@@ -113,28 +113,20 @@ export class CompanyComponent implements OnInit {
 
   deleteSocialMedia(platform: string): void {
     this.toastService.showToast(
-      `¿Estás seguro de eliminar ${platform}?`,
+      '¿Estás seguro de que deseas eliminar esta red social? Esta acción no se puede deshacer.',
       'warning',
-      'Eliminar',
-      () => this.confirmDeletion(platform)
-    );
-  }
-
-  confirmDeletion(platform: string): void {
-    this.isLoading = true;
-    this.companyForm.get(platform)?.setValue('');
-
-    this.companyService.deleteSocialMediaLinks({ [platform]: true }).subscribe(
-      (response) => {
-        this.company = response.company;
-        this.companyForm.patchValue(response.company);
-        this.isLoading = false;
-        this.toastService.showToast(`${platform} eliminado correctamente.`, 'success');
-      },
-      (error) => {
-        this.isLoading = false;
-        const errorMessage = `Error al eliminar ${platform}: ${error?.error?.message || 'Inténtalo de nuevo'}`;
-        this.toastService.showToast(errorMessage, 'error');
+      'Confirmar',
+      () => {
+        this.companyService.deleteSocialMediaLinks({ [platform]: true }).subscribe({
+          next: (response) => {
+            this.toastService.showToast(response.message || 'Red social eliminada exitosamente', 'success');
+            this.getCompanyInfo();
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || 'Error al eliminar la red social';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        });
       }
     );
   }

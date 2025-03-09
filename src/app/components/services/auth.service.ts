@@ -76,7 +76,6 @@ export class AuthService {
 
   // Cerrar sesión del usuario (elimina el token de la sesión actual)
   logout(): Observable<any> {
-    console.log('Cerrando sesión del usuario');
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
@@ -84,7 +83,6 @@ export class AuthService {
           tap(() => {
             localStorage.removeItem('userData'); // Eliminar el usuario del LocalStorage
             this.userSubject.next(null); // Resetear el estado del usuario
-            console.log('Sesión cerrada exitosamente');
           }),
           catchError(error => {
             return throwError(() => new Error('No se pudo cerrar sesión.'));
