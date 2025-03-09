@@ -39,10 +39,10 @@ export class EmailTemplateComponent {
     this.templateService.getEmailTemplateById(id).subscribe({
       next: (data) => {
         this.selectedEmailTemplate = data;
-        console.log('Tipo de correo electrónico seleccionado:', this.selectedEmailTemplate);
       },
       error: (err) => {
-        console.error('Error al obtener el tipo de correo electrónico por ID:', err);
+        const errorMessage = err?.error?.message || 'Error al obtener el tipo de correo electrónico';
+        this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
@@ -70,6 +70,8 @@ export class EmailTemplateComponent {
         this.emailTemplate = data;
       },
       error: (err) => {
+        const errorMessage = err?.error?.message || 'Error al obtener los tipo de correo electrónico';
+          this.toastService.showToast(errorMessage, 'error');
         console.error('Error al obtener los tipos de correo electrónico:', err);
       }
     });
@@ -96,7 +98,7 @@ export class EmailTemplateComponent {
   private crearPlantilla(data: any) {
     this.templateService.createEmailTemplate(data).subscribe(
       response => {
-        this.successMessage = 'Plantilla de correo electrónico creado exitosamente.';
+        this.toastService.showToast('Plantilla de correo electrónico creado exitosamente.', 'success');
         this.modal.close();
         this.getAllTemplates();
       },
@@ -108,7 +110,7 @@ export class EmailTemplateComponent {
   private actualizarPlantilla(id: number, data: any): void {
     this.templateService.updateEmailTemplate(id, data).subscribe(
       response => {
-        this.successMessage = 'Plantilla de correo electrónico actualizado exitosamente.';
+        this.toastService.showToast('Plantilla de correo electrónico actualizado exitosamente.', 'success');
         this.modal.close();
         this.getAllTemplates();
       },
