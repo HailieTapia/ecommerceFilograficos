@@ -14,17 +14,27 @@ export class SecurityComponent {
 
   failedAttempts: any[] = [];
   failedLoginAttempts: any[] = [];
-  selectedPeriodo: string = 'dia';
+  selectedPeriodo: string = 'mes';
+  config: any = [];
+  constructor(private securityService: SecurityService) {}
 
-  constructor(private securityService: SecurityService) {
-  }
-
-  //componente de carga al ejecutar el componente
   ngOnInit(): void {
-    //obtiene los intentos fallidos al cargar
+    this.getConfig();
     this.getFailedLoginAttempts(this.selectedPeriodo);
   }
-
+  getConfig(): void {
+    this.securityService.getConfig().subscribe(
+      (response) => {
+        console.log(response)
+        this.config = response;
+      },
+      (error) => {
+        const errorMessage = error?.error?.message || 'Error al obtener datos';
+        console.error('Error al obtener datos:', errorMessage);
+      }
+    );
+  }
+  
   desbloquearUsuario(user_id: string): void {
     if (!confirm('¿Estás seguro de que deseas desbloquear este usuario?')) {
       return;
@@ -43,14 +53,12 @@ export class SecurityComponent {
     );
   }
   
-
   //usuario cambia el período seleccionado.
   onPeriodoChange(): void {
     this.getFailedLoginAttempts(this.selectedPeriodo);
   }
 
   // Obtener intentos fallidos de inicio de sesión
-  //Hace una petición a un servicio para obtener los intentos fallidos de inicio de sesión del período especificado
   getFailedLoginAttempts(periodo: string): void {
     this.securityService.getFailedLoginAttempts(periodo).subscribe(
       (data) => {

@@ -13,7 +13,7 @@ export class SecurityService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-    // Obtener intentos fallidos de inicio de sesión(LISTO)
+    // Obtener intentos fallidos de inicio de sesión
     getFailedLoginAttempts(periodo: string): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -34,7 +34,7 @@ export class SecurityService {
         );
     }
 
-    // Desbloquear usuario como administrador NECESITO EL ID
+    // Desbloquear usuario como administrador
     adminUnlockUser(user_id: string): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -44,7 +44,7 @@ export class SecurityService {
         );
     }
 
-    // Obtener configuración del sistema ERROR 500
+    // Obtener configuración del sistema
     getConfig(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
