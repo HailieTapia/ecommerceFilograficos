@@ -46,12 +46,12 @@ export class CompanyService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put<any>(`${this.apiUrl}/company/delete-social-media-links`,  data , { headers, withCredentials: true });
+                return this.http.put<any>(`${this.apiUrl}/company/delete-social-media-links`, data, { headers, withCredentials: true });
             })
         );
     }
 
-    //Borrado lógico de la informacion de la empresa (marcarlo como inactivo)(NO SE OCUPA)
+    //Borrado lógico de la informacion de la empresa(NO SE OCUPA)
     deleteCompany(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -60,7 +60,7 @@ export class CompanyService {
             })
         );
     }
-    //Deshacer el borrado de la informacion de la compañia (activarlo)(NO SE OCUPA)
+    //Deshacer el borrado de la informacion de la compañia(NO SE OCUPA)
     restoreCompany(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -69,12 +69,12 @@ export class CompanyService {
             })
         );
     }
-    //(?)
+    //logo
     uploadCompanyLogo(file: File): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const formData = new FormData();
-                formData.append('logo', file); // Agrega el archivo bajo el nombre "logo"
+                formData.append('logo', file);
 
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
                 return this.http.post<any>(`${this.apiUrl}/company/upload-logo`, formData, {
