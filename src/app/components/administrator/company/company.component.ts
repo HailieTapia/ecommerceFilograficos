@@ -83,8 +83,6 @@ export class CompanyComponent implements OnInit {
     this.companyService.getCompanyInfo().subscribe(
       (response) => {
         this.company = response.company;
-        console.log(response)
-        this.company = response.company;
         this.companyForm.patchValue({
           name: this.company.name || '',
           slogan: this.company.slogan || '',
