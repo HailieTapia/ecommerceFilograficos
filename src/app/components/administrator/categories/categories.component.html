@@ -70,14 +70,17 @@
               <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ category.description }}</td>
               <td class="px-4 py-3">
                 <div class="flex justify-center items-center gap-4">
+
                   <button (click)="openEditModal(category.category_id)" class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                     <i class="fas fa-edit"></i>
                     <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
                   </button>
-                  <button (click)="deleteCategory(category.category_id)" class="group text-red-500 hover:text-red-600 transition-all duration-300 relative">
+
+                  <button (click)="deleteCategory(category.category_id)" class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
                     <i class="fas fa-trash"></i>
                     <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
                   </button>
+
                 </div>
               </td>
             </tr>
