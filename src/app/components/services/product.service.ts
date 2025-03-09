@@ -46,7 +46,7 @@ export interface NewProduct {
   category_id: number;
   collaborator_id?: number;
   variants: Variant[];
-  customizations?: { type: string; description: string }[]; // Añadido aquí
+  customizations?: { type: string; description: string }[];
 }
 
 export interface DetailedVariant {
@@ -92,6 +92,51 @@ export interface UpdateProductResponse {
   product: DetailedProduct;
 }
 
+// Interfaces existentes (sin cambios, solo extracto relevante)
+export interface StockVariant {
+  variant_id: number;
+  sku: string;
+  product_name: string | null;
+  category_name: string | null;
+  product_type: 'Existencia' | 'semi_personalizado' | 'personalizado' | null;
+  stock: number;
+  stock_threshold: number;
+  stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock'; // Añadido 'no_stock'
+  first_image: string | null;
+  last_updated: string;
+  last_stock_added_at?: string | null; // Nuevo campo opcional
+}
+
+export interface StockVariantsResponse {
+  message: string;
+  variants: StockVariant[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface UpdateStockRequest {
+  variant_id: number;
+  stock: number;
+  stock_threshold?: number;
+}
+
+export interface UpdatedStockVariant {
+  variant_id: number;
+  sku: string;
+  product_name: string | null;
+  stock: number;
+  stock_threshold: number;
+  stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock'; // Añadido 'no_stock'
+  last_updated: string;
+  last_stock_added_at?: string | null; // Nuevo campo opcional
+}
+
+export interface UpdateStockResponse {
+  message: string;
+  variant: UpdatedStockVariant;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -100,6 +145,7 @@ export class ProductService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
+  // Métodos existentes (sin cambios)
   getAllProductsCatalog(
     page: number = 1,
     pageSize: number = 10,
@@ -239,6 +285,50 @@ export class ProductService {
         console.log('Datos enviados en FormData (actualización):', formDataEntries);
 
         return this.http.put<UpdateProductResponse>(`${this.apiUrl}/${productId}`, formData, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  // Nuevos métodos para gestión de stock
+
+  getStockVariants(
+    page: number = 1,
+    pageSize: number = 10,
+    categoryId?: number,
+    stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock' // Añadido 'no_stock'
+  ): Observable<StockVariantsResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+    if (categoryId) {
+      params = params.set('category_id', categoryId.toString());
+    }
+    if (stockStatus) {
+      params = params.set('stock_status', stockStatus);
+    }
+
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<StockVariantsResponse>(`${this.apiUrl}/stock/variants`, {
+          headers,
+          params,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  updateStock(stockData: UpdateStockRequest): Observable<UpdateStockResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders()
+          .set('x-csrf-token', csrfToken)
+          .set('Content-Type', 'application/json');
+        return this.http.put<UpdateStockResponse>(`${this.apiUrl}/stock/update`, stockData, {
           headers,
           withCredentials: true
         });
