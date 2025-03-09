@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { CompanyService } from '../services/company.service';
+import { ThemeService } from '../services/theme.service';
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -19,7 +20,7 @@ export class HeaderComponent implements OnInit {
 
   logoPreview: string | ArrayBuffer | null = null;
 
-  constructor(private router: Router, private authService: AuthService, private companyService: CompanyService) { }
+  constructor(public themeService: ThemeService,private router: Router, private authService: AuthService, private companyService: CompanyService) { }
 
   ngOnInit(): void {
     this.getCompanyInfo();
@@ -60,5 +61,12 @@ export class HeaderComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+  toggleTheme() {
+    this.themeService.toggleTheme();
+  }
+
+  get isDarkMode() {
+    return this.themeService.isDarkMode();
   }
 }

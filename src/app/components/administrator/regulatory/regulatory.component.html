@@ -6,7 +6,8 @@
       </h1>
       <p class="mt-2 text-gray-500">Gestiona los documentos regulatorios del sistema.</p>
     </div>
-    <button (click)="openModal()" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all duration-300">
+    <button (click)="openModal()"
+      class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all duration-300">
       <i class="fas fa-plus"></i>
       <span>Crear</span>
     </button>
@@ -21,8 +22,10 @@
             <thead class="bg-red-50">
               <tr>
                 <th class="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Título</th>
-                <th class="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Versión Actual</th>
-                <th class="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Fecha de Efectividad</th>
+                <th class="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Versión Actual
+                </th>
+                <th class="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">Fecha de
+                  Efectividad</th>
                 <th class="border border-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-700">Acciones</th>
               </tr>
             </thead>
@@ -34,20 +37,28 @@
                 <td class="border border-gray-200 px-4 py-2">
                   <div class="flex justify-center items-center gap-4">
                     <!-- Botón Ver -->
-                    <button (click)="viewCurrentVersion(document.document_id)" class="bg-blue-600 bg-opacity-10 text-blue-600 p-1.5 rounded-md hover:bg-blue-600 hover:text-white transition-all duration-300">
+                    <button (click)="viewCurrentVersion(document.document_id)"
+                      class="bg-blue-600 bg-opacity-10 text-blue-600 p-1.5 rounded-md hover:bg-blue-600 hover:text-white transition-all duration-300">
                       <i class="fas fa-file-alt"></i>
                     </button>
                     <!-- Botón Editar -->
-                    <button (click)="openModal(document)" class="bg-yellow-600 bg-opacity-10 text-yellow-600 p-1.5 rounded-md hover:bg-yellow-600 hover:text-white transition-all duration-300">
+                    <button (click)="openModal(document)"
+                      class="bg-yellow-600 bg-opacity-10 text-yellow-600 p-1.5 rounded-md hover:bg-yellow-600 hover:text-white transition-all duration-300">
                       <i class="fas fa-edit "></i>
                     </button>
                     <!-- Botón Eliminar -->
-                    <button (click)="deleteRegulatoryDocument(document.document_id)" class="bg-red-600 bg-opacity-10 text-red-600 p-1.5 rounded-md hover:bg-red-700 hover:text-white transition-all duration-300">
+                    <button (click)="deleteRegulatoryDocument(document.document_id)"
+                      class="bg-red-600 bg-opacity-10 text-red-600 p-1.5 rounded-md hover:bg-red-700 hover:text-white transition-all duration-300">
                       <i class="fas fa-trash"></i>
                     </button>
                     <!-- Botón Historial -->
-                    <button (click)="openHistoryModal(document.document_id)" class="bg-gray-600 bg-opacity-10 text-gray-600 p-1.5 rounded-md hover:bg-gray-600 hover:text-white transition-all duration-300">
-                      <i class="fas fa-history "></i>
+                    <button (click)="openHistoryModal(document.document_id)"
+                      class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
+                      <i class="fas fa-history"></i>
+                      <span
+                        class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        Historial
+                      </span>
                     </button>
                   </div>
                 </td>
@@ -214,4 +225,3 @@
     </div>
   </div>
 </app-modal>
-
