@@ -1,0 +1,76 @@
+<app-modal #modal [title]="productId ? 'Editar Producto' : 'Nuevo Producto'">
+  <div class="p-6 space-y-4" [ngClass]="{'opacity-50 pointer-events-none': isLoading}">
+    <!-- Barra de progreso -->
+    <div class="mb-6">
+      <div class="bg-gray-200 rounded-full h-2.5">
+        <div 
+          class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" 
+          [style.width]="progressWidth"
+        ></div>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">Paso {{ currentStep }} de {{ totalSteps }}</p>
+    </div>
+
+    <!-- Paso 1: Información General -->
+    <div *ngIf="currentStep === 1" class="space-y-4">
+      <div class="p-4 bg-gradient-to-r from-blue-500 to-white rounded-lg">
+        <h2 class="text-xl font-bold text-white">1. Datos del Producto</h2>
+      </div>
+      <app-product-general-info 
+        [initialData]="generalInfoData" 
+        (formData)="onGeneralInfoChange($event)"
+      ></app-product-general-info>
+      <div class="flex justify-end">
+        <button 
+          type="button" 
+          (click)="nextStep()" 
+          class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 disabled:bg-blue-300 disabled:cursor-not-allowed"
+          [disabled]="isLoading || !isGeneralInfoValid() || !attributesLoaded"
+        >
+          {{ attributesLoaded ? 'Continuar a Variantes' : 'Cargando atributos...' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Paso 2: Variantes -->
+    <div *ngIf="currentStep === 2" class="space-y-4">
+      <div class="p-4 bg-gradient-to-r from-blue-500 to-white rounded-lg">
+        <h2 class="text-xl font-bold text-white">2. Variantes del Producto</h2>
+      </div>
+      <app-product-variants 
+        [categoryId]="generalInfoData.category_id" 
+        [productName]="generalInfoData.name || ''" 
+        [initialVariants]="variantsData" 
+        [detailedVariants]="detailedVariants"
+        (variantsData)="onVariantsChange($event)"
+      ></app-product-variants>
+      <div class="flex justify-between">
+        <button 
+          type="button" 
+          (click)="prevStep()" 
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors duration-200 disabled:bg-gray-200 disabled:cursor-not-allowed"
+          [disabled]="isLoading"
+        >
+          Volver
+        </button>
+        <button 
+          type="button" 
+          (click)="saveProduct()" 
+          class="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-200 disabled:bg-green-300 disabled:cursor-not-allowed"
+          [disabled]="isSaveDisabled"
+        >
+          <i class="fas fa-save mr-2"></i> 
+          {{ isLoading ? 'Guardando...' : 'Guardar Producto' }}
+        </button>
+      </div>
+      <div *ngIf="hasVariantsWithoutImages" class="text-red-500 text-sm mt-2">
+        Cada variante debe tener al menos una imagen para poder guardar el producto.
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 z-10">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+      <span class="ml-2 text-gray-700">Cargando...</span>
+    </div>
+  </div>
+</app-modal>

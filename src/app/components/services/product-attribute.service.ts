@@ -1,15 +1,30 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
 import { environment } from '../../environments/config';
 
+// Interfaces para tipado
+export interface Attribute {
+  attribute_id: number;
+  attribute_name: string;
+  data_type: string; // 'texto', 'numero', 'lista'
+  allowed_values?: string; // Valores permitidos separados por comas
+  is_required: boolean; // Asegúrate de que esta propiedad esté definida
+}
+
+export interface CategoryWithAttributes {
+  category_id: number;
+  category_name: string;
+  attributes: Attribute[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ProductAttributeService {
-  private apiUrl = `${environment.baseUrl}/product-attributes`; // Ajustado a tu ruta base del backend
+  private apiUrl = `${environment.baseUrl}/product-attributes`;
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
@@ -36,7 +51,15 @@ export class ProductAttributeService {
     );
   }
 
-  // Crear un nuevo atributo (requiere autenticación y rol de administrador)
+  getAttributesByActiveCategories(): Observable<CategoryWithAttributes[]> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<CategoryWithAttributes[]>(`${this.apiUrl}/attributes-by-active-categories`, { headers, withCredentials: true });
+      })
+    );
+  }
+
   createAttribute(attributeData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {

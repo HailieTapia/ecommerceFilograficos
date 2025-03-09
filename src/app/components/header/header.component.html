@@ -57,6 +57,14 @@
         <i class="fas fa-list mr-3 text-gray-600 hover:text-red-600"></i>
         <span *ngIf="sidebarOpen" class="text-gray-600 hover:text-red-600">Atributos de productos</span>
       </a>
+      <a routerLink="/product-catalog" class="flex items-center p-2 hover:bg-gray-700 rounded">
+        <i class="fas fa-list mr-2"></i>
+        <span *ngIf="sidebarOpen">Catálogo de productos</span>
+      </a>
+      <a routerLink="/product-stock" class="flex items-center p-2 hover:bg-gray-700 rounded">
+        <i class="fas fa-list mr-2"></i>
+        <span *ngIf="sidebarOpen">Inventario de productos</span>
+      </a>
     </nav>
   </aside>
 
