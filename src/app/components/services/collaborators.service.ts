@@ -42,21 +42,21 @@ export class CollaboratorsService {
     }
 
     //Actualiza un colaborador por ID.
-    updateCollaborator(userId: string): Observable<any> {
+    updateCollaborator(id: number, data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.put<any>(`${this.apiUrl}/collaborators`, { userId }, { headers, withCredentials: true });
+                return this.http.put<any>(`${this.apiUrl}/collaborators/${id}`, data, { headers, withCredentials: true });
             })
         );
     }
 
     // Ruta para eliminar lógicamente colaboradores (solo administradores)
-    deleteCollaborator(): Observable<any> {
+    deleteCollaborator(id: number,): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.delete<any>(`${this.apiUrl}/company/delete`, { headers, withCredentials: true });
+                return this.http.delete<any>(`${this.apiUrl}/collaborators/${id}`,{ headers, withCredentials: true });
             })
         );
     }

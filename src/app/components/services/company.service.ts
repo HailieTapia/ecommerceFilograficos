@@ -69,19 +69,5 @@ export class CompanyService {
             })
         );
     }
-    //logo
-    uploadCompanyLogo(file: File): Observable<any> {
-        return this.csrfService.getCsrfToken().pipe(
-            switchMap(csrfToken => {
-                const formData = new FormData();
-                formData.append('logo', file);
 
-                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post<any>(`${this.apiUrl}/company/upload-logo`, formData, {
-                    headers,
-                    withCredentials: true
-                });
-            })
-        );
-    }
 }
