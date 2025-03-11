@@ -1,5 +1,4 @@
-// src/app/components/notification-subscription/notification-subscription.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificationService } from '../services/notification.service';
 import { AuthService } from '../services/auth.service';
@@ -12,10 +11,15 @@ import { Subscription } from 'rxjs';
   templateUrl: './notification-subscription.component.html',
   styleUrls: ['./notification-subscription.component.css']
 })
-export class NotificationSubscriptionComponent implements OnInit {
-  isSubscribed = false;
+export class NotificationSubscriptionComponent implements OnInit, OnDestroy {
+  isSupported: boolean = true;
+  permissionState: string = 'default';
+  isSubscribed: boolean = false;
+  isLoggedIn: boolean = false;
   subscriptionError: string | null = null;
   private userSubscription: Subscription | undefined;
+  private loginSubscription: Subscription | undefined;
+  private logoutSubscription: Subscription | undefined;
 
   constructor(
     private notificationService: NotificationService,
@@ -23,43 +27,90 @@ export class NotificationSubscriptionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.checkSubscriptionStatus();
-    this.userSubscription = this.authService.getUser().subscribe(user => {
-      // Reactivar si necesitas actualizar el estado con cambios de usuario
-    });
+    // Verificar soporte para notificaciones
+    this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+    if (this.isSupported) {
+      // Escuchar mensajes en primer plano
+      this.notificationService.listenForMessages();
+
+      // Verificar el estado inicial
+      this.checkNotificationStatus();
+
+      // Escuchar cambios en el estado de autenticación
+      this.userSubscription = this.authService.getUser().subscribe(user => {
+        this.isLoggedIn = !!user;
+        if (this.isLoggedIn) {
+          this.handleLogin();
+        } else {
+          this.handleLogout();
+        }
+      });
+
+      // Escuchar eventos de login
+      this.loginSubscription = this.authService.onLogin().subscribe(() => {
+        this.handleLogin();
+      });
+
+      // Escuchar eventos de logout
+      this.logoutSubscription = this.authService.onLogout().subscribe(() => {
+        this.handleLogout();
+      });
+    }
   }
 
-  async checkSubscriptionStatus(): Promise<void> {
-    this.isSubscribed = await this.notificationService.isSubscribed();
+  private async checkNotificationStatus(): Promise<void> {
+    const { permission, subscribed } = await this.notificationService.checkNotificationStatus();
+    this.permissionState = permission;
+    this.isSubscribed = subscribed;
   }
 
-  async subscribeToNotifications(): Promise<void> {
+  private async handleLogin(): Promise<void> {
+    await this.checkNotificationStatus();
+
+    // Si el usuario nunca ha decidido, solicitar permiso
+    if (this.permissionState === 'default') {
+      this.subscribe();
+    }
+  }
+
+  private handleLogout(): void {
+    // No hacemos nada con las notificaciones al cerrar sesión
+    // El estado se mantendrá en localStorage y se verificará al iniciar sesión nuevamente
+  }
+
+  async subscribe(): Promise<void> {
     try {
       this.subscriptionError = null;
-
-      this.authService.getUser().subscribe(user => {
-        const userId = user?.userId; // Cambiado a userId para coincidir con localStorage
-        if (!userId) {
-          this.subscriptionError = 'Debes iniciar sesión para suscribirte';
-          return;
-        }
-
-        this.notificationService.subscribeToPush(userId).then(() => {
-          this.isSubscribed = true;
-        }).catch(error => {
-          this.subscriptionError = error.message || 'Error al suscribirse a notificaciones';
-          console.error('Subscription error:', error);
-        });
-      });
+      const { permission, subscribed } = await this.notificationService.requestPermissionAndSubscribe();
+      this.permissionState = permission;
+      this.isSubscribed = subscribed;
     } catch (error: any) {
       this.subscriptionError = error.message || 'Error al suscribirse a notificaciones';
       console.error('Subscription error:', error);
     }
   }
 
+  async unsubscribe(): Promise<void> {
+    try {
+      this.subscriptionError = null;
+      await this.notificationService.unsubscribeFromPush();
+      this.isSubscribed = false;
+    } catch (error: any) {
+      this.subscriptionError = error.message || 'Error al desuscribirse de notificaciones';
+      console.error('Unsubscribe error:', error);
+    }
+  }
+
   ngOnDestroy(): void {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
+    }
+    if (this.loginSubscription) {
+      this.loginSubscription.unsubscribe();
+    }
+    if (this.logoutSubscription) {
+      this.logoutSubscription.unsubscribe();
     }
   }
 }

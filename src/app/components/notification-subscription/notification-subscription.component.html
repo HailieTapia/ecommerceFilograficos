@@ -1,26 +1,59 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<div *ngIf="!isSubscribed" class="fixed bottom-4 right-4 z-50">
-    <button
-      (click)="subscribeToNotifications()"
-      [disabled]="subscriptionError !== null"
-      class="w-12 h-12 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center shadow-lg"
-      title="Suscribirse a notificaciones"
-    >
-      <i class="fas fa-bell"></i>
-    </button>
+<div *ngIf="isSupported; else notSupported" class="fixed bottom-4 right-4 z-50">
+  <div *ngIf="isLoggedIn">
+    <div [ngSwitch]="permissionState">
+      <!-- Estado: Permiso pendiente (default) -->
+      <div *ngSwitchCase="'default'">
+        <button
+          (click)="subscribe()"
+          class="w-12 h-12 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-200 flex items-center justify-center shadow-lg"
+          title="Activar notificaciones"
+        >
+          <i class="fas fa-bell"></i>
+        </button>
+      </div>
+
+      <!-- Estado: Permiso otorgado (granted) -->
+      <div *ngSwitchCase="'granted'">
+        <div *ngIf="isSubscribed; else notSubscribed">
+          <button
+            (click)="unsubscribe()"
+            class="w-12 h-12 bg-green-600 text-white rounded-full hover:bg-red-600 transition duration-200 flex items-center justify-center shadow-lg"
+            title="Desactivar notificaciones"
+          >
+            <i class="fas fa-bell"></i>
+          </button>
+        </div>
+        <ng-template #notSubscribed>
+          <button
+            (click)="subscribe()"
+            class="w-12 h-12 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-200 flex items-center justify-center shadow-lg"
+            title="Activar notificaciones"
+          >
+            <i class="fas fa-bell"></i>
+          </button>
+        </ng-template>
+      </div>
+
+      <!-- Estado: Permiso denegado (denied) -->
+      <div *ngSwitchCase="'denied'">
+        <div class="text-gray-600 bg-white p-2 rounded-md shadow-md">
+          Notificaciones desactivadas. Actívalas en la configuración de tu navegador.
+        </div>
+      </div>
+    </div>
   </div>
-  
-  <div *ngIf="isSubscribed" class="fixed bottom-4 right-4 z-50">
-    <button
-      class="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg"
-      disabled
-      title="Ya estás suscrito"
-    >
-      <i class="fas fa-check"></i>
-    </button>
+</div>
+
+<!-- Mensaje si el navegador no soporta notificaciones -->
+<ng-template #notSupported>
+  <div class="fixed bottom-4 right-4 z-50 text-gray-600 bg-white p-2 rounded-md shadow-md">
+    Las notificaciones no están soportadas en este navegador.
   </div>
-  
-  <div *ngIf="subscriptionError" class="fixed bottom-16 right-4 z-50 text-red-600 bg-white p-2 rounded-md shadow-md">
-    {{ subscriptionError }}
-  </div>
+</ng-template>
+
+<!-- Mensaje de error -->
+<div *ngIf="subscriptionError" class="fixed bottom-16 right-4 z-50 text-red-600 bg-white p-2 rounded-md shadow-md">
+  {{ subscriptionError }}
+</div>
