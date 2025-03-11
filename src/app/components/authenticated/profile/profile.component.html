@@ -1,22 +1,22 @@
-<div class="max-w-7xl mx-auto p-6">
+<div class="bg-light-background dark:bg-dark-background max-w-7xl mx-auto p-6 font-sans">
   <!-- Cabecera de perfil -->
-  <div class="bg-white rounded-lg shadow-md p-6 mb-6 flex flex-col md:flex-row md:items-center">
+  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-md p-6 mb-6 flex flex-col md:flex-row md:items-center border border-gray-200 dark:border-gray-600">
     <div class="flex justify-center md:flex-shrink-0">
       <div class="relative">
-        <img class="h-24 w-24 object-cover rounded-full border-4 border-red-600" src="/api/placeholder/200/200" alt="Foto de perfil">
-        <button class="absolute bottom-0 right-0 bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 transition-all duration-300">
+        <img class="h-24 w-24 object-cover rounded-full border-4 border-light-primary dark:border-dark-primary" src="/api/placeholder/200/200" alt="Foto de perfil">
+        <button class="absolute bottom-0 right-0 bg-light-primary dark:bg-dark-primary text-white rounded-full p-2 shadow-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300">
           <i class="fas fa-camera text-sm"></i>
         </button>
       </div>
     </div>
     <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
-      <h1 class="text-2xl font-bold text-cyan-500 flex items-center justify-center md:justify-start gap-2">
-       {{ userProfile?.name }}
+      <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center justify-center md:justify-start gap-2">
+        {{ userProfile?.name }}
       </h1>
-      <p class="text-gray-600">{{ userProfile?.email }}</p>
+      <p class="text-light-secondary dark:text-dark-secondary">{{ userProfile?.email }}</p>
       <div class="mt-3 flex justify-center md:justify-start">
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-gray-800">
-          <span class="h-2 w-2 rounded-full bg-green-700 mr-1"></span>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-success dark:bg-dark-success text-light-success-text dark:text-dark-success-text">
+          <span class="h-2 w-2 rounded-full bg-light-resolved-text dark:bg-dark-resolved mr-1"></span>
           Cuenta activa
         </span>
       </div>
@@ -24,20 +24,20 @@
   </div>
 
   <!-- Pestañas de navegación -->
-  <div class="mb-6 border-b border-gray-200">
+  <div class="mb-6 border-b border-gray-200 dark:border-gray-600">
     <nav class="flex space-x-4">
-      <button class="relative py-3 px-4 text-gray-700 font-semibold hover:text-red-600 transition-all duration-300"
-        [ngClass]="{ 'text-red-600 border-b-2 border-red-600': activeTab === 'info' }"
+      <button class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
+        [ngClass]="{ 'text-light-primary dark:text-dark-primary border-b-2 border-light-primary dark:border-dark-primary': activeTab === 'info' }"
         (click)="setActiveTab('info')">
         Información Personal
       </button>
-      <button class="relative py-3 px-4 text-gray-700 font-semibold hover:text-red-600 transition-all duration-300"
-        [ngClass]="{ 'text-red-600 border-b-2 border-red-600': activeTab === 'addresses' }"
+      <button class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
+        [ngClass]="{ 'text-light-primary dark:text-dark-primary border-b-2 border-light-primary dark:border-dark-primary': activeTab === 'addresses' }"
         (click)="setActiveTab('addresses')">
         Direcciones
       </button>
-      <button class="relative py-3 px-4 text-gray-700 font-semibold hover:text-red-600 transition-all duration-300"
-        [ngClass]="{ 'text-red-600 border-b-2 border-red-600': activeTab === 'password' }"
+      <button class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
+        [ngClass]="{ 'text-light-primary dark:text-dark-primary border-b-2 border-light-primary dark:border-dark-primary': activeTab === 'password' }"
         (click)="setActiveTab('password')">
         Cambio de Contraseña
       </button>
@@ -58,44 +58,44 @@
 
     <!-- Panel lateral (1/3) -->
     <div>
-      <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-medium text-gray-800 mb-3">Actividad reciente</h3>
+      <div class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-600">
+        <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Actividad reciente</h3>
         <div class="space-y-3">
           <div class="flex items-start">
-            <div class="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
-              <i class="fas fa-edit text-red-600"></i>
+            <div class="h-8 w-8 rounded-full bg-light-in-progress dark:bg-dark-in-progress flex items-center justify-center">
+              <i class="fas fa-edit text-light-in-progress-text dark:text-dark-in-progress-text"></i>
             </div>
             <div class="ml-3">
-              <p class="text-sm text-gray-700">Actualizaste tu perfil</p>
-              <p class="text-xs text-gray-500">Hace 2 días</p>
+              <p class="text-sm text-light-text dark:text-dark-text">Actualizaste tu perfil</p>
+              <p class="text-xs text-light-secondary dark:text-dark-secondary">Hace 2 días</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="bg-white shadow-md rounded-lg p-6">
-        <h3 class="text-lg font-medium text-gray-800 mb-3">Acciones de cuenta</h3>
+      <div class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 border border-gray-200 dark:border-gray-600">
+        <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Acciones de cuenta</h3>
         <div class="space-y-3">
-          <button class="flex w-full items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+          <button class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded-md transition-all duration-300">
             <div class="flex items-center">
-              <i class="fas fa-download mr-3 text-gray-600"></i>
+              <i class="fas fa-download mr-3 text-light-secondary dark:text-dark-secondary"></i>
               Descargar datos
             </div>
-            <i class="fas fa-chevron-right text-gray-600"></i>
+            <i class="fas fa-chevron-right text-light-secondary dark:text-dark-secondary"></i>
           </button>
-          <button class="flex w-full items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+          <button class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded-md transition-all duration-300">
             <div class="flex items-center">
-              <i class="fas fa-bell mr-3 text-gray-600"></i>
+              <i class="fas fa-bell mr-3 text-light-secondary dark:text-dark-secondary"></i>
               Notificaciones
             </div>
-            <i class="fas fa-chevron-right text-gray-600"></i>
+            <i class="fas fa-chevron-right text-light-secondary dark:text-dark-secondary"></i>
           </button>
-          <button (click)="deleteAccount()" class="flex w-full items-center justify-between px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md">
+          <button (click)="deleteAccount()" class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-danger dark:text-dark-danger hover:bg-light-danger dark:hover:bg-dark-danger hover:bg-opacity-10 dark:hover:bg-opacity-10 rounded-md transition-all duration-300">
             <div class="flex items-center">
-              <i class="fas fa-trash-alt mr-3 text-red-600"></i>
+              <i class="fas fa-trash-alt mr-3 text-light-danger dark:text-dark-danger"></i>
               Eliminar cuenta
             </div>
-            <i class="fas fa-chevron-right text-red-600"></i>
+            <i class="fas fa-chevron-right text-light-danger dark:text-dark-danger"></i>
           </button>
         </div>
       </div>

@@ -1,43 +1,44 @@
-<div class="bg-white shadow-md rounded-lg p-6">
-    <div class="border-t-2 border-red-600 pt-6">
-      <h2 class="text-lg font-medium text-gray-800 mb-4 flex justify-between items-center">
-        Mis Direcciones
-        <button (click)="openCreateModal()"
-          class="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-300 ml-auto">
-          <i class="fas fa-plus"></i> Agregar dirección
-        </button>
-      </h2>
-  
-      <div *ngIf="userProfile?.Addresses?.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div *ngFor="let address of userProfile.Addresses"
-          class="border border-gray-200 rounded-md p-4 hover:shadow-md transition-shadow">
-          <div class="flex justify-between">
-            <h3 class="text-md font-medium text-gray-800">{{ address.alias || 'Dirección' }}</h3>
-            <span *ngIf="address.is_primary"
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-              Principal
-            </span>
-          </div>
-          <p class="text-sm text-gray-500 mt-2">
-            {{ address.street }}<br>
-            {{ address.city }}, {{ address.state }}<br>
-            {{ address.postal_code }}
-          </p>
-          <div class="mt-4 flex justify-end space-x-3">
-            <button (click)="openEditModal()" class="bg-yellow-600 bg-opacity-10 text-yellow-600 p-1.5 rounded-md hover:bg-yellow-600 hover:text-white transition-all duration-300">
-              <i class="fas fa-edit text-sm"></i>
-            </button>
-          </div>
+<div class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 border border-gray-200 dark:border-gray-600">
+  <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
+    <h2 class="text-lg font-medium text-light-text dark:text-dark-text mb-4 flex justify-between items-center">
+      Mis Direcciones
+      <button (click)="openCreateModal()"
+        class="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-light-primary dark:bg-dark-primary hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover transition-all duration-300 ml-auto">
+        <i class="fas fa-plus"></i> Agregar dirección
+      </button>
+    </h2>
+
+    <div *ngIf="userProfile?.Addresses?.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div *ngFor="let address of userProfile.Addresses"
+        class="border border-gray-200 dark:border-gray-600 rounded-md p-4 hover:shadow-md transition-shadow">
+        <div class="flex justify-between">
+          <h3 class="text-md font-medium text-light-text dark:text-dark-text">{{ address.alias || 'Dirección' }}</h3>
+          <span *ngIf="address.is_primary"
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-in-progress dark:bg-dark-in-progress text-light-in-progress-text dark:text-dark-in-progress-text">
+            Principal
+          </span>
+        </div>
+        <p class="text-sm text-light-secondary dark:text-dark-secondary mt-2">
+          {{ address.street }}<br>
+          {{ address.city }}, {{ address.state }}<br>
+          {{ address.postal_code }}
+        </p>
+        <div class="mt-4 flex justify-end space-x-3">
+          <button (click)="openEditModal()"
+            class="bg-light-pending dark:bg-dark-pending bg-opacity-10 text-light-pending-text dark:text-dark-pending-text p-1.5 rounded-md hover:bg-light-pending dark:hover:bg-dark-pending hover:text-white transition-all duration-300">
+            <i class="fas fa-edit text-sm"></i>
+          </button>
         </div>
       </div>
-  
-      <div *ngIf="userProfile?.Addresses?.length === 0 || !userProfile?.Addresses" class="text-center text-gray-500">
-        <p class="flex justify-center items-center gap-2">
-          <i class="fas fa-exclamation-triangle text-red-600"></i> No tienes una dirección registrada.
-        </p>
-      </div>
+    </div>
+
+    <div *ngIf="userProfile?.Addresses?.length === 0 || !userProfile?.Addresses" class="text-center text-light-secondary dark:text-dark-secondary">
+      <p class="flex justify-center items-center gap-2">
+        <i class="fas fa-exclamation-triangle text-light-danger dark:text-dark-danger"></i> No tienes una dirección registrada.
+      </p>
     </div>
   </div>
+</div>
   
   <app-modal #modal title="Dirección">
     <form [formGroup]="addressForm" (ngSubmit)="savePerfil()" class="grid grid-cols-2 gap-4">
