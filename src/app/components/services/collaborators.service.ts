@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
@@ -31,6 +31,21 @@ export class CollaboratorsService {
             })
         );
     }
+    // Obtener todas las categorías con paginación
+    getCollaborators(
+        page: number = 1,
+        pageSize: number = 10,
+    ): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                let params = new HttpParams()
+                    .set('page', page.toString())
+                    .set('pageSize', pageSize.toString());
+                return this.http.get<any>(`${this.apiUrl}/collaborators/pag`, { headers, params, withCredentials: true });
+            })
+        );
+    }
     //Obtiene un colaborador por su ID.
     getCollaboratorById(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -56,7 +71,7 @@ export class CollaboratorsService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.delete<any>(`${this.apiUrl}/collaborators/${id}`,{ headers, withCredentials: true });
+                return this.http.delete<any>(`${this.apiUrl}/collaborators/${id}`, { headers, withCredentials: true });
             })
         );
     }

@@ -66,6 +66,8 @@
           </tbody>
         </table>
       </div>
+      <app-pagination [currentPage]="currentPage" [totalItems]="total" [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)"></app-pagination>
     </div>
     <ng-template #noCollaborators>
       <p class="text-light-secondary dark:text-dark-secondary flex items-center gap-2">
@@ -103,7 +105,7 @@
         </div>
         <div>
           <label class="block text-light-text dark:text-dark-text mb-1">Teléfono</label>
-          <input formControlName="phone" type="text"
+          <input formControlName="phone" maxlength="10" type="text"
             class="w-full p-2 border rounded dark:bg-dark-input dark:text-dark-text">
         </div>
         <div>

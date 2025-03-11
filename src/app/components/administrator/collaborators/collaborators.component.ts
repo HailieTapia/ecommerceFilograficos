@@ -4,11 +4,11 @@ import { CollaboratorsService } from '../../services/collaborators.service';
 import { ModalComponent } from '../../../modal/modal.component';
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../services/toastService';
-
+import { PaginationComponent } from '../pagination/pagination.component';
 @Component({
   selector: 'app-collaborators',
   standalone: true,
-  imports: [CommonModule, ModalComponent, ReactiveFormsModule],
+  imports: [PaginationComponent, CommonModule, ModalComponent, ReactiveFormsModule],
   templateUrl: './collaborators.component.html',
   styleUrl: './collaborators.component.css'
 })
@@ -17,7 +17,11 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
   collaborators: any[] = [];
   collaboratorNew!: FormGroup;
   selectedColaId: number | null = null;
-  selectedFile: File | null = null; // To store the selected file
+  selectedFile: File | null = null; 
+
+  total: number = 0;
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
 
   constructor(
     private toastService: ToastService,
@@ -35,22 +39,33 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.getAllCollaborators();
+    this.getCollaborators();
   }
 
-  // Obtener todos los colaboradores
-  getAllCollaborators(): void {
-    this.collaboratorsService.getAllCollaborators().subscribe({
-      next: (data) => {
-        this.collaborators = data;
-      },
-      error: (err) => {
-        const errorMessage = err?.error?.message || 'Error al obtener colaboradores';
-        this.toastService.showToast(errorMessage, 'error');
-      }
-    });
+  //obtener usuarios con paginacion 
+  getCollaborators(): void {
+    this.collaboratorsService
+      .getCollaborators(this.currentPage, this.itemsPerPage)
+      .subscribe({
+        next: (data) => {
+          this.collaborators = data.collaborators;
+          this.total = data.total;
+          this.currentPage = data.page;
+          this.itemsPerPage = data.pageSize;
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al obtener colaboradores';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      });
   }
-  
+
+  // Maneja el cambio de página desde PaginationComponent
+  onPageChange(newPage: number): void {
+    this.currentPage = newPage;
+    this.getCollaborators();
+  }
+
   //eliminar colaborador 
   deleteColaborators(colabId: number): void {
     this.toastService.showToast(
@@ -61,7 +76,7 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
         this.collaboratorsService.deleteCollaborator(colabId).subscribe({
           next: (response) => {
             this.toastService.showToast(response.message || 'Categoría eliminada exitosamente', 'success');
-            this.getAllCollaborators();
+            this.getCollaborators();
           },
           error: (error) => {
             const errorMessage = error?.error?.message || 'Error al eliminar la categoría';
@@ -101,7 +116,7 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
       this.collaboratorsService.updateCollaborator(this.selectedColaId, formData).subscribe({
         next: () => {
           this.toastService.showToast(`Colaborador actualizado exitosamente.`, 'success');
-          this.getAllCollaborators();
+          this.getCollaborators();
           this.modal.close();
           this.resetForm();
         },
@@ -114,7 +129,7 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
       this.collaboratorsService.createCollaborator(formData).subscribe({
         next: () => {
           this.toastService.showToast(`Colaborador creado exitosamente.`, 'success');
-          this.getAllCollaborators();
+          this.getCollaborators();
           this.modal.close();
           this.resetForm();
         },
