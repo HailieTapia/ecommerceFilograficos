@@ -11,6 +11,8 @@ import { CsrfService } from './csrf.service';
 export class AuthService {
   private apiUrl = `${environment.baseUrl}`;
   private userSubject = new BehaviorSubject<any>(null);
+  private loginSubject = new BehaviorSubject<void>(undefined); // Para emitir eventos de login
+  private logoutSubject = new BehaviorSubject<void>(undefined); // Para emitir eventos de logout
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {
     this.loadUserFromStorage();
@@ -45,6 +47,7 @@ export class AuthService {
         if (!user.mfaRequired) {
           localStorage.setItem('userData', JSON.stringify(user));
           this.userSubject.next(user);
+          this.loginSubject.next(); // Emitir evento de login
         }
       })
     );
@@ -70,19 +73,22 @@ export class AuthService {
       tap((user: any) => {
         localStorage.setItem('userData', JSON.stringify(user));
         this.userSubject.next(user);
+        this.loginSubject.next(); // Emitir evento de login después de verificar MFA
       })
     );
   }
 
-  // Cerrar sesión del usuario (elimina el token de la sesión actual)
+  // Cerrar sesión del usuario
   logout(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         return this.http.post(`${this.apiUrl}/auth/logout`, {}, { headers, withCredentials: true }).pipe(
           tap(() => {
-            localStorage.removeItem('userData'); // Eliminar el usuario del LocalStorage
-            this.userSubject.next(null); // Resetear el estado del usuario
+            localStorage.removeItem('userData');
+            this.userSubject.next(null);
+            this.logoutSubject.next(); // Emitir evento de logout
+            console.log('Sesión cerrada exitosamente');
           }),
           catchError(error => {
             return throwError(() => new Error('No se pudo cerrar sesión.'));
@@ -94,22 +100,34 @@ export class AuthService {
 
   // Método para obtener el usuario logueado
   getUser(): Observable<any> {
-    return this.userSubject.asObservable(); // Permite obtener la información del usuario desde otros componentes
+    return this.userSubject.asObservable();
   }
 
-  // En el AuthService
+  // Método para escuchar eventos de login
+  onLogin(): Observable<void> {
+    return this.loginSubject.asObservable();
+  }
+
+  // Método para escuchar eventos de logout
+  onLogout(): Observable<void> {
+    return this.logoutSubject.asObservable();
+  }
+
+  // Resetear el estado de autenticación
   resetAuthState(): void {
-    localStorage.removeItem('userData'); // Eliminar el usuario del LocalStorage
-    this.userSubject.next(null); // Resetear el estado del usuario
-  }
-  // Método para verificar si el usuario está logueado
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('userData'); // Verifica si hay un usuario logueado
+    localStorage.removeItem('userData');
+    this.userSubject.next(null);
+    this.logoutSubject.next(); // Emitir evento de logout
   }
 
-  // Método para obtener el tipo de usuario (rol) desde el usuario logueado
+  // Verificar si el usuario está logueado
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('userData');
+  }
+
+  // Obtener el rol del usuario
   getUserRole(): string | null {
     const userData = localStorage.getItem('userData');
-    return userData ? JSON.parse(userData).user_type : null; // Retorna el tipo de usuario si está logueado
+    return userData ? JSON.parse(userData).user_type : null;
   }
 }
