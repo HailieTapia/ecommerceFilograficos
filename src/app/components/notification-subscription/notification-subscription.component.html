@@ -1,0 +1,26 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div *ngIf="!isSubscribed" class="fixed bottom-4 right-4 z-50">
+    <button
+      (click)="subscribeToNotifications()"
+      [disabled]="subscriptionError !== null"
+      class="w-12 h-12 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center shadow-lg"
+      title="Suscribirse a notificaciones"
+    >
+      <i class="fas fa-bell"></i>
+    </button>
+  </div>
+  
+  <div *ngIf="isSubscribed" class="fixed bottom-4 right-4 z-50">
+    <button
+      class="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center shadow-lg"
+      disabled
+      title="Ya estás suscrito"
+    >
+      <i class="fas fa-check"></i>
+    </button>
+  </div>
+  
+  <div *ngIf="subscriptionError" class="fixed bottom-16 right-4 z-50 text-red-600 bg-white p-2 rounded-md shadow-md">
+    {{ subscriptionError }}
+  </div>
