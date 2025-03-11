@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SecurityService } from '../../services/security.service';
 import { FormsModule } from '@angular/forms';
-
+import { ToastService } from '../../services/toastService';
 @Component({
   selector: 'app-security',
   standalone: true,
@@ -14,35 +14,73 @@ export class SecurityComponent {
 
   failedAttempts: any[] = [];
   failedLoginAttempts: any[] = [];
-  selectedPeriodo: string = 'dia';
+  selectedPeriodo: string = 'mes';
+  config: any = {};
+  isEditing: boolean = false; 
+  selectedTab: string = 'seguridad'; 
 
-  constructor(private securityService: SecurityService) {
-  }
+  constructor(private securityService: SecurityService, private toastService: ToastService,) { }
 
-  //componente de carga al ejecutar el componente
   ngOnInit(): void {
-    //obtiene los intentos fallidos al cargar
+    this.getConfig();
     this.getFailedLoginAttempts(this.selectedPeriodo);
   }
-
-  desbloquearUsuario(user_id: string): void {
-    if (!confirm('¿Estás seguro de que deseas desbloquear este usuario?')) {
-      return;
-    }
-  
-    this.securityService.adminUnlockUser(user_id).subscribe(
+  // Método para cambiar la pestaña activa
+  selectTab(tab: string): void {
+    this.selectedTab = tab;
+  }
+  //obtener configuracion existente 
+  getConfig(): void {
+    this.securityService.getConfig().subscribe(
       (response) => {
-        console.log('Usuario desbloqueado con éxito:', response);
-        alert('Usuario desbloqueado con éxito');
-        this.getFailedLoginAttempts(this.selectedPeriodo); 
+        this.config = response.config;
       },
       (error) => {
-        console.error('Error al desbloquear el usuario:', error);
-        alert('Error al desbloquear el usuario: ' + (error?.error?.message || 'Intente de nuevo'));
+        const errorMessage = error?.error?.message || 'Error al obtener los datos de seguridad';
+        this.toastService.showToast(errorMessage, 'error');
       }
     );
   }
-  
+
+  // Función para activar el modo de edición
+  editConfig(): void {
+    this.isEditing = true;
+  }
+
+  // Función para guardar los cambios usando el servicio
+  saveConfig(): void {
+    this.isEditing = false;
+    this.securityService.updateTokenLifetime(this.config).subscribe(
+      (response) => {
+        this.toastService.showToast('Configuración guardada', 'success');
+      },
+      (error) => {
+        const errorMessage = error?.error?.message || 'Error al guardar los datos.';
+        this.toastService.showToast(errorMessage, 'error');
+      }
+    );
+  }
+
+  //desbloquear
+  desbloquearUsuario(user_id: string): void {
+    this.toastService.showToast(
+      '¿Estás seguro de que deseas desbloquear a este usuario? Esta acción no se puede deshacer.',
+      'warning',
+      'Confirmar',
+      () => {
+        this.securityService.adminUnlockUser(user_id).subscribe(
+          (response) => {
+            this.toastService.showToast(response.message || 'Usuario desbloqueado con éxito', 'success');
+            this.getFailedLoginAttempts(this.selectedPeriodo);
+          },
+          (error) => {
+            const errorMessage = error?.error?.message || 'Error al desbloquear el usuario.';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        );
+      }
+    );
+  }
 
   //usuario cambia el período seleccionado.
   onPeriodoChange(): void {
@@ -50,11 +88,9 @@ export class SecurityComponent {
   }
 
   // Obtener intentos fallidos de inicio de sesión
-  //Hace una petición a un servicio para obtener los intentos fallidos de inicio de sesión del período especificado
   getFailedLoginAttempts(periodo: string): void {
     this.securityService.getFailedLoginAttempts(periodo).subscribe(
       (data) => {
-        console.log('Intentos fallidos:', data);
         this.failedLoginAttempts = [
           ...(data?.clientes || []),
           ...(data?.administradores || [])
@@ -62,8 +98,11 @@ export class SecurityComponent {
       },
       (error) => {
         const errorMessage = error?.error?.message || 'Error al obtener intentos fallidos';
-        console.error('Error al obtener intentos fallidos:', errorMessage);
+        this.toastService.showToast(errorMessage, 'error');
       }
     );
+  }
+  get blockedUsers(): any[] {
+    return this.failedLoginAttempts.filter(a => a.estado === 'bloqueado_permanente');
   }
 }

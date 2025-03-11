@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { AbstractControl } from '@angular/forms';
-
+import { ToastService } from '../../services/toastService';
 @Component({
   selector: 'app-email-type',
   imports: [ModalComponent, ReactiveFormsModule, CommonModule, FormsModule],
@@ -23,7 +23,7 @@ export class EmailTypeComponent implements OnInit {
   variablesList: string[] = [];
   variableControl: FormControl = new FormControl(''); // Control para el input de variables
 
-  constructor(private typeService: TypeService, private fb: FormBuilder) {
+  constructor(private toastService: ToastService,private typeService: TypeService, private fb: FormBuilder) {
     this.emailTypeForm = this.fb.group({
       token: ['', [Validators.required, Validators.maxLength(50)]],
       name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -55,18 +55,23 @@ export class EmailTypeComponent implements OnInit {
 
   // Eliminación lógica
   deleteEmailType(id: number): void {
-    if (confirm('¿Está seguro de eliminar este tipo de correo electrónico?')) {
-      this.typeService.deleteEmailType(id).subscribe({
-        next: (response) => {
-          this.successMessage = response.message || 'Tipo de correo electrónico eliminado exitosamente.';
-          this.getAllEmailTypes();
-        },
-        error: (error) => {
-          this.errorMessage = 'Error al eliminar el tipo de correo electrónico: ' + error.message;
-          console.error("Error en la llamada API:", error);
-        }
-      });
-    }
+    this.toastService.showToast(
+      '¿Estás seguro de que deseas eliminar este tipo? Esta acción no se puede deshacer.',
+      'warning',
+      'Confirmar',
+      () => {
+        this.typeService.deleteEmailType(id).subscribe({
+          next: (response) => {
+            this.toastService.showToast(response.message || 'Tipo eliminado exitosamente', 'success');
+            this.getAllEmailTypes();
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || 'Error al eliminar el tipo de correo electrónico';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        });
+      }
+    );
   }
 
   // Obtener tipo por ID

@@ -44,7 +44,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     if (!this.modal) {
-      console.error("El modal no está inicializado correctamente.");
+      this.toastService.showToast('El modal no está inicializado correctamente.', 'info');
     }
   }
 
@@ -67,7 +67,8 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
           this.itemsPerPage = data.pageSize;
         },
         error: (err) => {
-          this.toastService.showToast('Error al obtener categorías', 'error');
+          const errorMessage = err?.error?.message || 'Error al obtener categorías';
+          this.toastService.showToast(errorMessage, 'error');
         }
       });
   }
@@ -136,29 +137,35 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   }
 
   deleteCategory(categoryId: number): void {
-    if (!confirm('¿Estás seguro de que deseas desactivar esta categoría?')) return;
-    this.categoriesService.deleteCategory(categoryId).subscribe({
-      next: () => {
-        alert('Categoría desactivada exitosamente');
-        this.getAllCategories();
-      },
-      error: (err) => {
-        const errorMessage = err?.error?.message || 'Error al eliminar la categoría';
-        this.toastService.showToast(errorMessage, 'error');
+    this.toastService.showToast(
+      '¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.',
+      'warning',
+      'Confirmar',
+      () => {
+        this.categoriesService.deleteCategory(categoryId).subscribe({
+          next: (response) => {
+            this.toastService.showToast(response.message || 'Categoría eliminada exitosamente', 'success');
+            this.getAllCategories();
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || 'Error al eliminar la categoría';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        });
       }
-    });
+    );
   }
   // Método para manejar el cambio en el filtro por nombre
   onNameFilterChange(name: string): void {
     this.filterName = name;
-    this.currentPage = 1; // Resetear a la primera página al filtrar
+    this.currentPage = 1;
     this.getAllCategories();
   }
 
   // Método para manejar el cambio en el filtro de estado
   onActiveFilterChange(active: boolean | undefined): void {
     this.filterActive = active;
-    this.currentPage = 1; // Resetear a la primera página al filtrar
+    this.currentPage = 1;
     this.getAllCategories();
   }
 

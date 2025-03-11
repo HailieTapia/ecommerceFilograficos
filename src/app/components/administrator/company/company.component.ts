@@ -18,7 +18,9 @@ export class CompanyComponent implements OnInit {
   company: any;
   companyForm: FormGroup;
   address: any = addressData;
-  isLoading: boolean = true; 
+  isLoading: boolean = true;
+  selectedLogoFile: File | null = null;
+  logoPreview: string | ArrayBuffer | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -39,11 +41,41 @@ export class CompanyComponent implements OnInit {
       linkedin: ['', [Validators.pattern('https?://.*'), noXSSValidator()]],
       twitter: ['', [Validators.pattern('https?://.*'), noXSSValidator()]],
       instagram: ['', [Validators.pattern('https?://.*'), noXSSValidator()]],
+      logo: [''],
     });
   }
 
   ngOnInit(): void {
     this.getCompanyInfo();
+  }
+
+  // Método para manejar la selección del archivo
+  onLogoSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      const maxSizeInMB = 2;
+      if (file.size > maxSizeInMB * 1024 * 1024) {
+        console.log('El archivo excede el tamaño máximo ');
+        return;
+      }
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      if (!validImageTypes.includes(file.type)) {
+        console.log('Solo se permiten archivos de imagen (JPEG, PNG, GIF). ');
+        return;
+      }
+
+      this.selectedLogoFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.logoPreview = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Método para simular el clic en el input de archivo
+  triggerFileInput(fileInput: HTMLInputElement): void {
+    fileInput.click();
   }
 
   getCompanyInfo(): void {
@@ -64,53 +96,56 @@ export class CompanyComponent implements OnInit {
           facebook: this.company.facebook || '',
           linkedin: this.company.linkedin || '',
           twitter: this.company.twitter || '',
-          instagram: this.company.instagram || ''
+          instagram: this.company.instagram || '',
         });
+        if (this.company.logo) {
+          this.logoPreview = this.company.logo; 
+        }
         this.isLoading = false;
       },
       (error) => {
         this.isLoading = false;
         const errorMessage = error?.error?.message || 'Error al obtener la información de la empresa';
         this.toastService.showToast(errorMessage, 'error');
-        console.error('Error:', error);
       }
     );
   }
 
   deleteSocialMedia(platform: string): void {
     this.toastService.showToast(
-      `¿Estás seguro de eliminar ${platform}?`,
+      '¿Estás seguro de que deseas eliminar esta red social? Esta acción no se puede deshacer.',
       'warning',
-      'Eliminar',
-      () => this.confirmDeletion(platform)
-    );
-  }
-  
-  confirmDeletion(platform: string): void {
-    this.isLoading = true;
-    this.companyForm.get(platform)?.setValue('');
-  
-    this.companyService.deleteSocialMediaLinks({ [platform]: true }).subscribe(
-      (response) => {
-        this.company = response.company;
-        this.companyForm.patchValue(response.company);
-        this.isLoading = false;
-        this.toastService.showToast(`${platform} eliminado correctamente.`, 'success');
-      },
-      (error) => {
-        this.isLoading = false;
-        const errorMessage = `Error al eliminar ${platform}: ${error?.error?.message || 'Inténtalo de nuevo'}`;
-        this.toastService.showToast(errorMessage, 'error');
+      'Confirmar',
+      () => {
+        this.companyService.deleteSocialMediaLinks({ [platform]: true }).subscribe({
+          next: (response) => {
+            this.toastService.showToast(response.message || 'Red social eliminada exitosamente', 'success');
+            this.getCompanyInfo();
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || 'Error al eliminar la red social';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        });
       }
     );
   }
-  
+
   updateCompanyInfo(): void {
     if (this.companyForm.valid) {
-      this.companyService.updateCompanyInfo(this.companyForm.value).subscribe(
+      const formData = new FormData();
+      Object.keys(this.companyForm.value).forEach((key) => {
+        formData.append(key, this.companyForm.get(key)?.value);
+      });
+
+      if (this.selectedLogoFile) {
+        formData.append('logo', this.selectedLogoFile);
+      }
+
+      this.companyService.updateCompanyInfo(formData).subscribe(
         (response) => {
           this.toastService.showToast('Información actualizada correctamente.', 'success');
-          this.getCompanyInfo(); 
+          this.getCompanyInfo();
         },
         (error) => {
           const errorMessage = error?.error?.message || 'Error al actualizar la información';

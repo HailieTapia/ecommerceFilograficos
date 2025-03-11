@@ -161,8 +161,11 @@
             <td class="p-3 text-sm">{{ consultation.created_at | date:'short' }}</td>
             <td class="p-3 text-sm">{{ consultation.updated_at | date:'short' }}</td>
             <td class="p-3">
-              <button (click)="openModal(consultation.inquiry_id)" class="text-blue-500 mr-2 hover:text-blue-700">
-                Ver
+              <button (click)="openModal(consultation.inquiry_id)"
+                class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
+                <i class="fas fa-eye"></i>
+                <span
+                  class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
               </button>
               <app-consultation-row
                 [consultation]="consultation"

@@ -80,7 +80,6 @@ export class AuthService {
 
   // Cerrar sesión del usuario
   logout(): Observable<any> {
-    console.log('Cerrando sesión del usuario');
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
