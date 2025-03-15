@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs'; // Importar Subscription de RxJS
 
 export interface Faq {
-  faq_id: number;  // Nombre y tipo que espera el backend
+  id: number;  // Nombre y tipo que espera el backend
   question: string;
   answer: string;
   category_id: number;  // Campo necesario para las relaciones
@@ -175,7 +175,7 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
 
   findCategoryByFaq(faq: Faq): FaqCategory | undefined {
     return this.categories.find(category => 
-      category.faqs.some(f => f.faq_id === faq.faq_id) // Usar faq_id
+      category.faqs.some(f => f.id === faq.id) // Usar id
     );
   }
 }
