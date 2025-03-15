@@ -2,130 +2,384 @@
   <!-- Sidebar -->
   <aside *ngIf="isLoggedIn && userRole === 'administrador'" [ngClass]="{'w-64': sidebarOpen, 'w-20': !sidebarOpen}"
     class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text min-h-screen p-4 transition-all duration-300 shadow-lg">
-    <div class="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-600">
-      <h2 *ngIf="sidebarOpen" class="text-xl font-bold text-light-text dark:text-dark-text">
+    <div class="p-2 flex items-center justify-between border-b border-gray-200 dark:border-gray-600">
+      <h2 *ngIf="sidebarOpen" class="text-xs font-bold text-light-primary dark:text-dark-primary">
         Administración
       </h2>
       <button (click)="toggleSidebar()" class="p-2 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded">
-        <i class="fas fa-bars text-xl text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"></i>
+        <i
+          class="fas fa-bars text-xl text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"></i>
       </button>
     </div>
 
-    <nav class="mt-8">
-      <a routerLink="/company" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-building mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Empresa</span>
+    <nav class="mt-8 space-y-2">
+      <a routerLink="/company"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-building text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Empresa</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Empresa</span>
       </a>
-      <a routerLink="/support-panel" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-headset mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Soporte</span>
+      <a routerLink="/support-panel"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-headset text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Soporte</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Soporte</span>
       </a>
-      <a routerLink="/faq-categories" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-list mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Categorías FAQ</span>
+      <a routerLink="/faq-categories"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-list-ul text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Categorías
+          FAQ</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Categorías
+          FAQ</span>
       </a>
-      <a routerLink="/faqs" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-question-circle mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">FAQs</span>
+      <a routerLink="/faqs"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-question-circle text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">FAQs</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">FAQs</span>
       </a>
-      <a routerLink="/security" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-shield-alt mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Seguridad</span>
+      <a routerLink="/security"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-shield-alt text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Seguridad</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Seguridad</span>
       </a>
-      <a routerLink="/type" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-tags mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Tipos</span>
+      <a routerLink="/type"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-tags text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Tipos</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Tipos</span>
       </a>
-      <a routerLink="/template" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-file-alt mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Plantillas</span>
+      <a routerLink="/template"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-file-alt text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Plantillas</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Plantillas</span>
       </a>
-      <a routerLink="/regulatory" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-balance-scale mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Regulaciones</span>
+      <a routerLink="/regulatory"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-balance-scale text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Regulaciones</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Regulaciones</span>
       </a>
-      <a routerLink="/collaborators" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-users mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Colaboradores</span>
+      <a routerLink="/collaborators"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-users text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Colaboradores</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Colaboradores</span>
       </a>
-      <a routerLink="/category" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-tags mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Categorías</span>
+      <a routerLink="/category"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-tags text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Categorías</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Categorías</span>
       </a>
-      <a routerLink="/product-attributes" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-list mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Atributos de productos</span>
+      <a routerLink="/product-attributes"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-list-ul text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Atributos
+          de productos</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Atributos
+          de productos</span>
       </a>
-      <a routerLink="/product-catalog" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-list mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Catálogo de productos</span>
+      <a routerLink="/product-catalog"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-box text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Catálogo
+          de productos</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Catálogo
+          de productos</span>
       </a>
-      <a routerLink="/product-stock" class="flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300">
-        <i class="fas fa-list mr-3 text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary"></i>
-        <span *ngIf="sidebarOpen" class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Inventario de productos</span>
+      <a routerLink="/product-stock"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-warehouse text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Inventario
+          de productos</span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Inventario
+          de productos</span>
       </a>
     </nav>
   </aside>
 
   <!-- Contenido principal -->
-  <div class="flex-1">
-    <header class="bg-light-background dark:bg-dark-background shadow-md px-6 py-4 flex items-center justify-between sticky top-0 z-50 border-b border-gray-200 dark:border-gray-600">
-      <!-- LOGO Y NOMBRE EMPRESA -->
-      <div class="flex items-center space-x-3">
-        <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="h-12 w-12">
-        <span class="text-2xl font-bold text-light-text dark:text-dark-text font-sans">
-          {{ company?.name || 'Filográficos' }}
-        </span>
-      </div>
-
-      <!-- Barra de búsqueda y botón de tema -->
-      <div class="flex-grow mx-6 flex items-center gap-4">
-        <div class="relative flex-1">
-          <input type="text" placeholder="Buscar productos..."
-            class="w-full px-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
-          <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
+  <div class="flex-1 flex flex-col">
+    <header class="bg-light-background dark:bg-dark-background shadow-md z-50 sticky top-0">
+      <div class="flex items-center justify-between px-20 py-3 max-full">
+        <div class="flex items-center space-x-3">
+          <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo"
+            class="h-12 w-16 rounded-md border border-gray-200 dark:border-gray-600">
+          <span class="text-xl font-bold text-light-primary dark:text-dark-primary font-sans">
+            {{ company?.name || 'Filográficos' }}
+          </span>
         </div>
-        <button (click)="toggleTheme()"
-          class="bg-light-primary dark:bg-dark-primary text-white px-3 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
-          <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
-          {{ isDarkMode ? 'Claro' : 'Oscuro' }}
-        </button>
+
+        <!-- Barra de búsqueda -->
+        <div class="flex-1 mx-4 max-w-2xl">
+          <div class="relative">
+            <input type="text" placeholder="Buscar productos, marcas y más..."
+              class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
+            <i
+              class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+          </div>
+        </div>
+
+        <!-- Acciones -->
+        <div class="flex items-center space-x-4">
+          <!-- Público (no autenticado) -->
+          <div *ngIf="!isLoggedIn" class="flex items-center space-x-4">
+            <a href="/register"
+              class="text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">Crea
+              tu cuenta</a>
+            <a href="/login"
+              class="text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">Iniciar
+              sesión</a>
+            <a href="/cart"
+              class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+              <i class="fas fa-shopping-cart"></i>
+            </a>
+          </div>
+
+          <!-- Cliente autenticado -->
+          <div *ngIf="isLoggedIn && userRole === 'cliente'" class="flex items-center space-x-4">
+            <!-- Notificaciones -->
+            <div class="relative group">
+              <a href="/notifications"
+                class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+                <i class="fas fa-bell text-xl"></i>
+                <span
+                  class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+              </a>
+              <!-- Dropdown de notificaciones -->
+              <div
+                class="absolute right-0 mt-2 w-80 bg-white dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                <!-- Encabezado -->
+                <div class="border-b border-gray-200 dark:border-gray-600 px-4 py-3 relative">
+                  <h3 class="text-lg font-semibold text-gray-800 dark:text-dark-text">Notificaciones</h3>
+                  <span class="absolute bottom-0 left-4 w-10 h-1 bg-yellow-500 dark:bg-yellow-400"></span>
+                </div>
+                <!-- Contenido -->
+                <div class="px-4 py-6 text-center">
+                  <p class="text-gray-600 dark:text-dark-secondary">Por ahora, no hay nada aquí.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Favoritos -->
+            <a href="/favorites"
+              class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+              <i class="fas fa-heart text-xl"></i>
+              <span
+                class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                role="tooltip" aria-label="Favoritos">Favoritos</span>
+            </a>
+
+            <!-- Carrito -->
+            <a href="/cart"
+              class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+              <i class="fas fa-shopping-cart text-xl"></i>
+              <span
+                class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+              <span
+                class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                role="tooltip" aria-label="Carrito">Carrito</span>
+            </a>
+            <!-- Perfil -->
+            <div class="relative group">
+              <div class="flex items-center space-x-2 cursor-pointer">
+                <span
+                  class="w-8 h-8 bg-light-primary dark:bg-dark-primary text-white rounded-md border border-gray-200 dark:border-gray-600 flex items-center justify-center text-sm font-medium">MT</span>
+                <span class="text-light-primary dark:text-dark-primary">Monse</span>
+                <i class="fas fa-chevron-down text-light-primary dark:text-dark-primary"></i>
+              </div>
+              <!-- Dropdown -->
+              <div
+                class="absolute right-0 mt-2 w-48 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                <a href="/profile"
+                  class="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi
+                  cuenta</a>
+                <a href="/purchases"
+                  class="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis
+                  compras</a>
+                <a href="/orders"
+                  class="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis
+                  Pedidos</a>
+                <button (click)="logout()"
+                  class="block w-full text-left px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">
+                  Cerrar sesión
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Administrador autenticado -->
+          <div *ngIf="isLoggedIn && userRole === 'administrador'" class="flex items-center space-x-4">
+            <!-- Notificaciones -->
+            <div class="relative group">
+              <a href="/notifications"
+                class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+                <i class="fas fa-bell text-xl"></i>
+                <span
+                  class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+              </a>
+              <!-- Dropdown-->
+              <div
+                class="absolute right-0 mt-2 w-80 bg-white dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                <!-- Encabezado -->
+                <div class="border-b border-gray-200 dark:border-gray-600 px-4 py-3 relative">
+                  <h3 class="text-lg font-semibold text-gray-800 dark:text-dark-text">Notificaciones</h3>
+                  <span class="absolute bottom-0 left-4 w-10 h-1 bg-yellow-500 dark:bg-yellow-400"></span>
+                </div>
+                <!-- Contenido -->
+                <div class="px-4 py-6 text-center">
+                  <p class="text-gray-600 dark:text-dark-secondary">Por ahora, no hay nada aquí.</p>
+                </div>
+              </div>
+            </div>
+            <!-- Perfil -->
+            <div class="relative group">
+              <div class="flex items-center space-x-2 cursor-pointer">
+                <span
+                  class="w-8 h-8 bg-light-primary dark:bg-dark-primary text-white rounded-full flex items-center justify-center text-sm font-medium">AD</span>
+                <span class="text-light-primary dark:text-dark-primary">Admin</span>
+                <i class="fas fa-chevron-down text-light-primary dark:text-dark-primary"></i>
+              </div>
+              <!-- Dropdown -->
+              <div
+                class="absolute right-0 mt-2 w-48 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+                <a href="/company"
+                  class="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi
+                  cuenta</a>
+                <button (click)="logout()"
+                  class="block w-full text-left px-4 py-2 text-light-text dark:text-dark-text hover:text-white hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300">
+                  Cerrar sesión
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Botón de tema -->
+          <button (click)="toggleTheme()"
+            class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+            <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- Público -->
-      <div *ngIf="!isLoggedIn" class="flex items-center space-x-4">
-        <button routerLink="/login" class="group text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300 relative">
-          <i class="fas fa-sign-in-alt text-2xl"></i>
-          <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Iniciar sesión</span>
-        </button>
-        <button routerLink="/register" class="group text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300 relative">
-          <i class="fas fa-heart text-2xl"></i>
-          <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Registrarse</span>
-        </button>
-        <button routerLink="/recovery" class="group text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300 relative">
-          <i class="fas fa-shopping-cart text-2xl"></i>
-          <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Recuperar</span>
-        </button>
-      </div>
-
-      <!-- Usuario autenticado (cliente) -->
-      <div *ngIf="isLoggedIn && userRole === 'cliente'" class="flex items-center space-x-4">
-        <button routerLink="/profile" class="group text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300 relative">
-          <i class="fas fa-user text-2xl"></i>
-          <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Perfil</span>
-        </button>
-      </div>
-
-      <!-- Botón de cerrar TESTING sesión -->
-      <div *ngIf="isLoggedIn" class="flex items-center space-x-4">
-        <button (click)="logout()" class="group text-light-secondary dark:text-dark-secondary hover:text-light-danger dark:hover:text-dark-danger transition-all duration-300 relative">
-          <i class="fas fa-sign-out-alt text-2xl"></i>
-          <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Cerrar sesión</span>
-        </button>
+      <!-- Segunda fila: Breadcrumbs y navegación -->
+      <div
+        class="border-t border-gray-200 dark:border-gray-600 px-4 py-2 mx-full flex items-center justify-between">
+        <!-- Breadcrumbs -->
+        <div class="flex items-center space-x-2 text-sm">
+          <a href="/"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">Inicio</a>
+          <span class="text-light-secondary dark:text-dark-secondary">></span>
+          <a href="/categories"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">Categorías</a>
+          <span class="text-light-secondary dark:text-dark-secondary">></span>
+          <span class="text-light-text dark:text-dark-text">Moda</span>
+        </div>
+        <!-- Navegación -->
+        <nav class="flex space-x-4">
+          <a href="/categories"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            Categorías
+            <span
+              class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              role="tooltip" aria-label="Categorías">Categorías</span>
+          </a>
+          <a href="/offers"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            Ofertas
+            <span
+              class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              role="tooltip" aria-label="Ofertas">Ofertas</span>
+          </a>
+          <a href="/history"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            Historial
+            <span
+              class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              role="tooltip" aria-label="Historial">Historial</span>
+          </a>
+          <a href="/supermarket"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            Supermercado
+            <span
+              class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              role="tooltip" aria-label="Supermercado">Supermercado</span>
+          </a>
+          <a href="/fashion"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            Moda
+            <span
+              class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              role="tooltip" aria-label="Moda">Moda</span>
+          </a>
+          <a href="/play"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            Play
+            <span
+              class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              role="tooltip" aria-label="Play">Play</span>
+          </a>
+          <a href="/sell"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            Vender
+            <span
+              class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              role="tooltip" aria-label="Vender">Vender</span>
+          </a>
+          <a href="/help"
+            class="text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            Ayuda
+            <span
+              class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              role="tooltip" aria-label="Ayuda">Ayuda</span>
+          </a>
+        </nav>
       </div>
     </header>
 
-    <!-- Contenido dinámico -->
-    <router-outlet></router-outlet>
+    <div>
+      <router-outlet></router-outlet>
+    </div>
   </div>
-</div>

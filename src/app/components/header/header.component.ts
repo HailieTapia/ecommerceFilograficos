@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { CompanyService } from '../services/company.service';
 import { ThemeService } from '../services/theme.service';
+
 @Component({
   selector: 'app-header',
   standalone: true,
