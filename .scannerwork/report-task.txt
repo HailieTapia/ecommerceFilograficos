@@ -1,7 +1,0 @@
-organization=luisgerardo11
-projectKey=LUISGERARDO11_FrontendFilograficos
-serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.60731
-dashboardUrl=https://sonarcloud.io/dashboard?id=LUISGERARDO11_FrontendFilograficos
-ceTaskId=AZWVVvnwBWqG58Ws9NIZ
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZWVVvnwBWqG58Ws9NIZ
