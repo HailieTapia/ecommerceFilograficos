@@ -181,28 +181,8 @@
 
           <!-- Cliente autenticado -->
           <div *ngIf="isLoggedIn && userRole === 'cliente'" class="flex items-center space-x-4">
-            <!-- Notificaciones -->
-            <div class="relative group">
-              <a href="/notifications"
-                class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
-                <i class="fas fa-bell text-xl"></i>
-                <span
-                  class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-              </a>
-              <!-- Dropdown de notificaciones -->
-              <div
-                class="absolute right-0 mt-2 w-80 bg-white dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                <!-- Encabezado -->
-                <div class="border-b border-gray-200 dark:border-gray-600 px-4 py-3 relative">
-                  <h3 class="text-lg font-semibold text-gray-800 dark:text-dark-text">Notificaciones</h3>
-                  <span class="absolute bottom-0 left-4 w-10 h-1 bg-yellow-500 dark:bg-yellow-400"></span>
-                </div>
-                <!-- Contenido -->
-                <div class="px-4 py-6 text-center">
-                  <p class="text-gray-600 dark:text-dark-secondary">Por ahora, no hay nada aquí.</p>
-                </div>
-              </div>
-            </div>
+            <!-- Notificaciones (reemplazado por el nuevo componente) -->
+            <app-notification-dropdown></app-notification-dropdown>
 
             <!-- Favoritos -->
             <a href="/favorites"
@@ -223,6 +203,7 @@
                 class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 role="tooltip" aria-label="Carrito">Carrito</span>
             </a>
+
             <!-- Perfil -->
             <div class="relative group">
               <div class="flex items-center space-x-2 cursor-pointer">
@@ -253,28 +234,9 @@
 
           <!-- Administrador autenticado -->
           <div *ngIf="isLoggedIn && userRole === 'administrador'" class="flex items-center space-x-4">
-            <!-- Notificaciones -->
-            <div class="relative group">
-              <a href="/notifications"
-                class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
-                <i class="fas fa-bell text-xl"></i>
-                <span
-                  class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
-              </a>
-              <!-- Dropdown-->
-              <div
-                class="absolute right-0 mt-2 w-80 bg-white dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                <!-- Encabezado -->
-                <div class="border-b border-gray-200 dark:border-gray-600 px-4 py-3 relative">
-                  <h3 class="text-lg font-semibold text-gray-800 dark:text-dark-text">Notificaciones</h3>
-                  <span class="absolute bottom-0 left-4 w-10 h-1 bg-yellow-500 dark:bg-yellow-400"></span>
-                </div>
-                <!-- Contenido -->
-                <div class="px-4 py-6 text-center">
-                  <p class="text-gray-600 dark:text-dark-secondary">Por ahora, no hay nada aquí.</p>
-                </div>
-              </div>
-            </div>
+            <!-- Notificaciones (reemplazado por el nuevo componente) -->
+            <app-notification-dropdown></app-notification-dropdown>
+
             <!-- Perfil -->
             <div class="relative group">
               <div class="flex items-center space-x-2 cursor-pointer">
@@ -293,9 +255,10 @@
                   class="block w-full text-left px-4 py-2 text-light-text dark:text-dark-text hover:text-white hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300">
                   Cerrar sesión
                 </button>
-              </div>
+              </div> 
             </div>
           </div>
+
           <!-- Botón de tema -->
           <button (click)="toggleTheme()"
             class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
@@ -383,3 +346,4 @@
       <router-outlet></router-outlet>
     </div>
   </div>
+</div>

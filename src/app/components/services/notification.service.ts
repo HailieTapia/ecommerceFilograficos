@@ -7,11 +7,23 @@ import { CsrfService } from './csrf.service';
 import { getMessaging, getToken, onMessage, deleteToken } from 'firebase/messaging';
 import { messaging } from '../../environments/firebase-config';
 
+// Definir la interfaz para las categorías del backend
+interface BackendCategories {
+  special_offers: boolean;
+  event_reminders: boolean;
+  news_updates: boolean;
+  order_updates: boolean;
+  urgent_orders: boolean;
+  design_reviews: boolean;
+  stock_alerts: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
   private apiUrl = `${environment.baseUrl}/notifications`;
+  private communicationUrl = `${environment.baseUrl}/communication`;
   private STORAGE_KEY = 'notification_state';
 
   constructor(
@@ -20,18 +32,18 @@ export class NotificationService {
   ) {}
 
   // Obtener el estado almacenado en localStorage
-  private getStoredState(): { permissionState: string; hasSubscribed: boolean } {
+  private getStoredState(): { permissionState: string; hasPrompted: boolean } {
     const stored = localStorage.getItem(this.STORAGE_KEY);
     return stored
       ? JSON.parse(stored)
-      : { permissionState: Notification.permission, hasSubscribed: false };
+      : { permissionState: Notification.permission, hasPrompted: false };
   }
 
   // Guardar el estado en localStorage
-  private saveState(permissionState: string, hasSubscribed: boolean): void {
+  private saveState(permissionState: string, hasPrompted: boolean): void {
     localStorage.setItem(
       this.STORAGE_KEY,
-      JSON.stringify({ permissionState, hasSubscribed })
+      JSON.stringify({ permissionState, hasPrompted })
     );
   }
 
@@ -40,73 +52,176 @@ export class NotificationService {
     return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   }
 
+  // Obtener las preferencias de comunicación
+  getCommunicationPreferences(): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(this.communicationUrl, { headers, withCredentials: true });
+      }),
+      catchError((error: any) => {
+        console.error('Error al obtener preferencias:', error);
+        return throwError(() => new Error(`Error al obtener preferencias: ${error.message}`));
+      })
+    );
+  }
+
+  // Actualizar las preferencias de comunicación
+  updateCommunicationPreferences(methods: string[], categories: BackendCategories): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.put(this.communicationUrl, { methods, categories }, { headers, withCredentials: true });
+      }),
+      catchError((error: any) => {
+        console.error('Error al actualizar preferencias:', error);
+        return throwError(() => new Error(`Error al actualizar preferencias: ${error.message}`));
+      })
+    );
+  }
+
   // Verificar el estado de las notificaciones
-  async checkNotificationStatus(): Promise<{ permission: string; subscribed: boolean }> {
+  async checkNotificationStatus(): Promise<{ permission: string; hasPush: boolean; hasPrompted: boolean }> {
     if (!this.isSupported()) {
       console.log('Notificaciones no soportadas en este navegador');
-      return { permission: 'unsupported', subscribed: false };
+      return { permission: 'unsupported', hasPush: false, hasPrompted: false };
     }
 
     const state = this.getStoredState();
     const permission = Notification.permission;
-    let subscribed = state.hasSubscribed;
+    let hasPush = false;
 
-    // Si el permiso es granted y no está suscrito, intentar suscribir
-    if (permission === 'granted' && !subscribed) {
-      try {
-        const registration = await navigator.serviceWorker.ready;
-        const token = await getToken(messaging, {
-          serviceWorkerRegistration: registration,
-          vapidKey: environment.vapidKey
-        });
-        if (token) {
-          await this.sendSubscriptionToServer(token).toPromise();
-          this.saveState(permission, true);
-          subscribed = true;
-        }
-      } catch (error) {
-        console.error('Error al verificar suscripción:', error);
-      }
+    try {
+      const response = await this.getCommunicationPreferences().toPromise();
+      hasPush = response.preferences?.methods.includes('push') || false;
+    } catch (error) {
+      console.error('Error al verificar preferencias:', error);
     }
 
-    return { permission, subscribed };
+    return { permission, hasPush, hasPrompted: state.hasPrompted };
   }
 
   // Solicitar permiso y suscribir al usuario
   async requestPermissionAndSubscribe(): Promise<{ permission: string; subscribed: boolean }> {
     if (!this.isSupported()) {
+      console.log('Notificaciones no soportadas en este navegador');
       return { permission: 'unsupported', subscribed: false };
     }
 
     try {
+      console.log('Solicitando permiso de notificación...');
       const permission = await Notification.requestPermission();
-      let subscribed = false;
+      console.log('Permiso de notificación:', permission);
 
+      let subscribed = false;
       if (permission === 'granted') {
+        console.log('Permiso concedido, esperando Service Worker...');
         const registration = await navigator.serviceWorker.ready;
+        console.log('Service Worker registrado:', registration);
+
+        // Añadir un pequeño retraso para asegurar que el Service Worker esté listo
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        console.log('Obteniendo token de FCM...');
         const token = await getToken(messaging, {
           serviceWorkerRegistration: registration,
           vapidKey: environment.vapidKey
+        }).catch((error) => {
+          console.error('Error al obtener token de FCM:', error);
+          throw error;
         });
+        console.log('Token de FCM obtenido:', token);
+
         if (token) {
+          console.log('Enviando suscripción al servidor...');
           await this.sendSubscriptionToServer(token).toPromise();
+          console.log('Actualizando preferencias de comunicación...');
+          await this.updateCommunicationPreferences(
+            ['email', 'push'],
+            {
+              special_offers: true,
+              event_reminders: true,
+              news_updates: true,
+              order_updates: true,
+              urgent_orders: false,
+              design_reviews: true,
+              stock_alerts: false
+            }
+          ).toPromise();
           subscribed = true;
+        } else {
+          console.error('No se pudo obtener el token de FCM');
         }
+      } else {
+        console.log('Permiso denegado, actualizando preferencias sin push...');
+        await this.updateCommunicationPreferences(
+          ['email'],
+          {
+            special_offers: false,
+            event_reminders: false,
+            news_updates: false,
+            order_updates: false,
+            urgent_orders: false,
+            design_reviews: false,
+            stock_alerts: false
+          }
+        ).toPromise();
       }
 
-      this.saveState(permission, subscribed);
+      this.saveState(permission, true);
       return { permission, subscribed };
     } catch (error: any) {
       console.error('Error al solicitar permiso:', error);
-      this.saveState(Notification.permission, false);
+      this.saveState(Notification.permission, true);
       return { permission: Notification.permission, subscribed: false };
+    }
+  }
+
+  // Desuscribirse de las notificaciones
+  async unsubscribeFromPush(): Promise<void> {
+    try {
+      console.log('Desuscribiendo de notificaciones push...');
+      const registration = await navigator.serviceWorker.ready;
+      console.log('Service Worker registrado para desuscribir:', registration);
+
+      const token = await getToken(messaging, {
+        serviceWorkerRegistration: registration,
+        vapidKey: environment.vapidKey
+      }).catch((error) => {
+        console.error('Error al obtener token para desuscribir:', error);
+        throw error;
+      });
+
+      if (token) {
+        console.log('Eliminando token de FCM...');
+        await deleteToken(messaging);
+      }
+
+      console.log('Eliminando suscripción del servidor...');
+      await this.removeSubscriptionFromServer().toPromise();
+      console.log('Actualizando preferencias sin push...');
+      await this.updateCommunicationPreferences(
+        ['email'],
+        {
+          special_offers: false,
+          event_reminders: false,
+          news_updates: false,
+          order_updates: false,
+          urgent_orders: false,
+          design_reviews: false,
+          stock_alerts: false
+        }
+      ).toPromise();
+      this.saveState(Notification.permission, true);
+    } catch (error: any) {
+      console.error('Error al desuscribirse:', error);
+      throw new Error(`Error al desuscribirse: ${error.message}`);
     }
   }
 
   // Enviar la suscripción al backend
   private sendSubscriptionToServer(token: string): Observable<any> {
     const subscriptionData = { token };
-
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
@@ -119,30 +234,6 @@ export class NotificationService {
     );
   }
 
-  // Desuscribirse de las notificaciones
-  async unsubscribeFromPush(): Promise<void> {
-    try {
-      // Eliminar el token FCM
-      const registration = await navigator.serviceWorker.ready;
-      const token = await getToken(messaging, {
-        serviceWorkerRegistration: registration,
-        vapidKey: environment.vapidKey
-      });
-      if (token) {
-        await deleteToken(messaging);
-      }
-
-      // Eliminar la suscripción del backend
-      await this.removeSubscriptionFromServer().toPromise();
-
-      // Actualizar el estado
-      this.saveState(Notification.permission, false);
-    } catch (error: any) {
-      console.error('Error al desuscribirse:', error);
-      throw new Error(`Error al desuscribirse: ${error.message}`);
-    }
-  }
-
   // Eliminar la suscripción del backend
   private removeSubscriptionFromServer(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
@@ -153,6 +244,34 @@ export class NotificationService {
       catchError((error: any) => {
         console.error('Error al eliminar la suscripción:', error);
         return throwError(() => new Error(`Error al eliminar la suscripción: ${error.message}`));
+      })
+    );
+  }
+
+  // Obtener historial de notificaciones
+  getNotificationHistory(): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/history`, { headers, withCredentials: true });
+      }),
+      catchError((error: any) => {
+        console.error('Error al obtener historial:', error);
+        return throwError(() => new Error(`Error al obtener historial: ${error.message}`));
+      })
+    );
+  }
+
+  // Marcar notificación como vista
+  markNotificationAsSeen(notificationId: number): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.post(`${this.apiUrl}/mark-seen`, { notification_id: notificationId }, { headers, withCredentials: true });
+      }),
+      catchError((error: any) => {
+        console.error('Error al marcar notificación:', error);
+        return throwError(() => new Error(`Error al marcar notificación: ${error.message}`));
       })
     );
   }
