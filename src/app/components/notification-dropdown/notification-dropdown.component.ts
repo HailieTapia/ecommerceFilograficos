@@ -31,7 +31,7 @@ interface BackendCategories {
 interface Preferences {
   methods: string[];
   categories: BackendCategories;
-  frontendCategories: FrontendCategories; // Para la interfaz de usuario
+  frontendCategories: FrontendCategories;
 }
 
 @Component({
@@ -42,7 +42,7 @@ interface Preferences {
   styleUrls: ['./notification-dropdown.component.css']
 })
 export class NotificationDropdownComponent implements OnInit, OnDestroy {
-  isSupported: boolean = true;
+  isSupported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   permissionState: string = 'default';
   hasPush: boolean = false;
   hasPrompted: boolean = false;
@@ -53,6 +53,8 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   notificationError: string | null = null;
   isLoggedIn: boolean = false;
   userRole: string | null = null;
+  isDropdownOpen = false; // Control para dropdown de notificaciones
+
   preferences: Preferences = {
     methods: ['email'],
     categories: {
@@ -75,9 +77,9 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
     }
   };
 
-  private userSubscription: Subscription | undefined;
-  private loginSubscription: Subscription | undefined;
-  private logoutSubscription: Subscription | undefined;
+  private userSubscription?: Subscription;
+  private loginSubscription?: Subscription;
+  private logoutSubscription?: Subscription;
 
   constructor(
     private authService: AuthService,
@@ -85,8 +87,6 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-
     if (this.isSupported) {
       this.notificationService.listenForMessages();
     }
@@ -94,20 +94,25 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
     this.userSubscription = this.authService.getUser().subscribe(user => {
       this.isLoggedIn = !!user;
       this.userRole = user?.tipo || null;
-      if (this.isLoggedIn) {
-        this.handleLogin();
-      } else {
-        this.handleLogout();
-      }
+      if (this.isLoggedIn) this.handleLogin();
+      else this.handleLogout();
     });
 
-    this.loginSubscription = this.authService.onLogin().subscribe(() => {
-      this.handleLogin();
-    });
+    this.loginSubscription = this.authService.onLogin().subscribe(() => this.handleLogin());
+    this.logoutSubscription = this.authService.onLogout().subscribe(() => this.handleLogout());
+  }
 
-    this.logoutSubscription = this.authService.onLogout().subscribe(() => {
-      this.handleLogout();
-    });
+  // Métodos para controlar el dropdown
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  openDropdown() {
+    this.isDropdownOpen = true;
+  }
+
+  closeDropdown() {
+    this.isDropdownOpen = false;
   }
 
   async handleLogin(): Promise<void> {
@@ -401,8 +406,8 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.userSubscription) this.userSubscription.unsubscribe();
-    if (this.loginSubscription) this.loginSubscription.unsubscribe();
-    if (this.logoutSubscription) this.logoutSubscription.unsubscribe();
+    this.userSubscription?.unsubscribe();
+    this.loginSubscription?.unsubscribe();
+    this.logoutSubscription?.unsubscribe();
   }
 }

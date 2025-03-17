@@ -5,12 +5,12 @@ import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { CompanyService } from '../services/company.service';
 import { ThemeService } from '../services/theme.service';
-import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component'; // Importar el nuevo componente
+import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationDropdownComponent], // Agregar NotificationDropdownComponent
+  imports: [CommonModule, RouterModule, NotificationDropdownComponent],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
@@ -18,8 +18,9 @@ export class HeaderComponent implements OnInit {
   userRole: string | null = null;
   isLoggedIn: boolean = false;
   company: any;
-  sidebarOpen = false; // Estado inicial del sidebar (abierto)
+  sidebarOpen = false;
   logoPreview: string | ArrayBuffer | null = null;
+  isProfileDropdownOpen = false; // Control para dropdown de perfil
 
   constructor(
     public themeService: ThemeService,
@@ -31,13 +32,8 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     this.getCompanyInfo();
     this.authService.getUser().subscribe(user => {
-      if (user) {
-        this.userRole = user.tipo;
-        this.isLoggedIn = true;
-      } else {
-        this.userRole = null;
-        this.isLoggedIn = false;
-      }
+      this.isLoggedIn = !!user;
+      this.userRole = user?.tipo || null;
     });
   }
 
@@ -51,24 +47,16 @@ export class HeaderComponent implements OnInit {
     this.companyService.getCompanyInfo().subscribe(
       (response) => {
         this.company = response.company;
-        if (this.company.logo) {
-          this.logoPreview = this.company.logo;
-        }
+        this.logoPreview = this.company.logo || null;
       },
-      (error) => {
-        console.error('Error al obtener:', error);
-      }
+      (error) => console.error('Error al obtener:', error)
     );
   }
 
   logout(): void {
     this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['login']);
-      },
-      error: (err) => {
-        console.error(err);
-      }
+      next: () => this.router.navigate(['login']),
+      error: (err) => console.error(err)
     });
   }
 
@@ -78,5 +66,18 @@ export class HeaderComponent implements OnInit {
 
   get isDarkMode() {
     return this.themeService.isDarkMode();
+  }
+
+  // Métodos para controlar el dropdown de perfil
+  toggleProfileDropdown() {
+    this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
+  }
+
+  openProfileDropdown() {
+    this.isProfileDropdownOpen = true;
+  }
+
+  closeProfileDropdown() {
+    this.isProfileDropdownOpen = false;
   }
 }

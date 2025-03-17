@@ -1,43 +1,34 @@
-<div class="relative group">
-    <a href="/notifications"
-      class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+<div class="relative p-2" (mouseenter)="openDropdown()" (mouseleave)="closeDropdown()">
+    <a href="/notifications" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300" (click)="toggleDropdown(); $event.preventDefault()">
       <i class="fas fa-bell text-xl"></i>
-      <span
-        class="absolute -top-2 -right-2 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ getUnreadCount() }}</span>
+      <span class="absolute -top-2 -right-2 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ getUnreadCount() }}</span>
     </a>
     <!-- Dropdown de notificaciones -->
-    <div
-      class="absolute right-0 mt-2 w-80 bg-white dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+    <div *ngIf="isDropdownOpen" class="absolute right-0 mt-2 w-80 bg-white dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg transition-opacity duration-300 z-10">
       <!-- Header con título y botón de configuración -->
       <div class="flex items-center justify-between border-b p-4">
         <div class="flex items-center">
           <i class="fas fa-bell text-blue-600 mr-2"></i>
           <h1 class="text-xl font-bold text-gray-800 dark:text-dark-text">Notificaciones</h1>
-          <span *ngIf="getUnreadCount() > 0"
-            class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{{ getUnreadCount() }}</span>
+          <span *ngIf="getUnreadCount() > 0" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{{ getUnreadCount() }}</span>
         </div>
-        <button (click)="showModal = true"
-          class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100"
-          aria-label="Configuración de notificaciones">
+        <button (click)="showModal = true" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100" aria-label="Configuración de notificaciones">
           <i class="fas fa-cog text-gray-600"></i>
         </button>
       </div>
-  
+
       <!-- Acciones de notificaciones -->
       <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
         <h2 class="text-sm font-medium text-gray-500 dark:text-dark-secondary">Últimas actualizaciones</h2>
-        <button *ngIf="getUnreadCount() > 0" (click)="handleMarkAllAsRead()"
-          class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+        <button *ngIf="getUnreadCount() > 0" (click)="handleMarkAllAsRead()" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
           Marcar todas como leídas
         </button>
       </div>
-  
+
       <!-- Lista de notificaciones -->
       <div class="p-4">
         <div *ngIf="notifications.length > 0; else noNotifications" class="space-y-3">
-          <div *ngFor="let notification of notifications" (click)="markAsSeen(notification.notification_id)"
-            class="p-3 border rounded-lg transition-all cursor-pointer"
-            [ngClass]="{'bg-white': notification.seen, 'bg-blue-50': !notification.seen}">
+          <div *ngFor="let notification of notifications" (click)="markAsSeen(notification.notification_id)" class="p-3 border rounded-lg transition-all cursor-pointer" [ngClass]="{'bg-white': notification.seen, 'bg-blue-50': !notification.seen}">
             <div class="flex items-start">
               <div [ngClass]="{
                   'p-2 rounded-full mr-3 bg-red-100 text-red-600': notification.category === 'urgent_orders',
@@ -73,7 +64,7 @@
         </ng-template>
       </div>
     </div>
-  
+
     <!-- Modal de configuración -->
     <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
@@ -86,15 +77,14 @@
             <i class="fas fa-times"></i>
           </button>
         </div>
-  
+
         <div class="p-4">
           <!-- Sección de Métodos de Comunicación -->
           <div class="mb-6">
             <h3 class="text-md font-semibold mb-3 text-gray-700 dark:text-dark-text">Métodos de Comunicación</h3>
             <div class="space-y-3">
               <div class="flex items-center">
-                <input type="checkbox" id="email" [checked]="preferences.methods.includes('email')" disabled
-                  class="w-4 h-4 text-blue-600 rounded">
+                <input type="checkbox" id="email" [checked]="preferences.methods.includes('email')" disabled class="w-4 h-4 text-blue-600 rounded">
                 <label for="email" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                   <i class="fas fa-envelope mr-2 text-gray-500"></i>
                   Correo electrónico
@@ -102,8 +92,7 @@
                 </label>
               </div>
               <div class="flex items-center">
-                <input type="checkbox" id="push" [checked]="hasPush" (change)="handlePushChange()"
-                  class="w-4 h-4 text-blue-600 rounded">
+                <input type="checkbox" id="push" [checked]="hasPush" (change)="handlePushChange()" class="w-4 h-4 text-blue-600 rounded">
                 <label for="push" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                   <i class="fas fa-bell mr-2 text-gray-500"></i>
                   Notificaciones push
@@ -114,55 +103,45 @@
               </p>
             </div>
           </div>
-  
+
           <!-- Sección de Categorías -->
           <div class="mb-6">
             <h3 class="text-md font-semibold mb-3 text-gray-700 dark:text-dark-text">Categorías de Notificaciones</h3>
-  
+
             <!-- Categorías para clientes -->
             <div *ngIf="userRole !== 'administrador'" class="mb-4">
               <h4 class="text-sm font-medium text-gray-500 dark:text-dark-secondary mb-2">General</h4>
               <div class="space-y-3">
                 <div class="flex items-center">
-                  <input type="checkbox" id="offers" [checked]="preferences.frontendCategories.offers"
-                    (change)="handleCategoryChange('offers')" [disabled]="!hasPush"
-                    class="w-4 h-4 text-blue-600 rounded">
+                  <input type="checkbox" id="offers" [checked]="preferences.frontendCategories.offers" (change)="handleCategoryChange('offers')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
                   <label for="offers" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                     <i class="fas fa-tag mr-2 text-gray-500"></i>
                     Ofertas y promociones
                   </label>
                 </div>
                 <div class="flex items-center">
-                  <input type="checkbox" id="events" [checked]="preferences.frontendCategories.events"
-                    (change)="handleCategoryChange('events')" [disabled]="!hasPush"
-                    class="w-4 h-4 text-blue-600 rounded">
+                  <input type="checkbox" id="events" [checked]="preferences.frontendCategories.events" (change)="handleCategoryChange('events')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
                   <label for="events" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                     <i class="fas fa-calendar mr-2 text-gray-500"></i>
                     Eventos y webinars
                   </label>
                 </div>
                 <div class="flex items-center">
-                  <input type="checkbox" id="news" [checked]="preferences.frontendCategories.news"
-                    (change)="handleCategoryChange('news')" [disabled]="!hasPush"
-                    class="w-4 h-4 text-blue-600 rounded">
+                  <input type="checkbox" id="news" [checked]="preferences.frontendCategories.news" (change)="handleCategoryChange('news')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
                   <label for="news" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                     <i class="fas fa-newspaper mr-2 text-gray-500"></i>
                     Novedades y noticias
                   </label>
                 </div>
                 <div class="flex items-center">
-                  <input type="checkbox" id="orders" [checked]="preferences.frontendCategories.orders"
-                    (change)="handleCategoryChange('orders')" [disabled]="!hasPush"
-                    class="w-4 h-4 text-blue-600 rounded">
+                  <input type="checkbox" id="orders" [checked]="preferences.frontendCategories.orders" (change)="handleCategoryChange('orders')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
                   <label for="orders" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                     <i class="fas fa-box mr-2 text-gray-500"></i>
                     Actualizaciones de pedidos
                   </label>
                 </div>
                 <div class="flex items-center">
-                  <input type="checkbox" id="designReviews" [checked]="preferences.frontendCategories.designReviews"
-                    (change)="handleCategoryChange('designReviews')" [disabled]="!hasPush"
-                    class="w-4 h-4 text-blue-600 rounded">
+                  <input type="checkbox" id="designReviews" [checked]="preferences.frontendCategories.designReviews" (change)="handleCategoryChange('designReviews')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
                   <label for="designReviews" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                     <i class="fas fa-edit mr-2 text-gray-500"></i>
                     Revisiones de diseño
@@ -170,24 +149,20 @@
                 </div>
               </div>
             </div>
-  
+
             <!-- Categorías para administradores -->
             <div *ngIf="userRole === 'administrador'" class="mb-4">
               <h4 class="text-sm font-medium text-gray-500 dark:text-dark-secondary mb-2">Administración</h4>
               <div class="space-y-3">
                 <div class="flex items-center">
-                  <input type="checkbox" id="urgentOrders" [checked]="preferences.frontendCategories.urgentOrders"
-                    (change)="handleCategoryChange('urgentOrders')" [disabled]="!hasPush"
-                    class="w-4 h-4 text-blue-600 rounded">
+                  <input type="checkbox" id="urgentOrders" [checked]="preferences.frontendCategories.urgentOrders" (change)="handleCategoryChange('urgentOrders')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
                   <label for="urgentOrders" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                     <i class="fas fa-exclamation-triangle mr-2 text-gray-500"></i>
                     Alertas de pedidos urgentes
                   </label>
                 </div>
                 <div class="flex items-center">
-                  <input type="checkbox" id="stockAlerts" [checked]="preferences.frontendCategories.stockAlerts"
-                    (change)="handleCategoryChange('stockAlerts')" [disabled]="!hasPush"
-                    class="w-4 h-4 text-blue-600 rounded">
+                  <input type="checkbox" id="stockAlerts" [checked]="preferences.frontendCategories.stockAlerts" (change)="handleCategoryChange('stockAlerts')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
                   <label for="stockAlerts" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
                     <i class="fas fa-warehouse mr-2 text-gray-500"></i>
                     Alertas de inventario
@@ -197,20 +172,16 @@
             </div>
           </div>
         </div>
-  
+
         <div class="flex justify-between p-4 border-t bg-gray-50">
-          <button (click)="handleReset()"
-            class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-dark-text dark:hover:text-dark-primary font-medium">
+          <button (click)="handleReset()" class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-dark-text dark:hover:text-dark-primary font-medium">
             Restaurar valores predeterminados
           </button>
           <div class="flex space-x-2">
-            <button (click)="showModal = false"
-              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-row-hover font-medium">
+            <button (click)="showModal = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-row-hover font-medium">
               Cancelar
             </button>
-            <button (click)="handleSave()"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center"
-              [disabled]="loading">
+            <button (click)="handleSave()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center" [disabled]="loading">
               <span *ngIf="loading" class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
               {{ loading ? 'Guardando...' : 'Guardar cambios' }}
             </button>
@@ -218,7 +189,7 @@
         </div>
       </div>
     </div>
-  
+
     <!-- Notificación de sistema -->
     <div *ngIf="systemNotification" class="fixed top-4 right-4 left-4 md:left-auto md:w-80 z-50">
       <div [ngClass]="{
@@ -235,7 +206,7 @@
         </button>
       </div>
     </div>
-  
+
     <!-- Mensaje de error -->
     <div *ngIf="notificationError" class="fixed bottom-4 right-4 z-50 text-red-600 bg-white p-2 rounded-md shadow-md">
       {{ notificationError }}
