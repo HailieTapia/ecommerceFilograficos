@@ -1,0 +1,264 @@
+<div class="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text p-4 sm:p-6">
+  <h1 class="text-xl sm:text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2 mb-4 sm:mb-6">
+    <i class="fas fa-images text-light-primary dark:text-dark-primary"></i> Gestión de Banners
+  </h1>
+
+  <!-- Limit Warning -->
+  <div *ngIf="showLimitWarning" class="bg-light-danger dark:bg-dark-danger text-white px-4 py-3 rounded flex items-center mb-4">
+    <i class="fas fa-exclamation-circle mr-2"></i>
+    <span>No se pueden registrar más de 5 banners en total. Actualmente hay {{ banners.length }} banners.</span>
+  </div>
+
+  <!-- Visibilidad Global -->
+  <div class="mb-4 bg-light-background dark:bg-dark-background p-4 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-eye text-light-primary dark:text-dark-primary text-lg"></i>
+        <span class="text-light-text dark:text-dark-text font-medium text-sm sm:text-base">Visibilidad de banners para usuarios</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" [checked]="showBannersToUsers" (change)="onVisibilityToggle($event)">
+        <span class="slider">
+          <span class="status-text status-visible">Visible</span>
+          <span class="status-text status-hidden">Oculto</span>
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+      <h2 class="text-lg font-medium text-light-text dark:text-dark-text">Lista de Banners</h2>
+      <button
+        (click)="openCreateModal()"
+        class="bg-light-primary dark:bg-dark-primary text-white px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition duration-300 whitespace-nowrap shadow-md"
+      >
+        <i class="fas fa-plus mr-2"></i> Crear Banner
+      </button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-light-table-header dark:bg-dark-table-header">
+          <tr>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Imagen</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Título</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden sm:table-cell">Descripción</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">CTA</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden md:table-cell">Enlace CTA</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Orden</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Estado</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let banner of banners" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
+            <td class="p-3">
+              <img [src]="banner.image_url" [alt]="banner.title" class="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded border border-gray-200 dark:border-gray-600" />
+            </td>
+            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text whitespace-nowrap">{{ banner.title }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary hidden sm:table-cell">{{ banner.description || 'N/A' }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ banner.cta_text || 'N/A' }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary hidden md:table-cell whitespace-nowrap">{{ banner.cta_link || 'N/A' }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">{{ banner.order }}</td>
+            <td class="p-3">
+              <mat-slide-toggle
+                [checked]="banner.is_active"
+                (change)="toggleActive(banner)"
+                color="primary"
+                class="custom-toggle"
+              >
+                {{ banner.is_active ? 'Activo' : 'Inactivo' }}
+              </mat-slide-toggle>
+            </td>
+            <td class="p-3 text-center">
+              <button
+                (click)="openEditModal(banner)"
+                class="bg-light-primary dark:bg-dark-primary text-white px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition duration-300 mr-2"
+              >
+                Editar
+              </button>
+              <button
+                (click)="openDeleteModal(banner)"
+                class="bg-light-danger dark:bg-dark-danger text-white px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-red-700 transition duration-300"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="banners.length === 0">
+            <td colspan="8" class="p-3 text-center text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">No hay banners disponibles</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal para Crear/Editar Banner -->
+  <app-modal #bannerModal>
+    <div class="p-4 sm:p-6 space-y-4">
+      <h2 class="text-xl font-bold text-light-text dark:text-dark-text">
+        {{ isEditing ? 'Editar Banner' : 'Crear Banner' }}
+      </h2>
+      <form [formGroup]="bannerForm" (ngSubmit)="saveBanner()">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Título <span class="text-light-danger dark:text-dark-danger">*</span></label>
+            <input
+              formControlName="title"
+              type="text"
+              class="w-full px-3 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+              placeholder="Ingrese título"
+              [ngClass]="{'border-red-500': bannerForm.get('title')?.touched && bannerForm.get('title')?.invalid}"
+            />
+            <p *ngIf="bannerForm.get('title')?.touched && bannerForm.get('title')?.hasError('required')" class="text-light-danger dark:text-dark-danger text-xs sm:text-sm mt-1">El título es obligatorio</p>
+          </div>
+
+          <div>
+            <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Descripción</label>
+            <textarea
+              formControlName="description"
+              class="w-full px-3 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+              placeholder="Descripción opcional"
+              rows="2"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Imagen</label>
+            <div class="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center bg-light-background dark:bg-dark-background">
+              <i class="fas fa-upload text-gray-400 dark:text-gray-500 mb-2 text-2xl"></i>
+              <p class="text-sm text-light-secondary dark:text-dark-secondary mb-1">Arrastra y suelta una imagen o</p>
+              <input
+                type="file"
+                (change)="onFileSelected($event)"
+                accept=".jpg,.png,.webp"
+                class="hidden"
+                #fileInput
+              />
+              <button
+                type="button"
+                (click)="fileInput.click()"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition duration-300"
+              >
+                Seleccionar archivo
+              </button>
+              <p class="text-xs text-light-secondary dark:text-dark-secondary mt-2">Formatos: JPG, PNG, WebP (máx. 1MB)</p>
+            </div>
+            <img *ngIf="imagePreview" [src]="imagePreview" alt="Vista previa" class="w-full max-h-40 object-cover rounded mt-4" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Texto del CTA</label>
+              <input
+                formControlName="cta_text"
+                type="text"
+                class="w-full px-3 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+                placeholder="Ej. Ver más"
+              />
+            </div>
+            <div>
+              <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Enlace del CTA</label>
+              <input
+                formControlName="cta_link"
+                type="text"
+                class="w-full px-3 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+                placeholder="Ej. https://ejemplo.com"
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Orden</label>
+              <select
+                formControlName="order"
+                class="w-full px-3 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+                [ngClass]="{'border-red-500': bannerForm.get('order')?.touched && bannerForm.get('order')?.invalid}"
+              >
+                <option *ngFor="let order of availableOrders" [value]="order">{{ order }}</option>
+              </select>
+              <p *ngIf="bannerForm.get('order')?.touched && bannerForm.get('order')?.hasError('required')" class="text-light-danger dark:text-dark-danger text-xs sm:text-sm mt-1">El orden es obligatorio</p>
+              <p *ngIf="bannerForm.get('order')?.touched && (bannerForm.get('order')?.hasError('min') || bannerForm.get('order')?.hasError('max'))" class="text-light-danger dark:text-dark-danger text-xs sm:text-sm mt-1">El orden debe estar entre 1 y 5</p>
+            </div>
+            <div class="flex items-center h-full pt-8">
+              <mat-slide-toggle
+                formControlName="is_active"
+                color="primary"
+                class="custom-toggle"
+              >
+                {{ bannerForm.get('is_active')?.value ? 'Activo' : 'Inactivo' }}
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end gap-4">
+          <button
+            type="button"
+            (click)="bannerModal.close()"
+            class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-300"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition duration-300"
+            [disabled]="bannerForm.invalid"
+          >
+            {{ isEditing ? 'Actualizar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </app-modal>
+
+  <!-- Modal para Eliminar Banner -->
+  <app-modal #deleteModal>
+    <div class="p-4 sm:p-6 space-y-4">
+      <h3 class="text-lg font-bold text-light-text dark:text-dark-text">Confirmar eliminación</h3>
+      <p class="text-light-secondary dark:text-dark-secondary">
+        ¿Estás seguro de eliminar el banner "{{ selectedBanner?.title }}"? Esta acción no se puede deshacer.
+      </p>
+      <div class="flex justify-end gap-4">
+        <button
+          (click)="deleteModal.close()"
+          class="bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-300"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="confirmDelete()"
+          class="bg-light-danger dark:bg-dark-danger text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300"
+        >
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </app-modal>
+
+  <!-- Modal para Cambiar Visibilidad -->
+  <app-modal #visibilityModal>
+    <div class="p-4 sm:p-6 space-y-4">
+      <h3 class="text-lg font-bold text-light-text dark:text-dark-text">Confirmar cambio de visibilidad</h3>
+      <p class="text-light-secondary dark:text-dark-secondary">
+        ¿Estás seguro de {{ pendingVisibilityChange ? 'mostrar' : 'ocultar' }} los banners a los usuarios?
+      </p>
+      <div class="flex justify-end gap-4">
+        <button
+          (click)="cancelVisibilityChange()"
+          class="bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition duration-300"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="confirmVisibilityChange()"
+          class="bg-light-primary dark:bg-dark-primary text-white px-4 py-2 rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition duration-300"
+        >
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </app-modal>
+</div>

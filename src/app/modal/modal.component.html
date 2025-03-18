@@ -1,12 +1,12 @@
-<div *ngIf="isOpen" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50 p-4">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] flex flex-col">
+<div *ngIf="isOpen" class="fixed inset-0 bg-gray-900 bg-opacity-60 dark:bg-gray-950 dark:bg-opacity-80 flex justify-center items-center z-50 p-4">
+  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col text-light-text dark:text-dark-text">
     <!-- Encabezado del modal -->
-    <div class="p-4 border-b border-gray-200">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
       <div class="flex justify-between items-center">
-        <h3 class="text-xl font-semibold">{{ title }}</h3>
+        <h3 class="text-xl font-semibold text-light-primary dark:text-dark-primary">{{ title }}</h3>
         <button 
           (click)="close()" 
-          class="text-gray-500 hover:text-gray-700 focus:outline-none"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary focus:outline-none transition-colors duration-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -16,15 +16,15 @@
     </div>
 
     <!-- Cuerpo del modal (desplazable) -->
-    <div class="flex-1 overflow-y-auto p-4">
+    <div class="flex-1 overflow-y-auto p-4 bg-light-background dark:bg-dark-background">
       <ng-content></ng-content>  <!-- Aquí se coloca el contenido dinámico -->
     </div>
 
     <!-- Pie del modal con botón de cierre -->
-    <div class="p-4 border-t border-gray-200">
+    <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-light-background dark:bg-dark-background">
       <button 
         (click)="close()" 
-        class="w-full py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+        class="w-full py-2 px-4 bg-light-danger dark:bg-red-600 text-white rounded-md hover:bg-red-700 dark:hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-light-danger dark:focus:ring-red-500 transition duration-300"
       >
         Cerrar
       </button>

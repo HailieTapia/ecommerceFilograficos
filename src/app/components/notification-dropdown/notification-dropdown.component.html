@@ -1,214 +1,214 @@
 <div class="relative p-2" (mouseenter)="openDropdown()" (mouseleave)="closeDropdown()">
-    <a href="/notifications" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300" (click)="toggleDropdown(); $event.preventDefault()">
-      <i class="fas fa-bell text-xl"></i>
-      <span class="absolute -top-2 -right-2 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ getUnreadCount() }}</span>
-    </a>
-    <!-- Dropdown de notificaciones -->
-    <div *ngIf="isDropdownOpen" class="absolute right-0 mt-2 w-80 bg-white dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg transition-opacity duration-300 z-10">
-      <!-- Header con título y botón de configuración -->
-      <div class="flex items-center justify-between border-b p-4">
-        <div class="flex items-center">
-          <i class="fas fa-bell text-blue-600 mr-2"></i>
-          <h1 class="text-xl font-bold text-gray-800 dark:text-dark-text">Notificaciones</h1>
-          <span *ngIf="getUnreadCount() > 0" class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{{ getUnreadCount() }}</span>
-        </div>
-        <button (click)="showModal = true" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100" aria-label="Configuración de notificaciones">
-          <i class="fas fa-cog text-gray-600"></i>
-        </button>
+  <a href="/notifications" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300" (click)="toggleDropdown(); $event.preventDefault()">
+    <i class="fas fa-bell text-xl"></i>
+    <span class="absolute -top-2 -right-2 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ getUnreadCount() }}</span>
+  </a>
+  <!-- Dropdown de notificaciones -->
+  <div *ngIf="isDropdownOpen" class="absolute right-0 mt-2 w-80 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg transition-opacity duration-300 z-10">
+    <!-- Header con título y botón de configuración -->
+    <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-600 p-4">
+      <div class="flex items-center">
+        <i class="fas fa-bell text-blue-600 dark:text-blue-400 mr-2"></i>
+        <h1 class="text-xl font-bold text-gray-800 dark:text-dark-text">Notificaciones</h1>
+        <span *ngIf="getUnreadCount() > 0" class="ml-2 bg-red-500 dark:bg-dark-danger text-white text-xs rounded-full px-2 py-1">{{ getUnreadCount() }}</span>
       </div>
-
-      <!-- Acciones de notificaciones -->
-      <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
-        <h2 class="text-sm font-medium text-gray-500 dark:text-dark-secondary">Últimas actualizaciones</h2>
-        <button *ngIf="getUnreadCount() > 0" (click)="handleMarkAllAsRead()" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-          Marcar todas como leídas
-        </button>
-      </div>
-
-      <!-- Lista de notificaciones -->
-      <div class="p-4">
-        <div *ngIf="notifications.length > 0; else noNotifications" class="space-y-3">
-          <div *ngFor="let notification of notifications" (click)="markAsSeen(notification.notification_id)" class="p-3 border rounded-lg transition-all cursor-pointer" [ngClass]="{'bg-white': notification.seen, 'bg-blue-50': !notification.seen}">
-            <div class="flex items-start">
-              <div [ngClass]="{
-                  'p-2 rounded-full mr-3 bg-red-100 text-red-600': notification.category === 'urgent_orders',
-                  'bg-green-100 text-green-600': notification.category === 'special_offers',
-                  'bg-purple-100 text-purple-600': notification.category === 'design_reviews',
-                  'bg-yellow-100 text-yellow-600': notification.category === 'event_reminders',
-                  'bg-blue-100 text-blue-600': !['urgent_orders', 'special_offers', 'design_reviews', 'event_reminders'].includes(notification.category)
-                }">
-                <i [class]="renderIcon(notification.category)"></i>
-              </div>
-              <div class="flex-grow">
-                <div class="flex justify-between items-start">
-                  <h3 class="font-medium text-gray-800 dark:text-dark-text">{{ notification.title }}</h3>
-                  <span *ngIf="!notification.seen" class="h-2 w-2 bg-red-500 rounded-full"></span>
-                </div>
-                <p class="text-sm text-gray-600 dark:text-dark-secondary mt-1">{{ notification.message }}</p>
-                <div class="flex justify-between items-center mt-2 text-xs text-gray-500 dark:text-dark-secondary">
-                  <span>{{ formatTimestamp(notification.sent_at) }}</span>
-                  <span class="flex items-center">
-                    <i class="fas fa-clock w-3 h-3 mr-1"></i>
-                    Expira en {{ getTimeRemaining(notification.sent_at) }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <ng-template #noNotifications>
-          <div class="text-center py-8 text-gray-500 dark:text-dark-secondary">
-            <i class="fas fa-bell w-12 h-12 mx-auto mb-3 text-gray-300"></i>
-            <p>No tienes notificaciones nuevas</p>
-          </div>
-        </ng-template>
-      </div>
+      <button (click)="showModal = true" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-light-row-hover dark:hover:bg-dark-row-hover" aria-label="Configuración de notificaciones">
+        <i class="fas fa-cog text-gray-600 dark:text-dark-secondary"></i>
+      </button>
     </div>
 
-    <!-- Modal de configuración -->
-    <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
-        <div class="flex justify-between items-center p-4 border-b">
-          <div class="flex items-center">
-            <i class="fas fa-cog text-gray-600 mr-2"></i>
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-dark-text">Configuración de Notificaciones</h2>
-          </div>
-          <button (click)="showModal = false" class="text-gray-500 hover:text-gray-700">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
+    <!-- Acciones de notificaciones -->
+    <div class="p-4 border-b bg-gray-50 dark:bg-dark-row-hover flex justify-between items-center">
+      <h2 class="text-sm font-medium text-gray-500 dark:text-dark-secondary">Últimas actualizaciones</h2>
+      <button *ngIf="getUnreadCount() > 0" (click)="handleMarkAllAsRead()" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300">
+        Marcar todas como leídas
+      </button>
+    </div>
 
-        <div class="p-4">
-          <!-- Sección de Métodos de Comunicación -->
-          <div class="mb-6">
-            <h3 class="text-md font-semibold mb-3 text-gray-700 dark:text-dark-text">Métodos de Comunicación</h3>
-            <div class="space-y-3">
-              <div class="flex items-center">
-                <input type="checkbox" id="email" [checked]="preferences.methods.includes('email')" disabled class="w-4 h-4 text-blue-600 rounded">
-                <label for="email" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                  <i class="fas fa-envelope mr-2 text-gray-500"></i>
-                  Correo electrónico
-                  <span class="ml-2 text-xs text-gray-500 dark:text-dark-secondary">(Obligatorio para notificaciones esenciales)</span>
-                </label>
-              </div>
-              <div class="flex items-center">
-                <input type="checkbox" id="push" [checked]="hasPush" (change)="handlePushChange()" class="w-4 h-4 text-blue-600 rounded">
-                <label for="push" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                  <i class="fas fa-bell mr-2 text-gray-500"></i>
-                  Notificaciones push
-                </label>
-              </div>
-              <p *ngIf="permissionState === 'denied'" class="text-xs text-red-600 mt-1">
-                Los permisos de notificaciones están bloqueados. Actívalos en la configuración de tu navegador.
-              </p>
+    <!-- Lista de notificaciones -->
+    <div class="p-4">
+      <div *ngIf="notifications.length > 0; else noNotifications" class="space-y-3">
+        <div *ngFor="let notification of notifications" (click)="markAsSeen(notification.notification_id)" class="p-3 border border-gray-200 dark:border-gray-600 rounded-lg transition-all cursor-pointer" [ngClass]="{'bg-light-background dark:bg-dark-background': notification.seen, 'bg-blue-50 dark:bg-blue-900': !notification.seen}">
+          <div class="flex items-start">
+            <div [ngClass]="{
+                'p-2 rounded-full mr-3 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400': notification.category === 'urgent_orders',
+                'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400': notification.category === 'special_offers',
+                'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400': notification.category === 'design_reviews',
+                'bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400': notification.category === 'event_reminders',
+                'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400': !['urgent_orders', 'special_offers', 'design_reviews', 'event_reminders'].includes(notification.category)
+              }">
+              <i [class]="renderIcon(notification.category)"></i>
             </div>
-          </div>
-
-          <!-- Sección de Categorías -->
-          <div class="mb-6">
-            <h3 class="text-md font-semibold mb-3 text-gray-700 dark:text-dark-text">Categorías de Notificaciones</h3>
-
-            <!-- Categorías para clientes -->
-            <div *ngIf="userRole !== 'administrador'" class="mb-4">
-              <h4 class="text-sm font-medium text-gray-500 dark:text-dark-secondary mb-2">General</h4>
-              <div class="space-y-3">
-                <div class="flex items-center">
-                  <input type="checkbox" id="offers" [checked]="preferences.frontendCategories.offers" (change)="handleCategoryChange('offers')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
-                  <label for="offers" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                    <i class="fas fa-tag mr-2 text-gray-500"></i>
-                    Ofertas y promociones
-                  </label>
-                </div>
-                <div class="flex items-center">
-                  <input type="checkbox" id="events" [checked]="preferences.frontendCategories.events" (change)="handleCategoryChange('events')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
-                  <label for="events" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                    <i class="fas fa-calendar mr-2 text-gray-500"></i>
-                    Eventos y webinars
-                  </label>
-                </div>
-                <div class="flex items-center">
-                  <input type="checkbox" id="news" [checked]="preferences.frontendCategories.news" (change)="handleCategoryChange('news')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
-                  <label for="news" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                    <i class="fas fa-newspaper mr-2 text-gray-500"></i>
-                    Novedades y noticias
-                  </label>
-                </div>
-                <div class="flex items-center">
-                  <input type="checkbox" id="orders" [checked]="preferences.frontendCategories.orders" (change)="handleCategoryChange('orders')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
-                  <label for="orders" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                    <i class="fas fa-box mr-2 text-gray-500"></i>
-                    Actualizaciones de pedidos
-                  </label>
-                </div>
-                <div class="flex items-center">
-                  <input type="checkbox" id="designReviews" [checked]="preferences.frontendCategories.designReviews" (change)="handleCategoryChange('designReviews')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
-                  <label for="designReviews" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                    <i class="fas fa-edit mr-2 text-gray-500"></i>
-                    Revisiones de diseño
-                  </label>
-                </div>
+            <div class="flex-grow">
+              <div class="flex justify-between items-start">
+                <h3 class="font-medium text-gray-800 dark:text-dark-text">{{ notification.title }}</h3>
+                <span *ngIf="!notification.seen" class="h-2 w-2 bg-red-500 dark:bg-dark-danger rounded-full"></span>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-dark-secondary mt-1">{{ notification.message }}</p>
+              <div class="flex justify-between items-center mt-2 text-xs text-gray-500 dark:text-dark-secondary">
+                <span>{{ formatTimestamp(notification.sent_at) }}</span>
+                <span class="flex items-center">
+                  <i class="fas fa-clock w-3 h-3 mr-1"></i>
+                  Expira en {{ getTimeRemaining(notification.sent_at) }}
+                </span>
               </div>
             </div>
-
-            <!-- Categorías para administradores -->
-            <div *ngIf="userRole === 'administrador'" class="mb-4">
-              <h4 class="text-sm font-medium text-gray-500 dark:text-dark-secondary mb-2">Administración</h4>
-              <div class="space-y-3">
-                <div class="flex items-center">
-                  <input type="checkbox" id="urgentOrders" [checked]="preferences.frontendCategories.urgentOrders" (change)="handleCategoryChange('urgentOrders')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
-                  <label for="urgentOrders" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                    <i class="fas fa-exclamation-triangle mr-2 text-gray-500"></i>
-                    Alertas de pedidos urgentes
-                  </label>
-                </div>
-                <div class="flex items-center">
-                  <input type="checkbox" id="stockAlerts" [checked]="preferences.frontendCategories.stockAlerts" (change)="handleCategoryChange('stockAlerts')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 rounded">
-                  <label for="stockAlerts" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
-                    <i class="fas fa-warehouse mr-2 text-gray-500"></i>
-                    Alertas de inventario
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex justify-between p-4 border-t bg-gray-50">
-          <button (click)="handleReset()" class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-dark-text dark:hover:text-dark-primary font-medium">
-            Restaurar valores predeterminados
-          </button>
-          <div class="flex space-x-2">
-            <button (click)="showModal = false" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-row-hover font-medium">
-              Cancelar
-            </button>
-            <button (click)="handleSave()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center" [disabled]="loading">
-              <span *ngIf="loading" class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
-              {{ loading ? 'Guardando...' : 'Guardar cambios' }}
-            </button>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Notificación de sistema -->
-    <div *ngIf="systemNotification" class="fixed top-4 right-4 left-4 md:left-auto md:w-80 z-50">
-      <div [ngClass]="{
-          'p-3 rounded-lg shadow-lg flex items-center justify-between bg-green-100 text-green-800': systemNotification.type === 'success',
-          'bg-red-100 text-red-800': systemNotification.type !== 'success'
-        }">
-        <div class="flex items-center">
-          <i *ngIf="systemNotification.type === 'success'" class="fas fa-check-circle w-5 h-5 mr-2"></i>
-          <i *ngIf="systemNotification.type !== 'success'" class="fas fa-exclamation-circle w-5 h-5 mr-2"></i>
-          {{ systemNotification.message }}
+      <ng-template #noNotifications>
+        <div class="text-center py-8 text-gray-500 dark:text-dark-secondary">
+          <i class="fas fa-bell w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600"></i>
+          <p>No tienes notificaciones nuevas</p>
         </div>
-        <button (click)="systemNotification = null" class="text-gray-500 hover:text-gray-700">
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Modal de configuración -->
+  <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-30 dark:bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-lg w-full max-w-lg max-h-screen overflow-y-auto">
+      <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-600">
+        <div class="flex items-center">
+          <i class="fas fa-cog text-gray-600 dark:text-dark-secondary mr-2"></i>
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-dark-text">Configuración de Notificaciones</h2>
+        </div>
+        <button (click)="showModal = false" class="text-gray-500 dark:text-dark-secondary hover:text-gray-700 dark:hover:text-dark-primary">
           <i class="fas fa-times"></i>
         </button>
       </div>
-    </div>
 
-    <!-- Mensaje de error -->
-    <div *ngIf="notificationError" class="fixed bottom-4 right-4 z-50 text-red-600 bg-white p-2 rounded-md shadow-md">
-      {{ notificationError }}
+      <div class="p-4">
+        <!-- Sección de Métodos de Comunicación -->
+        <div class="mb-6">
+          <h3 class="text-md font-semibold mb-3 text-gray-700 dark:text-dark-text">Métodos de Comunicación</h3>
+          <div class="space-y-3">
+            <div class="flex items-center">
+              <input type="checkbox" id="email" [checked]="preferences.methods.includes('email')" disabled class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+              <label for="email" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                <i class="fas fa-envelope mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                Correo electrónico
+                <span class="ml-2 text-xs text-gray-500 dark:text-dark-secondary">(Obligatorio para notificaciones esenciales)</span>
+              </label>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" id="push" [checked]="hasPush" (change)="handlePushChange()" class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+              <label for="push" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                <i class="fas fa-bell mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                Notificaciones push
+              </label>
+            </div>
+            <p *ngIf="permissionState === 'denied'" class="text-xs text-red-600 dark:text-red-400 mt-1">
+              Los permisos de notificaciones están bloqueados. Actívalos en la configuración de tu navegador.
+            </p>
+          </div>
+        </div>
+
+        <!-- Sección de Categorías -->
+        <div class="mb-6">
+          <h3 class="text-md font-semibold mb-3 text-gray-700 dark:text-dark-text">Categorías de Notificaciones</h3>
+
+          <!-- Categorías para clientes -->
+          <div *ngIf="userRole !== 'administrador'" class="mb-4">
+            <h4 class="text-sm font-medium text-gray-500 dark:text-dark-secondary mb-2">General</h4>
+            <div class="space-y-3">
+              <div class="flex items-center">
+                <input type="checkbox" id="offers" [checked]="preferences.frontendCategories.offers" (change)="handleCategoryChange('offers')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+                <label for="offers" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                  <i class="fas fa-tag mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                  Ofertas y promociones
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="events" [checked]="preferences.frontendCategories.events" (change)="handleCategoryChange('events')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+                <label for="events" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                  <i class="fas fa-calendar mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                  Eventos y webinars
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="news" [checked]="preferences.frontendCategories.news" (change)="handleCategoryChange('news')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+                <label for="news" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                  <i class="fas fa-newspaper mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                  Novedades y noticias
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="orders" [checked]="preferences.frontendCategories.orders" (change)="handleCategoryChange('orders')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+                <label for="orders" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                  <i class="fas fa-box mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                  Actualizaciones de pedidos
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="designReviews" [checked]="preferences.frontendCategories.designReviews" (change)="handleCategoryChange('designReviews')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+                <label for="designReviews" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                  <i class="fas fa-edit mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                  Revisiones de diseño
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categorías para administradores -->
+          <div *ngIf="userRole === 'administrador'" class="mb-4">
+            <h4 class="text-sm font-medium text-gray-500 dark:text-dark-secondary mb-2">Administración</h4>
+            <div class="space-y-3">
+              <div class="flex items-center">
+                <input type="checkbox" id="urgentOrders" [checked]="preferences.frontendCategories.urgentOrders" (change)="handleCategoryChange('urgentOrders')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+                <label for="urgentOrders" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                  <i class="fas fa-exclamation-triangle mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                  Alertas de pedidos urgentes
+                </label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="stockAlerts" [checked]="preferences.frontendCategories.stockAlerts" (change)="handleCategoryChange('stockAlerts')" [disabled]="!hasPush" class="w-4 h-4 text-blue-600 dark:text-blue-400 rounded">
+                <label for="stockAlerts" class="ml-2 flex items-center text-gray-700 dark:text-dark-text">
+                  <i class="fas fa-warehouse mr-2 text-gray-500 dark:text-dark-secondary"></i>
+                  Alertas de inventario
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-between p-4 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-dark-row-hover">
+        <button (click)="handleReset()" class="px-4 py-2 text-gray-600 dark:text-dark-text hover:text-gray-800 dark:hover:text-dark-primary font-medium">
+          Restaurar valores predeterminados
+        </button>
+        <div class="flex space-x-2">
+          <button (click)="showModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-dark-text hover:bg-light-row-hover dark:hover:bg-dark-row-hover font-medium">
+            Cancelar
+          </button>
+          <button (click)="handleSave()" class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 font-medium flex items-center" [disabled]="loading">
+            <span *ngIf="loading" class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+            {{ loading ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Notificación de sistema -->
+  <div *ngIf="systemNotification" class="fixed top-4 right-4 left-4 md:left-auto md:w-80 z-50">
+    <div [ngClass]="{
+        'p-3 rounded-lg shadow-lg flex items-center justify-between bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-400': systemNotification.type === 'success',
+        'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-400': systemNotification.type !== 'success'
+      }">
+      <div class="flex items-center">
+        <i *ngIf="systemNotification.type === 'success'" class="fas fa-check-circle w-5 h-5 mr-2"></i>
+        <i *ngIf="systemNotification.type !== 'success'" class="fas fa-exclamation-circle w-5 h-5 mr-2"></i>
+        {{ systemNotification.message }}
+      </div>
+      <button (click)="systemNotification = null" class="text-gray-500 dark:text-dark-secondary hover:text-gray-700 dark:hover:text-dark-primary">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="notificationError" class="fixed bottom-4 right-4 z-50 text-red-600 dark:text-red-400 bg-light-background dark:bg-dark-background p-2 rounded-md shadow-md">
+    {{ notificationError }}
+  </div>
+</div>

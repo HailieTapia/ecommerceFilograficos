@@ -16,6 +16,7 @@ import { ProfileComponent } from './components/authenticated/profile/profile.com
 
 //administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
+import { BannerAdminComponent } from './components/administrator/banner-admin/banner-admin.component';
 import { SecurityComponent } from './components/administrator/security/security.component';
 import { EmailTypeComponent } from './components/administrator/email-type/email-type.component';
 import { EmailTemplateComponent } from './components/administrator/email-template/email-template.component';
@@ -50,6 +51,7 @@ export const routes: Routes = [
   { path: 'category', component: CategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Colaboradores' } },
   { path: 'product-catalog', component: ProductCatalogComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Catalogo de productos' } },
   { path: 'product-stock', component: ProductStockComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Inventario de productos' } },
+  { path: 'banners', component: BannerAdminComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de banners' } },
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
 
