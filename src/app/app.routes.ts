@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard'; 
 
-//publicos
+// Públicos
 import { RegisterComponent } from './components/public/register/register.component';
 import { RecoverComponent } from './components/public/recover/recover.component';
 import { LoginComponent } from './components/public/login/login.component';
@@ -11,10 +11,10 @@ import { SupportInquiryComponent} from './components/public/support-inquiry/supp
 import { HomeComponent } from './components/public/home/home.component';
 import { LegalComponent } from './components/public/legal/legal.component'; 
 
-//autenticados
+// Autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
 
-//administrador
+// Administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
 import { BannerAdminComponent } from './components/administrator/banner-admin/banner-admin.component';
 import { SecurityComponent } from './components/administrator/security/security.component';
@@ -29,8 +29,9 @@ import { CollaboratorsComponent } from './components/administrator/collaborators
 import { CategoriesComponent } from './components/administrator/categories/categories.component';
 import { ProductCatalogComponent } from './components/administrator/product-catalog/product-catalog.component';
 import { ProductStockComponent } from './components/administrator/product-stock/product-stock.component';
+import { AdministratorDashboardComponent } from './components/administrator/administrator-dashboard/administrator-dashboard.component'; // Nuevo import
 
-//errores
+// Errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
 import { NotFoundComponent } from './components/errors/not-found/not-found.component';
 import { ServerErrorComponent } from './components/errors/server-error/server-error.component';
@@ -39,6 +40,7 @@ export const routes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard], data: { allowPublic: true, breadcrumb: 'Inicio' } },
 
   // Administrador
+  { path: 'admin-dashboard', component: AdministratorDashboardComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Dashboard' } }, // Nueva ruta
   { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Empresa' } },
   { path: 'security', component: SecurityComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Seguridad' } },
   { path: 'type', component: EmailTypeComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Tipos de Correo' } },
@@ -49,10 +51,11 @@ export const routes: Routes = [
   { path: 'support-panel', component: SupportPanelComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Panel de Soporte' } },
   { path: 'product-attributes', component: ProductAttributeComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Atributos de productos' } },
   { path: 'collaborators', component: CollaboratorsComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Colaboradores' } },
-  { path: 'category', component: CategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Colaboradores' } },
-  { path: 'product-catalog', component: ProductCatalogComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Catalogo de productos' } },
+  { path: 'category', component: CategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Categorías' } }, // Corregí el breadcrumb
+  { path: 'product-catalog', component: ProductCatalogComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Catálogo de productos' } }, // Corregí "Catalogo" a "Catálogo"
   { path: 'product-stock', component: ProductStockComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Inventario de productos' } },
   { path: 'banners', component: BannerAdminComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de banners' } },
+
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
 

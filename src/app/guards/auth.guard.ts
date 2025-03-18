@@ -18,35 +18,46 @@ export class AuthGuard implements CanActivate {
       map(user => {
         const expectedRole = route.data['role'];
         const allowPublic = route.data['allowPublic'] || false;
+        // Corregimos la detección de la raíz usando state.url
+        const isRootPath = state.url === '/' || state.url === '';
 
-        // Si la ruta permite acceso público (como HomeComponent) y no hay usuario autenticado
-        if (allowPublic && !user) {
-          return true; // Permitir acceso a usuarios no autenticados
-        }
-
-        // Si no hay usuario autenticado y la ruta no permite acceso público
+        // Si no hay usuario autenticado
         if (!user) {
-          this.router.navigate(['/login']);
+          if (allowPublic) {
+            return true; // Permitir acceso público
+          }
+          this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
           return false;
         }
 
-        // Si el usuario es administrador y la ruta es la raíz (HomeComponent)
-        if (user.tipo === 'administrador' && route.pathFromRoot.length === 1 && route.routeConfig?.path === '') {
-          this.router.navigate(['/company']); // Redirigir a los administradores a /company
-          return false;
+        // Si el usuario está autenticado como administrador
+        if (user.tipo === 'administrador') {
+          if (isRootPath) {
+            this.router.navigate(['/admin-dashboard']);
+            return false; // Denegar acceso a la raíz para administradores
+          }
+          if (expectedRole && expectedRole !== 'administrador') {
+            this.router.navigate(['/admin-dashboard']);
+            return false; // Denegar acceso a rutas no administrativas
+          }
+          return true; // Permitir acceso a rutas administrativas
         }
 
-        // Verificar el rol esperado si está definido
-        if (expectedRole && user.tipo !== expectedRole) {
-          this.router.navigate(['/403']); // Página de acceso denegado si es necesario
-          return false;
+        // Si el usuario está autenticado como cliente
+        if (user.tipo === 'cliente') {
+          if (expectedRole && expectedRole !== 'cliente') {
+            this.router.navigate(['/']);
+            return false; // Denegar acceso a rutas no de cliente
+          }
+          return true; // Permitir acceso a rutas de cliente o públicas
         }
 
+        // Caso por defecto (otros roles futuros, si los hay)
         return true;
       }),
       tap(allowed => {
         if (!allowed && !route.data['allowPublic']) {
-          this.router.navigate(['/login']);
+          this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
         }
       })
     );

@@ -69,7 +69,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       this.toastService.showToast('Por favor, completa los campos correctamente.', 'warning');
       return;
     }
-
+  
     this.authService.login(this.loginForm.value).subscribe(
       (response) => {
         if (response.mfaRequired) {
@@ -80,7 +80,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
         } else {
           this.toastService.showToast('Inicio de sesión exitoso.', 'success');
           this.loginForm.reset();
-          this.router.navigate(['/']);
+          // Redirigir según el rol del usuario
+          this.authService.getUser().subscribe(user => {
+            if (user?.tipo === 'administrador') {
+              this.router.navigate(['/admin-dashboard']);
+            } else {
+              this.router.navigate(['/']);
+            }
+          });
         }
       },
       (error) => {

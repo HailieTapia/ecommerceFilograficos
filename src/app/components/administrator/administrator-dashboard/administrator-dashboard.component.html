@@ -1,0 +1,50 @@
+<div class="min-h-screen w-full bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text p-4 sm:p-6 lg:p-8">
+  <!-- Título del Dashboard -->
+  <header class="mb-6">
+    <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-light-primary dark:text-dark-primary">
+      Panel de Administración
+    </h1>
+    <p class="text-sm sm:text-base md:text-lg text-light-secondary dark:text-dark-secondary mt-2">
+      Bienvenido, {{ adminName || 'Administrador' }}. Gestiona tu plataforma desde aquí.
+    </p>
+  </header>
+
+  <!-- Secciones del Dashboard -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+    <!-- Tarjeta de Estadísticas -->
+    <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
+      <h2 class="text-lg sm:text-xl font-semibold text-light-primary dark:text-dark-primary mb-2">
+        Estadísticas Rápidas
+      </h2>
+      <div class="space-y-2">
+        <p class="text-sm sm:text-base text-light-text dark:text-dark-text">
+          Usuarios registrados: <span class="font-bold">0</span>
+        </p>
+        <p class="text-sm sm:text-base text-light-text dark:text-dark-text">
+          Productos activos: <span class="font-bold">10</span>
+        </p>
+        <p class="text-sm sm:text-base text-light-text dark:text-dark-text">
+          Pedidos pendientes: <span class="font-bold">5</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Tarjeta de Acciones Rápidas -->
+    <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-md">
+      <h2 class="text-lg sm:text-xl font-semibold text-light-primary dark:text-dark-primary mb-2">
+        Acciones Rápidas
+      </h2>
+      <div class="space-y-2">
+        <a routerLink="/product-catalog" class="block text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover text-sm sm:text-base transition-colors duration-300">
+          Gestionar Catálogo
+        </a>
+        <a routerLink="/collaborators" class="block text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover text-sm sm:text-base transition-colors duration-300">
+          Gestionar Colaboradores
+        </a>
+        <a routerLink="/support-panel" class="block text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover text-sm sm:text-base transition-colors duration-300">
+          Panel de Soporte
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
