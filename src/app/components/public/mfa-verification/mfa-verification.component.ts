@@ -91,13 +91,13 @@ export class MfaVerificationComponent implements OnInit {
         console.log('LOG antes del if, el tipo es:', response.tipo);
         if (response.tipo === 'administrador') {
           console.log('LOG en el if, el tipo es:', response.tipo);
-          this.router.navigate(['/company']); // Redirigir a la página de administrador
+          this.router.navigate(['/admin-dashboard']); // Redirigir a la página de administrador
         } else if (response.tipo === 'cliente') {
           console.log('LOG en el if, el tipo es:', response.tipo);
-          this.router.navigate(['/profile']); // Redirigir a la página de cliente
+          this.router.navigate(['/']); // Redirigir a la página de cliente
         } else {
           console.log('LOG en el else, el tipo es:', response.tipo);
-          this.router.navigate(['/dashboard']); // Redirigir a una página por defecto si el tipo no está definido
+          this.router.navigate(['/login']); // Redirigir a una página por defecto si el tipo no está definido
         }
       },
       error: err => {
