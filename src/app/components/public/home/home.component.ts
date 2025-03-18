@@ -3,17 +3,18 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
+import { BannerComponent } from '../banner/banner.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, BannerComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
   user: any = null;
-  userProfile: any = null; // Para almacenar los datos del perfil
+  userProfile: any = null;
 
   constructor(
     private authService: AuthService,
@@ -24,17 +25,16 @@ export class HomeComponent implements OnInit {
     this.authService.getUser().subscribe(user => {
       this.user = user;
       if (user) {
-        // Si hay un usuario autenticado, obtener el perfil completo
         this.userService.getProfile().subscribe(
           profile => {
-            this.userProfile = profile; // Almacenar el perfil
+            this.userProfile = profile;
           },
           error => {
             console.error('Error al obtener el perfil:', error);
           }
         );
       } else {
-        this.userProfile = null; // Limpiar el perfil si no hay usuario
+        this.userProfile = null;
       }
     });
   }
