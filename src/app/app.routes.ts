@@ -8,7 +8,7 @@ import { LoginComponent } from './components/public/login/login.component';
 import { FaqComponent } from './components/public/faq/faq.component'; 
 import { MfaVerificationComponent } from './components/public/mfa-verification/mfa-verification.component'; 
 import { SupportInquiryComponent} from './components/public/support-inquiry/support-inquiry.component'; 
-
+import { HomeComponent } from './components/public/home/home.component';
 import { LegalComponent } from './components/public/legal/legal.component'; 
 
 //autenticados
@@ -36,6 +36,7 @@ import { NotFoundComponent } from './components/errors/not-found/not-found.compo
 import { ServerErrorComponent } from './components/errors/server-error/server-error.component';
 
 export const routes: Routes = [
+  { path: '', component: HomeComponent, canActivate: [AuthGuard], data: { allowPublic: true, breadcrumb: 'Inicio' } },
 
   // Administrador
   { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Empresa' } },

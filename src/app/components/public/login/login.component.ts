@@ -80,7 +80,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         } else {
           this.toastService.showToast('Inicio de sesión exitoso.', 'success');
           this.loginForm.reset();
-          this.router.navigate(['/profile']);
+          this.router.navigate(['/']);
         }
       },
       (error) => {

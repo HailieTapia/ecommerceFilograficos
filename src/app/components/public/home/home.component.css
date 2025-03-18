@@ -1,0 +1,4 @@
+/* Estilo básico para centrar el contenido y mantener consistencia con el tema */
+:host {
+  display: block;
+}
