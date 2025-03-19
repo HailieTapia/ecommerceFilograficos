@@ -23,6 +23,7 @@ export class PublicCatalogComponent implements OnInit {
   page = 1;
   pageSize = 10;
   total = 0;
+  totalPages = 0;
 
   constructor(private productService: PublicProductService, private router: Router) {}
 
@@ -30,13 +31,14 @@ export class PublicCatalogComponent implements OnInit {
     this.loadProducts();
   }
 
-  loadProducts() {
+loadProducts() {
     this.productService.getAllProducts(this.page, this.pageSize).subscribe(response => {
       console.log(response);
       this.products = response.products;
       this.total = response.total;
       this.page = response.page;
       this.pageSize = response.pageSize;
+      this.totalPages = Math.ceil(this.total / this.pageSize); // Calcular total de páginas
     });
   }
 
