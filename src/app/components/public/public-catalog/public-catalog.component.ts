@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ToastService } from '../../services/toastService';
 import { PublicProductService } from '../../services/PublicProductService';
 import { FilterSidebarComponent } from './filter-sidebar/filter-sidebar.component';
 @Component({
@@ -26,8 +27,8 @@ export class PublicCatalogComponent implements OnInit {
   total = 0;
   totalPages = 0;
   filters: any = {};
-  
-  constructor(private productService: PublicProductService, private router: Router) { }
+
+  constructor(private toastService: ToastService, private productService: PublicProductService, private router: Router) { }
 
   ngOnInit() {
     this.loadProducts();
@@ -35,7 +36,6 @@ export class PublicCatalogComponent implements OnInit {
 
   loadProducts() {
     this.productService.getAllProducts(this.page, this.pageSize, this.filters).subscribe(response => {
-      console.log(response);
       this.products = response.products;
       this.total = response.total;
       this.page = response.page;
@@ -43,7 +43,7 @@ export class PublicCatalogComponent implements OnInit {
       this.totalPages = Math.ceil(this.total / this.pageSize);
     });
   }
-  
+
   onFiltersChange(newFilters: any) {
     this.filters = newFilters;
     this.page = 1; // Resetear la página al aplicar nuevos filtros

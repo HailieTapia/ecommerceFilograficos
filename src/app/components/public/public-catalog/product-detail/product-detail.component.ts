@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PublicProductService } from '../../../services/PublicProductService';
 import { CommonModule } from '@angular/common';
+import { ToastService } from '../../../services/toastService';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
@@ -17,6 +18,7 @@ export class ProductDetailComponent implements OnInit {
   error: string | null = null;
 
   constructor(
+    private toastService: ToastService,
     private route: ActivatedRoute,
     private productService: PublicProductService
   ) { }
@@ -39,8 +41,8 @@ export class ProductDetailComponent implements OnInit {
       }
       this.isLoading = false;
     }, error => {
-      console.error('Error al cargar detalles del producto:', error);
-      this.error = 'No se pudo cargar el producto. Por favor, intenta de nuevo.';
+      const errorMessage = error?.error?.message || 'Error al cargar detalles del producto';
+      this.toastService.showToast(errorMessage, 'error');
       this.isLoading = false;
     });
   }
