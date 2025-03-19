@@ -13,8 +13,11 @@ import { CategorieService } from '../../../services/categorieService';
 export class FilterSidebarComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<any>();
   filters: any = {
-    categoryId: '', // Solo usaremos categoryId por ahora
+    categoryId: '',
+    minPrice: '',
+    maxPrice: ''
   };
+
 
   categories: any[] = []; // Lista de categorías obtenidas del backend
 
@@ -44,13 +47,21 @@ export class FilterSidebarComponent implements OnInit {
     if (this.filters.categoryId) {
       cleanedFilters.categoryId = this.filters.categoryId;
     }
+    if (this.filters.minPrice) {
+      cleanedFilters.minPrice = this.filters.minPrice;
+    }
+    if (this.filters.maxPrice) {
+      cleanedFilters.maxPrice = this.filters.maxPrice;
+    }
 
-    this.filtersChange.emit(cleanedFilters); // Emitimos los filtros al componente padre
+    this.filtersChange.emit(cleanedFilters); 
   }
 
   clearFilters() {
     this.filters = {
       categoryId: '',
+      minPrice: '',
+      maxPrice: ''
     };
     this.applyFilters();
   }
