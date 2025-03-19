@@ -1,14 +1,23 @@
 <div class="filter-sidebar bg-white p-6 rounded-xl shadow-lg max-w-xs">
-  <h3 class="text-xl font-semibold text-gray-900 mb-6 tracking-tight">Filtros</h3>
-
+  <!-- Encabezado con título y acción de limpiar -->
+  <div class="flex items-center justify-between mb-6">
+    <h3 class="text-xl font-semibold text-gray-900 tracking-tight">Filtros</h3>
+    <button (click)="clearFilters()"
+      class="text-sm text-gray-600 hover:text-blue-500 transition-colors flex items-center space-x-1 focus:outline-none">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+      <span>Limpiar</span>
+    </button>
+  </div>
   <!-- Filtro por Categoría -->
   <div class="filter-section mb-6">
     <h4 class="text-sm font-medium text-gray-800 mb-3">Categoría</h4>
     <ul class="text-sm text-gray-700 space-y-2">
       <li>
         <label class="flex items-center cursor-pointer space-x-2">
-          <input type="radio" [(ngModel)]="filters.categoryId" (ngModelChange)="applyFilters()" value=""
-            class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
+          <input type="radio" name="categoryFilter" [(ngModel)]="filters.categoryId" (ngModelChange)="applyFilters()"
+            value="" class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
           <span [class.font-semibold]="filters.categoryId === ''" class="hover:text-blue-500 transition-colors">
             Todas
           </span>
@@ -16,7 +25,7 @@
       </li>
       <li *ngFor="let category of categories">
         <label class="flex items-center cursor-pointer space-x-2">
-          <input type="radio" [(ngModel)]="filters.categoryId" (ngModelChange)="applyFilters()"
+          <input type="radio" name="categoryFilter" [(ngModel)]="filters.categoryId" (ngModelChange)="applyFilters()"
             [value]="category.category_id" class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
           <span [class.font-semibold]="filters.categoryId === category.category_id"
             class="hover:text-blue-500 transition-colors">
@@ -39,20 +48,28 @@
   </div>
 
   <!-- Filtro por Vendedor -->
-  <div class="mb-6">
+  <div class="filter-section mb-6">
     <h4 class="text-sm font-medium text-gray-800 mb-3">Vendedor</h4>
     <ul class="text-sm text-gray-700 space-y-2">
       <li>
-        <a href="#" (click)="filters.seller = ''; applyFilters()"
-          class="hover:text-blue-500 transition-colors block">Todos</a>
+        <label class="flex items-center cursor-pointer space-x-2">
+          <input type="radio" name="collaboratorFilter" [(ngModel)]="filters.collaboratorId"
+            (ngModelChange)="applyFilters()" value="" class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
+          <span [class.font-semibold]="filters.collaboratorId === ''" class="hover:text-blue-500 transition-colors">
+            Todos
+          </span>
+        </label>
       </li>
-      <li>
-        <a href="#" (click)="filters.seller = 'amazon'; applyFilters()"
-          class="hover:text-blue-500 transition-colors block">Amazon</a>
-      </li>
-      <li>
-        <a href="#" (click)="filters.seller = 'third-party'; applyFilters()"
-          class="hover:text-blue-500 transition-colors block">Terceros</a>
+      <li *ngFor="let collaborator of collaborators">
+        <label class="flex items-center cursor-pointer space-x-2">
+          <input type="radio" name="collaboratorFilter" [(ngModel)]="filters.collaboratorId"
+            (ngModelChange)="applyFilters()" [value]="collaborator.collaborator_id"
+            class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
+          <span [class.font-semibold]="filters.collaboratorId === collaborator.collaborator_id"
+            class="hover:text-blue-500 transition-colors">
+            {{ collaborator.name }}
+          </span>
+        </label>
       </li>
     </ul>
   </div>
@@ -65,13 +82,4 @@
       <span class="text-sm text-gray-700">Solo productos en oferta</span>
     </label>
   </div>
-
-  <!-- Botón Limpiar Filtros -->
-  <button (click)="clearFilters()"
-    class="w-full bg-gray-100 text-gray-800 py-2 rounded-lg hover:bg-gray-200 transition-colors font-medium text-sm flex items-center justify-center space-x-2">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-    </svg>
-    <span>Limpiar Filtros</span>
-  </button>
 </div>

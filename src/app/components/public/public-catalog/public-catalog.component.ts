@@ -44,7 +44,6 @@ export class PublicCatalogComponent implements OnInit {
     });
   }
   
-
   onFiltersChange(newFilters: any) {
     this.filters = newFilters;
     this.page = 1; // Resetear la página al aplicar nuevos filtros

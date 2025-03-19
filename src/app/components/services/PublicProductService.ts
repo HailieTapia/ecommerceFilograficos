@@ -13,6 +13,7 @@ export interface Product {
   max_price: number;
   total_stock: number;
   image_url: string | null;
+  collaborator?: { id: number; name: string } | null;
 }
 
 interface ProductVariant {
@@ -71,7 +72,7 @@ export class PublicProductService {
     if (filters.categoryId) params = params.set('categoryId', filters.categoryId.toString());
     if (filters.search) params = params.set('search', filters.search);
     if (filters.minPrice) params = params.set('minPrice', filters.minPrice.toString());
-    if (filters.maxPrice) params = params.set('maxPrice', filters.maxPrice.toString());
+    if (filters.collaboratorId) params = params.set('collaboratorId', filters.collaboratorId.toString()); // Nuevo filtro
     if (filters.attributes) params = params.set('attributes', JSON.stringify(filters.attributes));
 
     return this.http.get<ProductResponse>(this.apiUrl, { params });

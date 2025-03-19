@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategorieService } from '../../../services/categorieService';
+import { CollaboratorsService } from '../../../services/collaborators.service';
 
 @Component({
   selector: 'app-filter-sidebar',
@@ -12,19 +13,20 @@ import { CategorieService } from '../../../services/categorieService';
 })
 export class FilterSidebarComponent implements OnInit {
   categories: any[] = [];
+  collaborators: any[] = [];
 
   @Output() filtersChange = new EventEmitter<any>();
   filters: any = {
     categoryId: '',
     minPrice: '',
-    maxPrice: ''
+    maxPrice: '',
+    collaboratorId: ''
   };
-
-
-  constructor(private categoriesService: CategorieService) { }
+  constructor(private categoriesService: CategorieService, private collaboratorService: CollaboratorsService) { }
 
   ngOnInit() {
     this.loadCategories();
+    this.loadCollaborators();
   }
 
   loadCategories() {
@@ -36,7 +38,19 @@ export class FilterSidebarComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar las categorías:', error);
-        this.categories = []; 
+        this.categories = [];
+      }
+    });
+  }
+  loadCollaborators() {
+    this.collaboratorService.getPublicCollaborators().subscribe({
+      next: (response) => {
+        console.log(response);
+        this.collaborators = response;
+      },
+      error: (error) => {
+        console.error('Error al cargar los colaboradores:', error);
+        this.collaborators = [];
       }
     });
   }
@@ -52,7 +66,9 @@ export class FilterSidebarComponent implements OnInit {
     if (this.filters.maxPrice) {
       cleanedFilters.maxPrice = this.filters.maxPrice;
     }
-
+    if (this.filters.collaboratorId) {
+      cleanedFilters.collaboratorId = this.filters.collaboratorId; 
+    }
     this.filtersChange.emit(cleanedFilters);
   }
 
@@ -60,7 +76,8 @@ export class FilterSidebarComponent implements OnInit {
     this.filters = {
       categoryId: '',
       minPrice: '',
-      maxPrice: ''
+      maxPrice: '',
+      collaboratorId: ''
     };
     this.applyFilters();
   }
