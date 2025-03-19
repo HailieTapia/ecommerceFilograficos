@@ -11,7 +11,10 @@ import { CommonModule } from '@angular/common';
 })
 export class ProductDetailComponent implements OnInit {
   product: any = null;
+  selectedVariant: any = null;
   selectedImage: string | null = null;
+  isLoading = true;
+  error: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -26,18 +29,38 @@ export class ProductDetailComponent implements OnInit {
   }
 
   loadProductDetails(productId: number) {
+    this.isLoading = true;
+    this.error = null;
     this.productService.getProductById(productId).subscribe(response => {
       this.product = response.product;
-      // Establecer la primera imagen como predeterminada
-      if (this.product.variants[0]?.images?.length > 0) {
-        this.selectedImage = this.product.variants[0].images[0].image_url;
+      // Seleccionar la primera variante por defecto
+      if (this.product.variants && this.product.variants.length > 0) {
+        this.selectVariant(this.product.variants[0]);
       }
+      this.isLoading = false;
     }, error => {
       console.error('Error al cargar detalles del producto:', error);
+      this.error = 'No se pudo cargar el producto. Por favor, intenta de nuevo.';
+      this.isLoading = false;
     });
+  }
+
+  selectVariant(variant: any) {
+    this.selectedVariant = variant;
+    // Establecer la primera imagen de la variante seleccionada
+    if (variant.images && variant.images.length > 0) {
+      this.selectedImage = variant.images[0].image_url;
+    } else {
+      this.selectedImage = null;
+    }
   }
 
   changeImage(imageUrl: string) {
     this.selectedImage = imageUrl;
+  }
+
+  formatPrice(price: string | number): string {
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    return isNaN(numPrice) ? 'N/A' : numPrice.toFixed(2);
   }
 }
