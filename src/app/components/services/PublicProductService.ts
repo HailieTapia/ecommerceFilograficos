@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/config';
 
@@ -54,30 +54,29 @@ interface ProductResponse {
   providedIn: 'root'
 })
 export class PublicProductService {
-  private apiUrl = `${environment.baseUrl}/products/public-catalog`; // Ajustado a la nueva ruta
+  private apiUrl = `${environment.baseUrl}/products/public-catalog`;
 
   constructor(private http: HttpClient) {}
 
-  // Obtener todos los productos del catálogo (público)
   getAllProducts(
     page: number = 1,
     pageSize: number = 10,
-    sort?: string,
-    categoryId?: number,
-    search?: string
+    filters: any = {}
   ): Observable<ProductResponse> {
-    const params: any = {
-      page: page.toString(),
-      pageSize: pageSize.toString()
-    };
-    if (sort) params.sort = sort;
-    if (categoryId) params.categoryId = categoryId.toString();
-    if (search) params.search = search;
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (filters.sort) params = params.set('sort', filters.sort);
+    if (filters.categoryId) params = params.set('categoryId', filters.categoryId.toString());
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.minPrice) params = params.set('minPrice', filters.minPrice.toString());
+    if (filters.maxPrice) params = params.set('maxPrice', filters.maxPrice.toString());
+    if (filters.attributes) params = params.set('attributes', JSON.stringify(filters.attributes));
 
     return this.http.get<ProductResponse>(this.apiUrl, { params });
   }
 
-  // Obtener un producto por ID (público)
   getProductById(productId: number): Observable<{ message: string; product: ProductDetail }> {
     return this.http.get<{ message: string; product: ProductDetail }>(`${this.apiUrl}/${productId}`);
   }

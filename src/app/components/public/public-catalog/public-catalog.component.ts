@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { PublicProductService, Product } from '../../services/PublicProductService';
+import { PublicProductService } from '../../services/PublicProductService';
+import { FilterSidebarComponent } from './filter-sidebar/filter-sidebar.component';
 @Component({
   selector: 'app-public-catalog',
   standalone: true,
@@ -14,7 +15,7 @@ import { PublicProductService, Product } from '../../services/PublicProductServi
     <router-outlet></router-outlet>
   `
   ,
-  imports: [CommonModule],
+  imports: [FilterSidebarComponent, CommonModule],
   templateUrl: './public-catalog.component.html',
   styleUrl: './public-catalog.component.css'
 })
@@ -24,22 +25,30 @@ export class PublicCatalogComponent implements OnInit {
   pageSize = 10;
   total = 0;
   totalPages = 0;
-
-  constructor(private productService: PublicProductService, private router: Router) {}
+  filters: any = {};
+  
+  constructor(private productService: PublicProductService, private router: Router) { }
 
   ngOnInit() {
     this.loadProducts();
   }
 
-loadProducts() {
-    this.productService.getAllProducts(this.page, this.pageSize).subscribe(response => {
+  loadProducts() {
+    this.productService.getAllProducts(this.page, this.pageSize, this.filters).subscribe(response => {
       console.log(response);
       this.products = response.products;
       this.total = response.total;
       this.page = response.page;
       this.pageSize = response.pageSize;
-      this.totalPages = Math.ceil(this.total / this.pageSize); // Calcular total de páginas
+      this.totalPages = Math.ceil(this.total / this.pageSize);
     });
+  }
+  
+
+  onFiltersChange(newFilters: any) {
+    this.filters = newFilters;
+    this.page = 1; // Resetear la página al aplicar nuevos filtros
+    this.loadProducts();
   }
 
   goToDetail(productId: number) {
