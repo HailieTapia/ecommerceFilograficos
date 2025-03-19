@@ -1,0 +1,33 @@
+/* Efecto de zoom en la imagen principal */
+.zoom-container {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .zoom-image {
+    transition: transform 0.3s ease;
+  }
+  
+  .zoom-container:hover .zoom-image {
+    transform: scale(1.5);
+  }
+  
+  /* Limitar líneas de texto para secciones colapsables */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Estilo para el carrusel de miniaturas verticales */
+  .max-h-\[500px\] {
+    max-height: 500px;
+  }
+  
+  /* Ajustes para pantallas pequeñas */
+  @media (max-width: 1024px) {
+    .zoom-container:hover .zoom-image {
+      transform: none; /* Desactivar zoom en móviles */
+    }
+  }

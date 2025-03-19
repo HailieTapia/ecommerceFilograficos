@@ -1,14 +1,47 @@
-<div *ngIf="!isLoading && !error" class="max-full mx-auto py-10 px-5 bg-gray-100 min-h-screen font-sans">
-  <!-- Contenedor principal -->
-  <div class="flex flex-col lg:flex-row gap-8">
-    <!-- Sección de imágenes -->
-    <div class="flex-1">
-      <!-- Imagen principal -->
-      <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'" alt="{{ product.name }}"
-        class="w-full h-96 object-contain rounded-xl bg-gray-200 mb-4">
+<!-- Contenedor principal -->
+<div class="max-full mx-auto py-10 px-5 bg-gray-50 min-h-screen font-sans">
+  <!-- Botón "Volver al catálogo" -->
+  <div class="mb-6">
+    <a href="/publiccatalog" class="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+      <i class="fas fa-arrow-left"></i>
+      <span>Volver al catálogo</span>
+    </a>
+  </div>
 
-      <!-- Miniaturas de imágenes -->
-      <div class="flex gap-2 overflow-x-auto">
+  <!-- Contenido principal -->
+  <div *ngIf="!isLoading && !error" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Sección de imágenes -->
+    <div class="relative">
+      <!-- Miniaturas verticales (a la izquierda) -->
+      <div class="absolute top-0 left-0 w-20 hidden lg:block">
+        <div class="flex flex-col gap-2 overflow-y-auto max-h-[500px]">
+          <img *ngFor="let image of selectedVariant?.images" [src]="image.image_url" alt="Miniatura"
+            class="w-16 h-16 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-600"
+            [ngClass]="{'border-blue-600': image.image_url === selectedImage}" (click)="changeImage(image.image_url)">
+        </div>
+      </div>
+
+      <!-- Imagen principal con zoom -->
+      <div class="ml-0 lg:ml-24 relative">
+        <div class="zoom-container">
+          <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'" alt="{{ product.name }}"
+            class="w-full h-[500px] object-contain rounded-xl bg-gray-200 zoom-image">
+        </div>
+
+        <!-- Flechas de navegación para imágenes -->
+        <div *ngIf="selectedVariant?.images?.length > 1"
+          class="absolute top-1/2 transform -translate-y-1/2 w-full flex justify-between px-4">
+          <button (click)="prevImage()" class="bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
+            <i class="fas fa-chevron-left text-gray-600"></i>
+          </button>
+          <button (click)="nextImage()" class="bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
+            <i class="fas fa-chevron-right text-gray-600"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Miniaturas horizontales (móviles) -->
+      <div class="flex gap-2 overflow-x-auto mt-4 lg:hidden">
         <img *ngFor="let image of selectedVariant?.images" [src]="image.image_url" alt="Miniatura"
           class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-600"
           [ngClass]="{'border-blue-600': image.image_url === selectedImage}" (click)="changeImage(image.image_url)">
@@ -16,71 +49,128 @@
     </div>
 
     <!-- Sección de detalles -->
-    <div class="flex-1">
-      <h1 class="text-3xl font-semibold text-gray-900 mb-2">{{ product.name }}</h1>
-      <p class="text-sm text-gray-500 mb-4">{{ product.category.name }}</p>
-      <p class="text-lg text-gray-700 mb-4">{{ product.description || 'Sin descripción disponible.' }}</p>
+    <div class="relative">
+      <!-- Información principal -->
+      <div>
+        <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{{ product.name }}</h1>
+        <p class="text-sm text-gray-500 mb-2">
+          <i class="fas fa-store text-gray-600 mr-1"></i>
+          Vendido por: {{ product.collaborator?.name || 'Desconocido' }}
+        </p>
+        <p class="text-sm text-gray-500 mb-2">
+          <i class="fas fa-star text-yellow-400 mr-1"></i>
+          4.5 (120 reseñas) <a href="#reviews" class="text-blue-600 hover:underline">Ver reseñas</a>
+        </p>
+        <p class="text-sm text-gray-500 mb-4">{{ product.category.name }}</p>
 
-      <!-- Selector de variantes -->
-      <div class="mb-4" *ngIf="product.variants?.length > 1">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Seleccionar variante</h3>
-        <div class="flex gap-2">
-          <button *ngFor="let variant of product.variants" (click)="selectVariant(variant)"
-            class="px-4 py-2 rounded-full border"
-            [ngClass]="{'bg-blue-600 text-white border-blue-600': variant === selectedVariant, 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100': variant !== selectedVariant}">
-            {{ variant.sku }}
+        <!-- Precio y stock -->
+        <div class="mb-6">
+          <p class="text-3xl font-bold text-gray-900 mb-2">
+            ${{ formatPrice(selectedVariant?.calculated_price) }}
+          </p>
+          <p class="text-sm text-gray-500 mb-2">
+            <i class="fas fa-box text-gray-600 mr-1"></i>
+            Stock: {{ selectedVariant?.stock || 0 }}
+          </p>
+          <p *ngIf="selectedVariant?.stock === 0" class="text-sm text-red-600 mb-2">Producto agotado</p>
+        </div>
+
+        <!-- Selector de variantes -->
+        <div class="mb-6" *ngIf="product.variants?.length > 1">
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Seleccionar variante</h3>
+          <div class="flex flex-wrap gap-2">
+            <button *ngFor="let variant of product.variants" (click)="selectVariant(variant)"
+              class="px-4 py-2 rounded-full border transition-colors duration-200"
+              [ngClass]="{'bg-blue-600 text-white border-blue-600': variant === selectedVariant, 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100': variant !== selectedVariant}">
+              {{ variant.sku }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Descripción (colapsable) -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Descripción</h3>
+          <p class="text-base text-gray-700" [ngClass]="{'line-clamp-3': !showFullDescription}">
+            {{ product.description || 'Sin descripción disponible.' }}
+          </p>
+          <button *ngIf="product.description?.length > 150" (click)="showFullDescription = !showFullDescription"
+            class="text-blue-600 text-sm mt-2 hover:underline">
+            {{ showFullDescription ? 'Ver menos' : 'Ver más' }}
+          </button>
+        </div>
+
+        <!-- Atributos (colapsable) -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Características</h3>
+          <ul class="text-sm text-gray-700 space-y-1" [ngClass]="{'line-clamp-3': !showFullAttributes}">
+            <li *ngFor="let attr of selectedVariant?.attributes">
+              <span class="font-medium">{{ attr.attribute_name }}:</span> {{ attr.value }}
+            </li>
+          </ul>
+          <button *ngIf="selectedVariant?.attributes?.length > 3" (click)="showFullAttributes = !showFullAttributes"
+            class="text-blue-600 text-sm mt-2 hover:underline">
+            {{ showFullAttributes ? 'Ver menos' : 'Ver más' }}
+          </button>
+        </div>
+
+        <!-- Opciones de personalización (colapsable) -->
+        <div class="mb-6" *ngIf="product.customizations?.length > 0">
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Personalización</h3>
+          <div class="text-sm text-gray-700" [ngClass]="{'line-clamp-3': !showFullCustomizations}">
+            <p *ngFor="let cust of product.customizations">
+              <span class="font-medium">{{ cust.type }}:</span> {{ cust.description }}
+            </p>
+          </div>
+          <button *ngIf="product.customizations?.length > 3" (click)="showFullCustomizations = !showFullCustomizations"
+            class="text-blue-600 text-sm mt-2 hover:underline">
+            {{ showFullCustomizations ? 'Ver menos' : 'Ver más' }}
+          </button>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex gap-4 mb-6">
+          <button (click)="requireLogin()" [disabled]="selectedVariant?.stock === 0"
+            class="flex-1 bg-blue-600 text-white text-sm font-medium py-3 rounded-full hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
+            Añadir al carrito
+          </button>
+          <button (click)="requireLogin()" [disabled]="selectedVariant?.stock === 0"
+            class="flex-1 bg-green-600 text-white text-sm font-medium py-3 rounded-full hover:bg-green-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
+            Comprar ahora
+          </button>
+        </div>
+
+        <!-- Botones de compartir -->
+        <div class="flex gap-3">
+          <button (click)="shareOnWhatsApp()"
+            class="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
+            <i class="fab fa-whatsapp text-xl"></i>
+            <span>Compartir en WhatsApp</span>
+          </button>
+          <button (click)="copyLink()"
+            class="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+            <i class="fas fa-link text-xl"></i>
+            <span>Copiar enlace</span>
           </button>
         </div>
       </div>
-
-      <!-- Precio y stock -->
-      <div class="mb-4">
-        <p class="text-2xl font-bold text-gray-900">
-          ${{ formatPrice(selectedVariant?.calculated_price) }}
-        </p>
-        <p class="text-sm text-gray-500">Stock: {{ selectedVariant?.stock || 0 }}</p>
-        <p *ngIf="selectedVariant?.stock === 0" class="text-sm text-red-600 mt-1">Producto agotado</p>
-      </div>
-
-      <!-- Atributos -->
-      <div class="mb-4">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Características</h3>
-        <ul class="text-sm text-gray-700">
-          <li *ngFor="let attr of selectedVariant?.attributes">
-            <span class="font-medium">{{ attr.attribute_name }}:</span> {{ attr.value }}
-          </li>
-        </ul>
-      </div>
-
-      <!-- Opciones de personalización -->
-      <div class="mb-4" *ngIf="product.customizations?.length > 0">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Personalización</h3>
-        <div *ngFor="let cust of product.customizations" class="text-sm text-gray-700">
-          <p><span class="font-medium">{{ cust.type }}:</span> {{ cust.description }}</p>
-        </div>
-      </div>
-
-      <!-- Botón de acción -->
-      <div class="flex gap-4">
-        <button (click)="requireLogin()" [disabled]="selectedVariant?.stock === 0"
-                class="bg-blue-600 text-white text-sm font-medium py-3 px-6 rounded-full hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
-          Añadir al carrito
-        </button>
-        <button (click)="requireLogin()" [disabled]="selectedVariant?.stock === 0"
-                class="bg-green-600 text-white text-sm font-medium py-3 px-6 rounded-full hover:bg-green-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
-          Comprar ahora
-        </button>
-      </div>
     </div>
   </div>
-</div>
 
-<!-- Mensaje de carga -->
-<div *ngIf="isLoading" class="max-w-6xl mx-auto py-10 px-5 text-center">
-  <p class="text-gray-500">Cargando producto...</p>
-</div>
+  <!-- Mensaje de carga -->
+  <div *ngIf="isLoading" class="max-w-6xl mx-auto py-10 px-5 text-center">
+    <div class="flex justify-center items-center">
+      <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none"
+        viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+    </div>
+  </div>
 
-<!-- Mensaje de error -->
-<div *ngIf="error" class="max-w-6xl mx-auto py-10 px-5 text-center">
-  <p class="text-red-600">{{ error }}</p>
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="max-w-6xl mx-auto py-10 px-5 text-center">
+    <p class="text-red-600">{{ error }}</p>
+  </div>
 </div>

@@ -17,6 +17,10 @@ export class ProductDetailComponent implements OnInit {
   selectedImage: string | null = null;
   isLoading = true;
   error: string | null = null;
+  showFullDescription = false;
+  showFullAttributes = false;
+  showFullCustomizations = false;
+  currentImageIndex = 0;
 
   constructor(
     private router: Router,
@@ -37,7 +41,6 @@ export class ProductDetailComponent implements OnInit {
     this.error = null;
     this.productService.getProductById(productId).subscribe(response => {
       this.product = response.product;
-      // Seleccionar la primera variante por defecto
       if (this.product.variants && this.product.variants.length > 0) {
         this.selectVariant(this.product.variants[0]);
       }
@@ -51,7 +54,7 @@ export class ProductDetailComponent implements OnInit {
 
   selectVariant(variant: any) {
     this.selectedVariant = variant;
-    // Establecer la primera imagen de la variante seleccionada
+    this.currentImageIndex = 0;
     if (variant.images && variant.images.length > 0) {
       this.selectedImage = variant.images[0].image_url;
     } else {
@@ -61,16 +64,48 @@ export class ProductDetailComponent implements OnInit {
 
   changeImage(imageUrl: string) {
     this.selectedImage = imageUrl;
+    this.currentImageIndex = this.selectedVariant.images.findIndex((img: any) => img.image_url === imageUrl);
+  }
+
+  prevImage() {
+    if (this.currentImageIndex > 0) {
+      this.currentImageIndex--;
+      this.selectedImage = this.selectedVariant.images[this.currentImageIndex].image_url;
+    }
+  }
+
+  nextImage() {
+    if (this.currentImageIndex < this.selectedVariant.images.length - 1) {
+      this.currentImageIndex++;
+      this.selectedImage = this.selectedVariant.images[this.currentImageIndex].image_url;
+    }
   }
 
   formatPrice(price: string | number): string {
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     return isNaN(numPrice) ? 'N/A' : numPrice.toFixed(2);
   }
+
   requireLogin() {
     this.toastService.showToast('Necesitas iniciar sesión para realizar esta acción', 'warning');
     setTimeout(() => {
       this.router.navigate(['/login']);
     }, 2000);
+  }
+
+  shareOnWhatsApp() {
+    const url = window.location.href;
+    const text = `Mira este producto: ${this.product.name} - ${url}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
+  }
+
+  copyLink() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      this.toastService.showToast('Enlace copiado al portapapeles', 'success');
+    }).catch(() => {
+      this.toastService.showToast('Error al copiar el enlace', 'error');
+    });
   }
 }
