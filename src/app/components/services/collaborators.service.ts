@@ -31,6 +31,15 @@ export class CollaboratorsService {
             })
         );
     }
+    // Obtiene todos los colaboradores.
+    getPublicCollaborators(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.get<any>(`${this.apiUrl}/collaborators/public`, { headers, withCredentials: true });
+            })
+        );
+    }
     // Obtener todas las categorías con paginación
     getCollaborators(
         page: number = 1,
