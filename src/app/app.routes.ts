@@ -11,6 +11,7 @@ import { SupportInquiryComponent} from './components/public/support-inquiry/supp
 import { HomeComponent } from './components/public/home/home.component';
 import { LegalComponent } from './components/public/legal/legal.component'; 
 import { PublicCatalogComponent } from './components/public/public-catalog/public-catalog.component'; 
+import { ProductDetailComponent } from './components/public/public-catalog/product-detail/product-detail.component';
 
 // Autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
@@ -70,8 +71,18 @@ export const routes: Routes = [
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },
   { path: 'support-inquiry', component: SupportInquiryComponent, data: { breadcrumb: 'Consulta Soporte' } },
   { path: 'legal', component: LegalComponent, data: { breadcrumb: 'Legal' } },
-  { path: 'publiccatalog', component: PublicCatalogComponent, data: { breadcrumb: 'Catalogo' } },
-  
+
+  // Rutas del catálogo público (anidadas)
+  {
+    path: 'publiccatalog',
+    canActivate: [AuthGuard],
+    data: { allowPublic: true, breadcrumb: 'Catálogo' },
+    children: [
+      { path: '', component: PublicCatalogComponent }, // /catalog
+      { path: ':productId', component: ProductDetailComponent, data: { breadcrumb: 'Detalles del producto' } } // /catalog/:productId
+    ]
+  },
+
   // Rutas de error
   { path: '400', component: BadRequestComponent, data: { breadcrumb: 'Solicitud incorrecta' } },
   { path: '404', component: NotFoundComponent, data: { breadcrumb: 'Página no encontrada' } },

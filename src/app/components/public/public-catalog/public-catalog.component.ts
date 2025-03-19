@@ -41,7 +41,7 @@ export class PublicCatalogComponent implements OnInit {
   }
 
   goToDetail(productId: number) {
-    this.router.navigate([`/catalog/${productId}`]);
+    this.router.navigate([`/publiccatalog/${productId}`]);
   }
 
   changePage(newPage: number) {
