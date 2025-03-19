@@ -10,6 +10,7 @@ import { MfaVerificationComponent } from './components/public/mfa-verification/m
 import { SupportInquiryComponent} from './components/public/support-inquiry/support-inquiry.component'; 
 import { HomeComponent } from './components/public/home/home.component';
 import { LegalComponent } from './components/public/legal/legal.component'; 
+import { PublicCatalogComponent } from './components/public/public-catalog/public-catalog.component'; 
 
 // Autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
@@ -67,6 +68,7 @@ export const routes: Routes = [
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },
   { path: 'support-inquiry', component: SupportInquiryComponent, data: { breadcrumb: 'Consulta Soporte' } },
   { path: 'legal', component: LegalComponent, data: { breadcrumb: 'Legal' } },
+  { path: 'publiccatalog', component: PublicCatalogComponent, data: { breadcrumb: 'Catalogo' } },
   
   // Rutas de error
   { path: '400', component: BadRequestComponent, data: { breadcrumb: 'Solicitud incorrecta' } },
