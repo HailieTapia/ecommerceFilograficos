@@ -92,7 +92,6 @@ export interface UpdateProductResponse {
   product: DetailedProduct;
 }
 
-// Interfaces existentes (sin cambios, solo extracto relevante)
 export interface StockVariant {
   variant_id: number;
   sku: string;
@@ -101,10 +100,10 @@ export interface StockVariant {
   product_type: 'Existencia' | 'semi_personalizado' | 'personalizado' | null;
   stock: number;
   stock_threshold: number;
-  stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock'; // Añadido 'no_stock'
+  stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock';
   first_image: string | null;
   last_updated: string;
-  last_stock_added_at?: string | null; // Nuevo campo opcional
+  last_stock_added_at?: string | null;
 }
 
 export interface StockVariantsResponse {
@@ -127,14 +126,51 @@ export interface UpdatedStockVariant {
   product_name: string | null;
   stock: number;
   stock_threshold: number;
-  stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock'; // Añadido 'no_stock'
+  stock_status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock';
   last_updated: string;
-  last_stock_added_at?: string | null; // Nuevo campo opcional
+  last_stock_added_at?: string | null;
 }
 
 export interface UpdateStockResponse {
   message: string;
   variant: UpdatedStockVariant;
+}
+
+export interface PriceVariant {
+  variant_id: number;
+  product_name: string;
+  description: string | null;
+  sku: string;
+  image_url: string | null;
+  calculated_price: string; // String por el formato con decimales
+  production_cost: string; // String por el formato con decimales
+  profit_margin: string; // String por el formato con decimales
+  category: string | null;
+  updated_at: string; // Fecha del último cambio de precio o 'Sin cambios de precio'
+  product_type: 'Existencia' | 'semi_personalizado' | 'personalizado';
+}
+
+export interface PriceVariantsResponse {
+  message: string;
+  variants: PriceVariant[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface PriceVariantResponse {
+  message: string;
+  variant: PriceVariant;
+}
+
+export interface UpdatePriceRequest {
+  production_cost: number;
+  profit_margin: number;
+}
+
+export interface UpdatePriceResponse {
+  message: string;
+  variant: PriceVariant;
 }
 
 @Injectable({
@@ -292,13 +328,11 @@ export class ProductService {
     );
   }
 
-  // Nuevos métodos para gestión de stock
-
   getStockVariants(
     page: number = 1,
     pageSize: number = 10,
     categoryId?: number,
-    stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock' // Añadido 'no_stock'
+    stockStatus?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock'
   ): Observable<StockVariantsResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
@@ -329,6 +363,72 @@ export class ProductService {
           .set('x-csrf-token', csrfToken)
           .set('Content-Type', 'application/json');
         return this.http.put<UpdateStockResponse>(`${this.apiUrl}/stock/update`, stockData, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  getAllPriceVariants(
+    page: number = 1,
+    pageSize: number = 50,
+    search?: string,
+    categoryId?: number,
+    productType?: 'Existencia' | 'semi_personalizado' | 'personalizado',
+    sortBy?: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name', // Añadido product_name
+    sortOrder?: 'ASC' | 'DESC'
+  ): Observable<PriceVariantsResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', pageSize.toString());
+    if (search) {
+      params = params.set('search', search);
+    }
+    if (categoryId) {
+      params = params.set('category_id', categoryId.toString());
+    }
+    if (productType) {
+      params = params.set('product_type', productType);
+    }
+    if (sortBy) {
+      params = params.set('sortBy', sortBy);
+    }
+    if (sortOrder) {
+      params = params.set('sortOrder', sortOrder);
+    }
+
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<PriceVariantsResponse>(`${this.apiUrl}/price`, {
+          headers,
+          params,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  getPriceVariantById(variantId: number): Observable<PriceVariantResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<PriceVariantResponse>(`${this.apiUrl}/price/${variantId}`, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  updatePrice(variantId: number, priceData: UpdatePriceRequest): Observable<UpdatePriceResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders()
+          .set('x-csrf-token', csrfToken)
+          .set('Content-Type', 'application/json');
+        return this.http.put<UpdatePriceResponse>(`${this.apiUrl}/price/${variantId}`, priceData, {
           headers,
           withCredentials: true
         });

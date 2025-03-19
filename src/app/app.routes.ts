@@ -30,7 +30,8 @@ import { CollaboratorsComponent } from './components/administrator/collaborators
 import { CategoriesComponent } from './components/administrator/categories/categories.component';
 import { ProductCatalogComponent } from './components/administrator/product-catalog/product-catalog.component';
 import { ProductStockComponent } from './components/administrator/product-stock/product-stock.component';
-import { AdministratorDashboardComponent } from './components/administrator/administrator-dashboard/administrator-dashboard.component'; // Nuevo import
+import { AdministratorDashboardComponent } from './components/administrator/administrator-dashboard/administrator-dashboard.component';
+import { PriceManagementComponent } from './components/administrator/price-management/price-management.component';
 
 // Errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -41,7 +42,7 @@ export const routes: Routes = [
   { path: '', component: HomeComponent, canActivate: [AuthGuard], data: { allowPublic: true, breadcrumb: 'Inicio' } },
 
   // Administrador
-  { path: 'admin-dashboard', component: AdministratorDashboardComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Dashboard' } }, // Nueva ruta
+  { path: 'admin-dashboard', component: AdministratorDashboardComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Dashboard' } },
   { path: 'company', component: CompanyComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Empresa' } },
   { path: 'security', component: SecurityComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Seguridad' } },
   { path: 'type', component: EmailTypeComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Tipos de Correo' } },
@@ -52,10 +53,11 @@ export const routes: Routes = [
   { path: 'support-panel', component: SupportPanelComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Panel de Soporte' } },
   { path: 'product-attributes', component: ProductAttributeComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Atributos de productos' } },
   { path: 'collaborators', component: CollaboratorsComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Colaboradores' } },
-  { path: 'category', component: CategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Categorías' } }, // Corregí el breadcrumb
-  { path: 'product-catalog', component: ProductCatalogComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Catálogo de productos' } }, // Corregí "Catalogo" a "Catálogo"
+  { path: 'category', component: CategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Categorías' } }, 
+  { path: 'product-catalog', component: ProductCatalogComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Catálogo de productos' } },
   { path: 'product-stock', component: ProductStockComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Inventario de productos' } },
   { path: 'banners', component: BannerAdminComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de banners' } },
+  { path: 'price-management', component: PriceManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de precios de productos' } },
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },

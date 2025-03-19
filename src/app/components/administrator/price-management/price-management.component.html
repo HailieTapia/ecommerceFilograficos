@@ -1,0 +1,213 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div class="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text p-4 sm:p-6 font-sans">
+  <!-- Encabezado -->
+  <div class="flex justify-between items-center mb-6 bg-light-table-header dark:bg-dark-table-header p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
+        <i class="fas fa-dollar-sign text-light-primary dark:text-dark-primary"></i> Gestión de Precios de Productos
+      </h1>
+      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Edita los precios de las variantes de productos existentes</p>
+    </div>
+    <button
+      (click)="openHistoryModal()"
+      class="bg-light-primary dark:bg-dark-primary text-white px-4 sm:px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md text-sm sm:text-base"
+    >
+      <i class="fas fa-clock"></i> Historial de Cambios
+    </button>
+  </div>
+
+  <!-- Filtros y Búsqueda -->
+  <div class="bg-light-background dark:bg-dark-background p-6 rounded-lg shadow-sm mb-6 border border-gray-200 dark:border-gray-600">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+        <select
+          [(ngModel)]="selectedCategory"
+          (change)="applyFilters()"
+          class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+        >
+          <option value="">Todas las categorías</option>
+          <option *ngFor="let category of categories" [value]="category.category_id">{{ category.name }}</option>
+        </select>
+
+        <select
+          [(ngModel)]="selectedProductType"
+          (change)="applyFilters()"
+          class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+        >
+          <option value="">Todos los tipos</option>
+          <option value="Existencia">Existencia</option>
+          <option value="semi_personalizado">Semi Personalizado</option>
+          <option value="personalizado">Personalizado</option>
+        </select>
+      </div>
+
+      <div class="relative w-full sm:w-1/2">
+        <input
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Buscar por nombre, SKU o categoría..."
+          class="w-full p-2 pl-10 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+        />
+        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-600">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text">Variantes de Productos</h2>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <label for="itemsPerPage" class="text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">Elementos por página:</label>
+        <select
+          id="itemsPerPage"
+          [(ngModel)]="itemsPerPage"
+          (change)="onItemsPerPageChange()"
+          class="w-full sm:w-24 p-1 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+        >
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-light-table-header dark:bg-dark-table-header">
+          <tr>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Imagen</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('product_name')">Producto</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Categoría</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Tipo</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('sku')">SKU</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('production_cost')">Costo de Producción</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('calculated_price')">Precio Actual</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Última Actualización</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+          <tr *ngFor="let variant of variants" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
+            <td class="p-3">
+              <img *ngIf="variant.image_url" [src]="variant.image_url" alt="Imagen" class="w-8 sm:w-10 h-8 sm:h-10 object-cover rounded border border-gray-200 dark:border-gray-600">
+              <span *ngIf="!variant.image_url" class="text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">N/A</span>
+            </td>
+            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text whitespace-nowrap" [title]="variant.description || ''">{{ variant.product_name }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.category }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.product_type }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.sku }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">${{ variant.production_cost }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">${{ variant.calculated_price }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.updated_at }}</td>
+            <td class="p-3 text-center">
+              <button
+                (click)="openEditModal(variant)"
+                class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative"
+              >
+                <i class="fas fa-edit"></i>
+                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-light-text dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  Editar
+                </span>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="variants.length === 0">
+            <td colspan="9" class="p-3 text-center text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">
+              No hay variantes disponibles
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalItems]="totalVariants"
+      [itemsPerPage]="itemsPerPage"
+      (pageChange)="onPageChange($event)"
+      class="mt-4 p-4 border-t border-gray-200 dark:border-gray-600"
+    ></app-pagination>
+  </div>
+
+  <!-- Modal para Editar Precio -->
+  <app-modal #editModal>
+    <div class="p-4 sm:p-6 space-y-4">
+      <h2 class="text-xl font-bold text-light-text dark:text-dark-text mb-4">
+        Editar Precio - {{ selectedVariant?.product_name }} (SKU: {{ selectedVariant?.sku }})
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="flex justify-center items-center">
+          <img
+            *ngIf="selectedVariant?.image_url"
+            [src]="selectedVariant?.image_url"
+            alt="Imagen"
+            class="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+          >
+          <span *ngIf="!selectedVariant?.image_url" class="text-light-secondary dark:text-dark-secondary text-sm">Sin imagen</span>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm">Costo de Producción</label>
+            <input
+              [(ngModel)]="editProductionCost"
+              (ngModelChange)="calculatePrice()"
+              (keydown)="restrictInput($event)"
+              type="number"
+              step="0.01"
+              min="0"
+              class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+              [ngClass]="{'border-red-500': priceError && editProductionCost < 0}"
+            >
+          </div>
+          <div>
+            <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm">Margen de Ganancia (%)</label>
+            <input
+              id="profitMarginInput"
+              [(ngModel)]="editProfitMargin"
+              (ngModelChange)="calculatePrice()"
+              (keydown)="restrictInput($event)"
+              type="number"
+              step="0.01"
+              min="0.01"
+              [max]="MAX_PROFIT_MARGIN"
+              class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"
+              [ngClass]="{'border-red-500': priceError && (editProfitMargin < 0.01 || editProfitMargin > MAX_PROFIT_MARGIN)}"
+            >
+          </div>
+          <div>
+            <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm">Precio Calculado</label>
+            <input
+              [value]="editCalculatedPrice"
+              disabled
+              class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text rounded-md"
+              [ngClass]="{'border-red-500': priceError && isCalculatedPriceInvalid()}"
+            >
+          </div>
+          <p *ngIf="priceError" class="text-light-danger dark:text-dark-danger text-xs mt-1">{{ priceError }}</p>
+        </div>
+      </div>
+      <div class="mt-6 flex justify-end gap-4">
+        <button
+          (click)="closeEditModal()"
+          class="px-4 py-2 bg-light-danger dark:bg-dark-danger text-white rounded-lg hover:bg-red-700 transition-all duration-300"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="savePrice()"
+          [disabled]="!isFormValid"
+          class="px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          Guardar
+        </button>
+      </div>
+    </div>
+  </app-modal>
+
+  <!-- Notificación -->
+  <div *ngIf="notification" class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg">
+    {{ notification }}
+  </div>
+</div>
