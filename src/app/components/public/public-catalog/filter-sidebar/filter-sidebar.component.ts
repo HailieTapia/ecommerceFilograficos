@@ -11,6 +11,8 @@ import { CategorieService } from '../../../services/categorieService';
   styleUrls: ['./filter-sidebar.component.css']
 })
 export class FilterSidebarComponent implements OnInit {
+  categories: any[] = [];
+
   @Output() filtersChange = new EventEmitter<any>();
   filters: any = {
     categoryId: '',
@@ -19,25 +21,22 @@ export class FilterSidebarComponent implements OnInit {
   };
 
 
-  categories: any[] = []; // Lista de categorías obtenidas del backend
-
-  constructor(private categoriesService: CategorieService) {} // Inyectamos HttpClient
+  constructor(private categoriesService: CategorieService) { }
 
   ngOnInit() {
-    // Obtener las categorías del backend al inicializar el componente
     this.loadCategories();
   }
 
   loadCategories() {
     this.categoriesService
       .publicCategories(
-      ).subscribe({
+    ).subscribe({
       next: (response) => {
-        this.categories = response; 
+        this.categories = response;
       },
       error: (error) => {
         console.error('Error al cargar las categorías:', error);
-        this.categories = []; // En caso de error, dejamos la lista vacía
+        this.categories = []; 
       }
     });
   }
@@ -54,7 +53,7 @@ export class FilterSidebarComponent implements OnInit {
       cleanedFilters.maxPrice = this.filters.maxPrice;
     }
 
-    this.filtersChange.emit(cleanedFilters); 
+    this.filtersChange.emit(cleanedFilters);
   }
 
   clearFilters() {
