@@ -25,7 +25,7 @@ export class PriceManagementComponent implements OnInit {
   searchTerm = '';
   selectedCategory: string = '';
   selectedProductType: string = '';
-  sortBy: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name' = 'sku';
+  sortBy: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name' | 'updated_at' = 'sku';
   sortOrder: 'ASC' | 'DESC' = 'ASC';
 
   selectedVariant: PriceVariant | null = null;
@@ -36,7 +36,7 @@ export class PriceManagementComponent implements OnInit {
   notification: string = '';
   isFormValid: boolean = true;
 
-  readonly MAX_PROFIT_MARGIN: number = 500; // Máximo margen de ganancia permitido (500%)
+  readonly MAX_PROFIT_MARGIN: number = 500;
 
   categories: { category_id: number; name: string }[] = [];
 
@@ -112,7 +112,7 @@ export class PriceManagementComponent implements OnInit {
     this.loadVariants();
   }
 
-  sort(column: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name') {
+  sort(column: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name' | 'updated_at') { 
     if (this.sortBy === column) {
       this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC';
     } else {
@@ -138,8 +138,10 @@ export class PriceManagementComponent implements OnInit {
   }
 
   calculatePrice() {
+    this.editProductionCost = parseFloat(this.editProductionCost.toFixed(2));
+    this.editProfitMargin = parseFloat(this.editProfitMargin.toFixed(2));
     const calculated = this.editProductionCost * (1 + this.editProfitMargin / 100);
-    this.editCalculatedPrice = calculated.toFixed(2);
+    this.editCalculatedPrice = this.formatPrice(calculated);
     this.validatePrice();
   }
 
@@ -154,7 +156,8 @@ export class PriceManagementComponent implements OnInit {
       this.isFormValid = false;
       return;
     }
-    if (Number(this.editCalculatedPrice) < this.editProductionCost) { // Usamos Number en lugar de parseFloat directamente en el template
+    const calculatedPriceNum = parseFloat(this.editCalculatedPrice.replace(/[^0-9.]/g, ''));
+    if (calculatedPriceNum < this.editProductionCost) {
       this.priceError = `El precio debe ser mayor a $${this.editProductionCost.toFixed(2)}`;
       this.isFormValid = false;
       return;
@@ -186,6 +189,12 @@ export class PriceManagementComponent implements OnInit {
     console.log('Abrir historial de cambios');
   }
 
+  formatPrice(value: number | string): string {
+    const numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    const formatted = numericValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `$ ${formatted} MXN`;
+  }
+
   restrictInput(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', '.'];
     const isNumberKey = event.key >= '0' && event.key <= '9';
@@ -196,13 +205,22 @@ export class PriceManagementComponent implements OnInit {
       return;
     }
 
-    if (event.key === '.' && event.target instanceof HTMLInputElement && event.target.value.includes('.')) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    const dotIndex = value.indexOf('.');
+
+    if (event.key === '.' && dotIndex !== -1) {
+      event.preventDefault();
+      return;
+    }
+
+    if (dotIndex !== -1 && value.length - dotIndex > 2 && !allowedKeys.includes(event.key)) {
       event.preventDefault();
     }
   }
 
-  // Método para usar en el template
   isCalculatedPriceInvalid(): boolean {
-    return Number(this.editCalculatedPrice) < this.editProductionCost;
+    const calculatedPriceNum = parseFloat(this.editCalculatedPrice.replace(/[^0-9.]/g, ''));
+    return calculatedPriceNum < this.editProductionCost;
   }
 }

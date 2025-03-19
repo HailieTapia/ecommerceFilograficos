@@ -78,47 +78,73 @@
         <thead class="bg-light-table-header dark:bg-dark-table-header">
           <tr>
             <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Imagen</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('product_name')">Producto</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('product_name')">
+              Producto
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'product_name', 'text-gray-500 dark:text-gray-400': sortBy !== 'product_name'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'product_name'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
             <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Categoría</th>
             <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Tipo</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('sku')">SKU</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('production_cost')">Costo de Producción</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('calculated_price')">Precio Actual</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Última Actualización</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('sku')">
+              SKU
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'sku', 'text-gray-500 dark:text-gray-400': sortBy !== 'sku'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'sku'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('production_cost')">
+              Costo de Producción
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'production_cost', 'text-gray-500 dark:text-gray-400': sortBy !== 'production_cost'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'production_cost'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('calculated_price')">
+              Precio Actual
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'calculated_price', 'text-gray-500 dark:text-gray-400': sortBy !== 'calculated_price'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'calculated_price'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              </span>
+            </th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">
+              Última Actualización
+            </th>
             <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-          <tr *ngFor="let variant of variants" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
-            <td class="p-3">
-              <img *ngIf="variant.image_url" [src]="variant.image_url" alt="Imagen" class="w-8 sm:w-10 h-8 sm:h-10 object-cover rounded border border-gray-200 dark:border-gray-600">
-              <span *ngIf="!variant.image_url" class="text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">N/A</span>
-            </td>
-            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text whitespace-nowrap" [title]="variant.description || ''">{{ variant.product_name }}</td>
-            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.category }}</td>
-            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.product_type }}</td>
-            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.sku }}</td>
-            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">${{ variant.production_cost }}</td>
-            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">${{ variant.calculated_price }}</td>
-            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.updated_at }}</td>
-            <td class="p-3 text-center">
-              <button
-                (click)="openEditModal(variant)"
-                class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative"
-              >
-                <i class="fas fa-edit"></i>
-                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-light-text dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  Editar
-                </span>
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="variants.length === 0">
-            <td colspan="9" class="p-3 text-center text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">
-              No hay variantes disponibles
-            </td>
-          </tr>
-        </tbody>
+            <tr *ngFor="let variant of variants" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
+              <td class="p-3">
+                <img *ngIf="variant.image_url" [src]="variant.image_url" alt="Imagen" class="w-8 sm:w-10 h-8 sm:h-10 object-cover rounded border border-gray-200 dark:border-gray-600">
+                <span *ngIf="!variant.image_url" class="text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">N/A</span>
+              </td>
+              <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text whitespace-nowrap" [title]="variant.description || ''">{{ variant.product_name }}</td>
+              <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.category }}</td>
+              <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.product_type }}</td>
+              <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.sku }}</td>
+              <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatPrice(variant.production_cost) }}</td>
+              <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">{{ formatPrice(variant.calculated_price) }}</td>
+              <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ variant.updated_at }}</td>
+              <td class="p-3 text-center">
+                <button
+                  (click)="openEditModal(variant)"
+                  class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative"
+                >
+                  <i class="fas fa-edit"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-light-text dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Editar
+                  </span>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="variants.length === 0">
+              <td colspan="9" class="p-3 text-center text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">
+                No hay variantes disponibles
+              </td>
+            </tr>
+          </tbody>
       </table>
     </div>
 

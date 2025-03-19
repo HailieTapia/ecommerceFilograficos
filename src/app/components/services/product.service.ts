@@ -376,7 +376,7 @@ export class ProductService {
     search?: string,
     categoryId?: number,
     productType?: 'Existencia' | 'semi_personalizado' | 'personalizado',
-    sortBy?: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name', // Añadido product_name
+    sortBy?: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name' | 'updated_at',
     sortOrder?: 'ASC' | 'DESC'
   ): Observable<PriceVariantsResponse> {
     let params = new HttpParams()
