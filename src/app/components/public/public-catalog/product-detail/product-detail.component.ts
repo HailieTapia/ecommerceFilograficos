@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PublicProductService } from '../../../services/PublicProductService';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ToastService } from '../../../services/toastService';
 @Component({
   selector: 'app-product-detail',
@@ -18,6 +19,7 @@ export class ProductDetailComponent implements OnInit {
   error: string | null = null;
 
   constructor(
+    private router: Router,
     private toastService: ToastService,
     private route: ActivatedRoute,
     private productService: PublicProductService
@@ -64,5 +66,11 @@ export class ProductDetailComponent implements OnInit {
   formatPrice(price: string | number): string {
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     return isNaN(numPrice) ? 'N/A' : numPrice.toFixed(2);
+  }
+  requireLogin() {
+    this.toastService.showToast('Necesitas iniciar sesión para realizar esta acción', 'warning');
+    setTimeout(() => {
+      this.router.navigate(['/login']);
+    }, 2000);
   }
 }

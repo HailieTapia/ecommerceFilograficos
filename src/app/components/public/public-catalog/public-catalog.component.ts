@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ToastService } from '../../services/toastService';
+import { FormsModule } from '@angular/forms';
 import { PublicProductService } from '../../services/PublicProductService';
 import { FilterSidebarComponent } from './filter-sidebar/filter-sidebar.component';
 @Component({
@@ -16,7 +16,7 @@ import { FilterSidebarComponent } from './filter-sidebar/filter-sidebar.componen
     <router-outlet></router-outlet>
   `
   ,
-  imports: [FilterSidebarComponent, CommonModule],
+  imports: [FormsModule, FilterSidebarComponent, CommonModule],
   templateUrl: './public-catalog.component.html',
   styleUrl: './public-catalog.component.css'
 })
@@ -28,7 +28,16 @@ export class PublicCatalogComponent implements OnInit {
   totalPages = 0;
   filters: any = {};
 
-  constructor(private toastService: ToastService, private productService: PublicProductService, private router: Router) { }
+  sortOptions = [
+    { label: 'Orden por defecto', value: '' },
+    { label: 'Precio: Menor a Mayor', value: 'min_price:ASC' },
+    { label: 'Precio: Mayor a Menor', value: 'min_price:DESC' },
+    { label: 'Nombre: A-Z', value: 'name:ASC' },
+    { label: 'Nombre: Z-A', value: 'name:DESC' }
+  ];
+  selectedSort: string = '';
+
+  constructor(private productService: PublicProductService, private router: Router) { }
 
   ngOnInit() {
     this.loadProducts();
@@ -45,8 +54,13 @@ export class PublicCatalogComponent implements OnInit {
   }
 
   onFiltersChange(newFilters: any) {
-    this.filters = newFilters;
-    this.page = 1; // Resetear la página al aplicar nuevos filtros
+    this.filters = { ...newFilters, sort: this.selectedSort };
+    this.page = 1;
+    this.loadProducts();
+  }
+  onSortChange() {
+    this.filters.sort = this.selectedSort;
+    this.page = 1;
     this.loadProducts();
   }
 
