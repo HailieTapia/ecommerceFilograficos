@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductService, PriceVariant, PriceVariantsResponse, UpdatePriceRequest } from '../../services/product.service';
+import { ProductService, PriceVariant, PriceVariantsResponse, UpdatePriceRequest, PriceHistoryResponse, PriceHistoryEntry } from '../../services/product.service';
 import { CategorieService } from '../../services/categorieService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
@@ -16,6 +16,7 @@ import { of } from 'rxjs';
 })
 export class PriceManagementComponent implements OnInit {
   @ViewChild('editModal') editModal!: ModalComponent;
+  @ViewChild('historyModal') historyModal!: ModalComponent;
 
   variants: PriceVariant[] = [];
   totalVariants = 0;
@@ -35,6 +36,11 @@ export class PriceManagementComponent implements OnInit {
   priceError: string = '';
   notification: string = '';
   isFormValid: boolean = true;
+
+  // Nuevas propiedades para el historial
+  selectedHistoryVariant: PriceVariant | null = null;
+  priceHistory: PriceHistoryEntry[] = [];
+  historyMessage: string = '';
 
   readonly MAX_PROFIT_MARGIN: number = 500;
 
@@ -185,8 +191,29 @@ export class PriceManagementComponent implements OnInit {
     });
   }
 
-  openHistoryModal() {
-    console.log('Abrir historial de cambios');
+  // Método actualizado para el historial de precios
+  openHistoryModal(variant: PriceVariant) {
+    this.selectedHistoryVariant = variant;
+    this.productService.getPriceHistoryByVariantId(variant.variant_id).subscribe({
+      next: (response: PriceHistoryResponse) => {
+        this.priceHistory = response.history;
+        this.historyMessage = response.message;
+        this.historyModal.open();
+      },
+      error: (err) => {
+        console.error('Error al cargar el historial de precios:', err);
+        this.priceHistory = [];
+        this.historyMessage = 'Error al cargar el historial';
+        this.historyModal.open();
+      }
+    });
+  }
+
+  closeHistoryModal() {
+    this.historyModal.close();
+    this.selectedHistoryVariant = null;
+    this.priceHistory = [];
+    this.historyMessage = '';
   }
 
   formatPrice(value: number | string): string {
