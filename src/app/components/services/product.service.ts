@@ -5,7 +5,7 @@ import { switchMap } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 import { environment } from '../../environments/config';
 
-// Interfaces para tipado
+// Interfaces para tipado (sin cambios en las interfaces previas)
 export interface Product {
   product_id: number;
   name: string;
@@ -173,6 +173,36 @@ export interface UpdatePriceResponse {
   variant: PriceVariant;
 }
 
+// Interfaz actualizada para PriceHistoryEntry
+export interface PriceHistoryEntry {
+  history_id: number; // Cambiado de price_history_id a history_id para coincidir con el modelo
+  product_name: string;
+  sku: string;
+  previous: {
+    production_cost: string; // String por el formato con decimales
+    profit_margin: string; // String por el formato con decimales
+    calculated_price: string; // String por el formato con decimales
+  };
+  new: {
+    production_cost: string; // String por el formato con decimales
+    profit_margin: string; // String por el formato con decimales
+    calculated_price: string; // String por el formato con decimales
+  };
+  change_type: 'manual' | 'promotion' | 'discount' | 'adjustment';
+  change_description: string;
+  change_date: string;
+  changed_by: {
+    user_id: number;
+    name: string;
+    email: string;
+  };
+}
+
+export interface PriceHistoryResponse {
+  message: string;
+  history: PriceHistoryEntry[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -181,7 +211,7 @@ export class ProductService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
-  // Métodos existentes (sin cambios)
+  // Métodos existentes sin cambios (omitidos por brevedad)
   getAllProductsCatalog(
     page: number = 1,
     pageSize: number = 10,
@@ -429,6 +459,18 @@ export class ProductService {
           .set('x-csrf-token', csrfToken)
           .set('Content-Type', 'application/json');
         return this.http.put<UpdatePriceResponse>(`${this.apiUrl}/price/${variantId}`, priceData, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  getPriceHistoryByVariantId(variantId: number): Observable<PriceHistoryResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<PriceHistoryResponse>(`${this.apiUrl}/price/history/${variantId}`, {
           headers,
           withCredentials: true
         });
