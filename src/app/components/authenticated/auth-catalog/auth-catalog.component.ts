@@ -13,9 +13,7 @@ import { FilterSidebarComponent } from './filter-sidebar/filter-sidebar.componen
   </div>
   <button (click)="changePage(page - 1)" [disabled]="page === 1">Anterior</button>
   <button (click)="changePage(page + 1)" [disabled]="page * pageSize >= total">Siguiente</button>
-  <router-outlet></router-outlet>
-`
-  ,
+  <router-outlet></router-outlet>`,
   imports: [FilterSidebarComponent, CommonModule],
   templateUrl: './auth-catalog.component.html',
   styleUrl: './auth-catalog.component.css'

@@ -1,14 +1,10 @@
 <div *ngIf="!isLoading && !error" class="max-full mx-auto py-10 px-5 bg-gray-100 min-h-screen font-sans">
-    <!-- Contenedor principal -->
     <div class="flex flex-col lg:flex-row gap-8">
-      <!-- Sección de imágenes -->
       <div class="flex-1">
-        <!-- Imagen principal -->
         <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'"
              alt="{{ product.name }}"
              class="w-full h-96 object-contain rounded-xl bg-gray-200 mb-4">
         
-        <!-- Miniaturas de imágenes -->
         <div class="flex gap-2 overflow-x-auto">
           <img *ngFor="let image of selectedVariant?.images"
                [src]="image.image_url"
@@ -24,8 +20,6 @@
         <h1 class="text-3xl font-semibold text-gray-900 mb-2">{{ product.name }}</h1>
         <p class="text-sm text-gray-500 mb-4">{{ product.category.name }}</p>
         <p class="text-lg text-gray-700 mb-4">{{ product.description || 'Sin descripción disponible.' }}</p>
-  
-        <!-- Selector de variantes -->
         <div class="mb-4" *ngIf="product.variants?.length > 1">
           <h3 class="text-lg font-medium text-gray-900 mb-2">Seleccionar variante</h3>
           <div class="flex gap-2">
@@ -37,8 +31,6 @@
             </button>
           </div>
         </div>
-  
-        <!-- Precio y stock -->
         <div class="mb-4">
           <p class="text-2xl font-bold text-gray-900">
             ${{ formatPrice(selectedVariant?.calculated_price) }}
@@ -46,8 +38,7 @@
           <p class="text-sm text-gray-500">Stock: {{ selectedVariant?.stock || 0 }}</p>
           <p *ngIf="selectedVariant?.stock === 0" class="text-sm text-red-600 mt-1">Producto agotado</p>
         </div>
-  
-        <!-- Atributos -->
+
         <div class="mb-4">
           <h3 class="text-lg font-medium text-gray-900 mb-2">Características</h3>
           <ul class="text-sm text-gray-700">
@@ -73,13 +64,9 @@
       </div>
     </div>
   </div>
-  
-  <!-- Mensaje de carga -->
   <div *ngIf="isLoading" class="max-w-6xl mx-auto py-10 px-5 text-center">
     <p class="text-gray-500">Cargando producto...</p>
   </div>
-  
-  <!-- Mensaje de error -->
   <div *ngIf="error" class="max-w-6xl mx-auto py-10 px-5 text-center">
     <p class="text-red-600">{{ error }}</p>
   </div>
