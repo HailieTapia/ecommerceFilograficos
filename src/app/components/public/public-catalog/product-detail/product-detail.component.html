@@ -1,5 +1,5 @@
 <!-- Contenedor principal -->
-<div class="max-full mx-auto py-10 px-5 bg-gray-50 min-h-screen font-sans">
+<div class="max-full mx-auto py-3 px-5 bg-gray-50 min-h-screen font-sans">
   <!-- Botón "Volver al catálogo" -->
   <div class="mb-6">
     <a href="/publiccatalog" class="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
@@ -77,7 +77,7 @@
 
         <!-- Selector de variantes -->
         <div class="mb-6" *ngIf="product.variants?.length > 1">
-          <h3 class="text-lg font-medium text-gray-900 mb-3">Seleccionar variante</h3>
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Seleccionar modelo</h3>
           <div class="flex flex-wrap gap-2">
             <button *ngFor="let variant of product.variants" (click)="selectVariant(variant)"
               class="px-4 py-2 rounded-full border transition-colors duration-200"
