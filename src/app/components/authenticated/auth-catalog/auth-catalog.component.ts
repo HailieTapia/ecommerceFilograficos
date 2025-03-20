@@ -26,14 +26,14 @@ export class AuthCatalogComponent implements OnInit {
   totalPages = 0;
   filters: any = {};
   
-  constructor(private productService: AuthProductService, private router: Router) { }
+  constructor(private productAService: AuthProductService, private router: Router) { }
 
   ngOnInit() {
     this.loadProducts();
   }
 
   loadProducts() {
-    this.productService.getAllProducts(this.page, this.pageSize, this.filters).subscribe(response => {
+    this.productAService.getAllProducts(this.page, this.pageSize, this.filters).subscribe(response => {
       this.products = response.products;
       this.total = response.total;
       this.page = response.page;

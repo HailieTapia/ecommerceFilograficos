@@ -43,7 +43,7 @@ export class FilterSidebarComponent implements OnInit {
     });
   }
   loadCollaborators() {
-    this.collaboratorService.getPublicCollaborators().subscribe({
+    this.collaboratorService.getAuthCollaborators().subscribe({
       next: (response) => {
         console.log(response);
         this.collaborators = response;
