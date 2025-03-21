@@ -15,6 +15,8 @@ import { ProductDetailComponent } from './components/public/public-catalog/produ
 
 // Autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
+import { AuthCatalogComponent } from './components/authenticated/auth-catalog/auth-catalog.component';
+import { ProductDetailAComponent } from './components/authenticated/auth-catalog/product-detail-a/product-detail-a.component';
 
 // Administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
@@ -62,6 +64,16 @@ export const routes: Routes = [
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
+    // Rutas del catálogo autenticado (anidadas)
+  {
+    path: 'authcatalog',
+    canActivate: [AuthGuard],
+    data: { allowPublic: true, breadcrumb: 'Catálogo' },
+    children: [
+      { path: '', component: AuthCatalogComponent }, 
+      { path: ':productIdA', component: ProductDetailAComponent, data: { breadcrumb: 'Detalles del producto' } } 
+    ]
+  },
 
   // Públicos
   { path: 'register', component: RegisterComponent, data: { breadcrumb: 'Registrar' } },
@@ -78,8 +90,8 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { allowPublic: true, breadcrumb: 'Catálogo' },
     children: [
-      { path: '', component: PublicCatalogComponent }, // /catalog
-      { path: ':productId', component: ProductDetailComponent, data: { breadcrumb: 'Detalles del producto' } } // /catalog/:productId
+      { path: '', component: PublicCatalogComponent }, 
+      { path: ':productId', component: ProductDetailComponent, data: { breadcrumb: 'Detalles del producto' } } 
     ]
   },
 

@@ -65,6 +65,14 @@ export class CategorieService {
       })
     );
   }
+  authCategories(): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/auth-categories`, { headers, withCredentials: true });
+      })
+    );
+  }
 
   // Obtener una categoría por ID
   getCategoryById(id: number): Observable<any> {

@@ -4,6 +4,7 @@ import { PublicProductService } from '../../../services/PublicProductService';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../services/toastService';
+import { CollaboratorsService } from '../../../services/collaborators.service';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
@@ -21,8 +22,9 @@ export class ProductDetailComponent implements OnInit {
   showFullAttributes = false;
   showFullCustomizations = false;
   currentImageIndex = 0;
-
+  collaborators: any[] = [];
   constructor(
+    private collaboratorService: CollaboratorsService,
     private router: Router,
     private toastService: ToastService,
     private route: ActivatedRoute,
@@ -106,6 +108,17 @@ export class ProductDetailComponent implements OnInit {
       this.toastService.showToast('Enlace copiado al portapapeles', 'success');
     }).catch(() => {
       this.toastService.showToast('Error al copiar el enlace', 'error');
+    });
+  }
+  loadCollaborators() {
+    this.collaboratorService.getPublicCollaborators().subscribe({
+      next: (response) => {
+        this.collaborators = response;
+      },
+      error: (error) => {
+        console.error('Error al cargar los colaboradores:', error);
+        this.collaborators = [];
+      }
     });
   }
 }
