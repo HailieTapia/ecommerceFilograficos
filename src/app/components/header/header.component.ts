@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { CompanyService } from '../services/company.service';
 import { ThemeService } from '../services/theme.service';
 import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
+import { CartService } from '../services/cart.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -22,7 +24,11 @@ export class HeaderComponent implements OnInit {
   logoPreview: string | ArrayBuffer | null = null;
   isProfileDropdownOpen = false; // Control para dropdown de perfil
 
-  constructor(
+  cartItemCount: number = 0;
+  private cartSubscription!: Subscription; // Declaramos la propiedad aquí
+  constructor(  
+
+    private cartService: CartService,
     public themeService: ThemeService,
     private router: Router,
     private authService: AuthService,
@@ -30,6 +36,10 @@ export class HeaderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Suscribirse al estado del carrito
+    this.cartSubscription = this.cartService.getCartState().subscribe(cartState => {
+      this.cartItemCount = cartState.totalItems;
+    });
     this.getCompanyInfo();
     this.authService.getUser().subscribe(user => {
       this.isLoggedIn = !!user;
@@ -79,5 +89,11 @@ export class HeaderComponent implements OnInit {
 
   closeProfileDropdown() {
     this.isProfileDropdownOpen = false;
+  }
+  ngOnDestroy() {
+    // Desuscribirse para evitar memory leaks
+    if (this.cartSubscription) {
+      this.cartSubscription.unsubscribe();
+    }
   }
 }

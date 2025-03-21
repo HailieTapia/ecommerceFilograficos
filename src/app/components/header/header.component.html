@@ -211,10 +211,10 @@
           
             <a href="/cart" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
               <i class="fas fa-shopping-cart text-xl"></i>
-              <span class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+              <span class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemCount }}</span>
               <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" role="tooltip" aria-label="Carrito">Carrito</span>
-            </a>
-          
+            </a>       
+
             <!-- Perfil con control explícito -->
             <div class="relative p-2" (mouseenter)="openProfileDropdown()" (mouseleave)="closeProfileDropdown()">
               <div class="flex items-center space-x-2 cursor-pointer" (click)="toggleProfileDropdown()">
