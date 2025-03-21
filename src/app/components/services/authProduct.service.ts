@@ -81,6 +81,11 @@ export class AuthProductService {
     );
   }
   getProductById(productId: number): Observable<{ message: string; product: ProductDetail }> {
-    return this.http.get<{ message: string; product: ProductDetail }>(`${this.apiUrl}/${productId}`);
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<{ message: string; product: ProductDetail }>(`${this.apiUrl}/${productId}`, { headers, withCredentials: true });
+      })
+    );
   }
 }

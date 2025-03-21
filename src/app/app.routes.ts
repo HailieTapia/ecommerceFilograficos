@@ -1,16 +1,16 @@
 import { Routes } from '@angular/router';
-import { AuthGuard } from './guards/auth.guard'; 
+import { AuthGuard } from './guards/auth.guard';
 
 // Públicos
 import { RegisterComponent } from './components/public/register/register.component';
 import { RecoverComponent } from './components/public/recover/recover.component';
 import { LoginComponent } from './components/public/login/login.component';
-import { FaqComponent } from './components/public/faq/faq.component'; 
-import { MfaVerificationComponent } from './components/public/mfa-verification/mfa-verification.component'; 
-import { SupportInquiryComponent} from './components/public/support-inquiry/support-inquiry.component'; 
+import { FaqComponent } from './components/public/faq/faq.component';
+import { MfaVerificationComponent } from './components/public/mfa-verification/mfa-verification.component';
+import { SupportInquiryComponent } from './components/public/support-inquiry/support-inquiry.component';
 import { HomeComponent } from './components/public/home/home.component';
-import { LegalComponent } from './components/public/legal/legal.component'; 
-import { PublicCatalogComponent } from './components/public/public-catalog/public-catalog.component'; 
+import { LegalComponent } from './components/public/legal/legal.component';
+import { PublicCatalogComponent } from './components/public/public-catalog/public-catalog.component';
 import { ProductDetailComponent } from './components/public/public-catalog/product-detail/product-detail.component';
 
 // Autenticados
@@ -56,7 +56,7 @@ export const routes: Routes = [
   { path: 'support-panel', component: SupportPanelComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Panel de Soporte' } },
   { path: 'product-attributes', component: ProductAttributeComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Atributos de productos' } },
   { path: 'collaborators', component: CollaboratorsComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Colaboradores' } },
-  { path: 'category', component: CategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Categorías' } }, 
+  { path: 'category', component: CategoriesComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Categorías' } },
   { path: 'product-catalog', component: ProductCatalogComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Catálogo de productos' } },
   { path: 'product-stock', component: ProductStockComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Inventario de productos' } },
   { path: 'banners', component: BannerAdminComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de banners' } },
@@ -64,14 +64,14 @@ export const routes: Routes = [
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
-    // Rutas del catálogo autenticado (anidadas)
+  // Rutas del catálogo autenticado (anidadas)
   {
     path: 'authcatalog',
     canActivate: [AuthGuard],
-    data: { allowPublic: true, breadcrumb: 'Catálogo' },
+    data: { role: 'cliente', breadcrumb: 'Catálogo' },
     children: [
-      { path: '', component: AuthCatalogComponent }, 
-      { path: ':productIdA', component: ProductDetailAComponent, data: { breadcrumb: 'Detalles del producto' } } 
+      { path: '', component: AuthCatalogComponent },
+      { path: ':productIdA', component: ProductDetailAComponent, data: { breadcrumb: 'Detalles del producto' } }
     ]
   },
 
@@ -90,8 +90,8 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { allowPublic: true, breadcrumb: 'Catálogo' },
     children: [
-      { path: '', component: PublicCatalogComponent }, 
-      { path: ':productId', component: ProductDetailComponent, data: { breadcrumb: 'Detalles del producto' } } 
+      { path: '', component: PublicCatalogComponent },
+      { path: ':productId', component: ProductDetailComponent, data: { breadcrumb: 'Detalles del producto' } }
     ]
   },
 
