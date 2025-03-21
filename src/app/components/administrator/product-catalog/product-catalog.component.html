@@ -1,135 +1,154 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<div class="w-full p-4">
-  <!-- Encabezado con título y botón de crear -->
-  <div class="flex justify-between items-center mb-6">
-    <h2 class="text-lg font-semibold">Catálogo de Productos</h2>
-    <button 
-      (click)="openCreateModal()" 
-      class="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-md hover:bg-green-100 transition-colors"
+<div class="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text p-4 sm:p-6 font-sans">
+  <!-- Encabezado -->
+  <div class="flex justify-between items-center mb-6 bg-light-table-header dark:bg-dark-table-header p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
+        <i class="fas fa-box-open text-light-primary dark:text-dark-primary"></i> Catálogo de Productos
+      </h1>
+      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Administra el catálogo de productos disponibles</p>
+    </div>
+    <button
+      (click)="openCreateProductModal()"
+      class="px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-800 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2"
     >
-      <i class="fas fa-plus"></i>
-      Crear Producto
+      <i class="fas fa-plus"></i> Crear Producto
     </button>
   </div>
 
-  <!-- Tabla de Productos -->
-  <div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="p-4 border-b flex justify-between items-center">
-      <h3 class="text-md font-medium">Lista de Productos</h3>
-      <div class="flex items-center gap-2">
-        <label for="itemsPerPage" class="text-sm text-gray-600">Elementos por página:</label>
-        <select
-          id="itemsPerPage"
-          [(ngModel)]="itemsPerPage"
-          (change)="onItemsPerPageChange()"
-          class="p-1 border rounded-md text-sm"
-        >
-          <option value="5">5</option>
+  <!-- Filtros y Búsqueda -->
+  <div class="bg-light-background dark:bg-dark-background p-6 rounded-lg shadow-sm mb-6 border border-gray-200 dark:border-gray-600">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
+      <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <select [(ngModel)]="selectedCollaboratorId" (ngModelChange)="onFilterChange()" class="w-full sm:w-48 p-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary">
+          <option [ngValue]="null">Todos los colaboradores</option>
+          <option *ngFor="let collaborator of collaborators" [ngValue]="collaborator.collaborator_id">{{ collaborator.name }}</option>
+        </select>
+        <select [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()" class="w-full sm:w-48 p-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary">
+          <option [ngValue]="null">Todas las categorías</option>
+          <option *ngFor="let category of categories" [ngValue]="category.category_id">{{ category.name }}</option>
+        </select>
+        <select [(ngModel)]="selectedProductType" (ngModelChange)="onFilterChange()" class="w-full sm:w-48 p-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary">
+          <option value="">Todos los tipos</option>
+          <option value="Existencia">Existencia</option>
+          <option value="semi_personalizado">Semi Personalizado</option>
+          <option value="personalizado">Personalizado</option>
+        </select>
+      </div>
+      <div class="relative w-full sm:w-1/2">
+        <input [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Buscar por nombre, categoría, precios o stock..." class="w-full p-2 pl-10 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary"/>
+        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-600">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text">Productos</h2>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <label for="itemsPerPage" class="text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">Elementos por página:</label>
+        <select id="itemsPerPage" [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()" class="w-full sm:w-24 p-1 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary">
           <option value="10">10</option>
           <option value="20">20</option>
           <option value="50">50</option>
         </select>
       </div>
     </div>
-
     <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead class="bg-gray-50">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-light-table-header dark:bg-dark-table-header">
           <tr>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Imagen</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('product_id')">
-              ID
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'product_id'}" aria-hidden="true"></i>
-              <span *ngIf="sortColumn === 'product_id'" class="ml-1">
-                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
-              </span>
-            </th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('name')">
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Imagen</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('name')">
               Nombre
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'name'}" aria-hidden="true"></i>
-              <span *ngIf="sortColumn === 'name'" class="ml-1">
-                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'name', 'text-gray-500 dark:text-gray-400': sortBy !== 'name'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'name'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Categoría</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Tipo</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('variant_count')">
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Categoría</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Colaborador</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Tipo</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('variant_count')">
               Variantes
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'variant_count'}" aria-hidden="true"></i>
-              <span *ngIf="sortColumn === 'variant_count'" class="ml-1">
-                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'variant_count', 'text-gray-500 dark:text-gray-400': sortBy !== 'variant_count'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'variant_count'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('min_price')">
-              Precio Mín.
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'min_price'}" aria-hidden="true"></i>
-              <span *ngIf="sortColumn === 'min_price'" class="ml-1">
-                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('min_price')">
+              Precio Mínimo
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'min_price', 'text-gray-500 dark:text-gray-400': sortBy !== 'min_price'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'min_price'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('max_price')">
-              Precio Máx.
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'max_price'}" aria-hidden="true"></i>
-              <span *ngIf="sortColumn === 'max_price'" class="ml-1">
-                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('max_price')">
+              Precio Máximo
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'max_price', 'text-gray-500 dark:text-gray-400': sortBy !== 'max_price'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'max_price'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600 cursor-pointer" (click)="toggleSort('total_stock')">
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('total_stock')">
               Stock Total
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-500': sortColumn === 'total_stock'}" aria-hidden="true"></i>
-              <span *ngIf="sortColumn === 'total_stock'" class="ml-1">
-                <i class="fas" [ngClass]="sortDirection === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'total_stock', 'text-gray-500 dark:text-gray-400': sortBy !== 'total_stock'}" aria-hidden="true"></i>
+              <span *ngIf="sortBy === 'total_stock'" class="ml-1">
+                <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Acciones</th>
+            <th class="p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let product of products" class="hover:bg-gray-50">
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+          <tr *ngFor="let product of products" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
             <td class="p-3">
-              <img
-                *ngIf="product.image_url"
-                [src]="product.image_url"
-                [alt]="product.name"
-                class="w-12 h-12 object-cover rounded"
-              />
-              <span *ngIf="!product.image_url" class="text-gray-500">Sin imagen</span>
+              <img *ngIf="product.image_url" [src]="product.image_url" alt="Imagen" class="w-8 sm:w-10 h-8 sm:h-10 object-cover rounded border border-gray-200 dark:border-gray-600">
+              <span *ngIf="!product.image_url" class="text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">N/A</span>
             </td>
-            <td class="p-3">{{ product.product_id }}</td>
-            <td class="p-3">{{ product.name }}</td>
-            <td class="p-3">{{ product.category || 'Sin categoría' }}</td>
-            <td class="p-3">{{ product.product_type }}</td>
-            <td class="p-3">{{ product.variant_count }}</td>
-            <td class="p-3">${{ product.min_price.toFixed(2) }} MXN</td>
-            <td class="p-3">${{ product.max_price.toFixed(2) }} MXN</td>
-            <td class="p-3">{{ product.total_stock }}</td>
-            <td class="p-3">
-              <div class="flex gap-2">
-                <button (click)="editProduct(product.product_id)" class="text-blue-500 hover:text-blue-700" title="Editar">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button (click)="deleteProduct(product)" class="text-red-500 hover:text-red-700" title="Eliminar">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
+            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text whitespace-nowrap">{{ product.name }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ product.category || 'Sin categoría' }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ product.collaborator || 'Sin colaborador' }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ product.product_type }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ product.variant_count }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatPrice(product.min_price) }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">{{ formatPrice(product.max_price) }}</td>
+            <td class="p-3 text-xs sm:text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ product.total_stock }}</td>
+            <td class="p-3 text-center space-x-4">
+              <button (click)="editProduct(product)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                <i class="fas fa-edit"></i>
+                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  Editar
+                </span>
+              </button>
+              <button (click)="deleteProduct(product)" class="group text-gray-500 dark:text-dark-secondary hover:text-red-600 dark:hover:text-dark-danger transition-all duration-300 relative">
+                <i class="fas fa-trash"></i>
+                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  Eliminar
+                </span>
+              </button>
             </td>
           </tr>
           <tr *ngIf="products.length === 0">
-            <td colspan="10" class="p-3 text-center text-gray-500">No hay productos disponibles</td>
+            <td colspan="10" class="p-3 text-center text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">
+              No hay productos disponibles
+            </td>
           </tr>
         </tbody>
       </table>
-      <app-pagination
-        [currentPage]="currentPage"
-        [totalItems]="totalItems"
-        [itemsPerPage]="itemsPerPage"
-        (pageChange)="onPageChange($event)"
-        class="mt-4 p-4 border-t"
-      ></app-pagination>
     </div>
+    <app-pagination [currentPage]="currentPage" [totalItems]="totalProducts" [itemsPerPage]="itemsPerPage" (pageChange)="onPageChange($event)" class="mt-4 p-4 border-t border-gray-200 dark:border-gray-600"></app-pagination>
   </div>
 
-  <!-- Modal del formulario -->
-  <app-product-catalog-form (productSaved)="onProductSaved()"></app-product-catalog-form>
+  <!-- Notificación -->
+  <div *ngIf="notification" class="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg">
+    {{ notification }}
+  </div>
+
+  <!-- Modal para crear producto -->
+  <app-modal #createProductModal title="Crear Nuevo Producto">
+    <app-product-catalog-form (productSaved)="closeCreateProductModal()"></app-product-catalog-form>
+  </app-modal>
 </div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

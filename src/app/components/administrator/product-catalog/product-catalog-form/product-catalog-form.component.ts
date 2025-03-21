@@ -1,226 +1,349 @@
-import { Component, EventEmitter, Input, Output, ViewChild, AfterViewInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { ProductService, NewProduct, CreatedProductResponse, UpdateProductResponse, DetailedProductResponse, Variant, DetailedVariant } from '../../../services/product.service';
-import { ModalComponent } from '../../../../modal/modal.component';
-import { ProductGeneralInfoComponent } from './product-general-info/product-general-info.component';
-import { ProductVariantsComponent } from './product-variants/product-variants.component';
-import { ProductAttributeService } from '../../../services/product-attribute.service';
+import { FormsModule } from '@angular/forms';
+import { ProductService, NewProduct } from '../../../services/product.service';
+import { CategorieService } from '../../../services/categorieService';
+import { CollaboratorsService } from '../../../services/collaborators.service';
+import { SafeUrlPipe } from '../../../pipes/safe-url.pipe';
+
+interface Category {
+  category_id: number;
+  name: string;
+}
+
+interface Collaborator {
+  collaborator_id: number;
+  name: string;
+}
+
+interface Attribute {
+  attribute_id: number;
+  name: string;
+  options: string[];
+}
+
+interface Variant {
+  id: number;
+  sku: string;
+  attributes: { [key: string]: string };
+  production_cost: number | null;
+  profit_margin: number | null;
+  calculated_price: number;
+  images: File[];
+}
+
+interface FormErrors {
+  name?: string;
+  description?: string;
+  category_id?: string;
+  product_type?: string;
+  customizations?: string;
+  [key: string]: string | undefined;
+}
 
 @Component({
   selector: 'app-product-catalog-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ModalComponent, ProductGeneralInfoComponent, ProductVariantsComponent],
-  templateUrl: './product-catalog-form.component.html',
-  styleUrls: ['./product-catalog-form.component.css']
+  imports: [CommonModule, FormsModule, SafeUrlPipe],
+  templateUrl: './product-catalog-form.component.html'
 })
-export class ProductCatalogFormComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('modal') modal!: ModalComponent;
-  @Input() productId: number | null = null;
+export class ProductCatalogFormComponent implements OnInit {
   @Output() productSaved = new EventEmitter<void>();
 
   currentStep = 1;
-  totalSteps = 2;
-  generalInfoData: Partial<NewProduct> = {};
-  variantsData: Variant[] = [];
-  detailedVariants: DetailedVariant[] = [];
-  isLoading = false;
-  attributesLoaded = false;
-  private subscriptions = new Subscription();
+
+  basicInfo = {
+    name: '',
+    description: '',
+    category_id: null as number | null,
+    collaborator_id: null as number | null,
+    product_type: '' as 'Existencia' | 'semi_personalizado' | 'personalizado' | '',
+    customizations: {
+      text: false,
+      image: false,
+      file: false
+    }
+  };
+
+  errors: FormErrors = {};
+
+  variants: Variant[] = [{
+    id: 1,
+    sku: '',
+    attributes: {},
+    production_cost: null,
+    profit_margin: null,
+    calculated_price: 0,
+    images: []
+  }];
+
+  categories: Category[] = [];
+  collaborators: Collaborator[] = [];
+  attributes: { [key: string]: Attribute } = {};
 
   constructor(
     private productService: ProductService,
-    private productAttributeService: ProductAttributeService,
-    private cdr: ChangeDetectorRef
+    private categorieService: CategorieService,
+    private collaboratorsService: CollaboratorsService
   ) {}
 
-  ngAfterViewInit(): void {
-    if (!this.modal) {
-      throw new Error('El modal no está inicializado correctamente.');
-    }
-    this.preloadAttributes();
+  ngOnInit() {
+    this.loadCategories();
+    this.loadCollaborators();
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
-  preloadAttributes(): void {
-    this.isLoading = true;
-    this.cdr.detectChanges(); // Necesario para mostrar el spinner inmediatamente
-    const sub = this.productAttributeService.getAttributesByActiveCategories().subscribe({
-      next: () => {
-        this.attributesLoaded = true;
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error al precargar atributos:', err);
-        alert('No se pudieron cargar los atributos. Intenta de nuevo.');
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      }
-    });
-    this.subscriptions.add(sub);
-  }
-
-  openModal(): void {
-    this.resetForm();
-    this.currentStep = 1;
-    if (this.productId !== null) {
-      this.loadProductData(this.productId);
-    }
-    this.modal.open();
-  }
-
-  private resetForm(): void {
-    this.generalInfoData = {};
-    this.variantsData = [];
-    this.detailedVariants = [];
-    this.isLoading = false;
-  }
-
-  private loadProductData(productId: number): void {
-    this.isLoading = true;
-    this.cdr.detectChanges();
-    const sub = this.productService.getProductById(productId).subscribe({
-      next: (response: DetailedProductResponse) => {
-        const product = response.product;
-        this.generalInfoData = {
-          name: product.name,
-          description: product.description ?? undefined,
-          product_type: product.product_type,
-          category_id: product.category?.category_id ?? undefined,
-          collaborator_id: product.collaborator?.collaborator_id ?? undefined,
-          customizations: product.customizations
-        };
-        this.detailedVariants = product.variants;
-        this.variantsData = product.variants.map(v => ({
-          sku: v.sku,
-          production_cost: v.production_cost,
-          profit_margin: v.profit_margin,
-          stock: v.stock,
-          stock_threshold: v.stock_threshold,
-          attributes: v.attributes.map(a => ({ attribute_id: a.attribute_id, value: a.value })),
-          images: []
+  loadCategories() {
+    this.categorieService.getCategories().subscribe({
+      next: (response: any[]) => {
+        this.categories = response.map(cat => ({
+          category_id: cat.category_id,
+          name: cat.name
         }));
-        this.isLoading = false;
-        this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error al cargar los datos del producto:', err);
-        alert('No se pudo cargar el producto para edición.');
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      }
+      error: (err) => console.error('Error al cargar categorías:', err)
     });
-    this.subscriptions.add(sub);
   }
 
-  onGeneralInfoChange(data: Partial<NewProduct>): void {
-    this.generalInfoData = { ...this.generalInfoData, ...data, category_id: Number(data.category_id) };
-    // Eliminamos detectChanges aquí para evitar ciclos infinitos
+  loadCollaborators() {
+    this.collaboratorsService.getAllCollaborators().subscribe({
+      next: (response: any[]) => {
+        this.collaborators = response.filter(col => col.active).map(col => ({
+          collaborator_id: col.collaborator_id,
+          name: col.name
+        }));
+      },
+      error: (err) => console.error('Error al cargar colaboradores:', err)
+    });
   }
 
-  onVariantsChange(data: Variant[]): void {
-    this.variantsData = [...data];
-    // Eliminamos detectChanges aquí
-  }
-
-  nextStep(): void {
-    if (this.currentStep === 1 && !this.isGeneralInfoValid()) {
-      alert('Por favor, completa todos los campos requeridos en Información General.');
+  loadAttributes(categoryId: number | null) {
+    if (!categoryId) {
+      this.attributes = {};
       return;
     }
-    if (!this.attributesLoaded) {
-      alert('Esperando a que se carguen los atributos. Intenta de nuevo en un momento.');
+    if (categoryId === 1) {
+      this.attributes = {
+        light_type: { attribute_id: 1, name: 'Tipo de luz', options: ['Cálida', 'Fría'] },
+        material: { attribute_id: 2, name: 'Material', options: ['Plástico', 'Metal'] }
+      };
+    } else if (categoryId === 2) {
+      this.attributes = {
+        material: { attribute_id: 3, name: 'Material', options: ['Cerámica', 'Plástico'] },
+        size: { attribute_id: 4, name: 'Tamaño', options: ['Pequeño', 'Mediano', 'Grande'] },
+        color: { attribute_id: 5, name: 'Color', options: ['Blanco', 'Negro', 'Azul'] }
+      };
+    } else {
+      this.attributes = {
+        size: { attribute_id: 6, name: 'Tamaño', options: ['S', 'M', 'L', 'XL'] },
+        color: { attribute_id: 7, name: 'Color', options: ['Rojo', 'Verde', 'Azul', 'Negro'] }
+      };
+    }
+
+    this.variants = this.variants.map(variant => ({
+      ...variant,
+      attributes: Object.keys(this.attributes).reduce((acc, key) => {
+        acc[key] = '';
+        return acc;
+      }, {} as { [key: string]: string })
+    }));
+  }
+
+  onBasicInfoChange(field: string, value: any) {
+    if (field.startsWith('customization_')) {
+      const option = field.split('_')[1] as 'text' | 'image' | 'file';
+      this.basicInfo.customizations[option] = value;
+    } else if (field === 'category_id') {
+      this.basicInfo[field] = value ? Number(value) : null;
+      this.loadAttributes(this.basicInfo.category_id);
+    } else if (field === 'name' || field === 'description') {
+      // Normalizar entrada: primera letra en mayúsculas, sin espacios al inicio/fin, sin dobles espacios
+      const normalizedValue = value
+        .trim()
+        .replace(/\s+/g, ' ')
+        .replace(/^(.)/, (match: string) => match.toUpperCase()); // Tipar match como string
+      (this.basicInfo as any)[field] = normalizedValue;
+    } else {
+      (this.basicInfo as any)[field] = value;
+    }
+    this.validateStep1();
+  }
+
+  validateStep1(): boolean {
+    const newErrors: FormErrors = {};
+    const allowedCharsRegex = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s+_-]+$/;
+
+    if (!this.basicInfo.name) {
+      newErrors['name'] = 'El nombre es obligatorio';
+    } else if (!allowedCharsRegex.test(this.basicInfo.name)) {
+      newErrors['name'] = 'Solo se permiten letras, números, acentos, ñ, espacios, +, -, y _';
+    } else if (this.basicInfo.name.length < 3 || this.basicInfo.name.length > 100) {
+      newErrors['name'] = 'El nombre debe tener entre 3 y 100 caracteres';
+    }
+
+    if (!this.basicInfo.description) {
+      newErrors['description'] = 'La descripción es obligatoria';
+    } else if (!allowedCharsRegex.test(this.basicInfo.description)) {
+      newErrors['description'] = 'Solo se permiten letras, números, acentos, ñ, espacios, +, -, y _';
+    } else if (this.basicInfo.description.length < 10 || this.basicInfo.description.length > 500) {
+      newErrors['description'] = 'La descripción debe tener entre 10 y 500 caracteres';
+    }
+
+    if (!this.basicInfo.category_id) {
+      newErrors['category_id'] = 'Selecciona una categoría';
+    }
+
+    if (!this.basicInfo.product_type) {
+      newErrors['product_type'] = 'Selecciona un tipo de producto';
+    }
+
+    if (['semi_personalizado', 'personalizado'].includes(this.basicInfo.product_type)) {
+      const hasCustomization = Object.values(this.basicInfo.customizations).some(val => val);
+      if (!hasCustomization) {
+        newErrors['customizations'] = 'Selecciona al menos una opción de personalización';
+      }
+    }
+
+    this.errors = newErrors;
+    return Object.keys(newErrors).length === 0;
+  }
+
+  goToNextStep() {
+    if (this.validateStep1()) {
+      this.currentStep = 2;
+    }
+  }
+
+  goToPreviousStep() {
+    this.currentStep = 1;
+  }
+
+  generateNewId(): number {
+    return Math.max(...this.variants.map(v => v.id), 0) + 1;
+  }
+
+  addVariant() {
+    this.variants.push({
+      id: this.generateNewId(),
+      sku: '',
+      attributes: Object.keys(this.attributes).reduce((acc, key) => {
+        acc[key] = '';
+        return acc;
+      }, {} as { [key: string]: string }),
+      production_cost: null,
+      profit_margin: null,
+      calculated_price: 0,
+      images: []
+    });
+  }
+
+  removeVariant(id: number) {
+    if (this.variants.length > 1) {
+      this.variants = this.variants.filter(v => v.id !== id);
+    }
+  }
+
+  handleVariantChange(id: number, field: string, value: any) {
+    this.variants = this.variants.map(v => {
+      if (v.id === id) {
+        const updatedVariant = { ...v, [field]: field === 'production_cost' || field === 'profit_margin' ? Number(value) || null : value };
+        if (field === 'production_cost' || field === 'profit_margin') {
+          const cost = updatedVariant.production_cost || 0;
+          const margin = updatedVariant.profit_margin || 0;
+          updatedVariant.calculated_price = cost * (1 + margin / 100);
+        }
+        return updatedVariant;
+      }
+      return v;
+    });
+  }
+
+  handleAttributeChange(id: number, attributeKey: string, value: string) {
+    this.variants = this.variants.map(v => v.id === id ? { ...v, attributes: { ...v.attributes, [attributeKey]: value } } : v);
+  }
+
+  handleImageUpload(id: number, event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      const newImages = Array.from(input.files);
+      this.variants = this.variants.map(v => {
+        if (v.id === id) {
+          return { ...v, images: [...v.images, ...newImages].slice(0, 10) };
+        }
+        return v;
+      });
+    }
+  }
+
+  removeImage(variantId: number, index: number) {
+    this.variants = this.variants.map(v => {
+      if (v.id === variantId) {
+        const newImages = [...v.images];
+        newImages.splice(index, 1);
+        return { ...v, images: newImages };
+      }
+      return v;
+    });
+  }
+
+  validateStep2(): boolean {
+    const skus = new Set<string>();
+    return this.variants.every(v => {
+      if (!v.sku.trim() || skus.has(v.sku)) return false;
+      skus.add(v.sku);
+      if (v.production_cost === null || v.profit_margin === null) return false;
+      if (v.images.length === 0) return false;
+      return Object.values(v.attributes).every(attr => attr !== '');
+    });
+  }
+
+  saveProduct() {
+    if (!this.validateStep2()) {
+      window.alert('Por favor completa todos los campos requeridos en las variantes');
       return;
     }
-    if (this.currentStep < this.totalSteps) {
-      this.currentStep++;
-    }
-  }
 
-  prevStep(): void {
-    if (this.currentStep > 1) {
-      this.currentStep--;
-    }
-  }
-
-  isGeneralInfoValid(): boolean {
-    return !!(
-      this.generalInfoData.name &&
-      this.generalInfoData.product_type &&
-      this.generalInfoData.category_id &&
-      (this.generalInfoData.product_type === 'Existencia' ||
-       (this.generalInfoData.customizations && this.generalInfoData.customizations.length > 0))
-    );
-  }
-
-  get progressWidth(): string {
-    return this.currentStep === 1 ? '50%' : '100%';
-  }
-
-  get isSaveDisabled(): boolean {
-    return this.isLoading || 
-           this.variantsData.length === 0 || 
-           this.variantsData.some((v, i) => {
-             const hasExistingImages = this.detailedVariants[i]?.images?.length > 0;
-             return !v.sku || 
-                    v.production_cost <= 0 || 
-                    v.profit_margin <= 0 || 
-                    (!v.images?.length && !hasExistingImages) || 
-                    (v.attributes?.some(attr => !attr.value) ?? false);
-           });
-  }
-
-  get hasVariantsWithoutImages(): boolean {
-    return this.variantsData.length > 0 && 
-           this.variantsData.some((v, i) => !v.images?.length && !this.detailedVariants[i]?.images?.length);
-  }
-
-  saveProduct(): void {
-    if (!this.isGeneralInfoValid() || this.variantsData.length === 0 || this.isSaveDisabled) {
-      alert('Por favor, completa todos los campos requeridos.');
-      return;
-    }
+    const customizations = Object.entries(this.basicInfo.customizations)
+      .filter(([_, enabled]) => enabled)
+      .map(([type]) => ({ type: type.charAt(0).toUpperCase() + type.slice(1) as 'Texto' | 'Imagen' | 'Archivo', description: '' }));
 
     const productData: NewProduct = {
-      name: this.generalInfoData.name as string,
-      description: this.generalInfoData.description,
-      product_type: this.generalInfoData.product_type as 'Existencia' | 'semi_personalizado' | 'personalizado',
-      category_id: this.generalInfoData.category_id as number,
-      collaborator_id: this.generalInfoData.collaborator_id,
-      customizations: this.generalInfoData.customizations,
-      variants: this.variantsData
+      name: this.basicInfo.name,
+      description: this.basicInfo.description,
+      product_type: this.basicInfo.product_type as 'Existencia' | 'semi_personalizado' | 'personalizado',
+      category_id: this.basicInfo.category_id!,
+      collaborator_id: this.basicInfo.collaborator_id || undefined,
+      variants: this.variants.map(v => ({
+        sku: v.sku,
+        production_cost: v.production_cost!,
+        profit_margin: v.profit_margin!,
+        stock: 0,
+        attributes: Object.entries(v.attributes).map(([key, value]) => ({
+          attribute_id: this.attributes[key].attribute_id,
+          value
+        })),
+        images: v.images
+      })),
+      customizations: customizations.length > 0 ? customizations : undefined
     };
 
-    const saveConfirmationMessage = this.productId ? '¿Estás seguro de que deseas actualizar este producto?' : '¿Estás seguro de que deseas crear este producto?';
-    if (!confirm(saveConfirmationMessage)) {
-      return;
-    }
-
-    this.isLoading = true;
-    this.cdr.detectChanges();
-    const save$ = this.productId
-      ? this.productService.updateProduct(this.productId, productData)
-      : this.productService.createProduct(productData);
-
-    this.subscriptions.add(save$.subscribe({
-      next: (response: CreatedProductResponse | UpdateProductResponse) => {
-        alert(this.productId ? 'Producto actualizado exitosamente' : 'Producto creado exitosamente');
+    this.productService.createProduct(productData).subscribe({
+      next: (response) => {
+        console.log('Producto creado:', response);
+        window.alert('Producto guardado con éxito');
         this.productSaved.emit();
-        this.modal.close();
-        this.isLoading = false;
-        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al guardar producto:', err);
-        alert(`Error al guardar el producto: ${err.error?.message || 'Desconocido'}`);
-        this.isLoading = false;
-        this.cdr.detectChanges();
+        window.alert('Error al guardar el producto');
       }
-    }));
+    });
+  }
+
+  formatPrice(value: number): string {
+    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
+  }
+
+  getAttributeKeys(): string[] {
+    return Object.keys(this.attributes);
   }
 }
