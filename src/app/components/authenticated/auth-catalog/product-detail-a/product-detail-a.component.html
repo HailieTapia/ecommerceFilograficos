@@ -1,8 +1,15 @@
-<div *ngIf="!isLoading" class="max-full mx-auto py-10 px-5 bg-gray-100 min-h-screen font-sans">
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div *ngIf="!isLoading" class="max-full py-3 px-5 bg-gray-50 min-h-screen font-sans">
+  <div class="mb-6">
+    <a href="/authcatalog" class="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors">
+      <i class="fas fa-arrow-left"></i>
+      <span>Volver al catálogo</span>
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
     <!-- Sección de imágenes -->
     <div class="relative">
-      <!-- Miniaturas verticales -->
+      <!-- Miniaturas verticales (a la izquierda) -->
       <div class="absolute top-0 left-0 w-20 hidden lg:block">
         <div class="flex flex-col gap-2 overflow-y-auto max-h-[500px]">
           <img *ngFor="let image of selectedVariant?.images" [src]="image.image_url" alt="Miniatura"
@@ -10,55 +17,144 @@
             [ngClass]="{'border-blue-600': image.image_url === selectedImage}" (click)="changeImage(image.image_url)">
         </div>
       </div>
-      <!-- Imagen principal -->
+      <!-- Imagen principal con zoom -->
       <div class="ml-0 lg:ml-24 relative">
-        <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'" alt="{{ product.name }}"
-          class="w-full h-[500px] object-contain rounded-xl bg-gray-200">
-      </div>
-    </div>
+        <div class="zoom-container">
+          <img [src]="selectedImage" class="w-full h-[500px] object-contain rounded-xl bg-gray-200 zoom-image">
+        </div>
 
-    <!-- Sección de detalles -->
-    <div>
-      <h1 class="text-3xl font-semibold text-gray-900 mb-2">{{ product.name }}</h1>
-      <p class="text-sm text-gray-500 mb-4">{{ product.category.name }}</p>
-      <p class="text-lg text-gray-700 mb-4">{{ product.description || 'Sin descripción disponible.' }}</p>
-      
-      <!-- Precio y stock -->
-      <div class="mb-4">
-        <p class="text-2xl font-bold text-gray-900">
-          ${{ formatPrice(selectedVariant?.calculated_price) }}
-        </p>
-        <p class="text-sm text-gray-500">Stock: {{ selectedVariant?.stock || 0 }}</p>
-        <p *ngIf="selectedVariant?.stock === 0" class="text-sm text-red-600 mt-1">Producto agotado</p>
-      </div>
-      
-      <!-- Input para la cantidad -->
-      <div class="mb-4">
-        <label for="quantity" class="block text-sm font-medium text-gray-900 mb-1">Cantidad:</label>
-        <input type="number" id="quantity" [(ngModel)]="quantity" min="1" [max]="selectedVariant?.stock || 0"
-          class="w-20 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-          [disabled]="selectedVariant?.stock === 0">
-      </div>
-      
-
-      <!-- Opciones de personalización -->
-      <div class="mb-4" *ngIf="product.customizations?.length > 0">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Personalización</h3>
-        <div class="flex gap-2">
-          <button *ngFor="let cust of product.customizations" (click)="selectCustomization(cust)"
-            class="px-4 py-2 rounded-full border"
-            [ngClass]="{'bg-blue-600 text-white border-blue-600': selectedCustomization === cust, 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100': selectedCustomization !== cust}">
-            {{ cust.description }}
+        <!-- Flechas de navegación para imágenes -->
+        <div *ngIf="selectedVariant?.images?.length > 1"
+          class="absolute top-1/2 transform -translate-y-1/2 w-full flex justify-between px-4">
+          <button class="bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
+            <i class="fas fa-chevron-left text-gray-600"></i>
+          </button>
+          <button class="bg-white p-2 rounded-full shadow-md hover:bg-gray-100">
+            <i class="fas fa-chevron-right text-gray-600"></i>
           </button>
         </div>
       </div>
 
-      <!-- Botón de acción -->
-      <button (click)="addToCart()" [disabled]="selectedVariant?.stock === 0 || quantity <= 0 || isAddingToCart"
-        class="bg-blue-600 text-white text-sm font-medium py-3 px-6 rounded-full hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
-        Añadir al carrito
-      </button>
+      <!-- Miniaturas horizontales (móviles) -->
+      <div class="flex gap-2 overflow-x-auto mt-4 lg:hidden">
+        <img *ngFor="let image of selectedVariant?.images" [src]="image.image_url" alt="Miniatura"
+          class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-600"
+          [ngClass]="{'border-blue-600': image.image_url === selectedImage}" (click)="changeImage(image.image_url)">
+      </div>
+    </div>
 
+    <!-- Sección de detalles -->
+    <div class="space-y-6">
+      <div>
+        <h1 class="text-4xl font-bold text-gray-900 mb-2 leading-tight">{{ product.name }}</h1>
+      </div>
+      <!-- Calificaciones (simulada) -->
+      <div class="flex items-center gap-2">
+        <div class="flex text-yellow-400">
+          <i class="fas fa-star" *ngFor="let star of [1,2,3,4,5]"></i>
+        </div>
+        <a href="#reviews" class="text-sm text-blue-600 hover:underline">Ver 120 reseñas</a>
+      </div>
+      <!-- Información de envío -->
+      <div class="text-sm text-gray-600 space-y-1">
+        <p><i class="fas fa-store mr-2 text-gray-600"></i> Vendido por: {{ product.seller || 'Tienda Oficial' }}</p>
+        <p><i class="fas fa-box mr-2 text-gray-500"></i>Stock: {{
+          selectedVariant?.stock || 0 }}</p>
+        <p *ngIf="selectedVariant?.stock === 0"
+          class="text-sm text-red-600 font-medium bg-red-50 px-3 py-1 rounded-full inline-block">
+          <i class="fas fa-exclamation-circle mr-1"></i> Producto agotado
+        </p>
+        <p><i class="fas fa-truck mr-2 text-green-600"></i> Envío gratis en 2-3 días</p>
+      </div>
+
+      <!-- Precio y stock -->
+      <div class="flex items-baseline gap-3">
+        <p class="text-3xl font-bold text-green-600">
+          ${{ formatPrice(selectedVariant?.calculated_price) }}
+        </p>
+        <p class="text-lg text-gray-500 line-through" *ngIf="selectedVariant?.original_price">
+          ${{ formatPrice(selectedVariant?.original_price) }}
+        </p>
+      </div>
+
+      <!-- Variantes -->
+      <div *ngIf="product.variants?.length > 0">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3">Modelos:</h3>
+        <div class="flex flex-wrap gap-3">
+          <button *ngFor="let variant of product.variants" (click)="selectVariant(variant)"
+            class="px-4 py-2 rounded-lg border shadow-sm transition-all duration-200"
+            [ngClass]="{'bg-blue-600 text-white border-blue-600 shadow-md': selectedVariant === variant, 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50': selectedVariant !== variant}">
+            {{ variant.sku || 'Variante ' + variant.variant_id }}
+          </button>
+        </div>
+      </div>
+      <!-- Descripción (colapsable) -->
+      <div class="mb-6">
+        <h3 class="text-sm font-medium text-gray-900 mb-3">Descripción</h3>
+        <p class="text-sm text-gray-700" [ngClass]="{'line-clamp-3': !showFullDescription}">
+          {{ product.description || 'Sin descripción disponible.' }}
+        </p>
+        <button *ngIf="product.description?.length > 150" (click)="showFullDescription = !showFullDescription"
+          class="text-blue-600 text-sm mt-2 hover:underline">
+          {{ showFullDescription ? 'Ver menos' : 'Ver más' }}
+        </button>
+      </div>
+      <!-- Atributos (colapsable) -->
+      <div class="mb-6">
+        <h3 class="text-sm font-medium text-gray-900 mb-3">Características</h3>
+        <ul class="text-xs text-gray-700 space-y-1" [ngClass]="{'line-clamp-3': !showFullAttributes}">
+          <li *ngFor="let attr of selectedVariant?.attributes">
+            <span class="font-medium">{{ attr.attribute_name }}:</span> {{ attr.value }}
+          </li>
+        </ul>
+        <button *ngIf="selectedVariant?.attributes?.length > 3" (click)="showFullAttributes = !showFullAttributes"
+          class="text-blue-600 text-sm mt-2 hover:underline">
+          {{ showFullAttributes ? 'Ver menos' : 'Ver más' }}
+        </button>
+      </div>
+      <!-- Opciones de personalización -->
+      <div *ngIf="product.customizations?.length > 0">
+        <h3 class="text-lg font-semibold text-gray-900 mb-3">Personmmmmalización</h3>
+        <div class="flex flex-wrap gap-3">
+          <button *ngFor="let cust of product.customizations" (click)="selectCustomization(cust)"
+            class="px-4 py-2 rounded-lg border shadow-sm transition-all duration-200"
+            [ngClass]="{'bg-blue-600 text-white border-blue-600 shadow-md': selectedCustomization === cust, 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50': selectedCustomization !== cust}">
+            {{ cust.description }}
+          </button>
+        </div>
+      </div>
+      <!-- Input para la cantidad -->
+      <div>
+        <label for="quantity" class="block text-sm font-medium text-gray-900 mb-2">Cantidad:</label>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+            <button (click)="quantity = quantity > 1 ? quantity - 1 : 1"
+              class="px-4 py-2 text-gray-600 hover:bg-gray-100">
+              −
+            </button>
+            <input type="number" id="quantity" [(ngModel)]="quantity" min="1" [max]="selectedVariant?.stock || 0"
+              class="w-16 p-2 text-center border-none focus:ring-0" [disabled]="selectedVariant?.stock === 0">
+            <button (click)="quantity = quantity < (selectedVariant?.stock || 0) ? quantity + 1 : quantity"
+              class="px-4 py-2 text-gray-600 hover:bg-gray-100">
+              +
+            </button>
+          </div>
+          <p class="text-sm text-gray-500" *ngIf="selectedVariant?.stock > 0">
+            (Máximo disponible: {{ selectedVariant?.stock }})
+          </p>
+        </div>
+      </div>
+      <!-- Botones de acción -->
+      <div class="flex gap-4">
+        <button (click)="addToCart()" [disabled]="selectedVariant?.stock === 0 || quantity <= 0 || isAddingToCart"
+          class="flex-1 bg-blue-600 text-white font-semibold py-4 px-8 rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md">
+          Añadir al carrito
+        </button>
+        <button [disabled]="selectedVariant?.stock === 0 || quantity <= 0 || isAddingToCart"
+          class="flex-1 bg-green-600 text-white font-semibold py-4 px-8 rounded-lg hover:bg-green-700 transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md">
+          Comprar ahora
+        </button>
+      </div>
     </div>
   </div>
 </div>

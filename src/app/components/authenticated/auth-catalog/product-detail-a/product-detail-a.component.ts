@@ -20,6 +20,9 @@ export class ProductDetailAComponent implements OnInit {
   quantity: number = 1; 
   isLoading = true;
   isAddingToCart = false;
+  showFullDescription = false;
+  showFullAttributes = false;
+  showFullCustomizations = false;
 
   constructor(
     private toastService: ToastService,
