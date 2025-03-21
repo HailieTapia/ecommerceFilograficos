@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthProductService } from '../../../services/authProduct.service';
 import { CommonModule } from '@angular/common';
-
+import { FormsModule } from '@angular/forms';
+import { CartService } from '../../../services/cart.service';
+import { ToastService } from '../../../services/toastService';
 @Component({
   selector: 'app-product-detail-a',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './product-detail-a.component.html',
   styleUrl: './product-detail-a.component.css'
 })
@@ -14,16 +16,22 @@ export class ProductDetailAComponent implements OnInit {
   product: any = null;
   selectedVariant: any = null;
   selectedImage: string | null = null;
+  selectedCustomization: any = null;
+  quantity: number = 1; // Cantidad por defecto
   isLoading = true;
+  isAddingToCart = false;
   error: string | null = null;
+  cartError: string | null = null;
 
   constructor(
+    private toastService: ToastService,
+    private cartService: CartService,
     private route: ActivatedRoute,
     private productService: AuthProductService
   ) { }
 
   ngOnInit() {
-    const productId = this.route.snapshot.paramMap.get('productId');
+    const productId = this.route.snapshot.paramMap.get('productIdA');
     if (productId) {
       this.loadProductDetails(+productId);
     }
@@ -54,14 +62,51 @@ export class ProductDetailAComponent implements OnInit {
     } else {
       this.selectedImage = null;
     }
+    // Resetear la cantidad al cambiar de variante
+    this.quantity = 1;
   }
 
   changeImage(imageUrl: string) {
     this.selectedImage = imageUrl;
   }
 
+  selectCustomization(customization: any) {
+    this.selectedCustomization = customization;
+  }
+
   formatPrice(price: string | number): string {
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     return isNaN(numPrice) ? 'N/A' : numPrice.toFixed(2);
+  }
+
+  addToCart() {
+    if (!this.selectedVariant) {
+      this.cartError = 'Por favor, selecciona una variante.';
+      return;
+    }
+
+    this.isAddingToCart = true;
+    this.cartError = null;
+
+    const cartItem = {
+      product_id: this.product.product_id,
+      variant_id: this.selectedVariant.variant_id,
+      quantity: this.quantity,
+      customization_option_id: this.selectedCustomization?.option_id || null
+    };
+
+    this.cartService.addToCart(cartItem).subscribe({
+      next: (response) => {
+        this.isAddingToCart = false;
+        console.log('Producto añadido al carrito exitosamente');
+      },
+      
+      error: (error) => {
+        this.isAddingToCart = false;
+        console.log('No se pudo añadir el producto al carrito.', error);
+        const errorMessage = error?.error?.message || 'No se pudo añadir el producto al carrito.';
+        this.toastService.showToast(errorMessage, 'error');
+      }
+    });
   }
 }

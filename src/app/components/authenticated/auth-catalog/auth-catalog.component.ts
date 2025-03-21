@@ -49,7 +49,7 @@ export class AuthCatalogComponent implements OnInit {
   }
 
   goToDetail(productId: number) {
-    this.router.navigate([`/publiccatalog/${productId}`]);
+    this.router.navigate([`/authcatalog/${productId}`]);
   }
 
   changePage(newPage: number) {
