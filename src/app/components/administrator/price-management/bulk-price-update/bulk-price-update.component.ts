@@ -36,10 +36,12 @@ export class BulkPriceUpdateComponent implements OnInit {
   updateMode: 'uniform' | 'custom' = 'uniform';
   notification: string = '';
   errorMessage: string = '';
+  showConfirmDialog: boolean = false;
+  pendingModeChange: 'uniform' | 'custom' | null = null;
 
   categories: { category_id: number; name: string }[] = [];
   readonly MAX_PROFIT_MARGIN: number = 500;
-  readonly MIN_VALUE: number = 0.01; // Mínimo permitido por el backend
+  readonly MIN_VALUE: number = 0.01;
 
   constructor(
     private productService: ProductService,
@@ -175,33 +177,58 @@ export class BulkPriceUpdateComponent implements OnInit {
     }
   }
 
+  // Verifica si hay cambios sin guardar
+  hasPendingChanges(): boolean {
+    if (this.updateMode === 'uniform') {
+      return this.selectedVariants.size > 0 && (this.uniformProductionCost !== null || this.uniformProfitMargin !== null);
+    } else {
+      return this.selectedVariants.size > 0 && this.customUpdates.size > 0;
+    }
+  }
+
   setUpdateMode(mode: 'uniform' | 'custom') {
+    if (this.updateMode === mode) return;
+
+    if (this.hasPendingChanges()) {
+      this.pendingModeChange = mode;
+      this.showConfirmDialog = true;
+    } else {
+      this.performModeChange(mode);
+    }
+  }
+
+  // Realiza el cambio de modo
+  performModeChange(mode: 'uniform' | 'custom') {
     this.updateMode = mode;
+    this.selectedVariants.clear();
     if (mode === 'custom') {
       this.uniformProductionCost = null;
       this.uniformProfitMargin = null;
-      this.selectedVariants.forEach(variantId => {
-        if (!this.customUpdates.has(variantId)) {
-          const variant = this.variants.find(v => v.variant_id === variantId);
-          if (variant) {
-            this.customUpdates.set(variantId, {
-              production_cost: parseFloat(variant.production_cost) || this.MIN_VALUE,
-              profit_margin: parseFloat(variant.profit_margin) || this.MIN_VALUE
-            });
-          }
-        }
-      });
     } else {
       this.customUpdates.clear();
+    }
+    this.showConfirmDialog = false;
+    this.pendingModeChange = null;
+  }
+
+  // Maneja la confirmación del cambio de modo
+  confirmModeChange(action: 'change' | 'cancel' | 'save') {
+    if (action === 'cancel') {
+      this.showConfirmDialog = false;
+      this.pendingModeChange = null;
+    } else if (action === 'change') {
+      this.performModeChange(this.pendingModeChange!);
+    } else if (action === 'save') {
+      this.saveBulkUpdate(() => this.performModeChange(this.pendingModeChange!));
     }
   }
 
   updateCustomPrice(variantId: number, field: 'production_cost' | 'profit_margin', value: string) {
     const numValue = parseFloat(value) || this.MIN_VALUE;
     const update = this.customUpdates.get(variantId) || { production_cost: this.MIN_VALUE, profit_margin: this.MIN_VALUE };
-    update[field] = Math.max(numValue, this.MIN_VALUE); // Asegurar valor mínimo
+    update[field] = Math.max(numValue, this.MIN_VALUE);
     if (field === 'profit_margin' && update[field] > this.MAX_PROFIT_MARGIN) {
-      update[field] = this.MAX_PROFIT_MARGIN; // Limitar máximo
+      update[field] = this.MAX_PROFIT_MARGIN;
     }
     this.customUpdates.set(variantId, update);
   }
@@ -214,7 +241,46 @@ export class BulkPriceUpdateComponent implements OnInit {
     return this.formatPrice(newPrice);
   }
 
-  saveBulkUpdate() {
+  calculateUniformPrice(): string {
+    if (this.uniformProductionCost === null || this.uniformProfitMargin === null) {
+      return '--';
+    }
+    const productionCost = this.uniformProductionCost || this.MIN_VALUE;
+    const profitMargin = this.uniformProfitMargin || this.MIN_VALUE;
+    const newPrice = productionCost * (1 + profitMargin / 100);
+    return this.formatPrice(newPrice);
+  }
+
+  getUniformProposedValues(variantId: number): { production_cost: string; profit_margin: string; calculated_price: string } {
+    if (this.uniformProductionCost === null || this.uniformProfitMargin === null || !this.selectedVariants.has(variantId)) {
+      const variant = this.variants.find(v => v.variant_id === variantId);
+      return {
+        production_cost: variant ? variant.production_cost : this.MIN_VALUE.toString(),
+        profit_margin: variant ? variant.profit_margin : this.MIN_VALUE.toString(),
+        calculated_price: variant ? variant.calculated_price : this.formatPrice(0)
+      };
+    }
+    const productionCost = this.uniformProductionCost;
+    const profitMargin = this.uniformProfitMargin;
+    const newPrice = productionCost * (1 + profitMargin / 100);
+    return {
+      production_cost: productionCost.toFixed(2),
+      profit_margin: profitMargin.toFixed(2),
+      calculated_price: this.formatPrice(newPrice)
+    };
+  }
+
+  // Verifica si el botón de guardar debe estar habilitado
+  isSaveDisabled(): boolean {
+    if (this.selectedVariants.size === 0) return true;
+    if (this.updateMode === 'uniform') {
+      return this.uniformProductionCost === null || this.uniformProfitMargin === null || 
+             this.uniformProductionCost < this.MIN_VALUE || this.uniformProfitMargin < this.MIN_VALUE;
+    }
+    return this.customUpdates.size === 0;
+  }
+
+  saveBulkUpdate(callback?: () => void) {
     if (this.selectedVariants.size === 0) {
       this.errorMessage = 'Por favor, selecciona al menos una variante';
       setTimeout(() => this.errorMessage = '', 3000);
@@ -248,6 +314,7 @@ export class BulkPriceUpdateComponent implements OnInit {
           this.uniformProductionCost = null;
           this.uniformProfitMargin = null;
           setTimeout(() => this.notification = '', 3000);
+          if (callback) callback();
         },
         error: (err) => {
           console.error('Error al actualizar precios:', err);
@@ -256,7 +323,6 @@ export class BulkPriceUpdateComponent implements OnInit {
         }
       });
     } else {
-      // Modo personalizado
       const variantsToUpdate: BatchUpdatePriceIndividualVariant[] = [];
       let hasInvalidData = false;
 
@@ -297,6 +363,7 @@ export class BulkPriceUpdateComponent implements OnInit {
           this.selectedVariants.clear();
           this.customUpdates.clear();
           setTimeout(() => this.notification = '', 3000);
+          if (callback) callback();
         },
         error: (err) => {
           console.error('Error al actualizar precios personalizados:', err);
