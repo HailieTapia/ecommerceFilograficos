@@ -17,6 +17,7 @@ import { ProductDetailComponent } from './components/public/public-catalog/produ
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
 import { AuthCatalogComponent } from './components/authenticated/auth-catalog/auth-catalog.component';
 import { ProductDetailAComponent } from './components/authenticated/auth-catalog/product-detail-a/product-detail-a.component';
+import { CartComponent } from './components/authenticated/auth-catalog/cart/cart.component';
 
 // Administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
@@ -64,6 +65,7 @@ export const routes: Routes = [
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
+  { path: 'cart', component: CartComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Carrito' } },
   // Rutas del catálogo autenticado (anidadas)
   {
     path: 'authcatalog',

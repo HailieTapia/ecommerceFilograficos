@@ -17,11 +17,9 @@ export class ProductDetailAComponent implements OnInit {
   selectedVariant: any = null;
   selectedImage: string | null = null;
   selectedCustomization: any = null;
-  quantity: number = 1; // Cantidad por defecto
+  quantity: number = 1; 
   isLoading = true;
   isAddingToCart = false;
-  error: string | null = null;
-  cartError: string | null = null;
 
   constructor(
     private toastService: ToastService,
@@ -39,30 +37,26 @@ export class ProductDetailAComponent implements OnInit {
 
   loadProductDetails(productId: number) {
     this.isLoading = true;
-    this.error = null;
     this.productService.getProductById(productId).subscribe(response => {
       this.product = response.product;
-      // Seleccionar la primera variante por defecto
       if (this.product.variants && this.product.variants.length > 0) {
         this.selectVariant(this.product.variants[0]);
       }
       this.isLoading = false;
     }, error => {
-      console.error('Error al cargar detalles del producto:', error);
-      this.error = 'No se pudo cargar el producto. Por favor, intenta de nuevo.';
+      const errorMessage = error?.error?.message || 'No se pudo cargar el producto. Por favor, intenta de nuevo.';
+      this.toastService.showToast(errorMessage, 'error');
       this.isLoading = false;
     });
   }
 
   selectVariant(variant: any) {
     this.selectedVariant = variant;
-    // Establecer la primera imagen de la variante seleccionada
     if (variant.images && variant.images.length > 0) {
       this.selectedImage = variant.images[0].image_url;
     } else {
       this.selectedImage = null;
     }
-    // Resetear la cantidad al cambiar de variante
     this.quantity = 1;
   }
 
@@ -81,12 +75,11 @@ export class ProductDetailAComponent implements OnInit {
 
   addToCart() {
     if (!this.selectedVariant) {
-      this.cartError = 'Por favor, selecciona una variante.';
+      this.toastService.showToast('Por favor, selecciona una variante.', 'info');
       return;
     }
 
     this.isAddingToCart = true;
-    this.cartError = null;
 
     const cartItem = {
       product_id: this.product.product_id,
@@ -98,12 +91,12 @@ export class ProductDetailAComponent implements OnInit {
     this.cartService.addToCart(cartItem).subscribe({
       next: (response) => {
         this.isAddingToCart = false;
-        console.log('Producto añadido al carrito exitosamente');
+        const successMessage = response?.message || 'Producto añadido al carrito exitosamente';
+        this.toastService.showToast(successMessage, 'success');
       },
       
       error: (error) => {
         this.isAddingToCart = false;
-        console.log('No se pudo añadir el producto al carrito.', error);
         const errorMessage = error?.error?.message || 'No se pudo añadir el producto al carrito.';
         this.toastService.showToast(errorMessage, 'error');
       }

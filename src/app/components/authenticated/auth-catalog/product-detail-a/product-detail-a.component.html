@@ -1,31 +1,29 @@
-<div *ngIf="!isLoading && !error" class="max-full mx-auto py-10 px-5 bg-gray-100 min-h-screen font-sans">
-  <div class="flex flex-col lg:flex-row gap-8">
-    <div class="flex-1">
-      <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'" alt="{{ product.name }}"
-        class="w-full h-96 object-contain rounded-xl bg-gray-200 mb-4">
-
-      <div class="flex gap-2 overflow-x-auto">
-        <img *ngFor="let image of selectedVariant?.images" [src]="image.image_url" alt="Miniatura"
-          class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-600"
-          [ngClass]="{'border-blue-600': image.image_url === selectedImage}" (click)="changeImage(image.image_url)">
+<div *ngIf="!isLoading" class="max-full mx-auto py-10 px-5 bg-gray-100 min-h-screen font-sans">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Sección de imágenes -->
+    <div class="relative">
+      <!-- Miniaturas verticales -->
+      <div class="absolute top-0 left-0 w-20 hidden lg:block">
+        <div class="flex flex-col gap-2 overflow-y-auto max-h-[500px]">
+          <img *ngFor="let image of selectedVariant?.images" [src]="image.image_url" alt="Miniatura"
+            class="w-16 h-16 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-blue-600"
+            [ngClass]="{'border-blue-600': image.image_url === selectedImage}" (click)="changeImage(image.image_url)">
+        </div>
+      </div>
+      <!-- Imagen principal -->
+      <div class="ml-0 lg:ml-24 relative">
+        <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'" alt="{{ product.name }}"
+          class="w-full h-[500px] object-contain rounded-xl bg-gray-200">
       </div>
     </div>
 
     <!-- Sección de detalles -->
-    <div class="flex-1">
+    <div>
       <h1 class="text-3xl font-semibold text-gray-900 mb-2">{{ product.name }}</h1>
       <p class="text-sm text-gray-500 mb-4">{{ product.category.name }}</p>
       <p class="text-lg text-gray-700 mb-4">{{ product.description || 'Sin descripción disponible.' }}</p>
-      <div class="mb-4" *ngIf="product.variants?.length > 1">
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Seleccionar variante</h3>
-        <div class="flex gap-2">
-          <button *ngFor="let variant of product.variants" (click)="selectVariant(variant)"
-            class="px-4 py-2 rounded-full border"
-            [ngClass]="{'bg-blue-600 text-white border-blue-600': variant === selectedVariant, 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100': variant !== selectedVariant}">
-            {{ variant.sku }}
-          </button>
-        </div>
-      </div>
+      
+      <!-- Precio y stock -->
       <div class="mb-4">
         <p class="text-2xl font-bold text-gray-900">
           ${{ formatPrice(selectedVariant?.calculated_price) }}
@@ -33,7 +31,7 @@
         <p class="text-sm text-gray-500">Stock: {{ selectedVariant?.stock || 0 }}</p>
         <p *ngIf="selectedVariant?.stock === 0" class="text-sm text-red-600 mt-1">Producto agotado</p>
       </div>
-
+      
       <!-- Input para la cantidad -->
       <div class="mb-4">
         <label for="quantity" class="block text-sm font-medium text-gray-900 mb-1">Cantidad:</label>
@@ -41,6 +39,7 @@
           class="w-20 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
           [disabled]="selectedVariant?.stock === 0">
       </div>
+      
 
       <!-- Opciones de personalización -->
       <div class="mb-4" *ngIf="product.customizations?.length > 0">
@@ -57,15 +56,9 @@
       <!-- Botón de acción -->
       <button (click)="addToCart()" [disabled]="selectedVariant?.stock === 0 || quantity <= 0 || isAddingToCart"
         class="bg-blue-600 text-white text-sm font-medium py-3 px-6 rounded-full hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
-        {{ isAddingToCart ? 'Añadiendo...' : 'Añadir al carrito' }}
+        Añadir al carrito
       </button>
 
     </div>
   </div>
-</div>
-<div *ngIf="isLoading" class="max-w-6xl mx-auto py-10 px-5 text-center">
-  <p class="text-gray-500">Cargando producto...</p>
-</div>
-<div *ngIf="error" class="max-w-6xl mx-auto py-10 px-5 text-center">
-  <p class="text-red-600">{{ error }}</p>
 </div>
