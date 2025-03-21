@@ -107,21 +107,18 @@ export class NotificationService {
       console.log('Notificaciones no soportadas en este navegador');
       return { permission: 'unsupported', subscribed: false };
     }
-
+  
     try {
       console.log('Solicitando permiso de notificación...');
       const permission = await Notification.requestPermission();
       console.log('Permiso de notificación:', permission);
-
+  
       let subscribed = false;
       if (permission === 'granted') {
         console.log('Permiso concedido, esperando Service Worker...');
         const registration = await navigator.serviceWorker.ready;
         console.log('Service Worker registrado:', registration);
-
-        // Añadir un pequeño retraso para asegurar que el Service Worker esté listo
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
+  
         console.log('Obteniendo token de FCM...');
         const token = await getToken(messaging, {
           serviceWorkerRegistration: registration,
@@ -131,10 +128,13 @@ export class NotificationService {
           throw error;
         });
         console.log('Token de FCM obtenido:', token);
-
+  
         if (token) {
           console.log('Enviando suscripción al servidor...');
-          await this.sendSubscriptionToServer(token).toPromise();
+          // Esperar la respuesta del servidor antes de continuar
+          const subscriptionResponse = await this.sendSubscriptionToServer(token).toPromise();
+          console.log('Suscripción registrada en el servidor:', subscriptionResponse);
+  
           console.log('Actualizando preferencias de comunicación...');
           await this.updateCommunicationPreferences(
             ['email', 'push'],
@@ -167,13 +167,42 @@ export class NotificationService {
           }
         ).toPromise();
       }
-
+  
       this.saveState(permission, true);
       return { permission, subscribed };
     } catch (error: any) {
-      console.error('Error al solicitar permiso:', error);
+      console.error('Error al solicitar permiso o suscribirse:', error);
       this.saveState(Notification.permission, true);
+  
+      // En caso de error, asegurar que las preferencias reflejen el estado actual
+      await this.updateCommunicationPreferences(
+        ['email'],
+        {
+          special_offers: false,
+          event_reminders: false,
+          news_updates: false,
+          order_updates: false,
+          urgent_orders: false,
+          design_reviews: false,
+          stock_alerts: false
+        }
+      ).toPromise();
+  
       return { permission: Notification.permission, subscribed: false };
+    }
+  }
+
+  // Método para verificar el estado de la suscripción push antes de incluir "push" en methods
+  async getPushSubscriptionStatus(): Promise<boolean> {
+    if (!this.isSupported()) return false;
+  
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      return !!subscription; // Devuelve true si hay una suscripción activa en el navegador
+    } catch (error) {
+      console.error('Error al verificar suscripción push:', error);
+      return false;
     }
   }
 

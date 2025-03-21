@@ -222,26 +222,27 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
       this.notificationError = null;
       const { permission, subscribed } = await this.notificationService.requestPermissionAndSubscribe();
       this.permissionState = permission;
-      this.hasPush = subscribed;
-      this.hasPrompted = true;
-
-      if (this.permissionState === 'granted' && subscribed) {
+      this.hasPush = subscribed && (await this.notificationService.getPushSubscriptionStatus());
+  
+      if (this.permissionState === 'granted' && this.hasPush) {
         this.preferences.methods = ['email', 'push'];
         this.updatePreferencesBasedOnRole();
         await this.updateCommunicationPreferences();
       } else {
+        this.hasPush = false;
         this.preferences.methods = ['email'];
         this.resetCategories();
         await this.updateCommunicationPreferences();
       }
     } catch (error: any) {
       this.notificationError = error.message || 'Error al activar notificaciones';
+      this.hasPush = false;
       this.preferences.methods = ['email'];
       this.resetCategories();
       await this.updateCommunicationPreferences();
     }
   }
-
+  
   async unsubscribeFromPush(): Promise<void> {
     try {
       this.notificationError = null;
@@ -252,6 +253,10 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
       await this.updateCommunicationPreferences();
     } catch (error: any) {
       this.notificationError = error.message || 'Error al desactivar notificaciones';
+      this.hasPush = false;
+      this.preferences.methods = ['email'];
+      this.resetCategories();
+      await this.updateCommunicationPreferences();
     }
   }
 
@@ -266,36 +271,38 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleCategoryChange(category: keyof FrontendCategories): void {
+  async handleCategoryChange(category: keyof FrontendCategories): Promise<void> {
     if (!this.hasPush && !this.preferences.frontendCategories[category]) {
-      // Si se intenta activar una categoría y no hay push, activar push automáticamente
-      this.subscribeToPush().then(() => {
+      // Si se intenta activar una categoría y no hay push, activar push primero
+      await this.subscribeToPush();
+      if (this.hasPush) {
         this.preferences.frontendCategories[category] = true;
         this.mapFrontendToBackendCategories();
-        this.updateCommunicationPreferences();
-      });
+        await this.updateCommunicationPreferences();
+      }
     } else {
       // Activar o desactivar la categoría normalmente
       this.preferences.frontendCategories[category] = !this.preferences.frontendCategories[category];
       this.mapFrontendToBackendCategories();
-
-      // Verificar si todas las categorías están desactivadas para desactivar push
+  
       const allCategoriesDisabled = Object.values(this.preferences.frontendCategories).every(value => !value);
       if (allCategoriesDisabled && this.hasPush) {
-        this.unsubscribeFromPush();
+        await this.unsubscribeFromPush();
       } else {
-        this.updateCommunicationPreferences();
+        await this.updateCommunicationPreferences();
       }
     }
   }
 
-  handlePushChange(): void {
+  async handlePushChange(): Promise<void> {
     if (this.hasPush) {
-      this.unsubscribeFromPush();
+      await this.unsubscribeFromPush();
     } else {
-      this.subscribeToPush();
-      this.updatePreferencesBasedOnRole(); // Activar todas las categorías visibles al activar push
-      this.updateCommunicationPreferences();
+      await this.subscribeToPush();
+      if (this.hasPush) {
+        this.updatePreferencesBasedOnRole();
+        await this.updateCommunicationPreferences();
+      }
     }
   }
 
@@ -365,6 +372,12 @@ export class NotificationDropdownComponent implements OnInit, OnDestroy {
   }
 
   private async updateCommunicationPreferences(): Promise<void> {
+    const hasPushSubscription = await this.notificationService.getPushSubscriptionStatus();
+    const methods = hasPushSubscription ? ['email', 'push'] : ['email'];
+  
+    // Asegurar que methods refleje el estado real de la suscripción
+    this.preferences.methods = methods;
+  
     await this.notificationService.updateCommunicationPreferences(
       this.preferences.methods,
       this.preferences.categories
