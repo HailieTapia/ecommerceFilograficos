@@ -1,76 +1,269 @@
-<app-modal #modal [title]="productId ? 'Editar Producto' : 'Nuevo Producto'">
-  <div class="p-6 space-y-4" [ngClass]="{'opacity-50 pointer-events-none': isLoading}">
-    <!-- Barra de progreso -->
-    <div class="mb-6">
-      <div class="bg-gray-200 rounded-full h-2.5">
-        <div 
-          class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" 
-          [style.width]="progressWidth"
-        ></div>
+<div class="max-w-4xl mx-auto p-4 bg-white dark:bg-dark-background shadow-lg rounded-lg text-light-text dark:text-dark-text">
+  <!-- Stepper -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full" [ngClass]="{'bg-blue-500 text-white': currentStep === 1, 'bg-gray-200 dark:bg-gray-600': currentStep !== 1}">1</div>
+        <span class="ml-2 text-sm font-medium">Información básica</span>
       </div>
-      <p class="text-sm text-gray-500 mt-2">Paso {{ currentStep }} de {{ totalSteps }}</p>
-    </div>
-
-    <!-- Paso 1: Información General -->
-    <div *ngIf="currentStep === 1" class="space-y-4">
-      <div class="p-4 bg-gradient-to-r from-blue-500 to-white rounded-lg">
-        <h2 class="text-xl font-bold text-white">1. Datos del Producto</h2>
+      <div class="flex-1 h-px mx-4 bg-gray-300 dark:bg-gray-600"></div>
+      <div class="flex items-center">
+        <div class="flex items-center justify-center w-8 h-8 rounded-full" [ngClass]="{'bg-blue-500 text-white': currentStep === 2, 'bg-gray-200 dark:bg-gray-600': currentStep !== 2}">2</div>
+        <span class="ml-2 text-sm font-medium">Variantes</span>
       </div>
-      <app-product-general-info 
-        [initialData]="generalInfoData" 
-        (formData)="onGeneralInfoChange($event)"
-      ></app-product-general-info>
-      <div class="flex justify-end">
-        <button 
-          type="button" 
-          (click)="nextStep()" 
-          class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 disabled:bg-blue-300 disabled:cursor-not-allowed"
-          [disabled]="isLoading || !isGeneralInfoValid() || !attributesLoaded"
-        >
-          {{ attributesLoaded ? 'Continuar a Variantes' : 'Cargando atributos...' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Paso 2: Variantes -->
-    <div *ngIf="currentStep === 2" class="space-y-4">
-      <div class="p-4 bg-gradient-to-r from-blue-500 to-white rounded-lg">
-        <h2 class="text-xl font-bold text-white">2. Variantes del Producto</h2>
-      </div>
-      <app-product-variants 
-        [categoryId]="generalInfoData.category_id" 
-        [productName]="generalInfoData.name || ''" 
-        [initialVariants]="variantsData" 
-        [detailedVariants]="detailedVariants"
-        (variantsData)="onVariantsChange($event)"
-      ></app-product-variants>
-      <div class="flex justify-between">
-        <button 
-          type="button" 
-          (click)="prevStep()" 
-          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors duration-200 disabled:bg-gray-200 disabled:cursor-not-allowed"
-          [disabled]="isLoading"
-        >
-          Volver
-        </button>
-        <button 
-          type="button" 
-          (click)="saveProduct()" 
-          class="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-200 disabled:bg-green-300 disabled:cursor-not-allowed"
-          [disabled]="isSaveDisabled"
-        >
-          <i class="fas fa-save mr-2"></i> 
-          {{ isLoading ? 'Guardando...' : 'Guardar Producto' }}
-        </button>
-      </div>
-      <div *ngIf="hasVariantsWithoutImages" class="text-red-500 text-sm mt-2">
-        Cada variante debe tener al menos una imagen para poder guardar el producto.
-      </div>
-    </div>
-
-    <div *ngIf="isLoading" class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-50 z-10">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
-      <span class="ml-2 text-gray-700">Cargando...</span>
     </div>
   </div>
-</app-modal>
+
+  <!-- Paso 1: Información básica -->
+  <div *ngIf="currentStep === 1" class="space-y-4">
+    <!-- Nombre -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Nombre *</label>
+      <input
+        [(ngModel)]="basicInfo.name"
+        (ngModelChange)="onBasicInfoChange('name', $event)"
+        maxlength="100"
+        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+        [ngClass]="{'border-red-500': errors['name'], 'border-gray-300': !errors['name']}"
+        placeholder="Nombre del producto"
+      >
+      <p *ngIf="errors['name']" class="mt-1 text-sm text-red-500">{{ errors['name'] }}</p>
+    </div>
+
+    <!-- Descripción -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Descripción *</label>
+      <textarea
+        [(ngModel)]="basicInfo.description"
+        (ngModelChange)="onBasicInfoChange('description', $event)"
+        maxlength="500"
+        rows="3"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+        [ngClass]="{'border-red-500': errors['description'], 'border-gray-300': !errors['description']}"
+        placeholder="Descripción del producto"
+      ></textarea>
+      <p *ngIf="errors['description']" class="mt-1 text-sm text-red-500">{{ errors['description'] }}</p>
+    </div>
+
+    <!-- Categoría -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Categoría *</label>
+      <select
+        [(ngModel)]="basicInfo.category_id"
+        (ngModelChange)="onBasicInfoChange('category_id', $event)"
+        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+        [ngClass]="{'border-red-500': errors['category_id'], 'border-gray-300': !errors['category_id']}"
+      >
+        <option [ngValue]="null">Selecciona una categoría</option>
+        <option *ngFor="let category of categories" [ngValue]="category.category_id">{{ category.name }}</option>
+      </select>
+      <p *ngIf="errors['category_id']" class="mt-1 text-sm text-red-500">{{ errors['category_id'] }}</p>
+    </div>
+
+    <!-- Colaborador -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Colaborador</label>
+      <select
+        [(ngModel)]="basicInfo.collaborator_id"
+        (ngModelChange)="onBasicInfoChange('collaborator_id', $event)"
+        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+      >
+        <option [ngValue]="null">Selecciona un colaborador (opcional)</option>
+        <option *ngFor="let collaborator of collaborators" [ngValue]="collaborator.collaborator_id">{{ collaborator.name }}</option>
+      </select>
+    </div>
+
+    <!-- Tipo de producto -->
+    <div>
+      <label class="block text-sm font-medium mb-1">Tipo de producto *</label>
+      <select
+        [(ngModel)]="basicInfo.product_type"
+        (ngModelChange)="onBasicInfoChange('product_type', $event)"
+        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+        [ngClass]="{'border-red-500': errors['product_type'], 'border-gray-300': !errors['product_type']}"
+      >
+        <option value="">Selecciona un tipo</option>
+        <option value="Existencia">Existencia</option>
+        <option value="semi_personalizado">Semi Personalizado</option>
+        <option value="personalizado">Personalizado</option>
+      </select>
+      <p *ngIf="errors['product_type']" class="mt-1 text-sm text-red-500">{{ errors['product_type'] }}</p>
+    </div>
+
+    <!-- Opciones de personalización -->
+    <div *ngIf="basicInfo.product_type === 'semi_personalizado' || basicInfo.product_type === 'personalizado'" class="mt-4">
+      <label class="block text-sm font-medium mb-2">Opciones de personalización *</label>
+      <div class="space-y-2">
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            [(ngModel)]="basicInfo.customizations.text"
+            (ngModelChange)="onBasicInfoChange('customization_text', $event)"
+            class="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
+          >
+          <label class="ml-2 text-sm">Texto (permite al cliente agregar texto)</label>
+        </div>
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            [(ngModel)]="basicInfo.customizations.image"
+            (ngModelChange)="onBasicInfoChange('customization_image', $event)"
+            class="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
+          >
+          <label class="ml-2 text-sm">Imagen (permite subir una imagen)</label>
+        </div>
+        <div class="flex items-center">
+          <input
+            type="checkbox"
+            [(ngModel)]="basicInfo.customizations.file"
+            (ngModelChange)="onBasicInfoChange('customization_file', $event)"
+            class="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
+          >
+          <label class="ml-2 text-sm">Archivo (permite subir un archivo)</label>
+        </div>
+      </div>
+      <p *ngIf="errors['customizations']" class="mt-1 text-sm text-red-500">{{ errors['customizations'] }}</p>
+    </div>
+
+    <!-- Botón Siguiente -->
+    <div class="mt-8 flex justify-end">
+      <button
+        (click)="goToNextStep()"
+        [disabled]="!validateStep1()"
+        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        Siguiente <i class="fas fa-chevron-right ml-1"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Paso 2: Variantes -->
+  <div *ngIf="currentStep === 2" class="space-y-6">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-xl font-semibold">Variantes del producto</h2>
+        <p class="text-sm text-gray-600 dark:text-dark-secondary">Agrega al menos una variante para tu producto.</p>
+      </div>
+      <button (click)="addVariant()" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center">
+        <i class="fas fa-plus mr-1"></i> Agregar variante
+      </button>
+    </div>
+
+    <!-- Lista de variantes -->
+    <div *ngFor="let variant of variants; let i = index" class="p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-dark-table-header">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-medium">Variante #{{ i + 1 }}</h3>
+        <button *ngIf="variants.length > 1" (click)="removeVariant(variant.id)" class="p-1.5 bg-red-100 dark:bg-dark-danger text-red-600 dark:text-white rounded-md hover:bg-red-200 dark:hover:bg-red-700">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+
+      <!-- SKU -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-1">SKU *</label>
+        <input
+          [(ngModel)]="variant.sku"
+          (ngModelChange)="handleVariantChange(variant.id, 'sku', $event)"
+          maxlength="50"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+          placeholder="Código único de producto"
+        >
+      </div>
+
+      <!-- Atributos -->
+      <div *ngIf="basicInfo.category_id" class="mb-4">
+        <label class="block text-sm font-medium mb-2">Atributos *</label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div *ngFor="let attrKey of getAttributeKeys()">
+            <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">{{ attributes[attrKey].name }}</label>
+            <select
+              [(ngModel)]="variant.attributes[attrKey]"
+              (ngModelChange)="handleAttributeChange(variant.id, attrKey, $event)"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+            >
+              <option value="">Selecciona {{ attributes[attrKey].name }}</option>
+              <option *ngFor="let option of attributes[attrKey].options" [value]="option">{{ option }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Precios -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium mb-2">Precios *</label>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Costo de producción</label>
+            <input
+              type="number"
+              [(ngModel)]="variant.production_cost"
+              (ngModelChange)="handleVariantChange(variant.id, 'production_cost', $event)"
+              min="0"
+              step="0.01"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+              placeholder="0.00"
+            >
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Margen de ganancia (%)</label>
+            <input
+              type="number"
+              [(ngModel)]="variant.profit_margin"
+              (ngModelChange)="handleVariantChange(variant.id, 'profit_margin', $event)"
+              min="0"
+              step="0.01"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+              placeholder="0.00"
+            >
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Precio calculado</label>
+            <input
+              type="text"
+              [value]="formatPrice(variant.calculated_price)"
+              disabled
+              class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Imágenes -->
+      <div>
+        <label class="block text-sm font-medium mb-2">Imágenes *</label>
+        <div class="flex flex-wrap gap-2 mb-2">
+          <div *ngFor="let image of variant.images; let imgIndex = index" class="relative w-20 h-20">
+            <img [src]="image | safeUrl" alt="Vista previa" class="w-full h-full object-cover rounded-md border border-gray-300 dark:border-gray-600">
+            <button (click)="removeImage(variant.id, imgIndex)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+              <i class="fas fa-times text-xs"></i>
+            </button>
+          </div>
+          <label *ngIf="variant.images.length < 10" class="flex flex-col items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+            <i class="fas fa-upload text-gray-400 dark:text-dark-secondary"></i>
+            <span class="mt-1 text-xs text-gray-500 dark:text-dark-secondary">{{ variant.images.length === 0 ? 'Agregar' : '+' }}</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              (change)="handleImageUpload(variant.id, $event)"
+              class="hidden"
+            >
+          </label>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-dark-secondary">Máximo 10 imágenes por variante</p>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="mt-8 flex justify-between">
+      <button (click)="goToPreviousStep()" class="px-4 py-2 bg-blue-200 dark:bg-blue-600 text-blue-700 dark:text-white rounded-md hover:bg-blue-300 dark:hover:bg-blue-700 flex items-center">
+        <i class="fas fa-chevron-left mr-1"></i> Atrás
+      </button>
+      <button (click)="saveProduct()" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center">
+        <i class="fas fa-check mr-1"></i> Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

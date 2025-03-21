@@ -5,7 +5,7 @@ import { switchMap } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 import { environment } from '../../environments/config';
 
-// Interfaces para tipado (sin cambios en las interfaces previas)
+// Interfaces para tipado (existentes)
 export interface Product {
   product_id: number;
   name: string;
@@ -18,6 +18,7 @@ export interface Product {
   created_at: string;
   updated_at: string;
   image_url: string | null;
+  collaborator?: string | null;
 }
 
 export interface ProductResponse {
@@ -46,7 +47,7 @@ export interface NewProduct {
   category_id: number;
   collaborator_id?: number;
   variants: Variant[];
-  customizations?: { type: string; description: string }[];
+  customizations?: { type: 'Imagen' | 'Texto' | 'Archivo'; description: string }[];
 }
 
 export interface DetailedVariant {
@@ -142,11 +143,11 @@ export interface PriceVariant {
   description: string | null;
   sku: string;
   image_url: string | null;
-  calculated_price: string; // String por el formato con decimales
-  production_cost: string; // String por el formato con decimales
-  profit_margin: string; // String por el formato con decimales
+  calculated_price: string;
+  production_cost: string;
+  profit_margin: string;
   category: string | null;
-  updated_at: string; // Fecha del último cambio de precio o 'Sin cambios de precio'
+  updated_at: string;
   product_type: 'Existencia' | 'semi_personalizado' | 'personalizado';
 }
 
@@ -173,22 +174,21 @@ export interface UpdatePriceResponse {
   variant: PriceVariant;
 }
 
-// Interfaz actualizada para PriceHistoryEntry
 export interface PriceHistoryEntry {
-  history_id: number; // Cambiado de price_history_id a history_id para coincidir con el modelo
+  history_id: number;
   product_name: string;
   sku: string;
   previous: {
-    production_cost: string; // String por el formato con decimales
-    profit_margin: string; // String por el formato con decimales
-    calculated_price: string; // String por el formato con decimales
+    production_cost: string;
+    profit_margin: string;
+    calculated_price: string;
   };
   new: {
-    production_cost: string; // String por el formato con decimales
-    profit_margin: string; // String por el formato con decimales
-    calculated_price: string; // String por el formato con decimales
+    production_cost: string;
+    profit_margin: string;
+    calculated_price: string;
   };
-  change_type: 'manual' | 'promotion' | 'discount' | 'adjustment';
+  change_type: 'manual' | 'promotion' | 'discount' | 'adjustment' | 'batch_update_individual' | 'batch_update';
   change_description: string;
   change_date: string;
   changed_by: {
@@ -203,6 +203,33 @@ export interface PriceHistoryResponse {
   history: PriceHistoryEntry[];
 }
 
+// Nuevas interfaces para actualización en lote
+export interface BatchUpdatePriceRequest {
+  variant_ids: number[];
+  production_cost: number;
+  profit_margin: number;
+}
+
+export interface BatchUpdatePriceResponse {
+  message: string;
+  variants: PriceVariant[];
+}
+
+export interface BatchUpdatePriceIndividualVariant {
+  variant_id: number;
+  production_cost: number; // No opcional
+  profit_margin: number;   // No opcional
+}
+
+export interface BatchUpdatePriceIndividualRequest {
+  variants: BatchUpdatePriceIndividualVariant[];
+}
+
+export interface BatchUpdatePriceIndividualResponse {
+  message: string;
+  variants: PriceVariant[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -211,17 +238,33 @@ export class ProductService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
-  // Métodos existentes sin cambios (omitidos por brevedad)
   getAllProductsCatalog(
     page: number = 1,
     pageSize: number = 10,
-    sort?: string
+    sort?: string,
+    search?: string,
+    collaboratorId?: number,
+    categoryId?: number,
+    productType?: 'Existencia' | 'semi_personalizado' | 'personalizado'
   ): Observable<ProductResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
+    
     if (sort) {
       params = params.set('sort', sort);
+    }
+    if (search) {
+      params = params.set('search', search);
+    }
+    if (collaboratorId) {
+      params = params.set('collaborator_id', collaboratorId.toString());
+    }
+    if (categoryId) {
+      params = params.set('category_id', categoryId.toString());
+    }
+    if (productType) {
+      params = params.set('product_type', productType);
     }
 
     return this.csrfService.getCsrfToken().pipe(
@@ -251,23 +294,24 @@ export class ProductService {
         if (productData.collaborator_id) {
           formData.append('collaborator_id', productData.collaborator_id.toString());
         }
-        if (productData.customizations) {
+        if (productData.product_type !== 'Existencia' && productData.customizations) {
           formData.append('customizations', JSON.stringify(productData.customizations));
         }
 
-        formData.append('variants', JSON.stringify(productData.variants.map(v => ({
+        const variantsData = productData.variants.map(v => ({
           sku: v.sku,
           production_cost: v.production_cost,
           profit_margin: v.profit_margin,
           stock: v.stock,
-          stock_threshold: v.stock_threshold,
-          attributes: v.attributes,
-          customizations: v.customizations
-        }))));
+          stock_threshold: v.stock_threshold !== undefined ? v.stock_threshold : 10,
+          attributes: v.attributes || [],
+          customizations: productData.product_type !== 'Existencia' && v.customizations ? v.customizations : undefined
+        }));
+        formData.append('variants', JSON.stringify(variantsData));
 
         productData.variants.forEach((variant, index) => {
-          variant.images.forEach(image => {
-            formData.append(`variants[${index}][images]`, image, image.name);
+          variant.images.forEach((image, imgIndex) => {
+            formData.append(`variants[${index}][images]`, image, `${variant.sku}-${imgIndex + 1}-${image.name}`);
           });
         });
 
@@ -277,7 +321,7 @@ export class ProductService {
         });
         console.log('Datos enviados en FormData (creación):', formDataEntries);
 
-        return this.http.post<CreatedProductResponse>(`${this.apiUrl}/`, formData, {
+        return this.http.post<CreatedProductResponse>(this.apiUrl, formData, {
           headers,
           withCredentials: true
         });
@@ -324,23 +368,24 @@ export class ProductService {
         if (productData.collaborator_id) {
           formData.append('collaborator_id', productData.collaborator_id.toString());
         }
-        if (productData.customizations) {
+        if (productData.product_type !== 'Existencia' && productData.customizations) {
           formData.append('customizations', JSON.stringify(productData.customizations));
         }
 
-        formData.append('variants', JSON.stringify(productData.variants.map(v => ({
+        const variantsData = productData.variants.map(v => ({
           sku: v.sku,
           production_cost: v.production_cost,
           profit_margin: v.profit_margin,
           stock: v.stock,
           stock_threshold: v.stock_threshold,
-          attributes: v.attributes,
-          customizations: v.customizations
-        }))));
+          attributes: v.attributes || [],
+          customizations: productData.product_type !== 'Existencia' && v.customizations ? v.customizations : undefined
+        }));
+        formData.append('variants', JSON.stringify(variantsData));
 
         productData.variants.forEach((variant, index) => {
-          variant.images.forEach(image => {
-            formData.append(`variants[${index}][images]`, image, image.name);
+          variant.images.forEach((image, imgIndex) => {
+            formData.append(`variants[${index}][images]`, image, `${variant.sku}-${imgIndex + 1}-${image.name}`);
           });
         });
 
@@ -471,6 +516,36 @@ export class ProductService {
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         return this.http.get<PriceHistoryResponse>(`${this.apiUrl}/price/history/${variantId}`, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  // Nueva función para actualización en lote (uniforme)
+  batchUpdatePrices(priceData: BatchUpdatePriceRequest): Observable<BatchUpdatePriceResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders()
+          .set('x-csrf-token', csrfToken)
+          .set('Content-Type', 'application/json');
+        return this.http.put<BatchUpdatePriceResponse>(`${this.apiUrl}/price/batch-update`, priceData, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  // Nueva función para actualización en lote individual
+  batchUpdatePricesIndividual(priceData: BatchUpdatePriceIndividualRequest): Observable<BatchUpdatePriceIndividualResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders()
+          .set('x-csrf-token', csrfToken)
+          .set('Content-Type', 'application/json');
+        return this.http.put<BatchUpdatePriceIndividualResponse>(`${this.apiUrl}/price/batch-update-individual`, priceData, {
           headers,
           withCredentials: true
         });

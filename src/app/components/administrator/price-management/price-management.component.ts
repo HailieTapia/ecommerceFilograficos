@@ -7,11 +7,12 @@ import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { BulkPriceUpdateComponent } from './bulk-price-update/bulk-price-update.component'; // Importamos el nuevo componente hijo
 
 @Component({
   selector: 'app-price-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent, ModalComponent],
+  imports: [CommonModule, FormsModule, PaginationComponent, ModalComponent, BulkPriceUpdateComponent], // Añadimos el nuevo componente
   templateUrl: './price-management.component.html'
 })
 export class PriceManagementComponent implements OnInit {
@@ -41,6 +42,9 @@ export class PriceManagementComponent implements OnInit {
   selectedHistoryVariant: PriceVariant | null = null;
   priceHistory: PriceHistoryEntry[] = [];
   historyMessage: string = '';
+
+  // Propiedad para gestionar las pestañas
+  activeTab: 'prices' | 'bulk' = 'prices'; // Pestaña activa por defecto: "Precios de Productos"
 
   readonly MAX_PROFIT_MARGIN: number = 500;
 
@@ -191,7 +195,6 @@ export class PriceManagementComponent implements OnInit {
     });
   }
 
-  // Método actualizado para el historial de precios
   openHistoryModal(variant: PriceVariant) {
     this.selectedHistoryVariant = variant;
     this.productService.getPriceHistoryByVariantId(variant.variant_id).subscribe({
@@ -249,5 +252,10 @@ export class PriceManagementComponent implements OnInit {
   isCalculatedPriceInvalid(): boolean {
     const calculatedPriceNum = parseFloat(this.editCalculatedPrice.replace(/[^0-9.]/g, ''));
     return calculatedPriceNum < this.editProductionCost;
+  }
+
+  // Método para cambiar entre pestañas
+  setActiveTab(tab: 'prices' | 'bulk') {
+    this.activeTab = tab;
   }
 }

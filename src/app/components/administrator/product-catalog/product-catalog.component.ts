@@ -2,8 +2,23 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService, Product, ProductResponse } from '../../services/product.service';
+import { CategorieService } from '../../services/categorieService';
+import { CollaboratorsService } from '../../services/collaborators.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ProductCatalogFormComponent } from './product-catalog-form/product-catalog-form.component';
+import { ModalComponent } from '../../../modal/modal.component'; // Importar ModalComponent
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
+
+interface Category {
+  category_id: number;
+  name: string;
+}
+
+interface Collaborator {
+  collaborator_id: number;
+  name: string;
+}
 
 @Component({
   selector: 'app-product-catalog',
@@ -12,112 +27,142 @@ import { ProductCatalogFormComponent } from './product-catalog-form/product-cata
     CommonModule,
     FormsModule,
     PaginationComponent,
-    ProductCatalogFormComponent // Importamos el formulario
+    ProductCatalogFormComponent,
+    ModalComponent // Añadir ModalComponent
   ],
-  templateUrl: './product-catalog.component.html',
-  styleUrls: ['./product-catalog.component.css']
+  templateUrl: './product-catalog.component.html'
 })
 export class ProductCatalogComponent implements OnInit {
-  @ViewChild(ProductCatalogFormComponent) productFormModal!: ProductCatalogFormComponent;
+  @ViewChild('createProductModal') createProductModal!: ModalComponent; // Referencia al modal
 
   products: Product[] = [];
-  currentPage: number = 1;
-  itemsPerPage: number = 10;
-  totalItems: number = 0;
-  sortColumn: string | null = 'product_id'; // Por defecto ordenar por ID del producto
-  sortDirection: 'ASC' | 'DESC' = 'ASC';
+  totalProducts = 0;
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 1;
+  searchTerm = '';
+  selectedCollaboratorId: number | null = null;
+  selectedCategoryId: number | null = null;
+  selectedProductType: 'Existencia' | 'semi_personalizado' | 'personalizado' | '' = '';
+  sortBy: 'name' | 'variant_count' | 'min_price' | 'max_price' | 'total_stock' = 'name';
+  sortOrder: 'ASC' | 'DESC' = 'ASC';
 
-  constructor(private productService: ProductService) {}
+  notification: string = '';
+  categories: Category[] = [];
+  collaborators: Collaborator[] = [];
 
-  ngOnInit(): void {
+  constructor(
+    private productService: ProductService,
+    private categorieService: CategorieService,
+    private collaboratorsService: CollaboratorsService
+  ) {}
+
+  ngOnInit() {
+    this.loadCategories();
+    this.loadCollaborators();
     this.loadProducts();
   }
 
-  public loadProducts(): void {
-    const sortParam = this.sortColumn ? `${this.sortColumn}:${this.sortDirection}` : undefined;
-    this.productService.getAllProductsCatalog(this.currentPage, this.itemsPerPage, sortParam).subscribe({
-      next: (response: ProductResponse) => {
-        console.log('Productos recibidos del backend:', response.products); // Depuración
-        this.products = response.products;
-        this.totalItems = response.total;
+  loadCategories() {
+    this.categorieService.getCategories().subscribe({
+      next: (response: any) => {
+        this.categories = response.map((cat: any) => ({
+          category_id: cat.category_id,
+          name: cat.name
+        }));
       },
-      error: (e) => {
-        console.error('Error al cargar productos:', e);
-      }
+      error: (err) => console.error('Error al cargar categorías:', err)
     });
   }
 
-  onPageChange(newPage: number): void {
+  loadCollaborators() {
+    this.collaboratorsService.getAllCollaborators().subscribe({
+      next: (response: any[]) => {
+        this.collaborators = response.filter(col => col.active).map(col => ({
+          collaborator_id: col.collaborator_id,
+          name: col.name
+        }));
+      },
+      error: (err) => console.error('Error al cargar colaboradores:', err)
+    });
+  }
+
+  loadProducts() {
+    this.productService.getAllProductsCatalog(
+      this.currentPage,
+      this.itemsPerPage,
+      `${this.sortBy}:${this.sortOrder}`,
+      this.searchTerm || undefined,
+      this.selectedCollaboratorId || undefined,
+      this.selectedCategoryId || undefined,
+      this.selectedProductType || undefined
+    ).subscribe({
+      next: (response: ProductResponse) => {
+        this.products = response.products;
+        this.totalProducts = response.total;
+        this.totalPages = Math.ceil(response.total / this.itemsPerPage);
+      },
+      error: (err) => console.error('Error loading products:', err)
+    });
+  }
+
+  onPageChange(newPage: number) {
     this.currentPage = newPage;
     this.loadProducts();
   }
 
-  onItemsPerPageChange(): void {
+  onItemsPerPageChange() {
     this.currentPage = 1;
     this.loadProducts();
   }
 
-  openCreateModal(): void {
-    if (this.productFormModal) {
-      this.productFormModal.productId = null; // Para creación
-      this.productFormModal.openModal();
-    } else {
-      console.error('El componente del formulario no está inicializado.');
-    }
+  onSearchChange() {
+    this.currentPage = 1;
+    this.debounceSearch().subscribe(() => this.loadProducts());
   }
 
-  onProductSaved(): void {
-    this.loadProducts(); // Recargar productos después de guardar
+  debounceSearch() {
+    return of(this.searchTerm).pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(() => of(null))
+    );
   }
 
-  toggleSort(column: string): void {
-    const validColumns = ['name', 'product_id', 'variant_count', 'min_price', 'max_price', 'total_stock'];
-    if (!validColumns.includes(column)) return;
-
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'ASC' ? 'DESC' : 'ASC';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'ASC';
-    }
+  onFilterChange() {
     this.currentPage = 1;
     this.loadProducts();
   }
 
-  deleteProduct(product: Product): void {
-    if (!product.product_id) {
-      console.error('El product_id no está definido para el producto:', product);
-      alert('No se puede eliminar el producto porque falta su ID.');
-      return;
+  sort(column: 'name' | 'variant_count' | 'min_price' | 'max_price' | 'total_stock') {
+    if (this.sortBy === column) {
+      this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      this.sortBy = column;
+      this.sortOrder = 'ASC';
     }
-
-    const confirmDelete = confirm(`¿Estás seguro de que deseas eliminar el producto "${product.name}"? Esto eliminará todas sus variantes.`);
-    if (confirmDelete) {
-      console.log('Eliminando producto con ID:', product.product_id); // Depuración
-      this.productService.deleteProduct(product.product_id).subscribe({
-        next: (response) => {
-          alert(response.message);
-          this.loadProducts();
-        },
-        error: (err) => {
-          console.error('Error al eliminar el producto:', err);
-          alert('Error al eliminar el producto');
-        }
-      });
-    }
+    this.loadProducts();
   }
 
-  editProduct(productId: number): void {
-    if (!productId) {
-      console.error('El productId no está definido para editar');
-      alert('No se puede editar el producto porque falta su ID.');
-      return;
-    }
-    if (this.productFormModal) {
-      this.productFormModal.productId = productId; // Para edición
-      this.productFormModal.openModal();
-    } else {
-      console.error('El componente del formulario no está inicializado.');
-    }
+  openCreateProductModal() {
+    this.createProductModal.open(); // Abrir el modal
+  }
+
+  closeCreateProductModal() {
+    this.createProductModal.close(); // Cerrar el modal
+    this.loadProducts(); // Recargar productos
+  }
+
+  editProduct(product: Product) {
+    console.log('Editar producto:', product);
+  }
+
+  deleteProduct(product: Product) {
+    console.log('Eliminar producto:', product);
+  }
+
+  formatPrice(value: number): string {
+    const formatted = value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return `$ ${formatted} MXN`;
   }
 }
