@@ -6,7 +6,7 @@ import { CategorieService } from '../../services/categorieService';
 import { CollaboratorsService } from '../../services/collaborators.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ProductCatalogFormComponent } from './product-catalog-form/product-catalog-form.component';
-import { ModalComponent } from '../../../modal/modal.component'; // Importar ModalComponent
+import { ModalComponent } from '../../../modal/modal.component';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -28,12 +28,12 @@ interface Collaborator {
     FormsModule,
     PaginationComponent,
     ProductCatalogFormComponent,
-    ModalComponent // Añadir ModalComponent
+    ModalComponent
   ],
   templateUrl: './product-catalog.component.html'
 })
 export class ProductCatalogComponent implements OnInit {
-  @ViewChild('createProductModal') createProductModal!: ModalComponent; // Referencia al modal
+  @ViewChild('productModal') productModal!: ModalComponent;
 
   products: Product[] = [];
   totalProducts = 0;
@@ -50,6 +50,8 @@ export class ProductCatalogComponent implements OnInit {
   notification: string = '';
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
+  selectedProductId: number | undefined = undefined;
+  modalTitle: string = 'Crear Nuevo Producto'; // Título dinámico para el modal
 
   constructor(
     private productService: ProductService,
@@ -144,21 +146,42 @@ export class ProductCatalogComponent implements OnInit {
     this.loadProducts();
   }
 
-  openCreateProductModal() {
-    this.createProductModal.open(); // Abrir el modal
+  openProductModal(mode: 'create' | 'edit', product?: Product) {
+    if (mode === 'create') {
+      this.selectedProductId = undefined;
+      this.modalTitle = 'Crear Nuevo Producto';
+    } else {
+      this.selectedProductId = product?.product_id;
+      this.modalTitle = 'Editar Producto';
+    }
+    this.productModal.open();
   }
 
-  closeCreateProductModal() {
-    this.createProductModal.close(); // Cerrar el modal
-    this.loadProducts(); // Recargar productos
+  closeProductModal() {
+    this.productModal.close();
+    this.loadProducts();
+    this.selectedProductId = undefined;
   }
 
   editProduct(product: Product) {
-    console.log('Editar producto:', product);
+    this.openProductModal('edit', product);
   }
 
   deleteProduct(product: Product) {
-    console.log('Eliminar producto:', product);
+    if (confirm(`¿Estás seguro de que deseas eliminar el producto "${product.name}"?`)) {
+      this.productService.deleteProduct(product.product_id).subscribe({
+        next: () => {
+          this.notification = 'Producto eliminado con éxito';
+          this.loadProducts();
+          setTimeout(() => this.notification = '', 3000);
+        },
+        error: (err) => {
+          console.error('Error al eliminar producto:', err);
+          this.notification = 'Error al eliminar el producto';
+          setTimeout(() => this.notification = '', 3000);
+        }
+      });
+    }
   }
 
   formatPrice(value: number): string {

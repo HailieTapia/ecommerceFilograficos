@@ -8,7 +8,7 @@
       <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Administra el catálogo de productos disponibles</p>
     </div>
     <button
-      (click)="openCreateProductModal()"
+      (click)="openProductModal('create')"
       class="px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-800 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2"
     >
       <i class="fas fa-plus"></i> Crear Producto
@@ -20,7 +20,9 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
       <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
         <select [(ngModel)]="selectedCollaboratorId" (ngModelChange)="onFilterChange()" class="w-full sm:w-48 p-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary">
-          <option [ngValue]="null">Todos los colaboradores</option>
+          <option [ngValue]="null
+
+">Todos los colaboradores</option>
           <option *ngFor="let collaborator of collaborators" [ngValue]="collaborator.collaborator_id">{{ collaborator.name }}</option>
         </select>
         <select [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()" class="w-full sm:w-48 p-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary">
@@ -145,9 +147,9 @@
     {{ notification }}
   </div>
 
-  <!-- Modal para crear producto -->
-  <app-modal #createProductModal title="Crear Nuevo Producto">
-    <app-product-catalog-form (productSaved)="closeCreateProductModal()"></app-product-catalog-form>
+  <!-- Modal unificado para crear/editar producto -->
+  <app-modal #productModal [title]="modalTitle">
+    <app-product-catalog-form *ngIf="productModal.isOpen" [productId]="selectedProductId" (productSaved)="closeProductModal()"></app-product-catalog-form>
   </app-modal>
 </div>
 

@@ -1,6 +1,6 @@
 <div class="relative z-20 w-full flex items-center justify-center p-4">
   <div class="w-full max-w-4xl bg-light-background dark:bg-dark-background bg-opacity-80 dark:bg-opacity-80 rounded-2xl shadow-xl p-8 transform transition-all duration-300 hover:shadow-2xl" style="backdrop-filter: blur(10px);">
-    <!-- Progress Steps (nuevo diseño basado en RecoverComponent) -->
+    <!-- Progress Steps (sin cambios) -->
     <div class="flex justify-center mb-8">
       <div class="flex items-center space-x-1">
         <div [ngClass]="{'bg-light-primary dark:bg-dark-primary': currentStep === 1, 'bg-light-closed dark:bg-dark-closed': currentStep !== 1}" class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg">
@@ -110,9 +110,7 @@
                   [ngClass]="{'border-red-500': errors['customization_' + i + '_type'], 'border-gray-300': !errors['customization_' + i + '_type']}"
                 >
                   <option value="">Selecciona un tipo</option>
-                  <option value="Imagen">Imagen</option>
-                  <option value="Texto">Texto</option>
-                  <option value="Archivo">Archivo (PDF)</option>
+                  <option *ngFor="let type of customizationTypes" [value]="type">{{ type }}</option>
                 </select>
                 <div *ngIf="errors['customization_' + i + '_type']" class="text-red-500 text-sm mt-1">
                   {{ errors['customization_' + i + '_type'] }}
@@ -288,17 +286,26 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium mb-2">Imágenes <span class="text-red-500">*</span></label>
+          <label class="block text-sm font-medium mb-2">Imágenes <span *ngIf="!isEditMode" class="text-red-500">*</span></label>
           <div class="flex flex-wrap gap-2 mb-2">
+            <!-- Imágenes existentes (modo edición) -->
+            <div *ngFor="let image of getExistingImages(i); let imgIndex=index" class="relative w-20 h-20">
+              <img [src]="image.image_url" alt="Vista previa" class="w-full h-full object-cover rounded-md border border-gray-300 dark:border-gray-600">
+              <button (click)="markImageForDeletion(i, image.image_id)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                <i class="fas fa-times text-xs"></i>
+              </button>
+            </div>
+            <!-- Nuevas imágenes subidas -->
             <div *ngFor="let image of variant.get('images')?.value; let imgIndex=index" class="relative w-20 h-20">
               <img [src]="image | safeUrl" alt="Vista previa" class="w-full h-full object-cover rounded-md border border-gray-300 dark:border-gray-600">
               <button (click)="removeImage(i, imgIndex)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
                 <i class="fas fa-times text-xs"></i>
               </button>
             </div>
-            <label *ngIf="variant.get('images')?.value.length < 10" class="flex flex-col items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+            <!-- Input para subir nuevas imágenes -->
+            <label *ngIf="(variant.get('images')?.value.length + getExistingImages(i).length) < 10" class="flex flex-col items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
               <i class="fas fa-upload text-gray-400 dark:text-dark-secondary"></i>
-              <span class="mt-1 text-xs text-gray-500 dark:text-dark-secondary">{{ variant.get('images')?.value.length === 0 ? 'Agregar' : '+' }}</span>
+              <span class="mt-1 text-xs text-gray-500 dark:text-dark-secondary">{{ (variant.get('images')?.value.length + getExistingImages(i).length) === 0 ? 'Agregar' : '+' }}</span>
               <input
                 type="file"
                 accept="image/*"
@@ -308,7 +315,7 @@
               >
             </label>
           </div>
-          <p class="text-xs text-gray-500 dark:text-dark-secondary">Máximo 10 imágenes por variante</p>
+          <p class="text-xs text-gray-500 dark:text-dark-secondary">Máximo 10 imágenes por variante. {{ isEditMode ? 'No es obligatorio subir nuevas imágenes si ya existen.' : 'Se requiere al menos una imagen.' }}</p>
         </div>
       </div>
 
