@@ -101,14 +101,26 @@ export class ProductCatalogFormComponent implements OnInit {
     return `${base}-${digits}`;
   }
 
+  generateUniqueSku(baseSku: string): string {
+    const existingSkus = this.variants.controls.map(v => v.get('sku')?.value as string);
+    const base = baseSku.split('-')[0]; // Toma la parte inicial (ej. "PROD")
+    let newIndex = existingSkus.length + 1;
+    let newSku = `${base}-${newIndex.toString().padStart(3, '0')}`;
+    while (existingSkus.includes(newSku)) {
+      newIndex++;
+      newSku = `${base}-${newIndex.toString().padStart(3, '0')}`;
+    }
+    return newSku;
+  }
+
   ngOnInit() {
     this.loadCategories();
     this.loadCollaborators();
     this.loadAttributesByActiveCategories();
-  
+
     this.productForm.get('category_id')?.valueChanges.subscribe(value => this.updateVariantAttributes(value));
     this.productForm.get('product_type')?.valueChanges.subscribe(() => this.validateStep1());
-  
+
     this.productForm.get('name')?.valueChanges.subscribe(value => {
       if (value) {
         const capitalizedValue = this.capitalizeFirstWord(value);
@@ -117,7 +129,7 @@ export class ProductCatalogFormComponent implements OnInit {
         }
       }
     });
-  
+
     this.productForm.get('description')?.valueChanges.subscribe(value => {
       if (value) {
         const capitalizedValue = this.capitalizeFirstWord(value);
@@ -126,8 +138,7 @@ export class ProductCatalogFormComponent implements OnInit {
         }
       }
     });
-  
-    // Agregar debounceTime para evitar actualizaciones excesivas
+
     this.variants.valueChanges.pipe(debounceTime(100)).subscribe(() => {
       this.variants.controls.forEach(variant => this.calculatePrice(variant as FormGroup));
       this.updateErrors();
@@ -194,14 +205,14 @@ export class ProductCatalogFormComponent implements OnInit {
       });
       return;
     }
-  
+
     const attributes = this.attributesByCategory[categoryId];
     this.variants.controls.forEach(variant => {
       const attributesGroup = variant.get('attributes') as FormGroup;
       Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
       attributes.forEach(attr => {
         const validators = attr.is_required ? [Validators.required] : [];
-        if (!attributesGroup.get(attr.attribute_id.toString())) { // Evita agregar controles duplicados
+        if (!attributesGroup.get(attr.attribute_id.toString())) {
           attributesGroup.addControl(
             attr.attribute_id.toString(),
             this.fb.control('', validators)
@@ -255,7 +266,7 @@ export class ProductCatalogFormComponent implements OnInit {
       else if (this.productForm.get('name')?.errors?.['pattern']) newErrors['name'] = 'Solo se permiten letras, números, acentos, ñ, espacios, guiones y guiones bajos';
       else if (this.productForm.get('name')?.errors?.['minlength'] || this.productForm.get('name')?.errors?.['maxlength']) newErrors['name'] = 'El nombre debe tener entre 3 y 100 caracteres';
     }
-  
+
     if (this.productForm.get('description')?.invalid) {
       if (this.productForm.get('description')?.errors?.['required']) newErrors['description'] = 'La descripción es obligatoria';
       else if (this.productForm.get('description')?.errors?.['pattern']) newErrors['description'] = 'Solo se permiten letras, números, acentos, ñ, espacios, guiones y guiones bajos';
@@ -336,6 +347,30 @@ export class ProductCatalogFormComponent implements OnInit {
     }
   }
 
+  duplicateVariant(index: number) {
+    const variantToDuplicate = this.variants.at(index) as FormGroup;
+    const newVariant = this.createVariantFormGroup();
+
+    const newSku = this.generateUniqueSku(variantToDuplicate.get('sku')?.value as string);
+    newVariant.patchValue({
+      id: this.generateNewId(),
+      sku: newSku,
+      production_cost: variantToDuplicate.get('production_cost')?.value,
+      profit_margin: variantToDuplicate.get('profit_margin')?.value,
+      images: [...variantToDuplicate.get('images')?.value] // Copia del arreglo de imágenes
+    });
+
+    const attributesToDuplicate = variantToDuplicate.get('attributes') as FormGroup;
+    const newAttributes = newVariant.get('attributes') as FormGroup;
+    Object.keys(attributesToDuplicate.controls).forEach(key => {
+      newAttributes.addControl(key, this.fb.control(attributesToDuplicate.get(key)?.value || '', attributesToDuplicate.get(key)?.validator));
+    });
+
+    this.calculatePrice(newVariant);
+    this.variants.push(newVariant);
+    this.updateErrors();
+  }
+
   handleImageUpload(index: number, event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {
@@ -357,7 +392,7 @@ export class ProductCatalogFormComponent implements OnInit {
     const cost = variant.get('production_cost')?.value || 0;
     const margin = variant.get('profit_margin')?.value || 0;
     const calculated = parseFloat((cost * (1 + margin / 100)).toFixed(2));
-    variant.get('calculated_price')?.setValue(calculated, { emitEvent: false }); // Evita bucle
+    variant.get('calculated_price')?.setValue(calculated, { emitEvent: false });
     this.validatePrice(variant);
   }
 
@@ -413,12 +448,12 @@ export class ProductCatalogFormComponent implements OnInit {
   updateErrors() {
     const newErrors: FormErrors = { ...this.errors };
     const skus = new Set<string>();
-  
+
     this.variants.controls.forEach((variant, index) => {
       const skuControl = variant.get('sku');
       const sku = skuControl?.value;
       delete newErrors[`sku_${index}`];
-  
+
       if (!sku?.trim()) {
         newErrors[`sku_${index}`] = 'El SKU es obligatorio';
       } else if (skuControl?.errors?.['pattern']) {
@@ -428,9 +463,9 @@ export class ProductCatalogFormComponent implements OnInit {
       } else {
         skus.add(sku);
       }
-  
+
       this.validatePrice(variant as FormGroup);
-  
+
       const attributesGroup = variant.get('attributes') as FormGroup;
       const categoryId = this.productForm.get('category_id')?.value;
       if (categoryId && this.attributesByCategory[categoryId]) {
@@ -444,7 +479,7 @@ export class ProductCatalogFormComponent implements OnInit {
         });
       }
     });
-  
+
     this.errors = newErrors;
   }
 
@@ -462,9 +497,7 @@ export class ProductCatalogFormComponent implements OnInit {
     return !hasErrors;
   }
 
-  // Método para reiniciar el formulario después de guardar
   resetForm() {
-    // Reiniciar los campos del formulario
     this.productForm.reset({
       name: '',
       description: '',
@@ -473,24 +506,17 @@ export class ProductCatalogFormComponent implements OnInit {
       product_type: '',
     });
 
-    // Limpiar el FormArray de customizations
     while (this.customizations.length > 0) {
       this.customizations.removeAt(0);
     }
 
-    // Limpiar el FormArray de variants y agregar una variante vacía
     while (this.variants.length > 0) {
       this.variants.removeAt(0);
     }
     this.variants.push(this.createVariantFormGroup());
 
-    // Reiniciar el paso actual
     this.currentStep = 1;
-
-    // Limpiar los errores
     this.errors = {};
-
-    // Opcional: Si necesitas recargar los atributos por categoría, puedes hacerlo aquí
     this.updateVariantAttributes(null);
   }
 
@@ -530,7 +556,7 @@ export class ProductCatalogFormComponent implements OnInit {
         console.log('Producto creado:', response);
         window.alert('Producto guardado con éxito');
         this.productSaved.emit();
-        this.resetForm(); // Llamamos al método para reiniciar el formulario
+        this.resetForm();
       },
       error: (err) => {
         console.error('Error al guardar producto:', err);
