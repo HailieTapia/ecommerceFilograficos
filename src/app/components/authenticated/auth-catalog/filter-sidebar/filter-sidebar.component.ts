@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategorieService } from '../../../services/categorieService';
 import { CollaboratorsService } from '../../../services/collaborators.service';
-
+import { ToastService } from '../../../services/toastService';
 @Component({
   selector: 'app-filter-sidebar',
   standalone: true,
@@ -22,7 +22,7 @@ export class FilterSidebarComponent implements OnInit {
     maxPrice: '',
     collaboratorId: ''
   };
-  constructor(private categoriesService: CategorieService, private collaboratorService: CollaboratorsService) { }
+  constructor(private toastService: ToastService, private categoriesService: CategorieService, private collaboratorService: CollaboratorsService) { }
 
   ngOnInit() {
     this.loadCategories();
@@ -37,7 +37,8 @@ export class FilterSidebarComponent implements OnInit {
         this.categories = response;
       },
       error: (error) => {
-        console.error('Error al cargar las categorías:', error);
+        const errorMessage = error?.error?.message || 'No se pudo cargar las categorías. Por favor, intenta de nuevo.';
+        this.toastService.showToast(errorMessage, 'error');
         this.categories = [];
       }
     });
@@ -45,11 +46,11 @@ export class FilterSidebarComponent implements OnInit {
   loadCollaborators() {
     this.collaboratorService.getAuthCollaborators().subscribe({
       next: (response) => {
-        console.log(response);
         this.collaborators = response;
       },
       error: (error) => {
-        console.error('Error al cargar los colaboradores:', error);
+        const errorMessage = error?.error?.message || 'No se pudo cargar los colaboradores. Por favor, intenta de nuevo.';
+        this.toastService.showToast(errorMessage, 'error');
         this.collaborators = [];
       }
     });
@@ -67,7 +68,7 @@ export class FilterSidebarComponent implements OnInit {
       cleanedFilters.maxPrice = this.filters.maxPrice;
     }
     if (this.filters.collaboratorId) {
-      cleanedFilters.collaboratorId = this.filters.collaboratorId; 
+      cleanedFilters.collaboratorId = this.filters.collaboratorId;
     }
     this.filtersChange.emit(cleanedFilters);
   }

@@ -42,7 +42,6 @@ export class PublicCatalogComponent implements OnInit {
   ngOnInit() {
     this.loadProducts();
   }
-
   loadProducts() {
     this.productService.getAllProducts(this.page, this.pageSize, this.filters).subscribe(response => {
       this.products = response.products;
@@ -52,7 +51,6 @@ export class PublicCatalogComponent implements OnInit {
       this.totalPages = Math.ceil(this.total / this.pageSize);
     });
   }
-
   onFiltersChange(newFilters: any) {
     this.filters = { ...newFilters, sort: this.selectedSort };
     this.page = 1;
@@ -63,11 +61,9 @@ export class PublicCatalogComponent implements OnInit {
     this.page = 1;
     this.loadProducts();
   }
-
   goToDetail(productId: number) {
     this.router.navigate([`/publiccatalog/${productId}`]);
   }
-
   changePage(newPage: number) {
     this.page = newPage;
     this.loadProducts();
