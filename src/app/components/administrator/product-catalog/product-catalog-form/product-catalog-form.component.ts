@@ -1,7 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ProductService, NewProduct } from '../../../services/product.service';
+import { CommonModule, NgFor } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ProductService, NewProduct, Variant } from '../../../services/product.service';
 import { CategorieService } from '../../../services/categorieService';
 import { CollaboratorsService } from '../../../services/collaborators.service';
 import { SafeUrlPipe } from '../../../pipes/safe-url.pipe';
@@ -22,60 +22,28 @@ interface Attribute {
   options: string[];
 }
 
-interface Variant {
-  id: number;
-  sku: string;
-  attributes: { [key: string]: string };
-  production_cost: number | null;
-  profit_margin: number | null;
-  calculated_price: number;
-  images: File[];
-}
-
 interface FormErrors {
   name?: string;
   description?: string;
   category_id?: string;
   product_type?: string;
   customizations?: string;
+  sku?: string;
   [key: string]: string | undefined;
 }
 
 @Component({
   selector: 'app-product-catalog-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, SafeUrlPipe],
+  imports: [CommonModule, ReactiveFormsModule, SafeUrlPipe, NgFor],
   templateUrl: './product-catalog-form.component.html'
 })
 export class ProductCatalogFormComponent implements OnInit {
   @Output() productSaved = new EventEmitter<void>();
 
   currentStep = 1;
-
-  basicInfo = {
-    name: '',
-    description: '',
-    category_id: null as number | null,
-    collaborator_id: null as number | null,
-    product_type: '' as 'Existencia' | 'semi_personalizado' | 'personalizado' | '',
-    customizations: {
-      text: false,
-      image: false,
-      file: false
-    }
-  };
-
+  productForm: FormGroup;
   errors: FormErrors = {};
-
-  variants: Variant[] = [{
-    id: 1,
-    sku: '',
-    attributes: {},
-    production_cost: null,
-    profit_margin: null,
-    calculated_price: 0,
-    images: []
-  }];
 
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
@@ -84,12 +52,94 @@ export class ProductCatalogFormComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private categorieService: CategorieService,
-    private collaboratorsService: CollaboratorsService
-  ) {}
+    private collaboratorsService: CollaboratorsService,
+    private fb: FormBuilder
+  ) {
+    this.productForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]+$/)]],
+      description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500), Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]+$/)]],
+      category_id: [null, Validators.required],
+      collaborator_id: [null],
+      product_type: ['', Validators.required],
+      customizations: this.fb.array([]),
+      variants: this.fb.array([this.createVariantFormGroup()], this.uniqueSkuValidator.bind(this))
+    });
+  }
+
+  get customizations(): FormArray<FormGroup> {
+    return this.productForm.get('customizations') as FormArray<FormGroup>;
+  }
+
+  get variants(): FormArray<FormGroup> {
+    return this.productForm.get('variants') as FormArray<FormGroup>;
+  }
+
+  createVariantFormGroup(sku: string = ''): FormGroup {
+    return this.fb.group({
+      id: [1],
+      sku: [sku, [
+        Validators.required,
+        Validators.pattern(/^[A-Z]{4}-\d{3}$/), // 4 letras mayúsculas, guión, 3 dígitos
+        Validators.maxLength(8)
+      ]],
+      attributes: this.fb.group({}),
+      production_cost: [null, [Validators.required, Validators.min(0)]],
+      profit_margin: [null, [Validators.required, Validators.min(0)]],
+      calculated_price: [{ value: 0, disabled: true }],
+      images: [[]]
+    });
+  }
+
+  // Validador personalizado para SKUs únicos
+  uniqueSkuValidator(control: AbstractControl): ValidationErrors | null {
+    const variants = control as FormArray;
+    const skus = variants.controls.map(v => v.get('sku')?.value).filter(sku => sku);
+    const duplicates = skus.filter((sku, index) => skus.indexOf(sku) !== index);
+    return duplicates.length > 0 ? { duplicateSku: true } : null;
+  }
+
+  generateSKU(productName: string, variantIndex: number): string {
+    const base = (productName.substring(0, 4) || 'PROD').toUpperCase();
+    const digits = (variantIndex + 1).toString().padStart(3, '0');
+    return `${base}-${digits}`;
+  }
 
   ngOnInit() {
     this.loadCategories();
     this.loadCollaborators();
+    this.productForm.get('category_id')?.valueChanges.subscribe(value => this.loadAttributes(value));
+    this.productForm.get('product_type')?.valueChanges.subscribe(() => this.validateStep1());
+
+    this.productForm.get('name')?.valueChanges.subscribe(value => {
+      if (value) {
+        const capitalizedValue = this.capitalizeFirstWord(value);
+        if (capitalizedValue !== value) {
+          this.productForm.get('name')?.setValue(capitalizedValue, { emitEvent: false });
+        }
+      }
+    });
+
+    this.productForm.get('description')?.valueChanges.subscribe(value => {
+      if (value) {
+        const capitalizedValue = this.capitalizeFirstWord(value);
+        if (capitalizedValue !== value) {
+          this.productForm.get('description')?.setValue(capitalizedValue, { emitEvent: false });
+        }
+      }
+    });
+
+    // Suscripción a cambios en los SKUs para actualizar errores
+    this.variants.valueChanges.subscribe(() => this.updateErrors());
+  }
+
+  capitalizeFirstWord(text: string): string {
+    if (!text) return text;
+    const words = text.split(/\s+/);
+    if (words.length > 0) {
+      words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+      return words.join(' ');
+    }
+    return text;
   }
 
   loadCategories() {
@@ -119,6 +169,7 @@ export class ProductCatalogFormComponent implements OnInit {
   loadAttributes(categoryId: number | null) {
     if (!categoryId) {
       this.attributes = {};
+      this.updateVariantAttributes();
       return;
     }
     if (categoryId === 1) {
@@ -138,69 +189,86 @@ export class ProductCatalogFormComponent implements OnInit {
         color: { attribute_id: 7, name: 'Color', options: ['Rojo', 'Verde', 'Azul', 'Negro'] }
       };
     }
-
-    this.variants = this.variants.map(variant => ({
-      ...variant,
-      attributes: Object.keys(this.attributes).reduce((acc, key) => {
-        acc[key] = '';
-        return acc;
-      }, {} as { [key: string]: string })
-    }));
+    this.updateVariantAttributes();
   }
 
-  onBasicInfoChange(field: string, value: any) {
-    if (field.startsWith('customization_')) {
-      const option = field.split('_')[1] as 'text' | 'image' | 'file';
-      this.basicInfo.customizations[option] = value;
-    } else if (field === 'category_id') {
-      this.basicInfo[field] = value ? Number(value) : null;
-      this.loadAttributes(this.basicInfo.category_id);
-    } else if (field === 'name' || field === 'description') {
-      // Normalizar entrada: primera letra en mayúsculas, sin espacios al inicio/fin, sin dobles espacios
-      const normalizedValue = value
-        .trim()
-        .replace(/\s+/g, ' ')
-        .replace(/^(.)/, (match: string) => match.toUpperCase()); // Tipar match como string
-      (this.basicInfo as any)[field] = normalizedValue;
-    } else {
-      (this.basicInfo as any)[field] = value;
-    }
-    this.validateStep1();
+  updateVariantAttributes() {
+    this.variants.controls.forEach((variant) => {
+      const attributesGroup = variant.get('attributes') as FormGroup;
+      Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
+      Object.keys(this.attributes).forEach(key => {
+        attributesGroup.addControl(key, this.fb.control('', Validators.required));
+      });
+    });
+  }
+
+  addCustomization() {
+    const customizationGroup = this.fb.group({
+      type: ['', Validators.required],
+      description: ['']
+    });
+
+    customizationGroup.get('type')?.valueChanges.subscribe(type => {
+      if (type && !customizationGroup.get('description')?.touched) {
+        let defaultDescription = '';
+        switch (type) {
+          case 'Imagen':
+            defaultDescription = 'Ej: Sube tu diseño';
+            break;
+          case 'Texto':
+            defaultDescription = 'Ej: Escribe tu mensaje';
+            break;
+          case 'Archivo':
+            defaultDescription = 'Ej: Sube tu archivo PDF';
+            break;
+        }
+        customizationGroup.get('description')?.setValue(defaultDescription);
+      }
+    });
+
+    this.customizations.push(customizationGroup);
+  }
+
+  removeCustomization(index: number) {
+    this.customizations.removeAt(index);
+  }
+
+  isCustomizationRequired(): boolean {
+    const productType = this.productForm.get('product_type')?.value;
+    return productType === 'semi_personalizado' || productType === 'personalizado';
   }
 
   validateStep1(): boolean {
     const newErrors: FormErrors = {};
-    const allowedCharsRegex = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s+_-]+$/;
 
-    if (!this.basicInfo.name) {
-      newErrors['name'] = 'El nombre es obligatorio';
-    } else if (!allowedCharsRegex.test(this.basicInfo.name)) {
-      newErrors['name'] = 'Solo se permiten letras, números, acentos, ñ, espacios, +, -, y _';
-    } else if (this.basicInfo.name.length < 3 || this.basicInfo.name.length > 100) {
-      newErrors['name'] = 'El nombre debe tener entre 3 y 100 caracteres';
+    if (this.productForm.get('name')?.invalid) {
+      if (this.productForm.get('name')?.errors?.['required']) newErrors['name'] = 'El nombre es obligatorio';
+      else if (this.productForm.get('name')?.errors?.['pattern']) newErrors['name'] = 'Solo se permiten letras, números, acentos, ñ, espacios, guiones y guiones bajos';
+      else if (this.productForm.get('name')?.errors?.['minlength'] || this.productForm.get('name')?.errors?.['maxlength']) newErrors['name'] = 'El nombre debe tener entre 3 y 100 caracteres';
+    }
+  
+    if (this.productForm.get('description')?.invalid) {
+      if (this.productForm.get('description')?.errors?.['required']) newErrors['description'] = 'La descripción es obligatoria';
+      else if (this.productForm.get('description')?.errors?.['pattern']) newErrors['description'] = 'Solo se permiten letras, números, acentos, ñ, espacios, guiones y guiones bajos';
+      else if (this.productForm.get('description')?.errors?.['minlength'] || this.productForm.get('description')?.errors?.['maxlength']) newErrors['description'] = 'La descripción debe tener entre 10 y 500 caracteres';
     }
 
-    if (!this.basicInfo.description) {
-      newErrors['description'] = 'La descripción es obligatoria';
-    } else if (!allowedCharsRegex.test(this.basicInfo.description)) {
-      newErrors['description'] = 'Solo se permiten letras, números, acentos, ñ, espacios, +, -, y _';
-    } else if (this.basicInfo.description.length < 10 || this.basicInfo.description.length > 500) {
-      newErrors['description'] = 'La descripción debe tener entre 10 y 500 caracteres';
-    }
-
-    if (!this.basicInfo.category_id) {
+    if (this.productForm.get('category_id')?.invalid) {
       newErrors['category_id'] = 'Selecciona una categoría';
     }
 
-    if (!this.basicInfo.product_type) {
+    if (this.productForm.get('product_type')?.invalid) {
       newErrors['product_type'] = 'Selecciona un tipo de producto';
     }
 
-    if (['semi_personalizado', 'personalizado'].includes(this.basicInfo.product_type)) {
-      const hasCustomization = Object.values(this.basicInfo.customizations).some(val => val);
-      if (!hasCustomization) {
-        newErrors['customizations'] = 'Selecciona al menos una opción de personalización';
-      }
+    if (this.isCustomizationRequired() && this.customizations.length === 0) {
+      newErrors['customizations'] = 'Agrega al menos una opción de personalización';
+    } else if (this.isCustomizationRequired()) {
+      this.customizations.controls.forEach((control, index) => {
+        if (control.get('type')?.invalid) {
+          newErrors[`customization_${index}_type`] = 'El tipo es obligatorio';
+        }
+      });
     }
 
     this.errors = newErrors;
@@ -209,7 +277,24 @@ export class ProductCatalogFormComponent implements OnInit {
 
   goToNextStep() {
     if (this.validateStep1()) {
+      const step1Data = {
+        name: this.productForm.get('name')?.value,
+        description: this.productForm.get('description')?.value,
+        category_id: this.productForm.get('category_id')?.value,
+        collaborator_id: this.productForm.get('collaborator_id')?.value,
+        product_type: this.productForm.get('product_type')?.value,
+        customizations: this.customizations.value
+      };
+      console.log('Datos del Paso 1 al pasar al Paso 2:', step1Data);
+
+      const productName = this.productForm.get('name')?.value;
+      this.variants.controls.forEach((variant, index) => {
+        const sku = this.generateSKU(productName, index);
+        variant.get('sku')?.setValue(sku);
+      });
+
       this.currentStep = 2;
+      this.updateErrors(); // Actualizar errores al entrar al paso 2
     }
   }
 
@@ -218,112 +303,123 @@ export class ProductCatalogFormComponent implements OnInit {
   }
 
   generateNewId(): number {
-    return Math.max(...this.variants.map(v => v.id), 0) + 1;
+    return Math.max(...this.variants.controls.map(v => v.get('id')?.value || 0), 0) + 1;
   }
 
   addVariant() {
-    this.variants.push({
-      id: this.generateNewId(),
-      sku: '',
-      attributes: Object.keys(this.attributes).reduce((acc, key) => {
-        acc[key] = '';
-        return acc;
-      }, {} as { [key: string]: string }),
-      production_cost: null,
-      profit_margin: null,
-      calculated_price: 0,
-      images: []
+    const productName = this.productForm.get('name')?.value || 'PROD';
+    const newVariantIndex = this.variants.length;
+    const sku = this.generateSKU(productName, newVariantIndex);
+    const newVariant = this.createVariantFormGroup(sku);
+    newVariant.patchValue({ id: this.generateNewId() });
+    const attributesGroup = newVariant.get('attributes') as FormGroup;
+    Object.keys(this.attributes).forEach(key => {
+      attributesGroup.addControl(key, this.fb.control('', Validators.required));
     });
+    this.variants.push(newVariant);
+    this.updateErrors(); // Actualizar errores al agregar variante
   }
 
-  removeVariant(id: number) {
+  removeVariant(index: number) {
     if (this.variants.length > 1) {
-      this.variants = this.variants.filter(v => v.id !== id);
+      this.variants.removeAt(index);
+      this.updateErrors(); // Actualizar errores al eliminar variante
     }
   }
 
-  handleVariantChange(id: number, field: string, value: any) {
-    this.variants = this.variants.map(v => {
-      if (v.id === id) {
-        const updatedVariant = { ...v, [field]: field === 'production_cost' || field === 'profit_margin' ? Number(value) || null : value };
-        if (field === 'production_cost' || field === 'profit_margin') {
-          const cost = updatedVariant.production_cost || 0;
-          const margin = updatedVariant.profit_margin || 0;
-          updatedVariant.calculated_price = cost * (1 + margin / 100);
-        }
-        return updatedVariant;
-      }
-      return v;
-    });
-  }
-
-  handleAttributeChange(id: number, attributeKey: string, value: string) {
-    this.variants = this.variants.map(v => v.id === id ? { ...v, attributes: { ...v.attributes, [attributeKey]: value } } : v);
-  }
-
-  handleImageUpload(id: number, event: Event) {
+  handleImageUpload(index: number, event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       const newImages = Array.from(input.files);
-      this.variants = this.variants.map(v => {
-        if (v.id === id) {
-          return { ...v, images: [...v.images, ...newImages].slice(0, 10) };
-        }
-        return v;
-      });
+      const variant = this.variants.at(index);
+      const currentImages = variant.get('images')?.value || [];
+      variant.patchValue({ images: [...currentImages, ...newImages].slice(0, 10) });
     }
   }
 
-  removeImage(variantId: number, index: number) {
-    this.variants = this.variants.map(v => {
-      if (v.id === variantId) {
-        const newImages = [...v.images];
-        newImages.splice(index, 1);
-        return { ...v, images: newImages };
+  removeImage(variantIndex: number, imageIndex: number) {
+    const variant = this.variants.at(variantIndex);
+    const images = [...variant.get('images')?.value];
+    images.splice(imageIndex, 1);
+    variant.patchValue({ images });
+  }
+
+  calculatePrice(variant: FormGroup) {
+    const cost = variant.get('production_cost')?.value || 0;
+    const margin = variant.get('profit_margin')?.value || 0;
+    const price = cost * (1 + margin / 100);
+    variant.get('calculated_price')?.setValue(price);
+  }
+
+  // Nueva función para actualizar errores dinámicamente
+  updateErrors() {
+    const newErrors: FormErrors = { ...this.errors };
+    const skus = new Set<string>();
+
+    this.variants.controls.forEach((variant, index) => {
+      const skuControl = variant.get('sku');
+      const sku = skuControl?.value;
+
+      // Limpiar errores previos para este índice
+      delete newErrors[`sku_${index}`];
+
+      if (!sku?.trim()) {
+        newErrors[`sku_${index}`] = 'El SKU es obligatorio';
+      } else if (skuControl?.errors?.['pattern']) {
+        newErrors[`sku_${index}`] = 'El SKU debe tener el formato AAAA-123 (4 letras mayúsculas, guión, 3 dígitos)';
+      } else if (skus.has(sku)) {
+        newErrors[`sku_${index}`] = 'El SKU ya existe en otra variante';
+      } else {
+        skus.add(sku);
       }
-      return v;
     });
+
+    this.errors = newErrors;
   }
 
   validateStep2(): boolean {
-    const skus = new Set<string>();
-    return this.variants.every(v => {
-      if (!v.sku.trim() || skus.has(v.sku)) return false;
-      skus.add(v.sku);
-      if (v.production_cost === null || v.profit_margin === null) return false;
-      if (v.images.length === 0) return false;
-      return Object.values(v.attributes).every(attr => attr !== '');
+    this.updateErrors(); // Asegurarse de que los errores estén actualizados
+    const hasSkuErrors = this.variants.controls.some((v, i) => this.errors[`sku_${i}`]);
+    const otherFieldsValid = this.variants.controls.every((v) => {
+      const variant = v as FormGroup;
+      return (
+        !variant.get('production_cost')?.invalid &&
+        !variant.get('profit_margin')?.invalid &&
+        variant.get('images')?.value.length > 0 &&
+        Object.values((variant.get('attributes') as FormGroup).value).every((attr: any) => attr !== '')
+      );
     });
+
+    return !hasSkuErrors && otherFieldsValid;
   }
 
   saveProduct() {
     if (!this.validateStep2()) {
-      window.alert('Por favor completa todos los campos requeridos en las variantes');
+      window.alert('Por favor corrige los errores en las variantes antes de guardar');
       return;
     }
 
-    const customizations = Object.entries(this.basicInfo.customizations)
-      .filter(([_, enabled]) => enabled)
-      .map(([type]) => ({ type: type.charAt(0).toUpperCase() + type.slice(1) as 'Texto' | 'Imagen' | 'Archivo', description: '' }));
-
     const productData: NewProduct = {
-      name: this.basicInfo.name,
-      description: this.basicInfo.description,
-      product_type: this.basicInfo.product_type as 'Existencia' | 'semi_personalizado' | 'personalizado',
-      category_id: this.basicInfo.category_id!,
-      collaborator_id: this.basicInfo.collaborator_id || undefined,
-      variants: this.variants.map(v => ({
-        sku: v.sku,
-        production_cost: v.production_cost!,
-        profit_margin: v.profit_margin!,
-        stock: 0,
-        attributes: Object.entries(v.attributes).map(([key, value]) => ({
-          attribute_id: this.attributes[key].attribute_id,
-          value
-        })),
-        images: v.images
-      })),
-      customizations: customizations.length > 0 ? customizations : undefined
+      name: this.productForm.get('name')?.value as string,
+      description: this.productForm.get('description')?.value as string,
+      product_type: this.productForm.get('product_type')?.value as 'Existencia' | 'semi_personalizado' | 'personalizado',
+      category_id: this.productForm.get('category_id')?.value as number,
+      collaborator_id: this.productForm.get('collaborator_id')?.value || undefined,
+      variants: this.variants.controls.map((variant) => {
+        const attributesGroup = variant.get('attributes') as FormGroup;
+        return {
+          sku: variant.get('sku')?.value as string,
+          production_cost: variant.get('production_cost')?.value as number,
+          profit_margin: variant.get('profit_margin')?.value as number,
+          stock: 0,
+          attributes: Object.entries(attributesGroup.value).map(([key, value]) => ({
+            attribute_id: this.attributes[key].attribute_id,
+            value: value as string
+          })),
+          images: variant.get('images')?.value as File[]
+        };
+      }),
+      customizations: this.customizations.length > 0 ? this.customizations.value : undefined
     };
 
     this.productService.createProduct(productData).subscribe({
@@ -345,5 +441,13 @@ export class ProductCatalogFormComponent implements OnInit {
 
   getAttributeKeys(): string[] {
     return Object.keys(this.attributes);
+  }
+
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  getVariantAttributes(index: number): FormGroup {
+    return this.variants.at(index).get('attributes') as FormGroup;
   }
 }

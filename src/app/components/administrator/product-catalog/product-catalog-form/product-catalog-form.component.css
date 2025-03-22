@@ -10,3 +10,16 @@ input:focus, select:focus, textarea:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
 }
+
+.tooltip-container {
+    position: relative;
+}
+
+.tooltip-icon:hover + .tooltip-text {
+    display: block;
+}
+
+.tooltip-text {
+    width: 200px;
+    z-index: 10;
+}

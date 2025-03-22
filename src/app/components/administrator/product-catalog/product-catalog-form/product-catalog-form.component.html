@@ -15,13 +15,12 @@
   </div>
 
   <!-- Paso 1: Información básica -->
-  <div *ngIf="currentStep === 1" class="space-y-4">
+  <form [formGroup]="productForm" *ngIf="currentStep === 1" class="space-y-4">
     <!-- Nombre -->
     <div>
-      <label class="block text-sm font-medium mb-1">Nombre *</label>
+      <label class="block text-sm font-medium mb-1">Nombre <span class="text-red-500">*</span></label>
       <input
-        [(ngModel)]="basicInfo.name"
-        (ngModelChange)="onBasicInfoChange('name', $event)"
+        formControlName="name"
         maxlength="100"
         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
         [ngClass]="{'border-red-500': errors['name'], 'border-gray-300': !errors['name']}"
@@ -32,10 +31,9 @@
 
     <!-- Descripción -->
     <div>
-      <label class="block text-sm font-medium mb-1">Descripción *</label>
+      <label class="block text-sm font-medium mb-1">Descripción <span class="text-red-500">*</span></label>
       <textarea
-        [(ngModel)]="basicInfo.description"
-        (ngModelChange)="onBasicInfoChange('description', $event)"
+        formControlName="description"
         maxlength="500"
         rows="3"
         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
@@ -47,10 +45,9 @@
 
     <!-- Categoría -->
     <div>
-      <label class="block text-sm font-medium mb-1">Categoría *</label>
+      <label class="block text-sm font-medium mb-1">Categoría <span class="text-red-500">*</span></label>
       <select
-        [(ngModel)]="basicInfo.category_id"
-        (ngModelChange)="onBasicInfoChange('category_id', $event)"
+        formControlName="category_id"
         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
         [ngClass]="{'border-red-500': errors['category_id'], 'border-gray-300': !errors['category_id']}"
       >
@@ -64,8 +61,7 @@
     <div>
       <label class="block text-sm font-medium mb-1">Colaborador</label>
       <select
-        [(ngModel)]="basicInfo.collaborator_id"
-        (ngModelChange)="onBasicInfoChange('collaborator_id', $event)"
+        formControlName="collaborator_id"
         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
       >
         <option [ngValue]="null">Selecciona un colaborador (opcional)</option>
@@ -75,10 +71,9 @@
 
     <!-- Tipo de producto -->
     <div>
-      <label class="block text-sm font-medium mb-1">Tipo de producto *</label>
+      <label class="block text-sm font-medium mb-1">Tipo de producto <span class="text-red-500">*</span></label>
       <select
-        [(ngModel)]="basicInfo.product_type"
-        (ngModelChange)="onBasicInfoChange('product_type', $event)"
+        formControlName="product_type"
         class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
         [ngClass]="{'border-red-500': errors['product_type'], 'border-gray-300': !errors['product_type']}"
       >
@@ -90,36 +85,63 @@
       <p *ngIf="errors['product_type']" class="mt-1 text-sm text-red-500">{{ errors['product_type'] }}</p>
     </div>
 
-    <!-- Opciones de personalización -->
-    <div *ngIf="basicInfo.product_type === 'semi_personalizado' || basicInfo.product_type === 'personalizado'" class="mt-4">
-      <label class="block text-sm font-medium mb-2">Opciones de personalización *</label>
-      <div class="space-y-2">
-        <div class="flex items-center">
-          <input
-            type="checkbox"
-            [(ngModel)]="basicInfo.customizations.text"
-            (ngModelChange)="onBasicInfoChange('customization_text', $event)"
-            class="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
-          >
-          <label class="ml-2 text-sm">Texto (permite al cliente agregar texto)</label>
+    <!-- Opciones de Personalización -->
+    <div *ngIf="isCustomizationRequired()" class="mt-2">
+      <div class="flex items-center justify-between mb-2">
+        <label class="block text-sm font-medium mb-1">
+          Opciones de Personalización <span class="text-red-500">*</span>
+          <div class="tooltip-container inline-block ml-1">
+            <i class="fas fa-info-circle text-gray-400 tooltip-icon cursor-help"></i>
+            <span class="tooltip-text hidden absolute bg-gray-700 text-white text-xs rounded p-2 -mt-10 -ml-20">Define cómo el cliente puede personalizar el producto (ej. imagen, texto o archivo).</span>
+          </div>
+        </label>
+        <button
+          type="button"
+          (click)="addCustomization()"
+          class="bg-blue-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          +
+        </button>
+      </div>
+      <div class="border border-gray-200 p-4 rounded-lg">
+        <div *ngIf="customizations.length === 0" class="text-gray-500 text-center py-4">
+          Agrega al menos una opción de personalización
         </div>
-        <div class="flex items-center">
-          <input
-            type="checkbox"
-            [(ngModel)]="basicInfo.customizations.image"
-            (ngModelChange)="onBasicInfoChange('customization_image', $event)"
-            class="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
-          >
-          <label class="ml-2 text-sm">Imagen (permite subir una imagen)</label>
-        </div>
-        <div class="flex items-center">
-          <input
-            type="checkbox"
-            [(ngModel)]="basicInfo.customizations.file"
-            (ngModelChange)="onBasicInfoChange('customization_file', $event)"
-            class="h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
-          >
-          <label class="ml-2 text-sm">Archivo (permite subir un archivo)</label>
+        <div class="space-y-4">
+          <div *ngFor="let cust of customizations.controls; let i=index; trackBy: trackByIndex" [formGroup]="cust" class="flex items-start space-x-4">
+            <div class="flex-1">
+              <label class="block text-sm font-medium mb-1">Tipo <span class="text-red-500">*</span></label>
+              <select
+                formControlName="type"
+                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+                [ngClass]="{'border-red-500': errors['customization_' + i + '_type'], 'border-gray-300': !errors['customization_' + i + '_type']}"
+              >
+                <option value="">Selecciona un tipo</option>
+                <option value="Imagen">Imagen</option>
+                <option value="Texto">Texto</option>
+                <option value="Archivo">Archivo (PDF)</option>
+              </select>
+              <div *ngIf="errors['customization_' + i + '_type']" class="text-red-500 text-sm mt-1">
+                {{ errors['customization_' + i + '_type'] }}
+              </div>
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm font-medium mb-1">Descripción</label>
+              <input
+                formControlName="description"
+                type="text"
+                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+                placeholder="Describe la opción..."
+              />
+            </div>
+            <button
+              type="button"
+              (click)="removeCustomization(i)"
+              class="text-red-500 mt-6 hover:text-red-700 focus:outline-none"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
       </div>
       <p *ngIf="errors['customizations']" class="mt-1 text-sm text-red-500">{{ errors['customizations'] }}</p>
@@ -128,6 +150,7 @@
     <!-- Botón Siguiente -->
     <div class="mt-8 flex justify-end">
       <button
+        type="button"
         (click)="goToNextStep()"
         [disabled]="!validateStep1()"
         class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -135,7 +158,7 @@
         Siguiente <i class="fas fa-chevron-right ml-1"></i>
       </button>
     </div>
-  </div>
+  </form>
 
   <!-- Paso 2: Variantes -->
   <div *ngIf="currentStep === 2" class="space-y-6">
@@ -149,36 +172,32 @@
       </button>
     </div>
 
-    <!-- Lista de variantes -->
-    <div *ngFor="let variant of variants; let i = index" class="p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-dark-table-header">
+    <div *ngFor="let variant of variants.controls; let i=index" [formGroup]="variant" class="p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-dark-table-header">
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-medium">Variante #{{ i + 1 }}</h3>
-        <button *ngIf="variants.length > 1" (click)="removeVariant(variant.id)" class="p-1.5 bg-red-100 dark:bg-dark-danger text-red-600 dark:text-white rounded-md hover:bg-red-200 dark:hover:bg-red-700">
+        <button *ngIf="variants.length > 1" (click)="removeVariant(i)" class="p-1.5 bg-red-100 dark:bg-dark-danger text-red-600 dark:text-white rounded-md hover:bg-red-200 dark:hover:bg-red-700">
           <i class="fas fa-trash"></i>
         </button>
       </div>
-
-      <!-- SKU -->
+    
       <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">SKU *</label>
+        <label class="block text-sm font-medium mb-1">SKU <span class="text-red-500">*</span></label>
         <input
-          [(ngModel)]="variant.sku"
-          (ngModelChange)="handleVariantChange(variant.id, 'sku', $event)"
-          maxlength="50"
+          formControlName="sku"
+          maxlength="8"
           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-          placeholder="Código único de producto"
+          placeholder="Ej: LÁMP-001"
         >
+        <p *ngIf="errors['sku_' + i]" class="mt-1 text-sm text-red-500">{{ errors['sku_' + i] }}</p>
       </div>
-
-      <!-- Atributos -->
-      <div *ngIf="basicInfo.category_id" class="mb-4">
-        <label class="block text-sm font-medium mb-2">Atributos *</label>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    
+      <div *ngIf="productForm.get('category_id')?.value" class="mb-4">
+        <label class="block text-sm font-medium mb-2">Atributos <span class="text-red-500">*</span></label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" [formGroup]="getVariantAttributes(i)">
           <div *ngFor="let attrKey of getAttributeKeys()">
             <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">{{ attributes[attrKey].name }}</label>
             <select
-              [(ngModel)]="variant.attributes[attrKey]"
-              (ngModelChange)="handleAttributeChange(variant.id, attrKey, $event)"
+              [formControlName]="attrKey"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
             >
               <option value="">Selecciona {{ attributes[attrKey].name }}</option>
@@ -188,18 +207,17 @@
         </div>
       </div>
 
-      <!-- Precios -->
       <div class="mb-4">
-        <label class="block text-sm font-medium mb-2">Precios *</label>
+        <label class="block text-sm font-medium mb-2">Precios <span class="text-red-500">*</span></label>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Costo de producción</label>
             <input
               type="number"
-              [(ngModel)]="variant.production_cost"
-              (ngModelChange)="handleVariantChange(variant.id, 'production_cost', $event)"
+              formControlName="production_cost"
               min="0"
               step="0.01"
+              (input)="calculatePrice(variant)"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
               placeholder="0.00"
             >
@@ -208,10 +226,10 @@
             <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Margen de ganancia (%)</label>
             <input
               type="number"
-              [(ngModel)]="variant.profit_margin"
-              (ngModelChange)="handleVariantChange(variant.id, 'profit_margin', $event)"
+              formControlName="profit_margin"
               min="0"
               step="0.01"
+              (input)="calculatePrice(variant)"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
               placeholder="0.00"
             >
@@ -220,7 +238,7 @@
             <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Precio calculado</label>
             <input
               type="text"
-              [value]="formatPrice(variant.calculated_price)"
+              [value]="formatPrice(variant.get('calculated_price')?.value || 0)"
               disabled
               class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md"
             >
@@ -228,24 +246,23 @@
         </div>
       </div>
 
-      <!-- Imágenes -->
       <div>
-        <label class="block text-sm font-medium mb-2">Imágenes *</label>
+        <label class="block text-sm font-medium mb-2">Imágenes <span class="text-red-500">*</span></label>
         <div class="flex flex-wrap gap-2 mb-2">
-          <div *ngFor="let image of variant.images; let imgIndex = index" class="relative w-20 h-20">
+          <div *ngFor="let image of variant.get('images')?.value; let imgIndex=index" class="relative w-20 h-20">
             <img [src]="image | safeUrl" alt="Vista previa" class="w-full h-full object-cover rounded-md border border-gray-300 dark:border-gray-600">
-            <button (click)="removeImage(variant.id, imgIndex)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+            <button (click)="removeImage(i, imgIndex)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
               <i class="fas fa-times text-xs"></i>
             </button>
           </div>
-          <label *ngIf="variant.images.length < 10" class="flex flex-col items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+          <label *ngIf="variant.get('images')?.value.length < 10" class="flex flex-col items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
             <i class="fas fa-upload text-gray-400 dark:text-dark-secondary"></i>
-            <span class="mt-1 text-xs text-gray-500 dark:text-dark-secondary">{{ variant.images.length === 0 ? 'Agregar' : '+' }}</span>
+            <span class="mt-1 text-xs text-gray-500 dark:text-dark-secondary">{{ variant.get('images')?.value.length === 0 ? 'Agregar' : '+' }}</span>
             <input
               type="file"
               accept="image/*"
               multiple
-              (change)="handleImageUpload(variant.id, $event)"
+              (change)="handleImageUpload(i, $event)"
               class="hidden"
             >
           </label>
@@ -254,7 +271,6 @@
       </div>
     </div>
 
-    <!-- Botones -->
     <div class="mt-8 flex justify-between">
       <button (click)="goToPreviousStep()" class="px-4 py-2 bg-blue-200 dark:bg-blue-600 text-blue-700 dark:text-white rounded-md hover:bg-blue-300 dark:hover:bg-blue-700 flex items-center">
         <i class="fas fa-chevron-left mr-1"></i> Atrás
