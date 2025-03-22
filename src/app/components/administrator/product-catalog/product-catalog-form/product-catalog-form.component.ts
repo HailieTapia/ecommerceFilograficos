@@ -6,6 +6,7 @@ import { CategorieService } from '../../../services/categorieService';
 import { CollaboratorsService } from '../../../services/collaborators.service';
 import { ProductAttributeService, Attribute, CategoryWithAttributes } from '../../../services/product-attribute.service';
 import { SafeUrlPipe } from '../../../pipes/safe-url.pipe';
+import { debounceTime } from 'rxjs/operators';
 
 interface Category {
   category_id: number;
@@ -104,10 +105,10 @@ export class ProductCatalogFormComponent implements OnInit {
     this.loadCategories();
     this.loadCollaborators();
     this.loadAttributesByActiveCategories();
-
+  
     this.productForm.get('category_id')?.valueChanges.subscribe(value => this.updateVariantAttributes(value));
     this.productForm.get('product_type')?.valueChanges.subscribe(() => this.validateStep1());
-
+  
     this.productForm.get('name')?.valueChanges.subscribe(value => {
       if (value) {
         const capitalizedValue = this.capitalizeFirstWord(value);
@@ -116,7 +117,7 @@ export class ProductCatalogFormComponent implements OnInit {
         }
       }
     });
-
+  
     this.productForm.get('description')?.valueChanges.subscribe(value => {
       if (value) {
         const capitalizedValue = this.capitalizeFirstWord(value);
@@ -125,8 +126,9 @@ export class ProductCatalogFormComponent implements OnInit {
         }
       }
     });
-
-    this.variants.valueChanges.subscribe(() => {
+  
+    // Agregar debounceTime para evitar actualizaciones excesivas
+    this.variants.valueChanges.pipe(debounceTime(100)).subscribe(() => {
       this.variants.controls.forEach(variant => this.calculatePrice(variant as FormGroup));
       this.updateErrors();
     });
@@ -174,7 +176,7 @@ export class ProductCatalogFormComponent implements OnInit {
             attribute_id: attr.attribute_id,
             attribute_name: attr.attribute_name,
             data_type: attr.data_type,
-            allowed_values: attr.allowed_values, // Mantenemos como string | undefined según la interfaz
+            allowed_values: attr.allowed_values,
             is_required: attr.is_required || false
           }));
           return acc;
@@ -192,17 +194,19 @@ export class ProductCatalogFormComponent implements OnInit {
       });
       return;
     }
-
+  
     const attributes = this.attributesByCategory[categoryId];
     this.variants.controls.forEach(variant => {
       const attributesGroup = variant.get('attributes') as FormGroup;
       Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
       attributes.forEach(attr => {
         const validators = attr.is_required ? [Validators.required] : [];
-        attributesGroup.addControl(
-          attr.attribute_id.toString(),
-          this.fb.control('', validators)
-        );
+        if (!attributesGroup.get(attr.attribute_id.toString())) { // Evita agregar controles duplicados
+          attributesGroup.addControl(
+            attr.attribute_id.toString(),
+            this.fb.control('', validators)
+          );
+        }
       });
     });
   }
@@ -353,7 +357,7 @@ export class ProductCatalogFormComponent implements OnInit {
     const cost = variant.get('production_cost')?.value || 0;
     const margin = variant.get('profit_margin')?.value || 0;
     const calculated = parseFloat((cost * (1 + margin / 100)).toFixed(2));
-    variant.get('calculated_price')?.setValue(calculated);
+    variant.get('calculated_price')?.setValue(calculated, { emitEvent: false }); // Evita bucle
     this.validatePrice(variant);
   }
 
@@ -409,24 +413,24 @@ export class ProductCatalogFormComponent implements OnInit {
   updateErrors() {
     const newErrors: FormErrors = { ...this.errors };
     const skus = new Set<string>();
-
+  
     this.variants.controls.forEach((variant, index) => {
       const skuControl = variant.get('sku');
       const sku = skuControl?.value;
       delete newErrors[`sku_${index}`];
-
+  
       if (!sku?.trim()) {
         newErrors[`sku_${index}`] = 'El SKU es obligatorio';
       } else if (skuControl?.errors?.['pattern']) {
-        newErrors[`sku_${index}`] = 'El SKU debe tener el formato AAAA-123 (4 letras mayúsculas, guión, 3 dígitos)';
+        newErrors[`sku_${index}`] = 'El SKU debe tener el formato AAAA-123';
       } else if (skus.has(sku)) {
         newErrors[`sku_${index}`] = 'El SKU ya existe en otra variante';
       } else {
         skus.add(sku);
       }
-
+  
       this.validatePrice(variant as FormGroup);
-
+  
       const attributesGroup = variant.get('attributes') as FormGroup;
       const categoryId = this.productForm.get('category_id')?.value;
       if (categoryId && this.attributesByCategory[categoryId]) {
@@ -440,7 +444,7 @@ export class ProductCatalogFormComponent implements OnInit {
         });
       }
     });
-
+  
     this.errors = newErrors;
   }
 
@@ -456,6 +460,38 @@ export class ProductCatalogFormComponent implements OnInit {
     );
 
     return !hasErrors;
+  }
+
+  // Método para reiniciar el formulario después de guardar
+  resetForm() {
+    // Reiniciar los campos del formulario
+    this.productForm.reset({
+      name: '',
+      description: '',
+      category_id: null,
+      collaborator_id: null,
+      product_type: '',
+    });
+
+    // Limpiar el FormArray de customizations
+    while (this.customizations.length > 0) {
+      this.customizations.removeAt(0);
+    }
+
+    // Limpiar el FormArray de variants y agregar una variante vacía
+    while (this.variants.length > 0) {
+      this.variants.removeAt(0);
+    }
+    this.variants.push(this.createVariantFormGroup());
+
+    // Reiniciar el paso actual
+    this.currentStep = 1;
+
+    // Limpiar los errores
+    this.errors = {};
+
+    // Opcional: Si necesitas recargar los atributos por categoría, puedes hacerlo aquí
+    this.updateVariantAttributes(null);
   }
 
   saveProduct() {
@@ -494,6 +530,7 @@ export class ProductCatalogFormComponent implements OnInit {
         console.log('Producto creado:', response);
         window.alert('Producto guardado con éxito');
         this.productSaved.emit();
+        this.resetForm(); // Llamamos al método para reiniciar el formulario
       },
       error: (err) => {
         console.error('Error al guardar producto:', err);
@@ -522,7 +559,6 @@ export class ProductCatalogFormComponent implements OnInit {
     return this.variants.at(index).get('attributes') as FormGroup;
   }
 
-  // Método auxiliar para convertir allowed_values a un array
   getAllowedValuesAsArray(allowedValues: string | undefined): string[] {
     return allowedValues ? allowedValues.split(',').map(value => value.trim()) : [];
   }
