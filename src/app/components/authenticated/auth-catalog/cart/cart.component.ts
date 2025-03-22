@@ -20,7 +20,7 @@ export class CartComponent implements OnInit, OnDestroy {
   cartItems: any[] = [];
   totalItems: number = 0;
   subtotal: number = 0;
-  tax: number = 0; // Puedes ajustar el cálculo de impuestos según tus necesidades
+  tax: number = 0; 
   total: number = 0;
   private cartSubscription!: Subscription;
   private apiUrl = `${environment.baseUrl}/cart`;
