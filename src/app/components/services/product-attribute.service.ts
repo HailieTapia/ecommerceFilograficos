@@ -9,7 +9,7 @@ import { environment } from '../../environments/config';
 export interface Attribute {
   attribute_id: number;
   attribute_name: string;
-  data_type: string; // 'texto', 'numero', 'lista'
+  data_type: string; // 'texto', 'numero', 'lista' , 'booleno'
   allowed_values?: string; // Valores permitidos separados por comas
   is_required: boolean; // Asegúrate de que esta propiedad esté definida
 }

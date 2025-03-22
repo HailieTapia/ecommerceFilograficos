@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, Abs
 import { ProductService, NewProduct, Variant } from '../../../services/product.service';
 import { CategorieService } from '../../../services/categorieService';
 import { CollaboratorsService } from '../../../services/collaborators.service';
+import { ProductAttributeService, Attribute, CategoryWithAttributes } from '../../../services/product-attribute.service';
 import { SafeUrlPipe } from '../../../pipes/safe-url.pipe';
 
 interface Category {
@@ -14,12 +15,6 @@ interface Category {
 interface Collaborator {
   collaborator_id: number;
   name: string;
-}
-
-interface Attribute {
-  attribute_id: number;
-  name: string;
-  options: string[];
 }
 
 interface FormErrors {
@@ -50,14 +45,15 @@ export class ProductCatalogFormComponent implements OnInit {
 
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
-  attributes: { [key: string]: Attribute } = {};
+  attributesByCategory: { [key: number]: Attribute[] } = {};
 
-  readonly MAX_PROFIT_MARGIN: number = 500; // Máximo margen de ganancia del PriceManagementComponent
+  readonly MAX_PROFIT_MARGIN: number = 500;
 
   constructor(
     private productService: ProductService,
     private categorieService: CategorieService,
     private collaboratorsService: CollaboratorsService,
+    private productAttributeService: ProductAttributeService,
     private fb: FormBuilder
   ) {
     this.productForm = this.fb.group({
@@ -84,8 +80,8 @@ export class ProductCatalogFormComponent implements OnInit {
       id: [1],
       sku: [sku, [Validators.required, Validators.pattern(/^[A-Z]{4}-\d{3}$/), Validators.maxLength(8)]],
       attributes: this.fb.group({}),
-      production_cost: [null, [Validators.required, Validators.min(0)]], // Costo >= 0
-      profit_margin: [null, [Validators.required, Validators.min(0.01), Validators.max(this.MAX_PROFIT_MARGIN)]], // Margen entre 0.01 y 500
+      production_cost: [null, [Validators.required, Validators.min(0)]],
+      profit_margin: [null, [Validators.required, Validators.min(0.01), Validators.max(this.MAX_PROFIT_MARGIN)]],
       calculated_price: [{ value: 0, disabled: true }],
       images: [[]]
     });
@@ -107,7 +103,9 @@ export class ProductCatalogFormComponent implements OnInit {
   ngOnInit() {
     this.loadCategories();
     this.loadCollaborators();
-    this.productForm.get('category_id')?.valueChanges.subscribe(value => this.loadAttributes(value));
+    this.loadAttributesByActiveCategories();
+
+    this.productForm.get('category_id')?.valueChanges.subscribe(value => this.updateVariantAttributes(value));
     this.productForm.get('product_type')?.valueChanges.subscribe(() => this.validateStep1());
 
     this.productForm.get('name')?.valueChanges.subscribe(value => {
@@ -168,38 +166,43 @@ export class ProductCatalogFormComponent implements OnInit {
     });
   }
 
-  loadAttributes(categoryId: number | null) {
-    if (!categoryId) {
-      this.attributes = {};
-      this.updateVariantAttributes();
-      return;
-    }
-    if (categoryId === 1) {
-      this.attributes = {
-        light_type: { attribute_id: 1, name: 'Tipo de luz', options: ['Cálida', 'Fría'] },
-        material: { attribute_id: 2, name: 'Material', options: ['Plástico', 'Metal'] }
-      };
-    } else if (categoryId === 2) {
-      this.attributes = {
-        material: { attribute_id: 3, name: 'Material', options: ['Cerámica', 'Plástico'] },
-        size: { attribute_id: 4, name: 'Tamaño', options: ['Pequeño', 'Mediano', 'Grande'] },
-        color: { attribute_id: 5, name: 'Color', options: ['Blanco', 'Negro', 'Azul'] }
-      };
-    } else {
-      this.attributes = {
-        size: { attribute_id: 6, name: 'Tamaño', options: ['S', 'M', 'L', 'XL'] },
-        color: { attribute_id: 7, name: 'Color', options: ['Rojo', 'Verde', 'Azul', 'Negro'] }
-      };
-    }
-    this.updateVariantAttributes();
+  loadAttributesByActiveCategories() {
+    this.productAttributeService.getAttributesByActiveCategories().subscribe({
+      next: (response: CategoryWithAttributes[]) => {
+        this.attributesByCategory = response.reduce((acc, category) => {
+          acc[category.category_id] = category.attributes.map(attr => ({
+            attribute_id: attr.attribute_id,
+            attribute_name: attr.attribute_name,
+            data_type: attr.data_type,
+            allowed_values: attr.allowed_values, // Mantenemos como string | undefined según la interfaz
+            is_required: attr.is_required || false
+          }));
+          return acc;
+        }, {} as { [key: number]: Attribute[] });
+      },
+      error: (err) => console.error('Error al cargar atributos por categorías activas:', err)
+    });
   }
 
-  updateVariantAttributes() {
-    this.variants.controls.forEach((variant) => {
+  updateVariantAttributes(categoryId: number | null) {
+    if (!categoryId || !this.attributesByCategory[categoryId]) {
+      this.variants.controls.forEach(variant => {
+        const attributesGroup = variant.get('attributes') as FormGroup;
+        Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
+      });
+      return;
+    }
+
+    const attributes = this.attributesByCategory[categoryId];
+    this.variants.controls.forEach(variant => {
       const attributesGroup = variant.get('attributes') as FormGroup;
       Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
-      Object.keys(this.attributes).forEach(key => {
-        attributesGroup.addControl(key, this.fb.control('', Validators.required));
+      attributes.forEach(attr => {
+        const validators = attr.is_required ? [Validators.required] : [];
+        attributesGroup.addControl(
+          attr.attribute_id.toString(),
+          this.fb.control('', validators)
+        );
       });
     });
   }
@@ -314,10 +317,10 @@ export class ProductCatalogFormComponent implements OnInit {
     const sku = this.generateSKU(productName, newVariantIndex);
     const newVariant = this.createVariantFormGroup(sku);
     newVariant.patchValue({ id: this.generateNewId() });
-    const attributesGroup = newVariant.get('attributes') as FormGroup;
-    Object.keys(this.attributes).forEach(key => {
-      attributesGroup.addControl(key, this.fb.control('', Validators.required));
-    });
+    const categoryId = this.productForm.get('category_id')?.value;
+    if (categoryId) {
+      this.updateVariantAttributes(categoryId);
+    }
     this.variants.push(newVariant);
     this.updateErrors();
   }
@@ -423,6 +426,19 @@ export class ProductCatalogFormComponent implements OnInit {
       }
 
       this.validatePrice(variant as FormGroup);
+
+      const attributesGroup = variant.get('attributes') as FormGroup;
+      const categoryId = this.productForm.get('category_id')?.value;
+      if (categoryId && this.attributesByCategory[categoryId]) {
+        this.attributesByCategory[categoryId].forEach(attr => {
+          const attrControl = attributesGroup.get(attr.attribute_id.toString());
+          if (attr.is_required && (!attrControl?.value || attrControl.value.trim() === '')) {
+            newErrors[`attribute_${attr.attribute_id}_${index}`] = `${attr.attribute_name} es obligatorio`;
+          } else {
+            delete newErrors[`attribute_${attr.attribute_id}_${index}`];
+          }
+        });
+      }
     });
 
     this.errors = newErrors;
@@ -436,7 +452,7 @@ export class ProductCatalogFormComponent implements OnInit {
       this.errors[`profit_margin_${i}`] ||
       this.errors[`calculated_price_${i}`] ||
       v.get('images')?.value.length === 0 ||
-      Object.values((v.get('attributes') as FormGroup).value).some((attr: any) => attr === '')
+      Object.keys((v.get('attributes') as FormGroup).controls).some(key => this.errors[`attribute_${key}_${i}`])
     );
 
     return !hasErrors;
@@ -456,13 +472,15 @@ export class ProductCatalogFormComponent implements OnInit {
       collaborator_id: this.productForm.get('collaborator_id')?.value || undefined,
       variants: this.variants.controls.map((variant) => {
         const attributesGroup = variant.get('attributes') as FormGroup;
+        const categoryId = this.productForm.get('category_id')?.value;
+        const attributes = this.attributesByCategory[categoryId] || [];
         return {
           sku: variant.get('sku')?.value as string,
           production_cost: variant.get('production_cost')?.value as number,
           profit_margin: variant.get('profit_margin')?.value as number,
           stock: 0,
           attributes: Object.entries(attributesGroup.value).map(([key, value]) => ({
-            attribute_id: this.attributes[key].attribute_id,
+            attribute_id: parseInt(key),
             value: value as string
           })),
           images: variant.get('images')?.value as File[]
@@ -488,8 +506,12 @@ export class ProductCatalogFormComponent implements OnInit {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
   }
 
-  getAttributeKeys(): string[] {
-    return Object.keys(this.attributes);
+  getAttributesForCategory(categoryId: number): Attribute[] {
+    return this.attributesByCategory[categoryId] || [];
+  }
+
+  getAttributeKeys(categoryId: number): string[] {
+    return this.getAttributesForCategory(categoryId).map(attr => attr.attribute_id.toString());
   }
 
   trackByIndex(index: number): number {
@@ -498,5 +520,10 @@ export class ProductCatalogFormComponent implements OnInit {
 
   getVariantAttributes(index: number): FormGroup {
     return this.variants.at(index).get('attributes') as FormGroup;
+  }
+
+  // Método auxiliar para convertir allowed_values a un array
+  getAllowedValuesAsArray(allowedValues: string | undefined): string[] {
+    return allowedValues ? allowedValues.split(',').map(value => value.trim()) : [];
   }
 }
