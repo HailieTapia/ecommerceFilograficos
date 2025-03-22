@@ -215,24 +215,31 @@
             <input
               type="number"
               formControlName="production_cost"
+              (keydown)="restrictInput($event)"
+              (input)="calculatePrice(variant)"
               min="0"
               step="0.01"
-              (input)="calculatePrice(variant)"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+              [ngClass]="{'border-red-500': errors['production_cost_' + i], 'border-gray-300': !errors['production_cost_' + i]}"
               placeholder="0.00"
             >
+            <p *ngIf="errors['production_cost_' + i]" class="mt-1 text-sm text-red-500">{{ errors['production_cost_' + i] }}</p>
           </div>
           <div>
             <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Margen de ganancia (%)</label>
             <input
               type="number"
               formControlName="profit_margin"
-              min="0"
-              step="0.01"
+              (keydown)="restrictInput($event)"
               (input)="calculatePrice(variant)"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+              min="0.01"
+              [max]="MAX_PROFIT_MARGIN"
+              step="0.01"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+              [ngClass]="{'border-red-500': errors['profit_margin_' + i], 'border-gray-300': !errors['profit_margin_' + i]}"
               placeholder="0.00"
             >
+            <p *ngIf="errors['profit_margin_' + i]" class="mt-1 text-sm text-red-500">{{ errors['profit_margin_' + i] }}</p>
           </div>
           <div>
             <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Precio calculado</label>
@@ -240,8 +247,10 @@
               type="text"
               [value]="formatPrice(variant.get('calculated_price')?.value || 0)"
               disabled
-              class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md"
+              class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border rounded-md"
+              [ngClass]="{'border-red-500': errors['calculated_price_' + i], 'border-gray-300': !errors['calculated_price_' + i]}"
             >
+            <p *ngIf="errors['calculated_price_' + i]" class="mt-1 text-sm text-red-500">{{ errors['calculated_price_' + i] }}</p>
           </div>
         </div>
       </div>

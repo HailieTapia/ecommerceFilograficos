@@ -29,6 +29,9 @@ interface FormErrors {
   product_type?: string;
   customizations?: string;
   sku?: string;
+  production_cost?: string;
+  profit_margin?: string;
+  calculated_price?: string;
   [key: string]: string | undefined;
 }
 
@@ -48,6 +51,8 @@ export class ProductCatalogFormComponent implements OnInit {
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
   attributes: { [key: string]: Attribute } = {};
+
+  readonly MAX_PROFIT_MARGIN: number = 500; // Máximo margen de ganancia del PriceManagementComponent
 
   constructor(
     private productService: ProductService,
@@ -77,20 +82,15 @@ export class ProductCatalogFormComponent implements OnInit {
   createVariantFormGroup(sku: string = ''): FormGroup {
     return this.fb.group({
       id: [1],
-      sku: [sku, [
-        Validators.required,
-        Validators.pattern(/^[A-Z]{4}-\d{3}$/), // 4 letras mayúsculas, guión, 3 dígitos
-        Validators.maxLength(8)
-      ]],
+      sku: [sku, [Validators.required, Validators.pattern(/^[A-Z]{4}-\d{3}$/), Validators.maxLength(8)]],
       attributes: this.fb.group({}),
-      production_cost: [null, [Validators.required, Validators.min(0)]],
-      profit_margin: [null, [Validators.required, Validators.min(0)]],
+      production_cost: [null, [Validators.required, Validators.min(0)]], // Costo >= 0
+      profit_margin: [null, [Validators.required, Validators.min(0.01), Validators.max(this.MAX_PROFIT_MARGIN)]], // Margen entre 0.01 y 500
       calculated_price: [{ value: 0, disabled: true }],
       images: [[]]
     });
   }
 
-  // Validador personalizado para SKUs únicos
   uniqueSkuValidator(control: AbstractControl): ValidationErrors | null {
     const variants = control as FormArray;
     const skus = variants.controls.map(v => v.get('sku')?.value).filter(sku => sku);
@@ -128,8 +128,10 @@ export class ProductCatalogFormComponent implements OnInit {
       }
     });
 
-    // Suscripción a cambios en los SKUs para actualizar errores
-    this.variants.valueChanges.subscribe(() => this.updateErrors());
+    this.variants.valueChanges.subscribe(() => {
+      this.variants.controls.forEach(variant => this.calculatePrice(variant as FormGroup));
+      this.updateErrors();
+    });
   }
 
   capitalizeFirstWord(text: string): string {
@@ -294,7 +296,7 @@ export class ProductCatalogFormComponent implements OnInit {
       });
 
       this.currentStep = 2;
-      this.updateErrors(); // Actualizar errores al entrar al paso 2
+      this.updateErrors();
     }
   }
 
@@ -317,13 +319,13 @@ export class ProductCatalogFormComponent implements OnInit {
       attributesGroup.addControl(key, this.fb.control('', Validators.required));
     });
     this.variants.push(newVariant);
-    this.updateErrors(); // Actualizar errores al agregar variante
+    this.updateErrors();
   }
 
   removeVariant(index: number) {
     if (this.variants.length > 1) {
       this.variants.removeAt(index);
-      this.updateErrors(); // Actualizar errores al eliminar variante
+      this.updateErrors();
     }
   }
 
@@ -347,11 +349,60 @@ export class ProductCatalogFormComponent implements OnInit {
   calculatePrice(variant: FormGroup) {
     const cost = variant.get('production_cost')?.value || 0;
     const margin = variant.get('profit_margin')?.value || 0;
-    const price = cost * (1 + margin / 100);
-    variant.get('calculated_price')?.setValue(price);
+    const calculated = parseFloat((cost * (1 + margin / 100)).toFixed(2));
+    variant.get('calculated_price')?.setValue(calculated);
+    this.validatePrice(variant);
   }
 
-  // Nueva función para actualizar errores dinámicamente
+  validatePrice(variant: FormGroup) {
+    const index = this.variants.controls.indexOf(variant);
+    const cost = variant.get('production_cost')?.value || 0;
+    const margin = variant.get('profit_margin')?.value || 0;
+    const calculated = variant.get('calculated_price')?.value || 0;
+
+    if (cost < 0) {
+      this.errors[`production_cost_${index}`] = 'El costo de producción debe ser positivo';
+    } else {
+      delete this.errors[`production_cost_${index}`];
+    }
+
+    if (margin < 0.01 || margin > this.MAX_PROFIT_MARGIN) {
+      this.errors[`profit_margin_${index}`] = `El margen de ganancia debe estar entre 0.01% y ${this.MAX_PROFIT_MARGIN}%`;
+    } else {
+      delete this.errors[`profit_margin_${index}`];
+    }
+
+    if (calculated < cost) {
+      this.errors[`calculated_price_${index}`] = `El precio debe ser mayor a $${cost.toFixed(2)}`;
+    } else {
+      delete this.errors[`calculated_price_${index}`];
+    }
+  }
+
+  restrictInput(event: KeyboardEvent): void {
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', '.'];
+    const isNumberKey = event.key >= '0' && event.key <= '9';
+    const isAllowedSpecialKey = allowedKeys.includes(event.key);
+
+    if (!isNumberKey && !isAllowedSpecialKey) {
+      event.preventDefault();
+      return;
+    }
+
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    const dotIndex = value.indexOf('.');
+
+    if (event.key === '.' && dotIndex !== -1) {
+      event.preventDefault();
+      return;
+    }
+
+    if (dotIndex !== -1 && value.length - dotIndex > 2 && !allowedKeys.includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   updateErrors() {
     const newErrors: FormErrors = { ...this.errors };
     const skus = new Set<string>();
@@ -359,8 +410,6 @@ export class ProductCatalogFormComponent implements OnInit {
     this.variants.controls.forEach((variant, index) => {
       const skuControl = variant.get('sku');
       const sku = skuControl?.value;
-
-      // Limpiar errores previos para este índice
       delete newErrors[`sku_${index}`];
 
       if (!sku?.trim()) {
@@ -372,25 +421,25 @@ export class ProductCatalogFormComponent implements OnInit {
       } else {
         skus.add(sku);
       }
+
+      this.validatePrice(variant as FormGroup);
     });
 
     this.errors = newErrors;
   }
 
   validateStep2(): boolean {
-    this.updateErrors(); // Asegurarse de que los errores estén actualizados
-    const hasSkuErrors = this.variants.controls.some((v, i) => this.errors[`sku_${i}`]);
-    const otherFieldsValid = this.variants.controls.every((v) => {
-      const variant = v as FormGroup;
-      return (
-        !variant.get('production_cost')?.invalid &&
-        !variant.get('profit_margin')?.invalid &&
-        variant.get('images')?.value.length > 0 &&
-        Object.values((variant.get('attributes') as FormGroup).value).every((attr: any) => attr !== '')
-      );
-    });
+    this.updateErrors();
+    const hasErrors = this.variants.controls.some((v, i) =>
+      this.errors[`sku_${i}`] ||
+      this.errors[`production_cost_${i}`] ||
+      this.errors[`profit_margin_${i}`] ||
+      this.errors[`calculated_price_${i}`] ||
+      v.get('images')?.value.length === 0 ||
+      Object.values((v.get('attributes') as FormGroup).value).some((attr: any) => attr === '')
+    );
 
-    return !hasSkuErrors && otherFieldsValid;
+    return !hasErrors;
   }
 
   saveProduct() {
