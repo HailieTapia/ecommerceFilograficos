@@ -30,6 +30,7 @@ export interface ProductResponse {
 }
 
 export interface Variant {
+  variant_id?: number; // Opcional para permitir actualizar variantes existentes o crear nuevas
   sku: string;
   production_cost: number;
   profit_margin: number;
@@ -37,7 +38,8 @@ export interface Variant {
   stock_threshold?: number;
   attributes?: { attribute_id: number; value: string }[];
   customizations?: { type: 'Imagen' | 'Texto' | 'Archivo'; description: string }[];
-  images: File[];
+  images: File[]; // Nuevas imágenes a subir
+  imagesToDelete?: number[]; // IDs de imágenes a eliminar
 }
 
 export interface NewProduct {
@@ -48,6 +50,10 @@ export interface NewProduct {
   collaborator_id?: number;
   variants: Variant[];
   customizations?: { type: 'Imagen' | 'Texto' | 'Archivo'; description: string }[];
+}
+
+export interface DeleteVariantResponse {
+  message: string;
 }
 
 export interface DetailedVariant {
@@ -359,34 +365,41 @@ export class ProductService {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         const formData = new FormData();
 
-        formData.append('name', productData.name);
-        formData.append('product_type', productData.product_type);
-        formData.append('category_id', productData.category_id.toString());
-        if (productData.description) {
-          formData.append('description', productData.description);
-        }
-        if (productData.collaborator_id) {
-          formData.append('collaborator_id', productData.collaborator_id.toString());
-        }
+        // Datos básicos del producto (todos opcionales en actualización)
+        if (productData.name) formData.append('name', productData.name);
+        if (productData.description !== undefined) formData.append('description', productData.description);
+        if (productData.product_type) formData.append('product_type', productData.product_type);
+        if (productData.category_id) formData.append('category_id', productData.category_id.toString());
+        if (productData.collaborator_id !== undefined) formData.append('collaborator_id', productData.collaborator_id.toString());
         if (productData.product_type !== 'Existencia' && productData.customizations) {
           formData.append('customizations', JSON.stringify(productData.customizations));
         }
 
+        // Datos de las variantes
         const variantsData = productData.variants.map(v => ({
+          variant_id: v.variant_id, // Incluye variant_id si existe
           sku: v.sku,
           production_cost: v.production_cost,
           profit_margin: v.profit_margin,
           stock: v.stock,
           stock_threshold: v.stock_threshold,
           attributes: v.attributes || [],
-          customizations: productData.product_type !== 'Existencia' && v.customizations ? v.customizations : undefined
+          customizations: productData.product_type !== 'Existencia' && v.customizations ? v.customizations : undefined,
+          imagesToDelete: v.imagesToDelete || [] // IDs de imágenes a eliminar
         }));
         formData.append('variants', JSON.stringify(variantsData));
 
+        // Añadir nuevas imágenes
         productData.variants.forEach((variant, index) => {
-          variant.images.forEach((image, imgIndex) => {
-            formData.append(`variants[${index}][images]`, image, `${variant.sku}-${imgIndex + 1}-${image.name}`);
-          });
+          if (variant.images && variant.images.length > 0) {
+            variant.images.forEach((image, imgIndex) => {
+              formData.append(
+                `variants[${index}][images]`,
+                image,
+                `${variant.sku}-${imgIndex + 1}-${image.name}`
+              );
+            });
+          }
         });
 
         const formDataEntries: Record<string, any> = {};
@@ -395,7 +408,19 @@ export class ProductService {
         });
         console.log('Datos enviados en FormData (actualización):', formDataEntries);
 
-        return this.http.put<UpdateProductResponse>(`${this.apiUrl}/${productId}`, formData, {
+        return this.http.patch<UpdateProductResponse>(`${this.apiUrl}/${productId}`, formData, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  deleteVariant(productId: number, variantId: number): Observable<DeleteVariantResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.delete<DeleteVariantResponse>(`${this.apiUrl}/${productId}/variants/${variantId}`, {
           headers,
           withCredentials: true
         });
