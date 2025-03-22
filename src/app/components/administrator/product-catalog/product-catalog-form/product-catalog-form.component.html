@@ -1,320 +1,321 @@
-<div class="max-w-4xl mx-auto p-4 bg-white dark:bg-dark-background shadow-lg rounded-lg text-light-text dark:text-dark-text">
-  <!-- Stepper -->
-  <div class="mb-8">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center">
-        <div class="flex items-center justify-center w-8 h-8 rounded-full" [ngClass]="{'bg-blue-500 text-white': currentStep === 1, 'bg-gray-200 dark:bg-gray-600': currentStep !== 1}">1</div>
-        <span class="ml-2 text-sm font-medium">Información básica</span>
+<div class="relative z-20 w-full flex items-center justify-center p-4">
+  <div class="w-full max-w-4xl bg-light-background dark:bg-dark-background bg-opacity-80 dark:bg-opacity-80 rounded-2xl shadow-xl p-8 transform transition-all duration-300 hover:shadow-2xl" style="backdrop-filter: blur(10px);">
+    <!-- Progress Steps (nuevo diseño basado en RecoverComponent) -->
+    <div class="flex justify-center mb-8">
+      <div class="flex items-center space-x-1">
+        <div [ngClass]="{'bg-light-primary dark:bg-dark-primary': currentStep === 1, 'bg-light-closed dark:bg-dark-closed': currentStep !== 1}" class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg">
+          1
+        </div>
+        <div class="w-16 h-1" [ngClass]="{'bg-light-primary dark:bg-dark-primary': currentStep > 1, 'bg-light-closed dark:bg-dark-closed': currentStep <= 1}"></div>
+        <div [ngClass]="{'bg-light-primary dark:bg-dark-primary': currentStep === 2, 'bg-light-closed dark:bg-dark-closed': currentStep !== 2}" class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg">
+          2
+        </div>
       </div>
-      <div class="flex-1 h-px mx-4 bg-gray-300 dark:bg-gray-600"></div>
-      <div class="flex items-center">
-        <div class="flex items-center justify-center w-8 h-8 rounded-full" [ngClass]="{'bg-blue-500 text-white': currentStep === 2, 'bg-gray-200 dark:bg-gray-600': currentStep !== 2}">2</div>
-        <span class="ml-2 text-sm font-medium">Variantes</span>
+    </div>
+
+    <!-- Paso 1: Información básica -->
+    <form [formGroup]="productForm" *ngIf="currentStep === 1" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Nombre <span class="text-red-500">*</span></label>
+        <input
+          formControlName="name"
+          maxlength="100"
+          class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+          [ngClass]="{'border-red-500': errors['name'], 'border-gray-300': !errors['name']}"
+          placeholder="Nombre del producto"
+        >
+        <p *ngIf="errors['name']" class="mt-1 text-sm text-red-500">{{ errors['name'] }}</p>
       </div>
-    </div>
-  </div>
 
-  <!-- Paso 1: Información básica -->
-  <form [formGroup]="productForm" *ngIf="currentStep === 1" class="space-y-4">
-    <div>
-      <label class="block text-sm font-medium mb-1">Nombre <span class="text-red-500">*</span></label>
-      <input
-        formControlName="name"
-        maxlength="100"
-        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
-        [ngClass]="{'border-red-500': errors['name'], 'border-gray-300': !errors['name']}"
-        placeholder="Nombre del producto"
-      >
-      <p *ngIf="errors['name']" class="mt-1 text-sm text-red-500">{{ errors['name'] }}</p>
-    </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Descripción <span class="text-red-500">*</span></label>
+        <textarea
+          formControlName="description"
+          maxlength="500"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+          [ngClass]="{'border-red-500': errors['description'], 'border-gray-300': !errors['description']}"
+          placeholder="Descripción del producto"
+        ></textarea>
+        <p *ngIf="errors['description']" class="mt-1 text-sm text-red-500">{{ errors['description'] }}</p>
+      </div>
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Descripción <span class="text-red-500">*</span></label>
-      <textarea
-        formControlName="description"
-        maxlength="500"
-        rows="3"
-        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-        [ngClass]="{'border-red-500': errors['description'], 'border-gray-300': !errors['description']}"
-        placeholder="Descripción del producto"
-      ></textarea>
-      <p *ngIf="errors['description']" class="mt-1 text-sm text-red-500">{{ errors['description'] }}</p>
-    </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Categoría <span class="text-red-500">*</span></label>
+        <select
+          formControlName="category_id"
+          class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+          [ngClass]="{'border-red-500': errors['category_id'], 'border-gray-300': !errors['category_id']}"
+        >
+          <option [ngValue]="null">Selecciona una categoría</option>
+          <option *ngFor="let category of categories" [ngValue]="category.category_id">{{ category.name }}</option>
+        </select>
+        <p *ngIf="errors['category_id']" class="mt-1 text-sm text-red-500">{{ errors['category_id'] }}</p>
+      </div>
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Categoría <span class="text-red-500">*</span></label>
-      <select
-        formControlName="category_id"
-        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
-        [ngClass]="{'border-red-500': errors['category_id'], 'border-gray-300': !errors['category_id']}"
-      >
-        <option [ngValue]="null">Selecciona una categoría</option>
-        <option *ngFor="let category of categories" [ngValue]="category.category_id">{{ category.name }}</option>
-      </select>
-      <p *ngIf="errors['category_id']" class="mt-1 text-sm text-red-500">{{ errors['category_id'] }}</p>
-    </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Colaborador</label>
+        <select
+          formControlName="collaborator_id"
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+        >
+          <option [ngValue]="null">Selecciona un colaborador (opcional)</option>
+          <option *ngFor="let collaborator of collaborators" [ngValue]="collaborator.collaborator_id">{{ collaborator.name }}</option>
+        </select>
+      </div>
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Colaborador</label>
-      <select
-        formControlName="collaborator_id"
-        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-      >
-        <option [ngValue]="null">Selecciona un colaborador (opcional)</option>
-        <option *ngFor="let collaborator of collaborators" [ngValue]="collaborator.collaborator_id">{{ collaborator.name }}</option>
-      </select>
-    </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Tipo de producto <span class="text-red-500">*</span></label>
+        <select
+          formControlName="product_type"
+          class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+          [ngClass]="{'border-red-500': errors['product_type'], 'border-gray-300': !errors['product_type']}"
+        >
+          <option value="">Selecciona un tipo</option>
+          <option value="Existencia">Existencia</option>
+          <option value="semi_personalizado">Semi Personalizado</option>
+          <option value="personalizado">Personalizado</option>
+        </select>
+        <p *ngIf="errors['product_type']" class="mt-1 text-sm text-red-500">{{ errors['product_type'] }}</p>
+      </div>
 
-    <div>
-      <label class="block text-sm font-medium mb-1">Tipo de producto <span class="text-red-500">*</span></label>
-      <select
-        formControlName="product_type"
-        class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
-        [ngClass]="{'border-red-500': errors['product_type'], 'border-gray-300': !errors['product_type']}"
-      >
-        <option value="">Selecciona un tipo</option>
-        <option value="Existencia">Existencia</option>
-        <option value="semi_personalizado">Semi Personalizado</option>
-        <option value="personalizado">Personalizado</option>
-      </select>
-      <p *ngIf="errors['product_type']" class="mt-1 text-sm text-red-500">{{ errors['product_type'] }}</p>
-    </div>
-
-    <div *ngIf="isCustomizationRequired()" class="mt-2">
-      <div class="flex items-center justify-between mb-2">
-        <label class="block text-sm font-medium mb-1">
-          Opciones de Personalización <span class="text-red-500">*</span>
-          <div class="tooltip-container inline-block ml-1">
-            <i class="fas fa-info-circle text-gray-400 tooltip-icon cursor-help"></i>
-            <span class="tooltip-text hidden absolute bg-gray-700 text-white text-xs rounded p-2 -mt-10 -ml-20">Define cómo el cliente puede personalizar el producto (ej. imagen, texto o archivo).</span>
+      <div *ngIf="isCustomizationRequired()" class="mt-2">
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-sm font-medium mb-1">
+            Opciones de Personalización <span class="text-red-500">*</span>
+            <div class="tooltip-container inline-block ml-1">
+              <i class="fas fa-info-circle text-gray-400 tooltip-icon cursor-help"></i>
+              <span class="tooltip-text hidden absolute bg-gray-700 text-white text-xs rounded p-2 -mt-10 -ml-20">Define cómo el cliente puede personalizar el producto (ej. imagen, texto o archivo).</span>
+            </div>
+          </label>
+          <button
+            type="button"
+            (click)="addCustomization()"
+            class="bg-blue-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            +
+          </button>
+        </div>
+        <div class="border border-gray-200 p-4 rounded-lg">
+          <div *ngIf="customizations.length === 0" class="text-gray-500 text-center py-4">
+            Agrega al menos una opción de personalización
           </div>
-        </label>
+          <div class="space-y-4">
+            <div *ngFor="let cust of customizations.controls; let i=index; trackBy: trackByIndex" [formGroup]="cust" class="flex items-start space-x-4">
+              <div class="flex-1">
+                <label class="block text-sm font-medium mb-1">Tipo <span class="text-red-500">*</span></label>
+                <select
+                  formControlName="type"
+                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+                  [ngClass]="{'border-red-500': errors['customization_' + i + '_type'], 'border-gray-300': !errors['customization_' + i + '_type']}"
+                >
+                  <option value="">Selecciona un tipo</option>
+                  <option value="Imagen">Imagen</option>
+                  <option value="Texto">Texto</option>
+                  <option value="Archivo">Archivo (PDF)</option>
+                </select>
+                <div *ngIf="errors['customization_' + i + '_type']" class="text-red-500 text-sm mt-1">
+                  {{ errors['customization_' + i + '_type'] }}
+                </div>
+              </div>
+              <div class="flex-1">
+                <label class="block text-sm font-medium mb-1">Descripción</label>
+                <input
+                  formControlName="description"
+                  type="text"
+                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+                  placeholder="Describe la opción..."
+                />
+              </div>
+              <button
+                type="button"
+                (click)="removeCustomization(i)"
+                class="text-red-500 mt-6 hover:text-red-700 focus:outline-none"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p *ngIf="errors['customizations']" class="mt-1 text-sm text-red-500">{{ errors['customizations'] }}</p>
+      </div>
+
+      <div class="mt-8 flex justify-end">
         <button
           type="button"
-          (click)="addCustomization()"
-          class="bg-blue-500 text-white p-1 rounded-full w-6 h-6 flex items-center justify-center hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          (click)="goToNextStep()"
+          [disabled]="!validateStep1()"
+          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          +
+          Siguiente <i class="fas fa-chevron-right ml-1"></i>
         </button>
       </div>
-      <div class="border border-gray-200 p-4 rounded-lg">
-        <div *ngIf="customizations.length === 0" class="text-gray-500 text-center py-4">
-          Agrega al menos una opción de personalización
+    </form>
+
+    <!-- Paso 2: Variantes -->
+    <div *ngIf="currentStep === 2" class="space-y-6">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h2 class="text-xl font-semibold">Variantes del producto</h2>
+          <p class="text-sm text-gray-600 dark:text-dark-secondary">Agrega al menos una variante para tu producto.</p>
         </div>
-        <div class="space-y-4">
-          <div *ngFor="let cust of customizations.controls; let i=index; trackBy: trackByIndex" [formGroup]="cust" class="flex items-start space-x-4">
-            <div class="flex-1">
-              <label class="block text-sm font-medium mb-1">Tipo <span class="text-red-500">*</span></label>
-              <select
-                formControlName="type"
-                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
-                [ngClass]="{'border-red-500': errors['customization_' + i + '_type'], 'border-gray-300': !errors['customization_' + i + '_type']}"
-              >
-                <option value="">Selecciona un tipo</option>
-                <option value="Imagen">Imagen</option>
-                <option value="Texto">Texto</option>
-                <option value="Archivo">Archivo (PDF)</option>
-              </select>
-              <div *ngIf="errors['customization_' + i + '_type']" class="text-red-500 text-sm mt-1">
-                {{ errors['customization_' + i + '_type'] }}
-              </div>
+        <button (click)="addVariant()" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center">
+          <i class="fas fa-plus mr-1"></i> Agregar variante
+        </button>
+      </div>
+
+      <div *ngFor="let variant of variants.controls; let i=index" [formGroup]="variant" class="p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-dark-table-header">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-medium">Variante #{{ i + 1 }}</h3>
+          <button *ngIf="variants.length > 1" (click)="removeVariant(i)" class="p-1.5 bg-red-100 dark:bg-dark-danger text-red-600 dark:text-white rounded-md hover:bg-red-200 dark:hover:bg-red-700">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">SKU <span class="text-red-500">*</span></label>
+          <input
+            formControlName="sku"
+            maxlength="8"
+            readonly
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 focus:outline-none"
+            placeholder="Ej: LÁMP-001"
+          >
+          <p *ngIf="errors['sku_' + i]" class="mt-1 text-sm text-red-500">{{ errors['sku_' + i] }}</p>
+        </div>
+      
+        <div *ngIf="productForm.get('category_id')?.value" class="mb-4">
+          <label class="block text-sm font-medium mb-2">Atributos <span class="text-red-500">*</span></label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4" [formGroup]="getVariantAttributes(i)">
+            <div *ngFor="let attr of getAttributesForCategory(productForm.get('category_id')?.value)">
+              <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">
+                {{ attr.attribute_name }} {{ attr.is_required ? '*' : '' }}
+              </label>
+              <ng-container [ngSwitch]="attr.data_type">
+                <select
+                  *ngSwitchCase="'lista'"
+                  [formControlName]="attr.attribute_id.toString()"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+                  [ngClass]="{'border-red-500': errors['attribute_' + attr.attribute_id + '_' + i]}"
+                >
+                  <option value="">Selecciona {{ attr.attribute_name }}</option>
+                  <option *ngFor="let option of getAllowedValuesAsArray(attr.allowed_values)" [value]="option">{{ option }}</option>
+                </select>
+                <input
+                  *ngSwitchCase="'texto'"
+                  [formControlName]="attr.attribute_id.toString()"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+                  [ngClass]="{'border-red-500': errors['attribute_' + attr.attribute_id + '_' + i]}"
+                  placeholder="Ingresa {{ attr.attribute_name }}"
+                >
+                <input
+                  *ngSwitchCase="'numero'"
+                  [formControlName]="attr.attribute_id.toString()"
+                  type="number"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+                  [ngClass]="{'border-red-500': errors['attribute_' + attr.attribute_id + '_' + i]}"
+                  placeholder="Ingresa {{ attr.attribute_name }}"
+                >
+                <select
+                  *ngSwitchCase="'booleno'"
+                  [formControlName]="attr.attribute_id.toString()"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
+                  [ngClass]="{'border-red-500': errors['attribute_' + attr.attribute_id + '_' + i]}"
+                >
+                  <option value="">Selecciona {{ attr.attribute_name }}</option>
+                  <option value="true">Sí</option>
+                  <option value="false">No</option>
+                </select>
+              </ng-container>
+              <p *ngIf="errors['attribute_' + attr.attribute_id + '_' + i]" class="mt-1 text-sm text-red-500">
+                {{ errors['attribute_' + attr.attribute_id + '_' + i] }}
+              </p>
             </div>
-            <div class="flex-1">
-              <label class="block text-sm font-medium mb-1">Descripción</label>
-              <input
-                formControlName="description"
-                type="text"
-                class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
-                placeholder="Describe la opción..."
-              />
-            </div>
-            <button
-              type="button"
-              (click)="removeCustomization(i)"
-              class="text-red-500 mt-6 hover:text-red-700 focus:outline-none"
-            >
-              <i class="fas fa-times"></i>
-            </button>
           </div>
         </div>
-      </div>
-      <p *ngIf="errors['customizations']" class="mt-1 text-sm text-red-500">{{ errors['customizations'] }}</p>
-    </div>
 
-    <div class="mt-8 flex justify-end">
-      <button
-        type="button"
-        (click)="goToNextStep()"
-        [disabled]="!validateStep1()"
-        class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        Siguiente <i class="fas fa-chevron-right ml-1"></i>
-      </button>
-    </div>
-  </form>
-
-  <!-- Paso 2: Variantes -->
-  <div *ngIf="currentStep === 2" class="space-y-6">
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h2 class="text-xl font-semibold">Variantes del producto</h2>
-        <p class="text-sm text-gray-600 dark:text-dark-secondary">Agrega al menos una variante para tu producto.</p>
-      </div>
-      <button (click)="addVariant()" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center">
-        <i class="fas fa-plus mr-1"></i> Agregar variante
-      </button>
-    </div>
-
-    <div *ngFor="let variant of variants.controls; let i=index" [formGroup]="variant" class="p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-dark-table-header">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-medium">Variante #{{ i + 1 }}</h3>
-        <button *ngIf="variants.length > 1" (click)="removeVariant(i)" class="p-1.5 bg-red-100 dark:bg-dark-danger text-red-600 dark:text-white rounded-md hover:bg-red-200 dark:hover:bg-red-700">
-          <i class="fas fa-trash"></i>
-        </button>
-      </div>
-    
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-1">SKU <span class="text-red-500">*</span></label>
-        <input
-          formControlName="sku"
-          maxlength="8"
-          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-          placeholder="Ej: LÁMP-001"
-        >
-        <p *ngIf="errors['sku_' + i]" class="mt-1 text-sm text-red-500">{{ errors['sku_' + i] }}</p>
-      </div>
-    
-      <div *ngIf="productForm.get('category_id')?.value" class="mb-4">
-        <label class="block text-sm font-medium mb-2">Atributos <span class="text-red-500">*</span></label>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" [formGroup]="getVariantAttributes(i)">
-          <div *ngFor="let attr of getAttributesForCategory(productForm.get('category_id')?.value)">
-            <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">
-              {{ attr.attribute_name }} {{ attr.is_required ? '*' : '' }}
-            </label>
-            <ng-container [ngSwitch]="attr.data_type">
-              <select
-                *ngSwitchCase="'lista'"
-                [formControlName]="attr.attribute_id.toString()"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-                [ngClass]="{'border-red-500': errors['attribute_' + attr.attribute_id + '_' + i]}"
-              >
-                <option value="">Selecciona {{ attr.attribute_name }}</option>
-                <option *ngFor="let option of getAllowedValuesAsArray(attr.allowed_values)" [value]="option">{{ option }}</option>
-              </select>
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">Precios <span class="text-red-500">*</span></label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Costo de producción</label>
               <input
-                *ngSwitchCase="'texto'"
-                [formControlName]="attr.attribute_id.toString()"
-                type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-                [ngClass]="{'border-red-500': errors['attribute_' + attr.attribute_id + '_' + i]}"
-                placeholder="Ingresa {{ attr.attribute_name }}"
-              >
-              <input
-                *ngSwitchCase="'numero'"
-                [formControlName]="attr.attribute_id.toString()"
                 type="number"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-                [ngClass]="{'border-red-500': errors['attribute_' + attr.attribute_id + '_' + i]}"
-                placeholder="Ingresa {{ attr.attribute_name }}"
+                formControlName="production_cost"
+                (keydown)="restrictInput($event)"
+                (input)="calculatePrice(variant)"
+                min="0"
+                step="0.01"
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+                [ngClass]="{'border-red-500': errors['production_cost_' + i], 'border-gray-300': !errors['production_cost_' + i]}"
+                placeholder="0.00"
               >
-              <select
-                *ngSwitchCase="'booleno'"
-                [formControlName]="attr.attribute_id.toString()"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-                [ngClass]="{'border-red-500': errors['attribute_' + attr.attribute_id + '_' + i]}"
+              <p *ngIf="errors['production_cost_' + i]" class="mt-1 text-sm text-red-500">{{ errors['production_cost_' + i] }}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Margen de ganancia (%)</label>
+              <input
+                type="number"
+                formControlName="profit_margin"
+                (keydown)="restrictInput($event)"
+                (input)="calculatePrice(variant)"
+                min="0.01"
+                [max]="MAX_PROFIT_MARGIN"
+                step="0.01"
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+                [ngClass]="{'border-red-500': errors['profit_margin_' + i], 'border-gray-300': !errors['profit_margin_' + i]}"
+                placeholder="0.00"
               >
-                <option value="">Selecciona {{ attr.attribute_name }}</option>
-                <option value="true">Sí</option>
-                <option value="false">No</option>
-              </select>
-            </ng-container>
-            <p *ngIf="errors['attribute_' + attr.attribute_id + '_' + i]" class="mt-1 text-sm text-red-500">
-              {{ errors['attribute_' + attr.attribute_id + '_' + i] }}
-            </p>
+              <p *ngIf="errors['profit_margin_' + i]" class="mt-1 text-sm text-red-500">{{ errors['profit_margin_' + i] }}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Precio calculado</label>
+              <input
+                type="text"
+                [value]="formatPrice(variant.get('calculated_price')?.value || 0)"
+                disabled
+                class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border rounded-md"
+                [ngClass]="{'border-red-500': errors['calculated_price_' + i], 'border-gray-300': !errors['calculated_price_' + i]}"
+              >
+              <p *ngIf="errors['calculated_price_' + i]" class="mt-1 text-sm text-red-500">{{ errors['calculated_price_' + i] }}</p>
+            </div>
           </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Imágenes <span class="text-red-500">*</span></label>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <div *ngFor="let image of variant.get('images')?.value; let imgIndex=index" class="relative w-20 h-20">
+              <img [src]="image | safeUrl" alt="Vista previa" class="w-full h-full object-cover rounded-md border border-gray-300 dark:border-gray-600">
+              <button (click)="removeImage(i, imgIndex)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
+                <i class="fas fa-times text-xs"></i>
+              </button>
+            </div>
+            <label *ngIf="variant.get('images')?.value.length < 10" class="flex flex-col items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+              <i class="fas fa-upload text-gray-400 dark:text-dark-secondary"></i>
+              <span class="mt-1 text-xs text-gray-500 dark:text-dark-secondary">{{ variant.get('images')?.value.length === 0 ? 'Agregar' : '+' }}</span>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                (change)="handleImageUpload(i, $event)"
+                class="hidden"
+              >
+            </label>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-dark-secondary">Máximo 10 imágenes por variante</p>
         </div>
       </div>
 
-      <div class="mb-4">
-        <label class="block text-sm font-medium mb-2">Precios <span class="text-red-500">*</span></label>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Costo de producción</label>
-            <input
-              type="number"
-              formControlName="production_cost"
-              (keydown)="restrictInput($event)"
-              (input)="calculatePrice(variant)"
-              min="0"
-              step="0.01"
-              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
-              [ngClass]="{'border-red-500': errors['production_cost_' + i], 'border-gray-300': !errors['production_cost_' + i]}"
-              placeholder="0.00"
-            >
-            <p *ngIf="errors['production_cost_' + i]" class="mt-1 text-sm text-red-500">{{ errors['production_cost_' + i] }}</p>
-          </div>
-          <div>
-            <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Margen de ganancia (%)</label>
-            <input
-              type="number"
-              formControlName="profit_margin"
-              (keydown)="restrictInput($event)"
-              (input)="calculatePrice(variant)"
-              min="0.01"
-              [max]="MAX_PROFIT_MARGIN"
-              step="0.01"
-              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
-              [ngClass]="{'border-red-500': errors['profit_margin_' + i], 'border-gray-300': !errors['profit_margin_' + i]}"
-              placeholder="0.00"
-            >
-            <p *ngIf="errors['profit_margin_' + i]" class="mt-1 text-sm text-red-500">{{ errors['profit_margin_' + i] }}</p>
-          </div>
-          <div>
-            <label class="block text-sm text-gray-600 dark:text-dark-secondary mb-1">Precio calculado</label>
-            <input
-              type="text"
-              [value]="formatPrice(variant.get('calculated_price')?.value || 0)"
-              disabled
-              class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border rounded-md"
-              [ngClass]="{'border-red-500': errors['calculated_price_' + i], 'border-gray-300': !errors['calculated_price_' + i]}"
-            >
-            <p *ngIf="errors['calculated_price_' + i]" class="mt-1 text-sm text-red-500">{{ errors['calculated_price_' + i] }}</p>
-          </div>
-        </div>
+      <div class="mt-8 flex justify-between">
+        <button (click)="goToPreviousStep()" class="px-4 py-2 bg-blue-200 dark:bg-blue-600 text-blue-700 dark:text-white rounded-md hover:bg-blue-300 dark:hover:bg-blue-700 flex items-center">
+          <i class="fas fa-chevron-left mr-1"></i> Atrás
+        </button>
+        <button (click)="saveProduct()" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center">
+          <i class="fas fa-check mr-1"></i> Guardar
+        </button>
       </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-2">Imágenes <span class="text-red-500">*</span></label>
-        <div class="flex flex-wrap gap-2 mb-2">
-          <div *ngFor="let image of variant.get('images')?.value; let imgIndex=index" class="relative w-20 h-20">
-            <img [src]="image | safeUrl" alt="Vista previa" class="w-full h-full object-cover rounded-md border border-gray-300 dark:border-gray-600">
-            <button (click)="removeImage(i, imgIndex)" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center">
-              <i class="fas fa-times text-xs"></i>
-            </button>
-          </div>
-          <label *ngIf="variant.get('images')?.value.length < 10" class="flex flex-col items-center justify-center w-20 h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
-            <i class="fas fa-upload text-gray-400 dark:text-dark-secondary"></i>
-            <span class="mt-1 text-xs text-gray-500 dark:text-dark-secondary">{{ variant.get('images')?.value.length === 0 ? 'Agregar' : '+' }}</span>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              (change)="handleImageUpload(i, $event)"
-              class="hidden"
-            >
-          </label>
-        </div>
-        <p class="text-xs text-gray-500 dark:text-dark-secondary">Máximo 10 imágenes por variante</p>
-      </div>
-    </div>
-
-    <div class="mt-8 flex justify-between">
-      <button (click)="goToPreviousStep()" class="px-4 py-2 bg-blue-200 dark:bg-blue-600 text-blue-700 dark:text-white rounded-md hover:bg-blue-300 dark:hover:bg-blue-700 flex items-center">
-        <i class="fas fa-chevron-left mr-1"></i> Atrás
-      </button>
-      <button (click)="saveProduct()" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center">
-        <i class="fas fa-check mr-1"></i> Guardar
-      </button>
     </div>
   </div>
 </div>
