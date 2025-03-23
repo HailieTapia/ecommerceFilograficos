@@ -1,4 +1,4 @@
-<div class="max-w-full mx-auto py-10 px-5 bg-gray-100 min-h-screen font-sans">
+<div class="max-w-full mx-auto py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans">
   <div class="flex flex-col lg:flex-row gap-6">
     <!-- Barra lateral de filtros -->
     <div class="lg:w-1/4">
@@ -6,12 +6,11 @@
     </div>
 
     <!-- Cuadrícula de productos -->
-    <!-- Cuadrícula de productos -->
     <div class="lg:w-3/4">
       <!-- Dropdown de ordenamiento -->
       <div class="mb-4 flex justify-end">
         <select [(ngModel)]="selectedSort" (ngModelChange)="onSortChange()"
-          class="p-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-transparent transition">
+          class="p-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-light-text dark:text-dark-text bg-light-background dark:bg-dark-background focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-transparent transition">
           <option *ngFor="let option of sortOptions" [value]="option.value">
             {{ option.label }}
           </option>
@@ -20,23 +19,22 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
         <div *ngFor="let product of products"
-          class="bg-white rounded-xl shadow-md overflow-hidden transform transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+          class="bg-light-background dark:bg-dark-background rounded-xl shadow-md overflow-hidden transform transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
           <!-- Imagen del producto -->
-          <img [src]="product.image_url || 'https://via.placeholder.com/300x300?text=Sin+Imagen'"
-            alt="{{ product.name }}" class="w-full h-48 object-cover bg-gray-200">
+          <img [src]="product.image_url" class="w-full h-48 object-cover bg-gray-200 dark:bg-gray-600">
 
           <!-- Información del producto -->
           <div class="p-4 text-center">
-            <h3 class="text-lg font-medium text-gray-900 truncate">{{ product.name }}</h3>
-            <p class="text-sm text-gray-500 mt-1">{{ product.category }}</p>
-            <p class="text-base font-semibold text-gray-900 mt-2">
+            <h3 class="text-lg font-medium text-light-text dark:text-dark-text truncate">{{ product.name }}</h3>
+            <p class="text-sm text-light-secondary dark:text-dark-secondary mt-1">{{ product.category }}</p>
+            <p class="text-base font-semibold text-light-text dark:text-dark-text mt-2">
               ${{ product.min_price }} - ${{ product.max_price }}
             </p>
-            <p *ngIf="product.variant_count > 1" class="text-sm text-blue-600 mt-1">
+            <p *ngIf="product.variant_count > 1" class="text-sm text-light-primary dark:text-dark-primary mt-1">
               Disponible en {{ product.variant_count }} modelos
             </p>
             <button (click)="goToDetail(product.product_id)"
-              class="mt-3 bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-full hover:bg-blue-700 transition-colors duration-200">
+              class="mt-3 bg-light-primary dark:bg-dark-primary text-white text-sm font-medium py-2 px-4 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors duration-200">
               Ver detalles
             </button>
           </div>
@@ -44,14 +42,14 @@
       </div>
 
       <!-- Paginación -->
-      <div class="flex justify-center items-center gap-4 text-gray-900">
+      <div class="flex justify-center items-center gap-4 text-light-text dark:text-dark-text">
         <button [disabled]="page === 1" (click)="changePage(page - 1)"
-          class="bg-gray-200 text-gray-700 py-2 px-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors">
+          class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:bg-light-disabled dark:disabled:bg-dark-disabled disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text disabled:cursor-not-allowed hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-colors">
           Anterior
         </button>
         <span class="text-sm">Página {{ page }} de {{ totalPages }}</span>
         <button [disabled]="page === totalPages" (click)="changePage(page + 1)"
-          class="bg-gray-200 text-gray-700 py-2 px-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors">
+          class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:bg-light-disabled dark:disabled:bg-dark-disabled disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text disabled:cursor-not-allowed hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-colors">
           Siguiente
         </button>
       </div>
