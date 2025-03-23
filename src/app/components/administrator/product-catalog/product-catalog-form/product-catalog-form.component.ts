@@ -31,7 +31,6 @@ interface FormErrors {
   [key: string]: string | undefined;
 }
 
-// Mapeo bidireccional entre valores del backend y la interfaz
 const customizationTypeMap = {
   toBackend: {
     'Texto': 'text',
@@ -59,7 +58,7 @@ export class ProductCatalogFormComponent implements OnInit {
   productForm: FormGroup;
   errors: FormErrors = {};
   isEditMode = false;
-  variantsToDelete: number[] = []; // Lista de variant_ids a eliminar
+  variantsToDelete: number[] = [];
 
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
@@ -82,7 +81,7 @@ export class ProductCatalogFormComponent implements OnInit {
       collaborator_id: [null],
       product_type: ['', Validators.required],
       customizations: this.fb.array([]),
-      variants: this.fb.array([this.createVariantFormGroup()], this.uniqueSkuValidator.bind(this))
+      variants: this.fb.array([], this.uniqueSkuValidator.bind(this))
     });
   }
 
@@ -137,10 +136,14 @@ export class ProductCatalogFormComponent implements OnInit {
     this.loadCategories();
     this.loadCollaborators();
     this.loadAttributesByActiveCategories();
-  
-    this.productForm.get('category_id')?.valueChanges.subscribe(value => this.updateVariantAttributes(value));
+
+    // Listener para actualizar atributos cuando cambia la categoría
+    this.productForm.get('category_id')?.valueChanges.subscribe(categoryId => {
+      this.updateAllVariantAttributes(categoryId);
+    });
+
     this.productForm.get('product_type')?.valueChanges.subscribe(() => this.validateStep1());
-  
+
     this.productForm.get('name')?.valueChanges.subscribe(value => {
       if (value) {
         const capitalizedValue = this.capitalizeFirstWord(value);
@@ -149,7 +152,7 @@ export class ProductCatalogFormComponent implements OnInit {
         }
       }
     });
-  
+
     this.productForm.get('description')?.valueChanges.subscribe(value => {
       if (value) {
         const capitalizedValue = this.capitalizeFirstWord(value);
@@ -158,15 +161,18 @@ export class ProductCatalogFormComponent implements OnInit {
         }
       }
     });
-  
+
     this.variants.valueChanges.pipe(debounceTime(100)).subscribe(() => {
       this.variants.controls.forEach(variant => this.calculatePrice(variant as FormGroup));
       this.updateErrors();
     });
-  
+
     if (this.productId) {
       this.isEditMode = true;
       this.loadProductData(this.productId);
+    } else {
+      // Inicializar con una variante vacía en modo creación
+      this.addVariant();
     }
   }
 
@@ -176,6 +182,7 @@ export class ProductCatalogFormComponent implements OnInit {
         console.log('Datos del producto cargados:', response.product);
         const product = response.product;
   
+        // Cargar datos básicos del producto
         this.productForm.patchValue({
           name: product.name,
           description: product.description,
@@ -184,6 +191,7 @@ export class ProductCatalogFormComponent implements OnInit {
           product_type: product.product_type
         });
   
+        // Cargar customizaciones
         while (this.customizations.length > 0) this.customizations.removeAt(0);
         if (product.customizations && product.customizations.length > 0) {
           product.customizations.forEach(cust => {
@@ -194,6 +202,7 @@ export class ProductCatalogFormComponent implements OnInit {
           });
         }
   
+        // Limpiar variantes existentes y cargar nuevas
         while (this.variants.length > 0) this.variants.removeAt(0);
         product.variants.forEach(variant => {
           const variantGroup = this.createVariantFormGroup(variant.sku);
@@ -208,16 +217,16 @@ export class ProductCatalogFormComponent implements OnInit {
             imagesToDelete: []
           });
   
+          // Inicializar los atributos con sus valores existentes
           const attributesGroup = variantGroup.get('attributes') as FormGroup;
-          const categoryId = product.category?.category_id || 0;
-  
-          if (this.attributesByCategory[categoryId]) {
+          const categoryId = product.category?.category_id || null;
+          if (categoryId && this.attributesByCategory[categoryId]) {
             this.attributesByCategory[categoryId].forEach(attr => {
               const attrValue = variant.attributes.find(a => a.attribute_id === attr.attribute_id)?.value || '';
-              const attrValidators = attr.is_required ? [Validators.required] : [];
+              const validators = attr.is_required ? [Validators.required] : [];
               attributesGroup.addControl(
                 attr.attribute_id.toString(),
-                this.fb.control(attrValue, attrValidators)
+                this.fb.control(attrValue, validators)
               );
             });
           }
@@ -225,7 +234,7 @@ export class ProductCatalogFormComponent implements OnInit {
           this.variants.push(variantGroup);
         });
   
-        this.updateVariantAttributes(product.category?.category_id || null);
+        // No necesitamos llamar a updateAllVariantAttributes aquí porque ya inicializamos los atributos
         this.productForm.updateValueAndValidity();
         console.log('Formulario después de cargar datos:', this.productForm.value);
       },
@@ -288,7 +297,7 @@ export class ProductCatalogFormComponent implements OnInit {
     });
   }
 
-  updateVariantAttributes(categoryId: number | null) {
+  updateAllVariantAttributes(categoryId: number | null) {
     if (!categoryId || !this.attributesByCategory[categoryId]) {
       this.variants.controls.forEach(variant => {
         const attributesGroup = variant.get('attributes') as FormGroup;
@@ -298,21 +307,29 @@ export class ProductCatalogFormComponent implements OnInit {
     }
   
     const attributes = this.attributesByCategory[categoryId];
-    this.variants.controls.forEach(variant => {
+    this.variants.controls.forEach((variant, index) => {
       const attributesGroup = variant.get('attributes') as FormGroup;
       const existingValues = { ...attributesGroup.value };
   
-      Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
+      // Limpiar controles existentes solo si cambian los atributos esperados
+      const currentAttrIds = new Set(Object.keys(attributesGroup.controls));
+      const expectedAttrIds = new Set(attributes.map(attr => attr.attribute_id.toString()));
+      if (![...expectedAttrIds].every(id => currentAttrIds.has(id)) || ![...currentAttrIds].every(id => expectedAttrIds.has(id))) {
+        Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
   
-      attributes.forEach(attr => {
-        const existingValue = existingValues[attr.attribute_id.toString()] || '';
-        const validators = attr.is_required ? [Validators.required] : [];
-        attributesGroup.addControl(
-          attr.attribute_id.toString(),
-          this.fb.control(existingValue, validators)
-        );
-      });
+        // Agregar nuevos controles con valores preservados o vacíos
+        attributes.forEach(attr => {
+          const existingValue = existingValues[attr.attribute_id.toString()] || '';
+          const validators = attr.is_required ? [Validators.required] : [];
+          attributesGroup.addControl(
+            attr.attribute_id.toString(),
+            this.fb.control(existingValue, validators)
+          );
+        });
+      }
     });
+  
+    this.updateErrors();
   }
 
   addCustomization() {
@@ -424,12 +441,11 @@ export class ProductCatalogFormComponent implements OnInit {
     const newVariantIndex = this.variants.length;
     const sku = this.generateSKU(productName, newVariantIndex);
     const newVariant = this.createVariantFormGroup(sku);
-    const categoryId = this.productForm.get('category_id')?.value;
-    if (categoryId) {
-      this.updateVariantAttributes(categoryId);
-    }
     this.variants.push(newVariant);
-    this.updateErrors();
+
+    // Actualizar atributos para la nueva variante
+    const categoryId = this.productForm.get('category_id')?.value;
+    this.updateAllVariantAttributes(categoryId);
   }
 
   removeVariant(index: number) {
@@ -605,14 +621,14 @@ export class ProductCatalogFormComponent implements OnInit {
 
     return !hasErrors;
   }
-  
+
   resetForm() {
     this.productForm.reset({
       name: '',
       description: '',
       category_id: null,
       collaborator_id: null,
-      product_type: '',
+      product_type: ''
     });
 
     while (this.customizations.length > 0) {
@@ -622,11 +638,10 @@ export class ProductCatalogFormComponent implements OnInit {
     while (this.variants.length > 0) {
       this.variants.removeAt(0);
     }
-    this.variants.push(this.createVariantFormGroup());
+    this.addVariant(); // Agregar una variante inicial
 
     this.currentStep = 1;
     this.errors = {};
-    this.updateVariantAttributes(null);
     this.isEditMode = false;
     this.variantsToDelete = [];
   }
