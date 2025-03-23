@@ -37,7 +37,7 @@ export interface Variant {
   stock: number;
   stock_threshold?: number;
   attributes?: { attribute_id: number; value: string }[];
-  customizations?: { type: 'text' | 'image' | 'file'; description: string }[]; // Cambio aquí
+  customizations?: { type: 'text' | 'image' | 'file'; description: string }[];
   images: File[];
   imagesToDelete?: number[];
 }
@@ -49,11 +49,12 @@ export interface NewProduct {
   category_id: number;
   collaborator_id?: number;
   variants: Variant[];
-  customizations?: { type: 'text' | 'image' | 'file'; description: string }[]; // Cambio aquí
+  customizations?: { type: 'text' | 'image' | 'file'; description: string }[];
 }
 
 export interface DeleteVariantResponse {
   message: string;
+  deletedCount: number; // Actualizado para reflejar múltiples eliminaciones
 }
 
 export interface DetailedVariant {
@@ -398,12 +399,16 @@ export class ProductService {
     );
   }
 
-  deleteVariant(productId: number, variantId: number): Observable<DeleteVariantResponse> {
+  deleteVariant(productId: number, variantIds: number[]): Observable<DeleteVariantResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.delete<DeleteVariantResponse>(`${this.apiUrl}/${productId}/variants/${variantId}`, {
+        const headers = new HttpHeaders()
+          .set('x-csrf-token', csrfToken)
+          .set('Content-Type', 'application/json');
+        const body = { variant_ids: variantIds };
+        return this.http.delete<DeleteVariantResponse>(`${this.apiUrl}/${productId}/variants`, {
           headers,
+          body,
           withCredentials: true
         });
       })

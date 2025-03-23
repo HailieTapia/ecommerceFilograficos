@@ -1,7 +1,7 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { ProductService, NewProduct, Variant } from '../../../services/product.service';
+import { ProductService, NewProduct, Variant, DeleteVariantResponse } from '../../../services/product.service';
 import { CategorieService } from '../../../services/categorieService';
 import { CollaboratorsService } from '../../../services/collaborators.service';
 import { ProductAttributeService, Attribute, CategoryWithAttributes } from '../../../services/product-attribute.service';
@@ -59,13 +59,13 @@ export class ProductCatalogFormComponent implements OnInit {
   productForm: FormGroup;
   errors: FormErrors = {};
   isEditMode = false;
+  variantsToDelete: number[] = []; // Lista de variant_ids a eliminar
 
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
   attributesByCategory: { [key: number]: Attribute[] } = {};
 
   readonly MAX_PROFIT_MARGIN: number = 500;
-  // Lista de tipos de personalización para mostrar en la interfaz
   customizationTypes = ['Texto', 'Imagen', 'Archivo'];
 
   constructor(
@@ -176,7 +176,6 @@ export class ProductCatalogFormComponent implements OnInit {
         console.log('Datos del producto cargados:', response.product);
         const product = response.product;
   
-        // Paso 1: Cargar datos básicos del producto
         this.productForm.patchValue({
           name: product.name,
           description: product.description,
@@ -185,7 +184,6 @@ export class ProductCatalogFormComponent implements OnInit {
           product_type: product.product_type
         });
   
-        // Paso 2: Cargar personalizaciones
         while (this.customizations.length > 0) this.customizations.removeAt(0);
         if (product.customizations && product.customizations.length > 0) {
           product.customizations.forEach(cust => {
@@ -196,7 +194,6 @@ export class ProductCatalogFormComponent implements OnInit {
           });
         }
   
-        // Paso 3: Cargar variantes
         while (this.variants.length > 0) this.variants.removeAt(0);
         product.variants.forEach(variant => {
           const variantGroup = this.createVariantFormGroup(variant.sku);
@@ -211,18 +208,13 @@ export class ProductCatalogFormComponent implements OnInit {
             imagesToDelete: []
           });
   
-          // Paso 4: Cargar atributos de la variante
           const attributesGroup = variantGroup.get('attributes') as FormGroup;
           const categoryId = product.category?.category_id || 0;
   
-          // Asegurarse de que los atributos estén disponibles para la categoría
           if (this.attributesByCategory[categoryId]) {
             this.attributesByCategory[categoryId].forEach(attr => {
-              // Buscar el valor del atributo en los datos del backend
               const attrValue = variant.attributes.find(a => a.attribute_id === attr.attribute_id)?.value || '';
               const attrValidators = attr.is_required ? [Validators.required] : [];
-              
-              // Crear o actualizar el control del atributo con su valor
               attributesGroup.addControl(
                 attr.attribute_id.toString(),
                 this.fb.control(attrValue, attrValidators)
@@ -233,7 +225,6 @@ export class ProductCatalogFormComponent implements OnInit {
           this.variants.push(variantGroup);
         });
   
-        // Paso 5: Actualizar los atributos de las variantes según la categoría
         this.updateVariantAttributes(product.category?.category_id || null);
         this.productForm.updateValueAndValidity();
         console.log('Formulario después de cargar datos:', this.productForm.value);
@@ -309,12 +300,10 @@ export class ProductCatalogFormComponent implements OnInit {
     const attributes = this.attributesByCategory[categoryId];
     this.variants.controls.forEach(variant => {
       const attributesGroup = variant.get('attributes') as FormGroup;
-      const existingValues = { ...attributesGroup.value }; // Preservar valores existentes
+      const existingValues = { ...attributesGroup.value };
   
-      // Eliminar controles antiguos
       Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
   
-      // Crear nuevos controles con valores preservados o vacíos
       attributes.forEach(attr => {
         const existingValue = existingValues[attr.attribute_id.toString()] || '';
         const validators = attr.is_required ? [Validators.required] : [];
@@ -430,10 +419,6 @@ export class ProductCatalogFormComponent implements OnInit {
     this.currentStep = 1;
   }
 
-  generateNewId(): number {
-    return Math.max(...this.variants.controls.map(v => v.get('id')?.value || 0), 0) + 1;
-  }
-
   addVariant() {
     const productName = this.productForm.get('name')?.value || 'PROD';
     const newVariantIndex = this.variants.length;
@@ -449,6 +434,10 @@ export class ProductCatalogFormComponent implements OnInit {
 
   removeVariant(index: number) {
     if (this.variants.length > 1) {
+      const variantId = this.variants.at(index).get('variant_id')?.value;
+      if (variantId && this.isEditMode) {
+        this.variantsToDelete.push(variantId);
+      }
       this.variants.removeAt(index);
       this.updateErrors();
     }
@@ -639,6 +628,7 @@ export class ProductCatalogFormComponent implements OnInit {
     this.errors = {};
     this.updateVariantAttributes(null);
     this.isEditMode = false;
+    this.variantsToDelete = [];
   }
 
   saveProduct() {
@@ -673,28 +663,52 @@ export class ProductCatalogFormComponent implements OnInit {
       }),
       customizations: this.customizations.length > 0
         ? this.customizations.controls.map(control => ({
-            type: customizationTypeMap.toBackend[control.get('type')?.value] || control.get('type')?.value, // Convertir a inglés
+            type: customizationTypeMap.toBackend[control.get('type')?.value] || control.get('type')?.value,
             description: control.get('description')?.value as string
           }))
         : undefined
     };
 
-    const saveObservable = this.isEditMode && this.productId
-      ? this.productService.updateProduct(this.productId, productData)
-      : this.productService.createProduct(productData);
+    const saveAction = () => {
+      const saveObservable = this.isEditMode && this.productId
+        ? this.productService.updateProduct(this.productId, productData)
+        : this.productService.createProduct(productData);
 
-    saveObservable.subscribe({
-      next: (response) => {
-        console.log(this.isEditMode ? 'Producto actualizado:' : 'Producto creado:', response);
-        window.alert(this.isEditMode ? 'Producto actualizado con éxito' : 'Producto guardado con éxito');
-        this.productSaved.emit();
-        this.resetForm();
-      },
-      error: (err) => {
-        console.error('Error al guardar producto:', err);
-        window.alert('Error al guardar el producto');
+      saveObservable.subscribe({
+        next: (response) => {
+          console.log(this.isEditMode ? 'Producto actualizado:' : 'Producto creado:', response);
+          window.alert(this.isEditMode ? 'Producto actualizado con éxito' : 'Producto guardado con éxito');
+          this.productSaved.emit();
+          this.resetForm();
+        },
+        error: (err) => {
+          console.error('Error al guardar producto:', err);
+          window.alert('Error al guardar el producto');
+        }
+      });
+    };
+
+    if (this.isEditMode && this.productId && this.variantsToDelete.length > 0) {
+      const variantSkus = this.variantsToDelete.map(id => {
+        const variant = this.productForm.value.variants.find((v: any) => v.variant_id === id);
+        return variant ? variant.sku : id.toString();
+      });
+      const confirmMessage = `¿Estás seguro de que deseas eliminar las siguientes variantes: ${variantSkus.join(', ')}? Esta acción es irreversible.`;
+      if (window.confirm(confirmMessage)) {
+        this.productService.deleteVariant(this.productId, this.variantsToDelete).subscribe({
+          next: (response: DeleteVariantResponse) => {
+            console.log(`${response.deletedCount} variantes eliminadas: ${response.message}`);
+            saveAction();
+          },
+          error: (err) => {
+            console.error('Error al eliminar variantes:', err);
+            window.alert('Error al eliminar las variantes');
+          }
+        });
       }
-    });
+    } else {
+      saveAction();
+    }
   }
 
   getExistingImages(index: number): { image_id: number; image_url: string; order: number }[] {
