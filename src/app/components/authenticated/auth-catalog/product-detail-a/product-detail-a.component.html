@@ -63,8 +63,7 @@
         </div>
         <!-- Información de envío -->
         <div class="text-sm text-light-secondary dark:text-dark-secondary space-y-1">
-          <p><i class="fas fa-store mr-2 text-light-secondary dark:text-dark-secondary"></i> Vendido por: {{
-            product?.seller || 'Tienda Oficial' }}</p>
+          <p><i class="fas fa-store mr-2 text-light-secondary dark:text-dark-secondary"></i> Vendido por: {{ product?.collaborator?.name || 'Tienda Oficial' }}</p>
           <p><i class="fas fa-box mr-2 text-light-secondary dark:text-dark-secondary"></i>Stock: {{
             selectedVariant?.stock || 0 }}</p>
           <p *ngIf="selectedVariant?.stock === 0"

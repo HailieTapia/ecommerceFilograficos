@@ -42,6 +42,7 @@ export class ProductDetailAComponent implements OnInit {
   loadProductDetails(productId: number) {
     this.isLoading = true;
     this.productService.getProductById(productId).subscribe(response => {
+      console.log(response);
       this.product = response.product;
       if (this.product.variants && this.product.variants.length > 0) {
         this.selectVariant(this.product.variants[0]);
