@@ -651,13 +651,13 @@ export class ProductCatalogFormComponent implements OnInit {
       window.alert('Por favor corrige los errores en las variantes antes de guardar');
       return;
     }
-
+  
     const productData: NewProduct = {
       name: this.productForm.get('name')?.value as string,
       description: this.productForm.get('description')?.value as string,
       product_type: this.productForm.get('product_type')?.value as 'Existencia' | 'semi_personalizado' | 'personalizado',
       category_id: this.productForm.get('category_id')?.value as number,
-      collaborator_id: this.productForm.get('collaborator_id')?.value || undefined,
+      collaborator_id: this.productForm.get('collaborator_id')?.value, // Eliminamos || undefined
       variants: this.variants.controls.map((variant) => {
         const attributesGroup = variant.get('attributes') as FormGroup;
         const categoryId = this.productForm.get('category_id')?.value;
@@ -683,12 +683,12 @@ export class ProductCatalogFormComponent implements OnInit {
           }))
         : undefined
     };
-
+  
     const saveAction = () => {
       const saveObservable = this.isEditMode && this.productId
         ? this.productService.updateProduct(this.productId, productData)
         : this.productService.createProduct(productData);
-
+  
       saveObservable.subscribe({
         next: (response) => {
           console.log(this.isEditMode ? 'Producto actualizado:' : 'Producto creado:', response);
@@ -702,7 +702,7 @@ export class ProductCatalogFormComponent implements OnInit {
         }
       });
     };
-
+  
     if (this.isEditMode && this.productId && this.variantsToDelete.length > 0) {
       const variantSkus = this.variantsToDelete.map(id => {
         const variant = this.productForm.value.variants.find((v: any) => v.variant_id === id);

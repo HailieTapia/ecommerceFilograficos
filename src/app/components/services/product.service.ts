@@ -355,7 +355,9 @@ export class ProductService {
         if (productData.description !== undefined) formData.append('description', productData.description);
         if (productData.product_type) formData.append('product_type', productData.product_type);
         if (productData.category_id) formData.append('category_id', productData.category_id.toString());
-        if (productData.collaborator_id !== undefined) formData.append('collaborator_id', productData.collaborator_id.toString());
+        if (productData.collaborator_id !== undefined) {
+          formData.append('collaborator_id', productData.collaborator_id === null ? 'null' : productData.collaborator_id.toString());
+        }
         if (productData.product_type !== 'Existencia' && productData.customizations) {
           formData.append('customizations', JSON.stringify(productData.customizations));
         }
