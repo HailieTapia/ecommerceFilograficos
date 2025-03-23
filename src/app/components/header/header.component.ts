@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -25,26 +25,32 @@ export class HeaderComponent implements OnInit {
   isProfileDropdownOpen = false; // Control para dropdown de perfil
 
   cartItemCount: number = 0;
-  private cartSubscription!: Subscription; // Declaramos la propiedad aquí
-  constructor(  
+  private cartCountSubscription!: Subscription;
 
+  constructor(
     private cartService: CartService,
     public themeService: ThemeService,
     private router: Router,
     private authService: AuthService,
     private companyService: CompanyService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    // Suscribirse al estado del carrito
-    this.cartSubscription = this.cartService.getCartState().subscribe(cartState => {
-      this.cartItemCount = cartState.totalItems;
-    });
+    this.cartCountSubscription = this.cartService.cartItemCount$.subscribe(
+      (count) => {
+        this.cartItemCount = count;
+      }
+    );
     this.getCompanyInfo();
     this.authService.getUser().subscribe(user => {
       this.isLoggedIn = !!user;
       this.userRole = user?.tipo || null;
     });
+  }
+  ngOnDestroy(): void {
+    if (this.cartCountSubscription) {
+      this.cartCountSubscription.unsubscribe();
+    }
   }
 
   // Función para alternar el estado del sidebar
@@ -89,11 +95,5 @@ export class HeaderComponent implements OnInit {
 
   closeProfileDropdown() {
     this.isProfileDropdownOpen = false;
-  }
-  ngOnDestroy() {
-    // Desuscribirse para evitar memory leaks
-    if (this.cartSubscription) {
-      this.cartSubscription.unsubscribe();
-    }
   }
 }

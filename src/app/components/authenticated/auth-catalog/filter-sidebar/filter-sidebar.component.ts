@@ -14,7 +14,6 @@ import { ToastService } from '../../../services/toastService';
 export class FilterSidebarComponent implements OnInit {
   categories: any[] = [];
   collaborators: any[] = [];
-
   @Output() filtersChange = new EventEmitter<any>();
   filters: any = {
     categoryId: '',

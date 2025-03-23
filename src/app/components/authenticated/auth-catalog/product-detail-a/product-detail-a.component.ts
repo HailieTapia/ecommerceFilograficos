@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { AuthProductService } from '../../../services/authProduct.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../../services/cart.service';
 import { ToastService } from '../../../services/toastService';
+import { ActivatedRoute } from '@angular/router';
+import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 @Component({
   selector: 'app-product-detail-a',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [SpinnerComponent, CommonModule, FormsModule],
   templateUrl: './product-detail-a.component.html',
   styleUrl: './product-detail-a.component.css'
 })
@@ -17,7 +18,7 @@ export class ProductDetailAComponent implements OnInit {
   selectedVariant: any = null;
   selectedImage: string | null = null;
   selectedCustomization: any = null;
-  quantity: number = 1; 
+  quantity: number = 0;
   isLoading = true;
   isAddingToCart = false;
   showFullDescription = false;
@@ -71,11 +72,6 @@ export class ProductDetailAComponent implements OnInit {
     this.selectedCustomization = customization;
   }
 
-  formatPrice(price: string | number): string {
-    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-    return isNaN(numPrice) ? 'N/A' : numPrice.toFixed(2);
-  }
-
   addToCart() {
     if (!this.selectedVariant) {
       this.toastService.showToast('Por favor, selecciona una variante.', 'info');
@@ -88,7 +84,8 @@ export class ProductDetailAComponent implements OnInit {
       product_id: this.product.product_id,
       variant_id: this.selectedVariant.variant_id,
       quantity: this.quantity,
-      customization_option_id: this.selectedCustomization?.option_id || null
+      customization_option_id: this.selectedCustomization?.option_id || null,
+      image: this.selectedVariant?.images[0]?.image_url || this.product.image_url 
     };
 
     this.cartService.addToCart(cartItem).subscribe({
@@ -97,7 +94,6 @@ export class ProductDetailAComponent implements OnInit {
         const successMessage = response?.message || 'Producto añadido al carrito exitosamente';
         this.toastService.showToast(successMessage, 'success');
       },
-      
       error: (error) => {
         this.isAddingToCart = false;
         const errorMessage = error?.error?.message || 'No se pudo añadir el producto al carrito.';

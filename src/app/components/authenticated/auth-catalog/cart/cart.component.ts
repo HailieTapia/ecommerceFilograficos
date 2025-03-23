@@ -1,110 +1,97 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 import { CartService } from '../../../services/cart.service';
 import { ToastService } from '../../../services/toastService';
-import { CsrfService } from '../../../services/csrf.service';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { environment } from '../../../../environments/config';
-import { switchMap } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [SpinnerComponent, CommonModule, FormsModule],
   templateUrl: './cart.component.html',
   styleUrl: './cart.component.css'
 })
-export class CartComponent implements OnInit, OnDestroy {
+export class CartComponent implements OnInit {
   cartItems: any[] = [];
   totalItems: number = 0;
   subtotal: number = 0;
-  tax: number = 0; 
   total: number = 0;
-  private cartSubscription!: Subscription;
-  private apiUrl = `${environment.baseUrl}/cart`;
+  isLoading: boolean = false;
 
   constructor(
     private cartService: CartService,
     private toastService: ToastService,
-    private router: Router,
-    private csrfService: CsrfService,
-    private http: HttpClient
-  ) {}
+    private router: Router // Añadí el Router que faltaba
+  ) { }
 
   ngOnInit(): void {
-    // Suscribirse al estado del carrito
-    this.cartSubscription = this.cartService.getCartState().subscribe(cartState => {
-      this.cartItems = cartState.items;
-      this.totalItems = cartState.totalItems;
-      this.calculateSummary();
-    });
+    this.loadCart();
   }
 
-  // Calcular el resumen del carrito (subtotal, impuestos, total)
-  calculateSummary(): void {
+  loadCart(): void {
+    this.isLoading = true;
+    this.cartService.loadCart().subscribe(
+      (response) => {
+        // Aserción de tipo para decirle a TypeScript que response tiene items y total
+        const cartResponse = response as { items?: any[]; total?: number };
+        this.cartItems = cartResponse.items || [];
+        this.totalItems = this.cartItems.length;
+        this.total = cartResponse.total || 0; // Usar el total del backend
+        this.calculateTotals();
+        this.isLoading = false;
+      },
+      (error) => {
+        const errorMessage = error?.error?.message || 'No se pudo cargar el carrito. Por favor, intenta de nuevo.';
+        this.toastService.showToast(errorMessage, 'error');
+        this.isLoading = false;
+      }
+    );
+  }
+  calculateTotals(): void {
     this.subtotal = this.cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-    this.tax = this.subtotal * 0.1; // Ejemplo: 10% de impuestos, ajusta según tus necesidades
-    this.total = this.subtotal + this.tax;
+    this.total = this.subtotal; // Ajusta si hay impuestos o descuentos
   }
-
-  // Actualizar la cantidad de un ítem
   updateQuantity(item: any, newQuantity: number): void {
-    if (newQuantity <= 0) {
+    if (newQuantity < 1) {
       this.removeItem(item.cart_detail_id);
       return;
     }
 
-    this.csrfService.getCsrfToken().pipe(
-      switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.put(`${this.apiUrl}/update`, 
-          { cart_detail_id: item.cart_detail_id, quantity: newQuantity },
-          { headers, withCredentials: true }
-        );
-      })
-    ).subscribe({
-      next: () => {
-        this.cartService.loadCart().subscribe(); // Recargar el carrito después de actualizar
-        this.toastService.showToast('Cantidad actualizada exitosamente', 'success');
-      },
-      error: (error) => {
-        this.toastService.showToast(error.error?.message || 'Error al actualizar la cantidad', 'error');
-      }
-    });
-  }
+    const oldQuantity = item.quantity;
+    const data = {
+      cart_detail_id: item.cart_detail_id,
+      quantity: newQuantity
+    };
 
-  // Eliminar un ítem del carrito
+    this.cartService.updateQuantity(data, oldQuantity).subscribe(
+      (response) => {
+        item.quantity = newQuantity;
+        item.subtotal = item.calculated_price * newQuantity;
+        this.calculateTotals();
+        this.toastService.showToast('Cantidad actualizada', 'success');
+      },
+      (error) => {
+        const errorMessage = error?.error?.message || 'No se pudo actualizar la cantidad.';
+        this.toastService.showToast(errorMessage, 'error');
+      }
+    );
+  }
   removeItem(cartDetailId: number): void {
-    this.csrfService.getCsrfToken().pipe(
-      switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.delete(`${this.apiUrl}/remove/${cartDetailId}`, { headers, withCredentials: true });
-      })
-    ).subscribe({
-      next: () => {
-        this.cartService.loadCart().subscribe(); // Recargar el carrito después de eliminar
+    const item = this.cartItems.find((i: any) => i.cart_detail_id === cartDetailId);
+    const quantityToRemove = item ? item.quantity : 0;
+
+    this.cartService.removeItem(cartDetailId, quantityToRemove).subscribe(
+      (response) => {
+        this.cartItems = this.cartItems.filter((i: any) => i.cart_detail_id !== cartDetailId);
+        this.totalItems = this.cartItems.length;
+        this.calculateTotals();
         this.toastService.showToast('Producto eliminado del carrito', 'success');
       },
-      error: (error) => {
-        this.toastService.showToast(error.error?.message || 'Error al eliminar el producto', 'error');
+      (error) => {
+        const errorMessage = error?.error?.message || 'No se pudo eliminar el producto del carrito.';
+        this.toastService.showToast(errorMessage, 'error');
       }
-    });
-  }
-
-  // Proceder al checkout
-  proceedToCheckout(): void {
-    if (this.cartItems.length === 0) {
-      this.toastService.showToast('El carrito está vacío', 'error');
-      return;
-    }
-    this.router.navigate(['/checkout']);
-  }
-
-  ngOnDestroy(): void {
-    if (this.cartSubscription) {
-      this.cartSubscription.unsubscribe();
-    }
+    );
   }
 }

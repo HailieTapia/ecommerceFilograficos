@@ -1,87 +1,83 @@
-<div class="max-full mx-auto py-12 px-6 bg-light-background dark:bg-dark-background min-h-screen font-sans">
-  <!-- Título -->
-  <h1 class="text-3xl font-bold text-light-text dark:text-dark-text mb-8">Tu Carrito</h1>
+<div class="max-full mx-auto py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans">
+    <app-spinner [isLoading]="isLoading"></app-spinner>
 
-  <!-- Mensaje si el carrito está vacío -->
-  <div *ngIf="cartItems.length === 0" class="flex flex-col items-center justify-center py-12 bg-light-background dark:bg-dark-background rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
-    <p class="text-lg text-light-secondary dark:text-dark-secondary mb-4">Tu carrito está vacío.</p>
-    <a href="/authcatalog" class="inline-flex items-center px-6 py-3 bg-light-primary dark:bg-dark-primary text-white font-semibold rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-200 shadow-md">
-      Seguir comprando
-    </a>
-  </div>
-
-  <!-- Lista de ítems y resumen -->
-  <div *ngIf="cartItems.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Lista de ítems -->
-    <div class="lg:col-span-2 space-y-6">
-      <div *ngFor="let item of cartItems" class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-6 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-        <!-- Imagen del producto -->
-        <div class="w-24 h-24 flex-shrink-0">
-          <img [src]="item.image_url"
-            class="w-full h-full object-contain rounded-lg bg-gray-200 dark:bg-gray-600">
+    <!-- Contenido del carrito -->
+    <div *ngIf="!isLoading">
+        <div *ngIf="cartItems.length === 0"
+            class="flex flex-col items-center justify-center min-h-[50vh] text-center text-light-text dark:text-dark-text">
+            <div class="mb-6">
+                <i class="fas fa-shopping-cart text-6xl text-light-secondary dark:text-dark-secondary opacity-50"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-light-text dark:text-dark-text mb-2">¡Tu carrito está vacío!</h2>
+            <p class="text-lg text-light-secondary dark:text-dark-secondary mb-6">
+                Parece que no has añadido nada todavía. ¡Explora nuestro catálogo y encuentra algo que te guste!
+            </p>
+            <a href="/authcatalog"
+                class="inline-flex items-center gap-2 bg-light-primary dark:bg-dark-primary text-white font-semibold py-3 px-6 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                Volver al catálogo
+            </a>
         </div>
 
-        <!-- Detalles del ítem -->
-        <div class="flex-1 space-y-2">
-          <h3 class="text-lg font-semibold text-light-text dark:text-dark-text">{{ item.product_name }}</h3>
-          <p class="text-sm text-light-secondary dark:text-dark-secondary">Variante: {{ item.variant_sku }}</p>
-          <p *ngIf="item.customization" class="text-sm text-light-secondary dark:text-dark-secondary">Personalización: {{ item.customization.description }}</p>
-          <p class="text-sm text-light-secondary dark:text-dark-secondary">Precio unitario: ${{ item.unit_price | number:'1.2-2' }}</p>
-          <p class="text-base font-medium text-light-text dark:text-dark-text">Subtotal: ${{ item.subtotal | number:'1.2-2' }}</p>
-        </div>
+        <!-- Lista de productos -->
+        <div *ngIf="cartItems.length > 0">
+            <h1 class="text-lg font-bold text-light-text dark:text-dark-text mb-6">Carrito de Compras</h1>
+            <div *ngFor="let item of cartItems"
+                class="flex items-center gap-4 p-4 mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                <!-- Imagen (puedes añadirla si el backend la proporciona) -->
+                <img [src]="item.images?.length > 0 ? item.images[0].image_url : 'https://via.placeholder.com/100?text=No+Image'"
+                    class="w-24 h-24 object-cover rounded-lg">
 
-        <!-- Acciones del ítem -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <!-- Control de cantidad -->
-          <div class="flex items-center border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
-            <button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1"
-              class="px-4 py-2 text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text disabled:cursor-not-allowed">
-              −
-            </button>
-            <input type="number" [(ngModel)]="item.quantity" (change)="updateQuantity(item, item.quantity)" min="1" [max]="item.stock || 999"
-              class="w-16 p-2 text-center border-none focus:ring-0 text-light-text dark:text-dark-text bg-light-background dark:bg-dark-background">
-            <button (click)="updateQuantity(item, item.quantity + 1)" [disabled]="item.quantity >= (item.stock || 999)"
-              class="px-4 py-2 text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text disabled:cursor-not-allowed">
-              +
-            </button>
-          </div>
+                <!-- Detalles -->
+                <div class="flex-1">
+                    <h3 class="text-lg font-medium text-light-text dark:text-dark-text">{{ item.product_name }}</h3>
+                    <p class="text-sm text-light-secondary dark:text-dark-secondary">Variante: {{ item.variant_sku }}
+                    </p>
+                    <p class="text-sm text-light-secondary dark:text-dark-secondary">Precio unitario: ${{
+                        item.calculated_price }}</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1"
+                            class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-1 px-3 rounded-full disabled:bg-light-disabled dark:disabled:bg-dark-disabled disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text">
+                            -
+                        </button>
+                        <span class="text-lg text-light-text dark:text-dark-text">{{ item.quantity }}</span>
+                        <button (click)="updateQuantity(item, item.quantity + 1)"
+                            class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-1 px-3 rounded-full">
+                            +
+                        </button>
+                    </div>
+                </div>
 
-          <!-- Botón para eliminar -->
-          <button (click)="removeItem(item.cart_detail_id)"
-            class="px-4 py-2 bg-light-danger dark:bg-dark-danger bg-opacity-10 dark:bg-opacity-10 text-light-danger dark:text-dark-danger rounded-lg hover:bg-light-danger dark:hover:bg-dark-danger hover:bg-opacity-20 dark:hover:bg-opacity-20 transition-all duration-200">
-            Eliminar
-          </button>
+                <!-- Subtotal y eliminar -->
+                <div class="flex flex-col items-end gap-2">
+                    <p class="text-lg font-semibold text-light-text dark:text-dark-text">${{ item.subtotal.toFixed(2) }}
+                    </p>
+                    <button (click)="removeItem(item.cart_detail_id)"
+                        class="text-danger-text dark:text-dark-danger-text hover:text-danger-hover dark:hover:text-dark-danger-hover">
+                        <i class="fas fa-trash-alt"></i> Eliminar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Total y botones -->
+            <div
+                class="flex justify-between items-center mt-6 p-4 bg-light-background dark:bg-dark-background border-t border-gray-300 dark:border-gray-600">
+                <div>
+                    <a href="/authcatalog"
+                        class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                        Seguir comprando
+                    </a>
+                </div>
+                <div class="text-right">
+                    <p class="text-xl font-semibold text-light-text dark:text-dark-text">Subtotal: ${{
+                        subtotal.toFixed(2) }}</p>
+                    <p class="text-xl font-semibold text-light-text dark:text-dark-text">Total: ${{ total.toFixed(2) }}
+                    </p>
+                    <button
+                        class="mt-2 bg-light-primary dark:bg-dark-primary text-white py-2 px-4 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
+                        Proceder al checkout
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-
-    <!-- Resumen del carrito -->
-    <div class="lg:col-span-1">
-      <div class="sticky top-6 p-6 bg-light-background dark:bg-dark-background rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm">
-        <h2 class="text-xl font-semibold text-light-text dark:text-dark-text mb-4">Resumen</h2>
-        <div class="space-y-3 text-sm text-light-secondary dark:text-dark-secondary">
-          <div class="flex justify-between">
-            <p>Subtotal:</p>
-            <p>${{ subtotal | number:'1.2-2' }}</p>
-          </div>
-          <div class="flex justify-between">
-            <p>Impuestos (10%):</p>
-            <p>${{ tax | number:'1.2-2' }}</p>
-          </div>
-          <div class="flex justify-between">
-            <p>Envío:</p>
-            <p class="text-light-success-text dark:text-dark-success-text">Gratis</p>
-          </div>
-          <div class="flex justify-between text-base font-semibold text-light-text dark:text-dark-text pt-2 border-t border-gray-200 dark:border-gray-600">
-            <p>Total:</p>
-            <p>${{ total | number:'1.2-2' }}</p>
-          </div>
-        </div>
-        <button (click)="proceedToCheckout()"
-          class="w-full mt-6 bg-light-success dark:bg-dark-success text-light-success-text dark:text-dark-success-text font-semibold py-4 rounded-lg hover:bg-light-success dark:hover:bg-dark-success hover:bg-opacity-80 dark:hover:bg-opacity-80 transition-all duration-200 shadow-md">
-          Proceder al Checkout
-        </button>
-      </div>
-    </div>
-  </div>
 </div>
