@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toastService';
 
 @Component({
   selector: 'app-mfa-verification',
@@ -16,17 +17,24 @@ export class MfaVerificationComponent implements OnInit {
   userId: string | null = null;
   errorMessage: string = '';
   successMessage: string = '';
-  isVerified = false; // Bandera para verificar si el código OTP fue validado
-  isModalOpen = false; // Controlar la visibilidad del modal
+  isVerified = false;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {
     this.mfaForm = this.fb.group({
-      otp: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8)]] // Cambiar a 8 caracteres
+      otp0: ['', [Validators.required]],
+      otp1: ['', [Validators.required]],
+      otp2: ['', [Validators.required]],
+      otp3: ['', [Validators.required]],
+      otp4: ['', [Validators.required]],
+      otp5: ['', [Validators.required]],
+      otp6: ['', [Validators.required]],
+      otp7: ['', [Validators.required]]
     });
   }
 
@@ -37,73 +45,100 @@ export class MfaVerificationComponent implements OnInit {
         this.authService.sendOtpMfa(this.userId).subscribe({
           next: () => {
             console.log('OTP enviado correctamente');
-            this.openModal(); // Abrir el modal automáticamente al cargar el componente
+            this.toastService.showToast('Se ha enviado un código OTP a tu correo.', 'info');
           },
           error: err => {
             console.error('Error enviando OTP:', err);
             this.errorMessage = 'Error al enviar el código OTP';
+            this.toastService.showToast(this.errorMessage, 'error');
+            this.router.navigate(['/login']);
           }
         });
       } else {
         this.errorMessage = 'No se encontró el usuario';
+        this.toastService.showToast(this.errorMessage, 'error');
+        this.router.navigate(['/login']);
       }
     });
   }
 
-  // Abrir el modal
-  openModal(): void {
-    this.mfaForm.reset(); // Reiniciar el formulario
-    this.errorMessage = ''; // Limpiar mensajes de error
-    this.successMessage = ''; // Limpiar mensajes de éxito
-    this.isVerified = false; // Reiniciar la bandera de verificación
-    this.isModalOpen = true; // Mostrar el modal
-  }
+  moveFocus(index: number, event: any): void {
+    const input = event.target;
+    const value = input.value.toUpperCase();
+    input.value = value;
+    this.mfaForm.get(`otp${index}`)?.setValue(value);
 
-  // Cerrar el modal y redirigir si no se verificó el código
-  closeModal(): void {
-    console.log("Cerrando modal...");
-    this.isModalOpen = false; // Ocultar el modal
-
-    // Redirigir al login si no se verificó el código
-    if (!this.isVerified) {
-      console.log("Redirigiendo al login...");
-      this.router.navigate(['/login']);
-    } else {
-      console.log("El código fue verificado, no se redirige al login.");
+    const nextInput = input.nextElementSibling;
+    if (nextInput && value) {
+      nextInput.focus();
     }
   }
 
-  // Verificar el código OTP
+  handleKeyDown(index: number, event: KeyboardEvent): void {
+    const input = event.target as HTMLInputElement;
+    const previousInput = input.previousElementSibling as HTMLInputElement | null;
+
+    if (event.key === 'Backspace' || event.key === 'Delete') {
+      const currentValue = input.value;
+
+      if (!currentValue && previousInput) {
+        event.preventDefault();
+        previousInput.focus();
+        previousInput.value = '';
+        this.mfaForm.get(`otp${index - 1}`)?.setValue('');
+      } else if (currentValue) {
+        input.value = '';
+        this.mfaForm.get(`otp${index}`)?.setValue('');
+      }
+    }
+  }
+
   verifyOtp(): void {
     if (this.mfaForm.invalid || !this.userId) {
       this.errorMessage = 'Por favor, ingresa un código OTP válido.';
+      this.toastService.showToast(this.errorMessage, 'warning');
       return;
     }
-  
-    const otpCode = this.mfaForm.value.otp.trim(); // Asegúrate de eliminar espacios adicionales
-    this.authService.verifyMfaOtp(this.userId, otpCode).subscribe({
+
+    const otp = Object.values(this.mfaForm.value).join('');
+    this.authService.verifyMfaOtp(this.userId, otp).subscribe({
       next: (response) => {
         console.log('OTP verificado con éxito', response);
         this.successMessage = 'Código OTP verificado correctamente.';
-        this.isVerified = true; // Marcar como verificado
-  
-        // Redirigir según el tipo de usuario
-        console.log('LOG antes del if, el tipo es:', response.tipo);
+        this.isVerified = true;
+        this.toastService.showToast(this.successMessage, 'success');
+
         if (response.tipo === 'administrador') {
-          console.log('LOG en el if, el tipo es:', response.tipo);
-          this.router.navigate(['/admin-dashboard']); // Redirigir a la página de administrador
+          this.router.navigate(['/admin-dashboard']);
         } else if (response.tipo === 'cliente') {
-          console.log('LOG en el if, el tipo es:', response.tipo);
-          this.router.navigate(['/']); // Redirigir a la página de cliente
+          this.router.navigate(['/']);
         } else {
-          console.log('LOG en el else, el tipo es:', response.tipo);
-          this.router.navigate(['/login']); // Redirigir a una página por defecto si el tipo no está definido
+          this.router.navigate(['/login']);
         }
       },
       error: err => {
         console.error('Error al verificar OTP:', err);
-        this.errorMessage = 'Código OTP incorrecto. Inténtalo de nuevo.';
+        const attemptsRemaining = err.error?.attemptsRemaining;
+        if (err.status === 400 && typeof attemptsRemaining === 'number') {
+          if (attemptsRemaining > 0) {
+            this.errorMessage = `Código incorrecto. Te quedan ${attemptsRemaining} intentos.`;
+            this.toastService.showToast(this.errorMessage, 'error');
+          } else {
+            this.errorMessage = 'Código incorrecto. Se han agotado los intentos.';
+            this.toastService.showToast('Código incorrecto. Regresando al inicio de sesión.', 'error');
+            this.router.navigate(['/login']);
+          }
+        } else {
+          this.errorMessage = 'Error al verificar el código. Intenta de nuevo más tarde.';
+          this.toastService.showToast('Error al verificar el código. Regresando al inicio de sesión.', 'error');
+          this.router.navigate(['/login']);
+        }
       }
     });
+  }
+
+  cancelVerification(): void {
+    this.toastService.showToast('Verificación cancelada. Regresando al inicio de sesión.', 'info');
+    this.router.navigate(['/login']);
   }
 }
