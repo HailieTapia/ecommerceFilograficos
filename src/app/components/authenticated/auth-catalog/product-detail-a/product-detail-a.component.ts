@@ -4,12 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../../../services/cart.service';
 import { ToastService } from '../../../services/toastService';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 @Component({
   selector: 'app-product-detail-a',
   standalone: true,
-  imports: [SpinnerComponent, CommonModule, FormsModule],
+  imports: [SpinnerComponent, CommonModule, FormsModule,RouterModule],
   templateUrl: './product-detail-a.component.html',
   styleUrl: './product-detail-a.component.css'
 })
@@ -30,7 +30,7 @@ export class ProductDetailAComponent implements OnInit {
     private cartService: CartService,
     private route: ActivatedRoute,
     private productService: AuthProductService
-  ) { }
+  ) {}
 
   ngOnInit() {
     const productId = this.route.snapshot.paramMap.get('productIdA');
