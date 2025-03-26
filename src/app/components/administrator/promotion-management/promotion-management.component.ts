@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PromotionService, Promotion, PromotionQueryParams, Variant, VariantQueryParams, PromotionData } from '../../services/promotion.service';
+import { CategorieService } from '../../services/categorieService'; // Importamos el servicio de categorías
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
 import { ToastService } from '../../services/toastService';
@@ -51,10 +52,11 @@ export class PromotionManagementComponent implements OnInit {
     unit_discount: 'Descuento por Unidad'
   };
 
-  minStartDate: string; // Para establecer la fecha mínima en el input
+  minStartDate: string;
 
   constructor(
     private promotionService: PromotionService,
+    private categorieService: CategorieService, // Inyectamos el servicio de categorías
     private fb: FormBuilder,
     private toastService: ToastService
   ) {
@@ -70,7 +72,7 @@ export class PromotionManagementComponent implements OnInit {
       min_unit_measure: [{ value: null, disabled: true }, Validators.min(0)],
       applies_to: ['', Validators.required],
       is_exclusive: [true],
-      start_date: ['', [Validators.required, this.dateNotBeforeToday.bind(this)]], // Validador personalizado
+      start_date: ['', [Validators.required, this.dateNotBeforeToday.bind(this)]],
       end_date: ['', Validators.required],
       variantIds: [[]],
       categoryIds: [[]]
@@ -90,7 +92,7 @@ export class PromotionManagementComponent implements OnInit {
   ngOnInit() {
     this.loadPromotions();
     this.loadAvailableVariants();
-    this.loadAvailableCategories();
+    this.loadAvailableCategories(); // Cambiamos a esta función para cargar desde el backend
     this.setupVariantSearch();
     this.setupCategorySearch();
   }
@@ -127,12 +129,22 @@ export class PromotionManagementComponent implements OnInit {
     });
   }
 
+  // Nueva función para cargar categorías desde el backend
   loadAvailableCategories() {
-    this.availableCategories = [
-      { category_id: 1, name: 'Electrónica' },
-      { category_id: 2, name: 'Ropa' }
-    ];
-    this.filteredCategories = [...this.availableCategories];
+    this.categorieService.getCategories().subscribe({
+      next: (response: any) => {
+        this.availableCategories = response.map((cat: any) => ({
+          category_id: cat.category_id,
+          name: cat.name
+        }));
+        this.filteredCategories = [...this.availableCategories];
+      },
+      error: (err) => {
+        this.toastService.showToast('Error al cargar las categorías', 'error');
+        this.availableCategories = [];
+        this.filteredCategories = [];
+      }
+    });
   }
 
   getVariantName(variantId: number): string | undefined {
