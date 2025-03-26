@@ -1,0 +1,321 @@
+<div class="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text p-4 sm:p-6 font-sans">
+    <!-- Encabezado -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-light-table-header dark:bg-dark-table-header p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-4">
+      <div>
+        <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
+          <i class="fas fa-tags text-light-primary dark:text-dark-primary"></i> Gestión de Promociones
+        </h1>
+        <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Administra las promociones activas de la tienda</p>
+      </div>
+      <button
+        (click)="openPromotionModal('create')"
+        class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-800 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2"
+      >
+        <i class="fas fa-plus"></i> Crear Promoción
+      </button>
+    </div>
+  
+    <!-- Filtros y Búsqueda -->
+    <div class="bg-light-background dark:bg-dark-background p-4 sm:p-6 rounded-lg shadow-sm mb-6 border border-gray-200 dark:border-gray-700">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
+        <div class="relative w-full sm:w-1/2 md:w-1/3">
+          <input [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" 
+            placeholder="Buscar por nombre o descuento..." 
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base"/>
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Tabla -->
+    <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-600">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 class="text-lg font-semibold text-light-text dark:text-dark-text">Promociones Activas</h2>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <label for="itemsPerPage" class="text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">Elementos por página:</label>
+          <select id="itemsPerPage" [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()" 
+            class="w-full sm:w-24 p-1 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full table-auto border-collapse min-w-[640px]">
+          <thead class="bg-light-table-header dark:bg-dark-table-header">
+            <tr>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('promotion_id')">
+                ID
+                <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'promotion_id', 'text-gray-500 dark:text-gray-400': sortBy !== 'promotion_id'}" aria-hidden="true"></i>
+                <span *ngIf="sortBy === 'promotion_id'" class="ml-1">
+                  <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                </span>
+              </th>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Nombre</th>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Tipo</th>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('discount_value')">
+                Descuento
+                <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'discount_value', 'text-gray-500 dark:text-gray-400': sortBy !== 'discount_value'}" aria-hidden="true"></i>
+                <span *ngIf="sortBy === 'discount_value'" class="ml-1">
+                  <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                </span>
+              </th>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('start_date')">
+                Fecha Inicio
+                <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'start_date', 'text-gray-500 dark:text-gray-400': sortBy !== 'start_date'}" aria-hidden="true"></i>
+                <span *ngIf="sortBy === 'start_date'" class="ml-1">
+                  <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                </span>
+              </th>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('end_date')">
+                Fecha Fin
+                <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'end_date', 'text-gray-500 dark:text-gray-400': sortBy !== 'end_date'}" aria-hidden="true"></i>
+                <span *ngIf="sortBy === 'end_date'" class="ml-1">
+                  <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                </span>
+              </th>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Productos</th>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer" (click)="sort('created_at')">
+                Creado
+                <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'created_at', 'text-gray-500 dark:text-gray-400': sortBy !== 'created_at'}" aria-hidden="true"></i>
+                <span *ngIf="sortBy === 'created_at'" class="ml-1">
+                  <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                </span>
+              </th>
+              <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+            <tr *ngFor="let promotion of promotions" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
+              <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text whitespace-nowrap">{{ promotion.promotion_id }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-normal break-words max-w-[150px] sm:max-w-[200px]">{{ promotion.name }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ promotionTypeLabels[promotion.promotion_type] }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ promotion.discount_value }}%</td>
+              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(promotion.start_date) }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">{{ formatDate(promotion.end_date) }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ promotion.product_variants_count || 0 }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(promotion.created_at || '') }}</td>
+              <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
+                <button (click)="openPromotionModal('edit', promotion)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                  <i class="fas fa-edit"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Editar
+                  </span>
+                </button>
+                <button (click)="deletePromotion(promotion)" class="group text-gray-500 dark:text-dark-secondary hover:text-red-600 dark:hover:text-dark-danger transition-all duration-300 relative">
+                  <i class="fas fa-trash"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Eliminar
+                  </span>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="promotions.length === 0">
+              <td colspan="9" class="p-2 sm:p-3 text-center text-sm text-light-secondary dark:text-dark-secondary">
+                No hay promociones activas disponibles
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <app-pagination [currentPage]="currentPage" [totalItems]="totalPromotions" [itemsPerPage]="itemsPerPage" (pageChange)="onPageChange($event)" class="mt-4 p-4 border-t border-gray-200 dark:border-gray-600"></app-pagination>
+    </div>
+  
+    <!-- Modal para Crear/Editar Promoción -->
+    <app-modal #promotionModal [title]="selectedPromotionId ? 'Editar Promoción' : 'Crear Promoción'">
+      <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto">
+        <form [formGroup]="promotionForm" (ngSubmit)="savePromotion()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Nombre</label>
+            <input formControlName="name" type="text" 
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+            <div *ngIf="promotionForm.get('name')?.touched && promotionForm.get('name')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              <div *ngIf="promotionForm.get('name')?.errors?.['required']">El nombre es obligatorio.</div>
+              <div *ngIf="promotionForm.get('name')?.errors?.['minlength']">Debe tener al menos 3 caracteres.</div>
+              <div *ngIf="promotionForm.get('name')?.errors?.['maxlength']">No puede exceder 100 caracteres.</div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Tipo de Promoción</label>
+            <select formControlName="promotion_type" 
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base">
+              <option value="">Seleccionar Tipo</option>
+              <option value="quantity_discount">Descuento por Cantidad</option>
+              <option value="order_count_discount">Descuento por Conteo de Órdenes</option>
+              <option value="unit_discount">Descuento por Unidad</option>
+            </select>
+            <div *ngIf="promotionForm.get('promotion_type')?.touched && promotionForm.get('promotion_type')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              El tipo de promoción es obligatorio.
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Valor de Descuento (%)</label>
+            <input formControlName="discount_value" type="number" min="1" max="100" 
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+            <div *ngIf="promotionForm.get('discount_value')?.touched && promotionForm.get('discount_value')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              <div *ngIf="promotionForm.get('discount_value')?.errors?.['required']">El valor de descuento es obligatorio.</div>
+              <div *ngIf="promotionForm.get('discount_value')?.errors?.['min']">Debe ser al menos 1%.</div>
+              <div *ngIf="promotionForm.get('discount_value')?.errors?.['max']">No puede exceder 100%.</div>
+              <div *ngIf="promotionForm.get('discount_value')?.errors?.['pattern']">Debe ser un número entero.</div>
+            </div>
+          </div>
+          <!-- Campo Cantidad Mínima de Productos -->
+          <div *ngIf="promotionForm.get('promotion_type')?.value === 'quantity_discount'">
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Cantidad Mínima de Productos</label>
+            <input formControlName="min_quantity" type="number" min="1" 
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+            <div *ngIf="promotionForm.get('min_quantity')?.touched && promotionForm.get('min_quantity')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              El valor debe ser mayor o igual a 1.
+            </div>
+          </div>
+          <!-- Campo Cantidad Mínima de Pedidos -->
+          <div *ngIf="promotionForm.get('promotion_type')?.value === 'order_count_discount'">
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Cantidad Mínima de Pedidos</label>
+            <input formControlName="min_order_count" type="number" min="1" 
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+            <div *ngIf="promotionForm.get('min_order_count')?.touched && promotionForm.get('min_order_count')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              El valor debe ser mayor o igual a 1.
+            </div>
+          </div>
+          <!-- Campo Medida Mínima (metros) -->
+          <div *ngIf="promotionForm.get('promotion_type')?.value === 'unit_discount'">
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Medida Mínima (metros)</label>
+            <input formControlName="min_unit_measure" type="number" min="0" step="0.01" 
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+            <div *ngIf="promotionForm.get('min_unit_measure')?.touched && promotionForm.get('min_unit_measure')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              El valor debe ser mayor o igual a 0.
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Aplica a</label>
+            <select formControlName="applies_to" 
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base">
+              <option value="">Seleccionar</option>
+              <option value="specific_products">Productos Específicos</option>
+              <option value="specific_categories">Categorías Específicas</option>
+              <option value="all">Todos</option>
+            </select>
+            <div *ngIf="promotionForm.get('applies_to')?.touched && promotionForm.get('applies_to')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              Este campo es obligatorio.
+            </div>
+          </div>
+          <div *ngIf="promotionForm.get('applies_to')?.value === 'specific_products'" class="space-y-2">
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Seleccionar Productos</label>
+            <div class="relative">
+              <input [(ngModel)]="variantSearchTerm" (ngModelChange)="onVariantSearchChange()" 
+                [ngModelOptions]="{standalone: true}" 
+                placeholder="Buscar productos por nombre o SKU..." 
+                class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            </div>
+            <div class="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800">
+              <div *ngIf="filteredVariants.length === 0" class="p-2 text-gray-500 dark:text-gray-400 text-sm">
+                No se encontraron productos.
+              </div>
+              <div *ngFor="let variant of filteredVariants" 
+                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2"
+                [ngClass]="{'bg-gray-200 dark:bg-gray-600': selectedVariantIds.includes(variant.variant_id)}"
+                (click)="toggleVariant(variant.variant_id)">
+                <img [src]="variant.image_url || 'assets/default-image.jpg'" alt="{{ variant.product_name }}" class="w-6 sm:w-8 h-6 sm:h-8 object-cover rounded" />
+                <span class="text-gray-900 dark:text-gray-100 flex-1 text-sm sm:text-base">{{ variant.product_name }} (SKU: {{ variant.sku }})</span>
+                <i class="fas fa-check text-light-primary dark:text-dark-primary" *ngIf="selectedVariantIds.includes(variant.variant_id)"></i>
+              </div>
+            </div>
+            <div class="mt-2">
+              <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Productos Seleccionados</label>
+              <div class="flex flex-wrap gap-2">
+                <div *ngFor="let variantId of selectedVariantIds" 
+                  class="flex items-center gap-2 px-3 py-1 bg-light-primary dark:bg-dark-primary text-white rounded-full text-sm">
+                  <img [src]="getVariantImage(variantId) || 'assets/default-image.jpg'" alt="{{ getVariantName(variantId) }}" class="w-5 sm:w-6 h-5 sm:h-6 object-cover rounded" />
+                  <span>{{ getVariantName(variantId) }}</span>
+                  <button type="button" (click)="removeVariant(variantId)" 
+                    class="text-white hover:text-red-200 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div *ngIf="selectedVariantIds.length === 0" class="text-gray-500 dark:text-gray-400 text-sm">
+                  Ningún producto seleccionado.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="promotionForm.get('applies_to')?.value === 'specific_categories'" class="space-y-2">
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Seleccionar Categorías</label>
+            <div class="relative">
+              <input [(ngModel)]="categorySearchTerm" (ngModelChange)="onCategorySearchChange()" 
+                [ngModelOptions]="{standalone: true}" 
+                placeholder="Buscar categorías por nombre..." 
+                class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            </div>
+            <div class="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800">
+              <div *ngIf="filteredCategories.length === 0" class="p-2 text-gray-500 dark:text-gray-400 text-sm">
+                No se encontraron categorías.
+              </div>
+              <div *ngFor="let category of filteredCategories" 
+                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center gap-2"
+                [ngClass]="{'bg-gray-200 dark:bg-gray-600': selectedCategoryIds.includes(category.category_id)}"
+                (click)="toggleCategory(category.category_id)">
+                <span class="text-gray-900 dark:text-gray-100 flex-1 text-sm sm:text-base">{{ category.name }}</span>
+                <i class="fas fa-check text-light-primary dark:text-dark-primary" *ngIf="selectedCategoryIds.includes(category.category_id)"></i>
+              </div>
+            </div>
+            <div class="mt-2">
+              <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Categorías Seleccionadas</label>
+              <div class="flex flex-wrap gap-2">
+                <div *ngFor="let categoryId of selectedCategoryIds" 
+                  class="flex items-center gap-2 px-3 py-1 bg-light-primary dark:bg-dark-primary text-white rounded-full text-sm">
+                  <span>{{ getCategoryName(categoryId) }}</span>
+                  <button type="button" (click)="removeCategory(categoryId)" 
+                    class="text-white hover:text-red-200 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <div *ngIf="selectedCategoryIds.length === 0" class="text-gray-500 dark:text-gray-400 text-sm">
+                  Ninguna categoría seleccionada.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1 flex items-center gap-2">
+              <input formControlName="is_exclusive" type="checkbox" 
+                class="h-5 w-5 text-light-primary dark:text-dark-primary focus:ring-light-primary dark:focus:ring-dark-primary border-gray-300 dark:border-gray-600 rounded" />
+              ¿Es exclusiva? (No acumulable con otras promociones)
+            </label>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Fecha de Inicio</label>
+            <input formControlName="start_date" type="datetime-local" [min]="minStartDate"
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+            <div *ngIf="promotionForm.get('start_date')?.touched && promotionForm.get('start_date')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              <div *ngIf="promotionForm.get('start_date')?.errors?.['required']">La fecha de inicio es obligatoria.</div>
+              <div *ngIf="promotionForm.get('start_date')?.errors?.['dateBeforeToday']">No puede ser anterior a la fecha actual.</div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Fecha de Fin</label>
+            <input formControlName="end_date" type="datetime-local" [min]="promotionForm.get('start_date')?.value || minStartDate"
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base" />
+            <div *ngIf="promotionForm.get('end_date')?.touched && promotionForm.get('end_date')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              <div *ngIf="promotionForm.get('end_date')?.errors?.['required']">La fecha de fin es obligatoria.</div>
+            </div>
+            <div *ngIf="promotionForm.errors?.['invalidDateRange'] && promotionForm.get('end_date')?.touched" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              La fecha de fin debe ser posterior a la fecha de inicio.
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row justify-end gap-4">
+            <button type="button" (click)="promotionModal.close()" 
+              class="w-full sm:w-auto px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300">
+              Cancelar
+            </button>
+            <button type="submit" [disabled]="promotionForm.invalid" 
+              class="w-full sm:w-auto px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
+              {{ selectedPromotionId ? 'Actualizar' : 'Crear' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </app-modal>
+  </div>

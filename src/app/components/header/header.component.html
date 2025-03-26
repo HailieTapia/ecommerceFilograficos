@@ -158,6 +158,17 @@
           class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Gestión de precios
           de productos</span>
       </a>
+       <a routerLink="/promotion-management"
+        class="group flex items-center p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded transition-all duration-300 relative">
+        <i
+          class="fas fa-warehouse text-lg text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary mr-3"></i>
+        <span *ngIf="sidebarOpen"
+          class="text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary">Gestión de promociones
+          </span>
+        <span *ngIf="!sidebarOpen"
+          class="absolute left-16 hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Gestión de promociones
+          </span>
+      </a>
     </nav>
   </aside>
 
