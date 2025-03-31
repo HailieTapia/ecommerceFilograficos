@@ -1,72 +1,195 @@
-import { Component, OnInit } from '@angular/core';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { provideAnimations } from '@angular/platform-browser/animations'; 
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FaqCategoryService } from '../../services/faq-category.service';
-import { FaqCategoryFormComponent } from './faq-category-form/faq-category-form.component';
+import { PaginationComponent } from '../pagination/pagination.component';
+import { ModalComponent } from '../../../modal/modal.component';
+import { ToastService } from '../../services/toastService';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-faq-categories',
-  templateUrl: './faq-categories.component.html',
   standalone: true,
-  styleUrls: ['./faq-categories.component.css'],
   imports: [
     CommonModule,
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule
-  ]
+    FormsModule,
+    ReactiveFormsModule,
+    PaginationComponent,
+    ModalComponent,
+  ],
+  templateUrl: './faq-categories.component.html',
+  styleUrls: ['./faq-categories.component.css'],
 })
 export class FaqCategoriesComponent implements OnInit {
-  displayedColumns: string[] = ['name', 'description', 'status', 'actions'];
-  dataSource = new MatTableDataSource<any>();
+  @ViewChild('faqCategoryModal') faqCategoryModal!: ModalComponent;
 
-  constructor(private faqCategoryService: FaqCategoryService, private dialog: MatDialog) {}
+  categories: any[] = [];
+  totalCategories = 0;
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 1;
+  searchTerm = '';
+  categoryForm!: FormGroup;
+  selectedCategoryId: string | null = null;
+
+  constructor(
+    private faqCategoryService: FaqCategoryService,
+    private toastService: ToastService,
+    private fb: FormBuilder
+  ) {
+    this.categoryForm = this.fb.group({
+      name: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(500),
+        this.noNumbersValidator,
+        this.noSpecialCharsValidator,
+        this.noSQLInjectionValidator,
+      ]],
+      description: ['', [
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(500),
+        this.noNumbersValidator,
+        this.noSpecialCharsValidator,
+        this.noSQLInjectionValidator,
+      ]],
+    });
+  }
 
   ngOnInit(): void {
-    this.getCategories();
+    this.loadCategories();
   }
 
-  getCategories(): void {
-    this.faqCategoryService.getAllCategories().subscribe({
-      next: (data) => {
-        if (data && Array.isArray(data.faqCategories)) {
-          this.dataSource.data = data.faqCategories;
-        } else {
-          console.error('Los datos recibidos no son un array válido:', data);
-        }
+  loadCategories(): void {
+    this.faqCategoryService.getAllCategories(this.currentPage, this.itemsPerPage, this.searchTerm).subscribe({
+      next: (response) => {
+        this.categories = response.faqCategories;
+        this.totalCategories = response.total;
+        this.totalPages = Math.ceil(response.total / this.itemsPerPage);
       },
-      error: (err) => console.error('Error al obtener categorías:', err)
+      error: (err) => {
+        this.toastService.showToast('Error al cargar las categorías', 'error');
+      },
     });
   }
 
-  openFormDialog(category?: any): void {
-    const dialogRef = this.dialog.open(FaqCategoryFormComponent, {
-      width: '500px', // Ancho del modal
-      maxHeight: '90vh', // Altura máxima
-      panelClass: 'custom-dialog-container', // Clase personalizada para estilos adicionales
-      autoFocus: false, // Evita que el cursor mueva la pantalla
-      data: category ? { ...category } : null, // Datos para editar
-    });
-  
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.getCategories(); // Recargar categorías si se guardó algo
-      }
-    });
+  onPageChange(newPage: number): void {
+    this.currentPage = newPage;
+    this.loadCategories();
   }
 
-  deleteCategory(category_id: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta categoría? Esta acción eliminará todas las preguntas frecuentes con esta categoría')) {
-      this.faqCategoryService.deleteCategory(category_id).subscribe({
-        next: () => this.getCategories(),
-        error: (err) => console.error('Error al eliminar la categoría:', err)
+  onItemsPerPageChange(): void {
+    this.currentPage = 1;
+    this.loadCategories();
+  }
+
+  onSearchChange(): void {
+    this.currentPage = 1;
+    this.debounceSearch().subscribe(() => this.loadCategories());
+  }
+
+  debounceSearch() {
+    return of(this.searchTerm).pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(() => of(null))
+    );
+  }
+
+  // Validadores personalizados
+  noSpecialCharsValidator(control: any) {
+    const hasDangerousChars = /[<>'"`;]/.test(control.value);
+    return hasDangerousChars ? { invalidContent: true } : null;
+  }
+
+  noNumbersValidator(control: any) {
+    const hasNumbers = /\d/.test(control.value);
+    return hasNumbers ? { invalidContent: true } : null;
+  }
+
+  noSQLInjectionValidator(control: any) {
+    const sqlKeywords = /(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|EXEC|UNION|GRANT|REVOKE)/i;
+    return sqlKeywords.test(control.value) ? { invalidContent: true } : null;
+  }
+
+  sanitizeInput(input: string): string {
+    return input.replace(/[<>'"`;]/g, '').replace(/(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|EXEC|UNION|GRANT|REVOKE)/gi, '');
+  }
+
+  openCategoryModal(mode: 'create' | 'edit', category?: any): void {
+    if (mode === 'create') {
+      this.selectedCategoryId = null;
+      this.categoryForm.reset();
+      this.faqCategoryModal.open();
+    } else if (category) {
+      this.selectedCategoryId = category.category_id;
+      this.faqCategoryService.getCategoryById(category.category_id).subscribe({
+        next: (response) => {
+          this.categoryForm.patchValue({
+            name: response.faqCategory.name,
+            description: response.faqCategory.description,
+          });
+          this.faqCategoryModal.open();
+        },
+        error: (err) => {
+          this.toastService.showToast('Error al cargar los detalles de la categoría', 'error');
+        },
       });
     }
+  }
+
+  saveCategory(): void {
+    if (this.categoryForm.invalid) {
+      this.categoryForm.markAllAsTouched();
+      return;
+    }
+
+    const categoryData = {
+      name: this.sanitizeInput(this.categoryForm.value.name),
+      description: this.sanitizeInput(this.categoryForm.value.description),
+    };
+
+    const serviceCall = this.selectedCategoryId
+      ? this.faqCategoryService.updateCategory(this.selectedCategoryId, categoryData)
+      : this.faqCategoryService.createCategory(categoryData);
+
+    serviceCall.subscribe({
+      next: (response) => {
+        this.toastService.showToast(
+          this.selectedCategoryId ? 'Categoría actualizada exitosamente' : 'Categoría creada exitosamente',
+          'success'
+        );
+        this.loadCategories();
+        this.faqCategoryModal.close();
+      },
+      error: (err) => {
+        this.toastService.showToast(err.message || 'Error al guardar la categoría', 'error');
+      },
+    });
+  }
+
+  deleteCategory(category: any): void {
+    this.toastService.showToast(
+      `¿Estás seguro de que deseas eliminar la categoría "${category.name}"? Esto eliminará todas las preguntas frecuentes asociadas.`,
+      'warning',
+      'Confirmar',
+      () => {
+        this.faqCategoryService.deleteCategory(category.category_id).subscribe({
+          next: () => {
+            this.toastService.showToast('Categoría eliminada exitosamente', 'success');
+            this.loadCategories();
+          },
+          error: (err) => {
+            this.toastService.showToast(err.message || 'Error al eliminar la categoría', 'error');
+          },
+        });
+      }
+    );
+  }
+
+  formatDate(date: string): string {
+    return date ? new Date(date).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
   }
 }

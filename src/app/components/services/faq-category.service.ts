@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
@@ -33,12 +33,24 @@ export class FaqCategoryService {
     );
   }
 
-  // Obtener todas las categorías de FAQ activas
-  getAllCategories(): Observable<any> {
+  // Obtener todas las categorías de FAQ activas con paginación y búsqueda
+  getAllCategories(page: number = 1, pageSize: number = 10, search: string = ''): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get(`${this.apiUrl}/`, { headers, withCredentials: true });
+        let params = new HttpParams()
+          .set('page', page.toString())
+          .set('pageSize', pageSize.toString());
+
+        if (search) {
+          params = params.set('search', search);
+        }
+
+        return this.http.get(`${this.apiUrl}/`, {
+          headers,
+          params,
+          withCredentials: true,
+        });
       })
     );
   }

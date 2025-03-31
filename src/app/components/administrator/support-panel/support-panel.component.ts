@@ -6,8 +6,8 @@ import { StatusCardsComponent } from './status-cards/status-cards.component';
 import { ConsultationRowComponent } from './consultation-row/consultation-row.component';
 import { StatusBadgeComponent } from './status-badge/status-badge.component';
 import { ConsultationDetailsComponent } from './consultation-details/consultation-details.component';
-import { PaginationComponent } from '../pagination/pagination.component'; // Asegúrate de que la ruta sea correcta
-import {FiltersPanelComponent} from './filters-panel/filters-panel.component';
+import { PaginationComponent } from '../pagination/pagination.component';
+import { FiltersPanelComponent } from './filters-panel/filters-panel.component';
 
 @Component({
   selector: 'app-support-panel',
@@ -27,18 +27,20 @@ import {FiltersPanelComponent} from './filters-panel/filters-panel.component';
 export class SupportPanelComponent {
   consultationCounts: any = {};
   consultations: any[] = [];
-  filteredConsultations: any[] = []; // Lista filtrada para mostrar
   selectedConsultationId: string | null = null;
   showModal: boolean = false;
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalItems: number = 0;
 
-  // Nueva propiedad para el término de búsqueda
+  // Propiedad para el término de búsqueda
   searchQuery: string = '';
 
-  // Nueva propiedad para controlar la visibilidad de los filtros
+  // Propiedad para controlar la visibilidad de los filtros
   showFilters: boolean = false;
+
+  // Almacenar los filtros actuales
+  currentFilters: any = {};
 
   constructor(private supportService: SupportInquiryService) {}
 
@@ -46,6 +48,7 @@ export class SupportPanelComponent {
     this.loadData();
   }
 
+  // Cargar datos (consultas y estadísticas)
   public loadData(): void {
     // Cargar estadísticas
     this.supportService.getConsultationCountsByStatus().subscribe({
@@ -53,32 +56,30 @@ export class SupportPanelComponent {
       error: (e) => console.error('Error counts:', e),
     });
 
-    // Cargar consultas paginadas
-    this.supportService.getAllConsultations(this.currentPage, this.itemsPerPage).subscribe({
+    // Cargar consultas con filtros y búsqueda actuales
+    this.loadConsultations();
+  }
+
+  // Nueva función para cargar consultas basada en filtros y búsqueda
+  private loadConsultations(): void {
+    const filters = { ...this.currentFilters };
+    if (this.searchQuery) {
+      filters.search = this.searchQuery; // Añadir búsqueda a los filtros si existe
+    }
+
+    this.supportService.getFilteredConsultations(filters, this.currentPage, this.itemsPerPage).subscribe({
       next: (res) => {
         this.consultations = res.consultations;
-        this.filteredConsultations = this.consultations; // Inicializar la lista filtrada
         this.totalItems = res.total;
       },
-      error: (e) => console.error('Error consultations:', e),
+      error: (e) => console.error('Error al cargar consultas:', e),
     });
   }
 
-  // Función para manejar la búsqueda
+  // Manejar la búsqueda
   onSearch(): void {
-    if (!this.searchQuery) {
-      this.filteredConsultations = this.consultations; // Si no hay búsqueda, mostrar todos
-      return;
-    }
-
-    const query = this.searchQuery.toLowerCase();
-    this.filteredConsultations = this.consultations.filter((consultation) => {
-      return (
-        consultation.user_name.toLowerCase().includes(query) || // Buscar en el nombre
-        consultation.user_email.toLowerCase().includes(query) || // Buscar en el email
-        consultation.subject.toLowerCase().includes(query) // Buscar en el asunto
-      );
-    });
+    this.currentPage = 1; // Resetear a la primera página al buscar
+    this.loadConsultations();
   }
 
   // Alternar la visibilidad de los filtros
@@ -89,13 +90,13 @@ export class SupportPanelComponent {
   // Manejar cambio de página
   onPageChange(newPage: number): void {
     this.currentPage = newPage;
-    this.loadData();
+    this.loadConsultations();
   }
 
   // Manejar cambio de elementos por página
   onItemsPerPageChange(): void {
     this.currentPage = 1; // Resetear a la primera página
-    this.loadData();
+    this.loadConsultations();
   }
 
   private processCounts(counts: any[]): void {
@@ -105,19 +106,11 @@ export class SupportPanelComponent {
     }, {});
   }
   
+  // Manejar cambios en los filtros
   onFiltersChanged(filters: any): void {
-    // Aplicar filtros y luego búsqueda
-    this.supportService.getFilteredConsultations(filters, this.currentPage, this.itemsPerPage).subscribe({
-      next: (response) => {
-        this.consultations = response.consultations;
-        this.filteredConsultations = this.consultations; // Reiniciar la lista filtrada
-        this.onSearch(); // Aplicar búsqueda después de los filtros
-        this.totalItems = response.total;
-      },
-      error: (error) => {
-        console.error('Error al obtener consultas filtradas:', error);
-      },
-    });
+    this.currentFilters = filters; // Almacenar los filtros actuales
+    this.currentPage = 1; // Resetear a la primera página
+    this.loadConsultations();
   }
 
   openModal(consultationId: string): void {

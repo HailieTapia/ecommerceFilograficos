@@ -1,48 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Importar FormsModule para ngModel
-import { FaqService } from '../../services/faq.service';
-
-interface Faq {
-  id: number;
-  question: string;
-  answer: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface FaqCategory {
-  id: number;
-  name: string;
-  description: string;
-  faqs: Faq[];
-}
+import { FormsModule } from '@angular/forms';
+import { FaqService, Faq, FaqResponse } from '../../services/faq.service';
+import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-faq',
   standalone: true,
   templateUrl: './faq.component.html',
   styleUrls: ['./faq.component.css'],
-  imports: [CommonModule, FormsModule] // Añadir FormsModule aquí
+  imports: [CommonModule, FormsModule],
 })
-export class FaqComponent implements OnInit {
-  faqCategories: FaqCategory[] = [];
-  selectedCategory: FaqCategory | null = null;
-  isSidebarOpen: boolean = false;
-  isDesktopView: boolean = window.innerWidth >= 768; // 768px es el breakpoint de Tailwind para md:
-  
-  // Variables para paginación
-  currentPage: number = 1;
-  itemsPerPage: number = 10;
-  totalPages: number = 1;
-
-  // Variables para búsqueda
-  searchQuery: string = '';
-  filteredFaqs: Faq[] = [];
-  isSearchActive: boolean = false;
+export class FaqComponent implements OnInit, OnDestroy {
+  faqs: Faq[] = [];
+  totalFaqs = 0;
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 1;
+  searchQuery = '';
+  selectedCategoryId: number | null = null;
+  categories: { id: number; name: string; description: string }[] = [];
+  isSidebarOpen = false;
+  isDesktopView = window.innerWidth >= 768;
+  private subscriptions: Subscription = new Subscription();
 
   constructor(private faqService: FaqService) {
-    // Escuchar cambios en el tamaño de la ventana
     window.addEventListener('resize', () => {
       this.isDesktopView = window.innerWidth >= 768;
     });
@@ -50,43 +34,67 @@ export class FaqComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('[FaqComponent] Inicializando...');
-    this.getAllFaqs();
+    this.loadCategories();
+    this.loadFaqs();
   }
 
-  getAllFaqs(): void {
-    console.log('[FaqComponent] Obteniendo preguntas frecuentes...');
-    this.faqService.getAllFaqs().subscribe({
-      next: (response: FaqCategory[]) => {
-        console.log('[FaqComponent] Datos recibidos:', response);
-        this.faqCategories = response;
-        if (this.faqCategories.length > 0) {
-          this.selectCategory(this.faqCategories[0]);
-        }
-      },
-      error: (err) => console.error('[FaqComponent] Error al obtener FAQs:', err)
-    });
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
-  selectCategory(category: FaqCategory): void {
-    this.selectedCategory = category;
+  loadFaqs(): void {
+    const params = {
+      page: this.currentPage,
+      pageSize: this.itemsPerPage,
+      search: this.searchQuery.trim(),
+      categoryId: this.selectedCategoryId || undefined,
+      grouped: false,
+    };
+
+    this.subscriptions.add(
+      this.faqService.getAllFaqs(params).subscribe({
+        next: (response: FaqResponse) => {
+          console.log('[FaqComponent] Datos recibidos:', response);
+          this.faqs = response.faqs as Faq[];
+          this.totalFaqs = response.total;
+          this.totalPages = Math.ceil(response.total / this.itemsPerPage);
+          if (!this.selectedCategoryId && this.categories.length > 0) {
+            this.selectedCategoryId = this.categories[0].id; // Seleccionar la primera categoría por defecto
+          }
+        },
+        error: (err) => console.error('[FaqComponent] Error al obtener FAQs:', err),
+      })
+    );
+  }
+
+  loadCategories(): void {
+    this.subscriptions.add(
+      this.faqService.getAllFaqs({ grouped: true }).subscribe({
+        next: (response: FaqResponse) => {
+          this.categories = (response.faqs as any[]).map((cat: any) => ({
+            id: cat.id,
+            name: cat.name,
+            description: cat.description,
+          }));
+        },
+        error: (err) => console.error('[FaqComponent] Error al obtener categorías:', err),
+      })
+    );
+  }
+
+  selectCategory(categoryId: number): void {
+    this.selectedCategoryId = categoryId;
     this.currentPage = 1;
-    this.updatePagination(); // Actualizar paginación al seleccionar una categoría
-    this.isSidebarOpen = false; // Cerrar el menú después de seleccionar
-    console.log('[FaqComponent] Categoría seleccionada:', category.name);
-    this.onSearch(); // Aplicar búsqueda al cambiar de categoría
-  }
-
-  getPaginatedFaqs(): Faq[] {
-    if (!this.selectedCategory) return [];
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return this.isSearchActive ? this.filteredFaqs.slice(start, end) : this.selectedCategory.faqs.slice(start, end);
+    this.isSidebarOpen = false;
+    console.log('[FaqComponent] Categoría seleccionada:', this.selectedCategoryId);
+    this.loadFaqs();
   }
 
   changePage(delta: number): void {
     const newPage = this.currentPage + delta;
     if (newPage >= 1 && newPage <= this.totalPages) {
       this.currentPage = newPage;
+      this.loadFaqs();
     }
   }
 
@@ -95,40 +103,25 @@ export class FaqComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.searchQuery = this.searchQuery.trim(); // Eliminar espacios en blanco
-
-    if (this.searchQuery.length < 3) {
-      this.isSearchActive = false;
-      this.filteredFaqs = [];
-      this.updatePagination(); // Actualizar paginación cuando no hay búsqueda
-      return;
-    }
-
-    this.isSearchActive = true;
-    const query = this.searchQuery.toLowerCase();
-
-    this.filteredFaqs = this.faqCategories
-      .flatMap(category => category.faqs)
-      .filter(faq => 
-        faq.question.toLowerCase().includes(query) ||
-        faq.answer.toLowerCase().includes(query) ||
-        this.faqCategories.find(cat => cat.id === faq.id)?.name.toLowerCase().includes(query)
-      );
-
-    this.updatePagination();
     this.currentPage = 1;
+    this.debounceSearch().subscribe(() => this.loadFaqs());
   }
 
-  updatePagination(): void {
-    if (this.isSearchActive) {
-      // Calcular totalPages basado en los resultados filtrados
-      this.totalPages = Math.ceil(this.filteredFaqs.length / this.itemsPerPage);
-    } else if (this.selectedCategory) {
-      // Calcular totalPages basado en las FAQs de la categoría seleccionada
-      this.totalPages = Math.ceil(this.selectedCategory.faqs.length / this.itemsPerPage);
-    } else {
-      // Si no hay categoría seleccionada ni búsqueda, no hay páginas
-      this.totalPages = 1;
-    }
+  debounceSearch() {
+    return of(this.searchQuery).pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(() => of(null))
+    );
+  }
+
+  getSelectedCategoryName(): string {
+    const category = this.categories.find(cat => cat.id === this.selectedCategoryId);
+    return category ? category.name : '';
+  }
+
+  getSelectedCategoryDescription(): string {
+    const category = this.categories.find(cat => cat.id === this.selectedCategoryId);
+    return category ? category.description : '';
   }
 }

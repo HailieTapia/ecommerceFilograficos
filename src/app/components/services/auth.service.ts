@@ -128,6 +128,6 @@ export class AuthService {
   // Obtener el rol del usuario
   getUserRole(): string | null {
     const userData = localStorage.getItem('userData');
-    return userData ? JSON.parse(userData).user_type : null;
+    return userData ? JSON.parse(userData).tipo : null;
   }
 }

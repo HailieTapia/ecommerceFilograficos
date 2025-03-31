@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient,HttpParams,HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
@@ -43,17 +43,26 @@ export class SupportInquiryService {
         const params = new HttpParams()
           .set('page', page.toString())
           .set('pageSize', pageSize.toString());
-
-        return this.http.get(`${this.apiUrl}/`, { 
-          headers, 
-          params, 
-          withCredentials: true 
-        });
+        return this.http.get(`${this.apiUrl}/`, { headers, params, withCredentials: true });
       })
     );
   }
 
-  // Obtener consultas filtradas según los parámetros proporcionados
+  // Nueva función: Buscar consultas por ID, nombre, correo o asunto
+  searchConsultations(searchTerm: string, page: number = 1, pageSize: number = 10): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        const params = new HttpParams()
+          .set('search', searchTerm)
+          .set('page', page.toString())
+          .set('pageSize', pageSize.toString());
+        return this.http.get(`${this.apiUrl}/filtered`, { headers, params, withCredentials: true });
+      })
+    );
+  }
+
+  // Obtener consultas filtradas (actualizado para incluir búsqueda opcional)
   getFilteredConsultations(
     filters: {
       status?: string;
@@ -62,6 +71,7 @@ export class SupportInquiryService {
       startDate?: string;
       endDate?: string;
       user_id?: string; // "null" para no registrados, "registered" para registrados
+      search?: string;  // Nuevo campo opcional para búsqueda
     },
     page: number = 1,
     pageSize: number = 10
@@ -72,9 +82,9 @@ export class SupportInquiryService {
   
         // Parámetros de filtrado y paginación
         let params = new HttpParams()
-          .set('page', page.toString()) // Cambiar a 'page'
-          .set('pageSize', pageSize.toString()); // Cambiar a 'pageSize'
-  
+          .set('page', page.toString())
+          .set('pageSize', pageSize.toString());
+
         if (filters.status) {
           params = params.set('status', filters.status);
         }
@@ -91,7 +101,10 @@ export class SupportInquiryService {
         if (filters.user_id) {
           params = params.set('user_id', filters.user_id);
         }
-  
+        if (filters.search) {
+          params = params.set('search', filters.search);
+        }
+
         return this.http.get(`${this.apiUrl}/filtered`, {
           headers,
           params,
@@ -100,8 +113,8 @@ export class SupportInquiryService {
       })
     );
   }
-  
-  // Obtener una consulta específica por ID (requiere autenticación)
+
+  // Obtener una consulta específica por ID
   getConsultationById(id: string): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -111,7 +124,7 @@ export class SupportInquiryService {
     );
   }
 
-  // Actualizar el estado de una consulta por ID (requiere autenticación y rol de administrador)
+  // Actualizar el estado de una consulta por ID
   updateConsultationStatus(id: string, statusData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -121,7 +134,7 @@ export class SupportInquiryService {
     );
   }
 
-  // Actualizar el canal de contacto de una consulta por ID (requiere autenticación y rol de administrador)
+  // Actualizar el canal de contacto de una consulta por ID
   updateConsultationContactChannel(id: string, contactChannelData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -131,7 +144,7 @@ export class SupportInquiryService {
     );
   }
 
-  // Actualizar el canal de respuesta de una consulta por ID (requiere autenticación y rol de administrador)
+  // Actualizar el canal de respuesta de una consulta por ID
   updateConsultationResponseChannel(id: string, responseChannelData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -141,7 +154,7 @@ export class SupportInquiryService {
     );
   }
 
-  // Añadir estas funciones al servicio
+  // Funciones de utilidad
   getStatusText(status: string): string {
     const statusMap: { [key: string]: string } = {
       'pending': 'Pendiente',
@@ -171,5 +184,5 @@ export class SupportInquiryService {
     };
   
     return validTransitions[currentStatus]?.includes(newStatus) || false;
-  }  
+  }
 }

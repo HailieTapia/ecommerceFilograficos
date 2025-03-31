@@ -1,181 +1,207 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FaqService } from '../../services/faq.service';
-import { FaqFormComponent } from './faq-form/faq-form.component';
-import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs'; // Importar Subscription de RxJS
-
-export interface Faq {
-  id: number;  // Nombre y tipo que espera el backend
-  question: string;
-  answer: string;
-  category_id: number;  // Campo necesario para las relaciones
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface FaqCategory {
-  category_id: number;  // Nombre y tipo que espera el backend
-  name: string;
-  description: string;
-  faqs: Faq[];
-}
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FaqService, Faq, GroupedFaq, FaqResponse } from '../../services/faq.service';
+import { PaginationComponent } from '../pagination/pagination.component';
+import { ModalComponent } from '../../../modal/modal.component';
+import { ToastService } from '../../services/toastService';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { of, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-faq',
-  templateUrl: './faq.component.html',
   standalone: true,
-  styleUrls: ['./faq.component.css'],
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    FormsModule
-  ]
+    FormsModule,
+    ReactiveFormsModule,
+    PaginationComponent,
+    ModalComponent,
+  ],
+  templateUrl: './faq.component.html',
+  styleUrls: ['./faq.component.css'],
 })
 export class FaqComponentAdmin implements OnInit, OnDestroy {
-  categories: FaqCategory[] = [];
-  searchQuery: string = '';
-  selectedCategory: FaqCategory | null = null;
-  currentPage: number = 1;
-  itemsPerPage: number = 5;
-  totalPages: number = 1;
-  filteredFaqs: Faq[] = [];
-  isSearchActive: boolean = false;
-  private subscriptions: Subscription = new Subscription(); // Declarar e inicializar subscriptions
+  @ViewChild('faqModal') faqModal!: ModalComponent;
 
-  constructor(private faqService: FaqService, private dialog: MatDialog) {}
+  faqs: (Faq | GroupedFaq)[] = [];
+  totalFaqs = 0;
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 1;
+  searchTerm = '';
+  selectedCategoryId: number | null = null;
+  isGrouped = false;
+  categories: { id: number; name: string; description: string }[] = [];
+  faqForm!: FormGroup;
+  selectedFaqId: number | null = null;
+  private subscriptions: Subscription = new Subscription();
+
+  constructor(
+    private faqService: FaqService,
+    private toastService: ToastService,
+    private fb: FormBuilder
+  ) {
+    this.faqForm = this.fb.group({
+      category_id: ['', [Validators.required]],
+      question: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(500)]],
+      answer: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(500)]],
+    });
+  }
 
   ngOnInit(): void {
-    this.getFaqs();
+    this.loadFaqs();
+    this.loadCategories();
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe(); // Asegurarse de desuscribirse al destruir el componente
+    this.subscriptions.unsubscribe();
   }
 
-  getFaqs(): void {
-    this.subscriptions.add( // Agregar la suscripción al manejador
-      this.faqService.getAllFaqs().subscribe({
-        next: (data) => {
-          if (data && Array.isArray(data)) {
-            this.categories = data;
-            this.updatePagination();
-          }
-        },
-        error: (err) => console.error('Error al obtener FAQs:', err)
-      })
-    );
-  }
+  loadFaqs(): void {
+    const params = {
+      page: this.currentPage,
+      pageSize: this.itemsPerPage,
+      search: this.searchTerm,
+      categoryId: this.selectedCategoryId || undefined,
+      grouped: this.isGrouped,
+    };
 
-  openFormDialog(faq?: Faq, category?: FaqCategory): void {
-    const dialogRef = this.dialog.open(FaqFormComponent, {
-      width: '500px',
-      maxHeight: '90vh',
-      panelClass: 'custom-dialog-container',
-      autoFocus: false,
-      data: {
-        faq: faq ? { ...faq } : null, // Asegúrate de que el `id` esté incluido
-        category: category ? { ...category } : null
-      },
-    });
-  
     this.subscriptions.add(
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) this.getFaqs(); // Actualiza la lista después de cerrar el modal
+      this.faqService.getAllFaqs(params, true).subscribe({
+        next: (response: FaqResponse) => {
+          this.faqs = response.faqs;
+          this.totalFaqs = response.total;
+          this.totalPages = Math.ceil(response.total / this.itemsPerPage);
+        },
+        error: (err) => {
+          this.toastService.showToast('Error al cargar las FAQs', 'error');
+        },
       })
     );
   }
 
-  deleteFaq(id: number): void { // Usar number en lugar de string
-    if (confirm('¿Estás seguro de eliminar esta pregunta?')) {
-      this.subscriptions.add(
-        this.faqService.deleteFaq(id.toString()) // Asegurar conversión si el backend necesita string
-          .subscribe({
-            next: () => this.getFaqs(),
-            error: (err) => console.error('Error al eliminar:', err)
-          })
-      );
+  loadCategories(): void {
+    this.subscriptions.add(
+      this.faqService.getAllFaqs({ grouped: true }, true).subscribe({
+        next: (response: FaqResponse) => {
+          this.categories = (response.faqs as GroupedFaq[]).map((cat) => ({
+            id: cat.id,
+            name: cat.name,
+            description: cat.description,
+          }));
+        },
+        error: (err) => {
+          this.toastService.showToast('Error al cargar las categorías', 'error');
+        },
+      })
+    );
+  }
+
+  toggleGrouping(): void {
+    this.isGrouped = !this.isGrouped;
+    this.currentPage = 1;
+    this.loadFaqs();
+  }
+
+  onPageChange(newPage: number): void {
+    this.currentPage = newPage;
+    this.loadFaqs();
+  }
+
+  onItemsPerPageChange(): void {
+    this.currentPage = 1;
+    this.loadFaqs();
+  }
+
+  onSearchChange(): void {
+    this.currentPage = 1;
+    this.debounceSearch().subscribe(() => this.loadFaqs());
+  }
+
+  debounceSearch() {
+    return of(this.searchTerm).pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(() => of(null))
+    );
+  }
+
+  onCategoryChange(): void {
+    this.currentPage = 1;
+    this.loadFaqs();
+  }
+
+  openFaqModal(mode: 'create' | 'edit', faq?: Faq): void {
+    if (mode === 'create') {
+      this.selectedFaqId = null;
+      this.faqForm.reset();
+      this.faqModal.open();
+    } else if (faq) {
+      this.selectedFaqId = faq.id;
+      this.faqForm.patchValue({
+        category_id: faq.category.id,
+        question: faq.question,
+        answer: faq.answer,
+      });
+      this.faqModal.open();
     }
   }
 
-  onSearch(): void {
-    this.searchQuery = this.searchQuery.trim().toLowerCase();
-    
-    if (this.searchQuery.length < 3) {
-      this.isSearchActive = false;
-      this.filteredFaqs = [];
-      this.updatePagination();
+  saveFaq(): void {
+    if (this.faqForm.invalid) {
+      this.faqForm.markAllAsTouched();
       return;
     }
 
-    this.isSearchActive = true;
-    this.filteredFaqs = this.categories
-      .flatMap(category => category.faqs)
-      .filter(faq => 
-        faq.question.toLowerCase().includes(this.searchQuery) ||
-        faq.answer.toLowerCase().includes(this.searchQuery)
-      );
-    
-    this.updatePagination();
-    this.currentPage = 1;
-  }
+    const faqData = this.faqForm.value;
+    const serviceCall = this.selectedFaqId
+      ? this.faqService.updateFaq(this.selectedFaqId, faqData)
+      : this.faqService.createFaq(faqData);
 
-  selectCategory(category: FaqCategory | null): void {
-    this.selectedCategory = category;
-    this.currentPage = 1;
-    this.updatePagination();
-  }
-
-  updatePagination(): void {
-    let totalItems = 0;
-    
-    if (this.isSearchActive) {
-      totalItems = this.filteredFaqs.length;
-    } else if (this.selectedCategory) {
-      totalItems = this.selectedCategory.faqs.length;
-    } else {
-      // Si no hay categoría seleccionada, cuenta todas las FAQs
-      totalItems = this.categories.flatMap(c => c.faqs).length;
-    }
-    
-    this.totalPages = Math.ceil(totalItems / this.itemsPerPage) || 1;
-  }
-
-  getPaginatedFaqs(): Faq[] {
-    let faqs: Faq[] = [];
-    
-    if (this.isSearchActive) {
-      // Si hay búsqueda activa, usa los FAQs filtrados
-      faqs = this.filteredFaqs;
-    } else if (this.selectedCategory) {
-      // Si hay una categoría seleccionada, usa los FAQs de esa categoría
-      faqs = this.selectedCategory.faqs;
-    } else {
-      // Si no hay categoría seleccionada, muestra todas las FAQs de todas las categorías
-      faqs = this.categories.flatMap(c => c.faqs);
-    }
-    
-    // Aplica paginación
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    return faqs.slice(start, end);
-  }
-
-  changePage(delta: number): void {
-    const newPage = this.currentPage + delta;
-    if (newPage >= 1 && newPage <= this.totalPages) {
-      this.currentPage = newPage;
-    }
-  }
-
-  findCategoryByFaq(faq: Faq): FaqCategory | undefined {
-    return this.categories.find(category => 
-      category.faqs.some(f => f.id === faq.id) // Usar id
+    this.subscriptions.add(
+      serviceCall.subscribe({
+        next: () => {
+          this.toastService.showToast(
+            this.selectedFaqId ? 'FAQ actualizada exitosamente' : 'FAQ creada exitosamente',
+            'success'
+          );
+          this.loadFaqs();
+          this.faqModal.close();
+        },
+        error: (err) => {
+          this.toastService.showToast(err.message || 'Error al guardar la FAQ', 'error');
+        },
+      })
     );
+  }
+
+  deleteFaq(faq: Faq): void {
+    this.toastService.showToast(
+      `¿Estás seguro de que deseas eliminar la FAQ "${faq.question}"?`,
+      'warning',
+      'Confirmar',
+      () => {
+        this.subscriptions.add(
+          this.faqService.deleteFaq(faq.id.toString()).subscribe({
+            next: () => {
+              this.toastService.showToast('FAQ eliminada exitosamente', 'success');
+              this.loadFaqs();
+            },
+            error: (err) => {
+              this.toastService.showToast(err.message || 'Error al eliminar la FAQ', 'error');
+            },
+          })
+        );
+      }
+    );
+  }
+
+  formatDate(date?: string): string {
+    return date ? new Date(date).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+  }
+
+  isGroupedFaq(item: Faq | GroupedFaq): item is GroupedFaq {
+    return (item as GroupedFaq).faqs !== undefined;
   }
 }
