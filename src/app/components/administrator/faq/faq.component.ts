@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FaqService, Faq, GroupedFaq, FaqResponse } from '../../services/faq.service';
+import { FaqCategoryService } from '../../services/faq-category.service'; // Importar el nuevo servicio
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
 import { ToastService } from '../../services/toastService';
@@ -32,13 +33,14 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
   searchTerm = '';
   selectedCategoryId: number | null = null;
   isGrouped = false;
-  categories: { id: number; name: string; description: string }[] = [];
+  categories: { id: number; name: string; description?: string }[] = []; // Ajustar para que description sea opcional
   faqForm!: FormGroup;
   selectedFaqId: number | null = null;
   private subscriptions: Subscription = new Subscription();
 
   constructor(
     private faqService: FaqService,
+    private faqCategoryService: FaqCategoryService, // Inyectar el nuevo servicio
     private toastService: ToastService,
     private fb: FormBuilder
   ) {
@@ -83,12 +85,12 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
 
   loadCategories(): void {
     this.subscriptions.add(
-      this.faqService.getAllFaqs({ grouped: true }, true).subscribe({
-        next: (response: FaqResponse) => {
-          this.categories = (response.faqs as GroupedFaq[]).map((cat) => ({
-            id: cat.id,
+      this.faqCategoryService.getPublicCategories().subscribe({
+        next: (categories: { category_id: number; name: string }[]) => {
+          this.categories = categories.map(cat => ({
+            id: cat.category_id,
             name: cat.name,
-            description: cat.description,
+            description: '' // Asignamos una descripción vacía ya que el endpoint público no la incluye
           }));
         },
         error: (err) => {

@@ -33,7 +33,7 @@ export class FaqCategoryService {
     );
   }
 
-  // Obtener todas las categorías de FAQ activas con paginación y búsqueda
+  // Obtener todas las categorías de FAQ activas con paginación y búsqueda (admin)
   getAllCategories(page: number = 1, pageSize: number = 10, search: string = ''): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -73,5 +73,10 @@ export class FaqCategoryService {
         return this.http.delete(`${this.apiUrl}/${id}`, { headers, withCredentials: true });
       })
     );
+  }
+
+  // Obtener ID y nombre de categorías activas (público)
+  getPublicCategories(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/public`);
   }
 }
