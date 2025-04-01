@@ -1,5 +1,5 @@
 <footer class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text py-6">
-  <div class="max-w-screen-xl mx-auto px-1">
+  <div class="max-w-screen-xl mx-auto px-4"> <!-- Adjusted px-1 to px-4 for better spacing -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
       <div>
         <h4 class="font-bold text-lg mb-4">Compañía</h4>
@@ -21,32 +21,32 @@
       <div>
         <h4 class="font-bold text-lg mb-4">Contáctanos</h4>
         <div class="flex space-x-4">
-          <a href="https://wa.me/7711983714" class="hover:text-light-primary dark:hover:text-dark-primary">
+          <a *ngIf="companyInfo?.phone_number" [href]="'https://wa.me/' + companyInfo.phone_number" class="hover:text-light-primary dark:hover:text-dark-primary" target="_blank">
             <i class="fab fa-whatsapp text-2xl"></i>
           </a>
-          <a href="mailto:htapiahailie@gmail.com" class="hover:text-light-primary dark:hover:text-dark-primary">
+          <a *ngIf="companyInfo?.email" [href]="'mailto:' + companyInfo.email" class="hover:text-light-primary dark:hover:text-dark-primary">
             <i class="fas fa-envelope text-2xl"></i>
           </a>
-          <a href="https://maps.app.goo.gl/irSjJ9RzgT6yxpCz7" class="hover:text-light-primary dark:hover:text-dark-primary" target="_blank">
+          <a *ngIf="companyInfo?.address_street" href="https://maps.app.goo.gl/irSjJ9RzgT6yxpCz7" class="hover:text-light-primary dark:hover:text-dark-primary" target="_blank">
             <i class="fas fa-map-marker-alt text-2xl"></i>
           </a>
         </div>
       </div>
       <div>
         <h4 class="font-bold text-lg mb-4">Síguenos</h4>
-        <div class="flex space-x-4">
-          <a href="https://www.facebook.com/filograficos?mibextid=LQQJ4d" class="hover:text-light-primary dark:hover:text-dark-primary">
-            <i class="fab fa-facebook text-2xl"></i>
+        <div class="flex flex-wrap gap-4">
+          <a
+            *ngFor="let social of companyInfo?.SocialMedia"
+            [href]="social.link"
+            target="_blank"
+            class="hover:text-light-primary dark:hover:text-dark-primary"
+          >
+            <i [class]="companyService.getSocialMediaIcon(social.name)" class="text-2xl"></i>
           </a>
-          <a href="#" class="hover:text-light-primary dark:hover:text-dark-primary">
-            <i class="fab fa-twitter text-2xl"></i>
-          </a>
-          <a href="#" class="hover:text-light-primary dark:hover:text-dark-primary">
-            <i class="fab fa-instagram text-2xl"></i>
-          </a>
-          <a href="#" class="hover:text-light-primary dark:hover:text-dark-primary">
-            <i class="fab fa-youtube text-2xl"></i>
-          </a>
+          <!-- Fallback si no hay redes sociales -->
+          <p *ngIf="!companyInfo?.SocialMedia?.length" class="text-sm text-light-secondary dark:text-dark-secondary">
+            No hay redes sociales disponibles.
+          </p>
         </div>
       </div>
     </div>

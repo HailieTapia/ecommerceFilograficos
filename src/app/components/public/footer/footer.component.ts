@@ -1,29 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { CompanyService } from '../../services/company.service';
+import { CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './footer.component.html',
-  styleUrl: './footer.component.css'
+  styleUrls: ['./footer.component.css']
 })
-export class FooterComponent {
+export class FooterComponent implements OnInit {
   companyInfo: any = null;
-  constructor(
-    private companyService: CompanyService
-  ) { }
+
+  constructor(public companyService: CompanyService) {} // Changed from private to public
+
   ngOnInit(): void {
     this.getCompanyInfo();
   }
+
   // Obtener la información de la empresa 
   getCompanyInfo(): void {
-    this.companyService.getCompanyInfo().subscribe(
-      (response) => {
+    this.companyService.getCompanyInfo().subscribe({
+      next: (response) => {
         this.companyInfo = response.company;
       },
-      (error) => {
-        console.error('Error al obtener:', error);
+      error: (error) => {
+        console.error('Error al obtener la información de la empresa:', error);
       }
-    );
+    });
   }
 }

@@ -16,7 +16,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   userRole: string | null = null;
   isLoggedIn: boolean = false;
   company: any;
@@ -47,6 +47,7 @@ export class HeaderComponent implements OnInit {
       this.userRole = user?.tipo || null;
     });
   }
+
   ngOnDestroy(): void {
     if (this.cartCountSubscription) {
       this.cartCountSubscription.unsubscribe();
