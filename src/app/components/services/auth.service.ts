@@ -11,8 +11,8 @@ import { CsrfService } from './csrf.service';
 export class AuthService {
   private apiUrl = `${environment.baseUrl}`;
   private userSubject = new BehaviorSubject<any>(null);
-  private loginSubject = new BehaviorSubject<void>(undefined); // Para emitir eventos de login
-  private logoutSubject = new BehaviorSubject<void>(undefined); // Para emitir eventos de logout
+  private loginSubject = new BehaviorSubject<void>(undefined);
+  private logoutSubject = new BehaviorSubject<void>(undefined);
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {
     this.loadUserFromStorage();
@@ -43,11 +43,12 @@ export class AuthService {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         return this.http.post(`${this.apiUrl}/auth/login`, data, { headers, withCredentials: true });
       }),
-      tap((user: any) => {
-        if (!user.mfaRequired) {
-          localStorage.setItem('userData', JSON.stringify(user));
-          this.userSubject.next(user);
-          this.loginSubject.next(); // Emitir evento de login
+      tap((response: any) => {
+        if (!response.mfaRequired) {
+          const normalizedUser = { userId: response.userId, tipo: response.tipo };
+          localStorage.setItem('userData', JSON.stringify(normalizedUser));
+          this.userSubject.next(normalizedUser);
+          this.loginSubject.next();
         }
       })
     );
@@ -70,10 +71,11 @@ export class AuthService {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         return this.http.post(`${this.apiUrl}/auth/mfa/verify-otp`, { userId, otp }, { headers, withCredentials: true });
       }),
-      tap((user: any) => {
-        localStorage.setItem('userData', JSON.stringify(user));
-        this.userSubject.next(user);
-        this.loginSubject.next(); // Emitir evento de login después de verificar MFA
+      tap((response: any) => {
+        const normalizedUser = { userId: response.userId, tipo: response.tipo };
+        localStorage.setItem('userData', JSON.stringify(normalizedUser));
+        this.userSubject.next(normalizedUser);
+        this.loginSubject.next();
       })
     );
   }
@@ -87,11 +89,37 @@ export class AuthService {
           tap(() => {
             localStorage.removeItem('userData');
             this.userSubject.next(null);
-            this.logoutSubject.next(); // Emitir evento de logout
-            console.log('Sesión cerrada exitosamente');
+            this.logoutSubject.next();
           }),
           catchError(error => {
-            return throwError(() => new Error('No se pudo cerrar sesión.'));
+            localStorage.removeItem('userData');
+            this.userSubject.next(null);
+            this.logoutSubject.next();
+            return throwError(() => new Error('Error al cerrar sesión en el servidor'));
+          })
+        );
+      })
+    );
+  }
+
+  checkTokenStatus(): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true }).pipe(
+          tap((response: any) => {
+            const normalizedUser = {
+              userId: response.user_id,
+              tipo: response.user_type
+            };
+            localStorage.setItem('userData', JSON.stringify(normalizedUser));
+            this.userSubject.next(normalizedUser);
+          }),
+          catchError(error => {
+            if (error.status === 401 && !this.isLoggedIn()) {
+              this.resetAuthState();
+            }
+            return throwError(() => error);
           })
         );
       })
@@ -117,7 +145,7 @@ export class AuthService {
   resetAuthState(): void {
     localStorage.removeItem('userData');
     this.userSubject.next(null);
-    this.logoutSubject.next(); // Emitir evento de logout
+    this.logoutSubject.next();
   }
 
   // Verificar si el usuario está logueado

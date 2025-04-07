@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { AuthService } from '../components/services/auth.service';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -14,18 +14,15 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
+    const isRootPath = state.url === '/' || state.url === '';
+    const allowPublic = route.data['allowPublic'] || false;
+    const expectedRole = route.data['role'];
+
     return this.authService.getUser().pipe(
       map(user => {
-        const expectedRole = route.data['role'];
-        const allowPublic = route.data['allowPublic'] || false;
-        // Corregimos la detección de la raíz usando state.url
-        const isRootPath = state.url === '/' || state.url === '';
-
         // Si no hay usuario autenticado
         if (!user) {
-          if (allowPublic) {
-            return true; // Permitir acceso público
-          }
+          if (allowPublic) return true; // Permitir rutas públicas
           this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
           return false;
         }
@@ -34,30 +31,39 @@ export class AuthGuard implements CanActivate {
         if (user.tipo === 'administrador') {
           if (isRootPath) {
             this.router.navigate(['/admin-dashboard']);
-            return false; // Denegar acceso a la raíz para administradores
+            return false;
           }
           if (expectedRole && expectedRole !== 'administrador') {
             this.router.navigate(['/admin-dashboard']);
-            return false; // Denegar acceso a rutas no administrativas
+            return false;
           }
-          return true; // Permitir acceso a rutas administrativas
+          return true;
         }
 
         // Si el usuario está autenticado como cliente
         if (user.tipo === 'cliente') {
           if (expectedRole && expectedRole !== 'cliente') {
             this.router.navigate(['/']);
-            return false; // Denegar acceso a rutas no de cliente
+            return false;
           }
-          return true; // Permitir acceso a rutas de cliente o públicas
+          return true;
         }
 
-        // Caso por defecto (otros roles futuros, si los hay)
-        return true;
+        return true; // Otros roles futuros
       }),
       tap(allowed => {
-        if (!allowed && !route.data['allowPublic']) {
+        // Validar token solo para rutas protegidas y si hay usuario
+        if (!allowed && !allowPublic) {
           this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+        } else if (this.authService.isLoggedIn() && !allowPublic) {
+          this.authService.checkTokenStatus().subscribe({
+            error: (err) => {
+              if (err.status === 401) {
+                this.authService.resetAuthState();
+                this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+              }
+            }
+          });
         }
       })
     );
