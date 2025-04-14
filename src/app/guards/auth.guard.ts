@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { AuthService } from '../components/services/auth.service';
 import { Observable, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, take, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -14,20 +14,25 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> {
-    const isRootPath = state.url === '/' || state.url === '';
     const allowPublic = route.data['allowPublic'] || false;
     const expectedRole = route.data['role'];
+    const isRootPath = state.url === '/' || state.url === '';
 
     return this.authService.getUser().pipe(
+      take(1), // Tomar solo el primer valor para evitar suscripciones infinitas
       map(user => {
-        // Si no hay usuario autenticado
+        // Permitir acceso a rutas públicas si no hay usuario
+        if (allowPublic && !user) {
+          return true;
+        }
+
+        // Si no hay usuario autenticado, redirigir al login
         if (!user) {
-          if (allowPublic) return true; // Permitir rutas públicas
           this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
           return false;
         }
 
-        // Si el usuario está autenticado como administrador
+        // Si el usuario es administrador
         if (user.tipo === 'administrador') {
           if (isRootPath) {
             this.router.navigate(['/admin-dashboard']);
@@ -40,7 +45,7 @@ export class AuthGuard implements CanActivate {
           return true;
         }
 
-        // Si el usuario está autenticado como cliente
+        // Si el usuario es cliente
         if (user.tipo === 'cliente') {
           if (expectedRole && expectedRole !== 'cliente') {
             this.router.navigate(['/']);
@@ -49,22 +54,13 @@ export class AuthGuard implements CanActivate {
           return true;
         }
 
-        return true; // Otros roles futuros
+        // Otros roles futuros
+        return true;
       }),
-      tap(allowed => {
-        // Validar token solo para rutas protegidas y si hay usuario
-        if (!allowed && !allowPublic) {
-          this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-        } else if (this.authService.isLoggedIn() && !allowPublic) {
-          this.authService.checkTokenStatus().subscribe({
-            error: (err) => {
-              if (err.status === 401) {
-                this.authService.resetAuthState();
-                this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-              }
-            }
-          });
-        }
+      catchError(() => {
+        this.authService.resetAuthState();
+        this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+        return of(false);
       })
     );
   }

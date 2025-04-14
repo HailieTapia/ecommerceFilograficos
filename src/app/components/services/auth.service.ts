@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { switchMap, tap, catchError } from 'rxjs/operators';
+import { switchMap, tap, catchError, take } from 'rxjs/operators';
 import { environment } from '../../environments/config';
 import { CsrfService } from './csrf.service';
 
@@ -15,14 +15,29 @@ export class AuthService {
   private logoutSubject = new BehaviorSubject<void>(undefined);
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {
-    this.loadUserFromStorage();
+    this.initializeAuthState();
   }
 
-  // Cargar usuario desde el localStorage al iniciar la aplicación
-  private loadUserFromStorage() {
+  // Inicializar el estado de autenticación
+  private initializeAuthState() {
     const userData = localStorage.getItem('userData');
     if (userData) {
-      this.userSubject.next(JSON.parse(userData));
+      const user = JSON.parse(userData);
+      this.userSubject.next(user);
+      // Verificar el estado del usuario en el backend
+      this.checkTokenStatus().pipe(take(1)).subscribe({
+        next: (response) => {
+          const normalizedUser = {
+            userId: response.user_id,
+            tipo: response.user_type
+          };
+          localStorage.setItem('userData', JSON.stringify(normalizedUser));
+          this.userSubject.next(normalizedUser);
+        },
+        error: () => {
+          this.resetAuthState();
+        }
+      });
     }
   }
 
@@ -45,7 +60,10 @@ export class AuthService {
       }),
       tap((response: any) => {
         if (!response.mfaRequired) {
-          const normalizedUser = { userId: response.userId, tipo: response.tipo };
+          const normalizedUser = {
+            userId: response.userId,
+            tipo: response.tipo
+          };
           localStorage.setItem('userData', JSON.stringify(normalizedUser));
           this.userSubject.next(normalizedUser);
           this.loginSubject.next();
@@ -72,7 +90,10 @@ export class AuthService {
         return this.http.post(`${this.apiUrl}/auth/mfa/verify-otp`, { userId, otp }, { headers, withCredentials: true });
       }),
       tap((response: any) => {
-        const normalizedUser = { userId: response.userId, tipo: response.tipo };
+        const normalizedUser = {
+          userId: response.userId,
+          tipo: response.tipo
+        };
         localStorage.setItem('userData', JSON.stringify(normalizedUser));
         this.userSubject.next(normalizedUser);
         this.loginSubject.next();
@@ -95,33 +116,19 @@ export class AuthService {
             localStorage.removeItem('userData');
             this.userSubject.next(null);
             this.logoutSubject.next();
-            return throwError(() => new Error('Error al cerrar sesión en el servidor'));
+            return throwError(() => new Error('Error al cerrar sesión'));
           })
         );
       })
     );
   }
 
+  // Verificar el estado del token
   checkTokenStatus(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true }).pipe(
-          tap((response: any) => {
-            const normalizedUser = {
-              userId: response.user_id,
-              tipo: response.user_type
-            };
-            localStorage.setItem('userData', JSON.stringify(normalizedUser));
-            this.userSubject.next(normalizedUser);
-          }),
-          catchError(error => {
-            if (error.status === 401 && !this.isLoggedIn()) {
-              this.resetAuthState();
-            }
-            return throwError(() => error);
-          })
-        );
+        return this.http.get(`${this.apiUrl}/users/profile`, { headers, withCredentials: true });
       })
     );
   }

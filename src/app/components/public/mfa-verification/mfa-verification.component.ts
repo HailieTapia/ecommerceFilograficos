@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toastService';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-mfa-verification',
@@ -39,17 +40,16 @@ export class MfaVerificationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
       this.userId = params['userId'];
       if (this.userId) {
         this.authService.sendOtpMfa(this.userId).subscribe({
           next: () => {
-            console.log('OTP enviado correctamente');
             this.toastService.showToast('Se ha enviado un código OTP a tu correo.', 'info');
           },
           error: err => {
             console.error('Error enviando OTP:', err);
-            this.errorMessage = 'Error al enviar el código OTP';
+            this.errorMessage = 'Error al enviar el código OTP. Intenta de nuevo.';
             this.toastService.showToast(this.errorMessage, 'error');
             this.router.navigate(['/login']);
           }
@@ -102,19 +102,21 @@ export class MfaVerificationComponent implements OnInit {
 
     const otp = Object.values(this.mfaForm.value).join('');
     this.authService.verifyMfaOtp(this.userId, otp).subscribe({
-      next: (response) => {
-        console.log('OTP verificado con éxito', response);
+      next: () => {
         this.successMessage = 'Código OTP verificado correctamente.';
         this.isVerified = true;
         this.toastService.showToast(this.successMessage, 'success');
 
-        if (response.tipo === 'administrador') {
-          this.router.navigate(['/admin-dashboard']);
-        } else if (response.tipo === 'cliente') {
-          this.router.navigate(['/']);
-        } else {
-          this.router.navigate(['/login']);
-        }
+        // Usar el estado del AuthService para redirigir
+        this.authService.getUser().pipe(take(1)).subscribe(user => {
+          if (user?.tipo === 'administrador') {
+            this.router.navigate(['/admin-dashboard']);
+          } else if (user?.tipo === 'cliente') {
+            this.router.navigate(['/']);
+          } else {
+            this.router.navigate(['/login']);
+          }
+        });
       },
       error: err => {
         console.error('Error al verificar OTP:', err);
@@ -129,9 +131,9 @@ export class MfaVerificationComponent implements OnInit {
             this.router.navigate(['/login']);
           }
         } else {
-          this.errorMessage = 'Error al verificar el código. Intenta de nuevo más tarde.';
-          this.toastService.showToast('Error al verificar el código. Regresando al inicio de sesión.', 'error');
-          this.router.navigate(['/login']);
+          this.errorMessage = 'Error al verificar el código. Intenta de nuevo.';
+          this.toastService.showToast(this.errorMessage, 'error');
+          // No redirigir automáticamente para permitir reintentos
         }
       }
     });
