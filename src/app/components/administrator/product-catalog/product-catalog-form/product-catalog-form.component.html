@@ -179,11 +179,16 @@
           <label class="block text-sm font-medium mb-1">SKU <span class="text-red-500">*</span></label>
           <input
             formControlName="sku"
-            maxlength="8"
+            maxlength="13"
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background"
-            placeholder="Ej: LÁMP-001"
+            placeholder="Ej: LAMP-250419-01"
+            [ngClass]="{'border-red-500': errors['sku_' + i], 'border-gray-300': !errors['sku_' + i]}"
           >
-          <p *ngIf="errors['sku_' + i]" class="mt-1 text-sm text-red-500">{{ errors['sku_' + i] }}</p>
+          <p *ngIf="errors['sku_' + i]" class="mt-1 text-sm text-red-500">
+            {{ errors['sku_' + i] === 'El SKU es obligatorio.' ? 'El SKU es obligatorio.' :
+               errors['sku_' + i] === 'Máximo 13 caracteres.' ? 'Máximo 13 caracteres.' :
+               'El SKU debe tener el formato AAAA-NNNNNN-NN, ej. LAMP-250419-01.' }}
+          </p>
         </div>
       
         <div *ngIf="productForm.get('category_id')?.value" class="mb-4">
@@ -330,5 +335,3 @@
     </div>
   </div>
 </div>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

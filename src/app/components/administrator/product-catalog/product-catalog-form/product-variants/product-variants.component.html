@@ -44,20 +44,22 @@
           SKU <span class="text-red-500" aria-hidden="true">*</span>
           <div class="tooltip-container">
             <i class="fas fa-info-circle text-gray-400 tooltip-icon" aria-hidden="true"></i>
-            <span class="tooltip-text">Código único para identificar la variante del producto.</span>
           </div>
         </label>
         <input 
           [id]="'sku-' + i"
           formControlName="sku" 
           type="text" 
+          maxlength="13"
           class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Ej: LAMP-250419-01"
           [attr.aria-required]="true"
           [attr.aria-invalid]="variant.get('sku')?.invalid && variant.get('sku')?.touched || false">
         <div *ngIf="variant.get('sku')?.touched && variant.get('sku')?.errors" 
              class="text-red-500 text-sm">
           <span *ngIf="variant.get('sku')?.errors?.['required']">El SKU es obligatorio.</span>
-          <span *ngIf="variant.get('sku')?.errors?.['maxlength']">Máximo 50 caracteres.</span>
+          <span *ngIf="variant.get('sku')?.errors?.['pattern']">El SKU debe tener el formato AAAA-NNNNNN-NN, ej. LAMP-250419-01.</span>
+          <span *ngIf="variant.get('sku')?.errors?.['maxlength']">Máximo 13 caracteres.</span>
         </div>
       </div>
 

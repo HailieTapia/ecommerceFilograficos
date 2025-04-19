@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectorRef } from '@angular/core'; // Agregar ChangeDetectorRef
 import { CommonModule, NgFor } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ProductService, NewProduct, Variant, DeleteVariantResponse } from '../../../services/product.service';
@@ -72,7 +72,8 @@ export class ProductCatalogFormComponent implements OnInit {
     private categorieService: CategorieService,
     private collaboratorsService: CollaboratorsService,
     private productAttributeService: ProductAttributeService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef // Inyectar ChangeDetectorRef
   ) {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]+$/)]],
@@ -96,7 +97,7 @@ export class ProductCatalogFormComponent implements OnInit {
   createVariantFormGroup(sku: string = ''): FormGroup {
     return this.fb.group({
       variant_id: [null],
-      sku: [sku, [Validators.required, Validators.pattern(/^[A-Z]{4}-\d{3}$/), Validators.maxLength(8)]],
+      sku: [sku, [Validators.required, Validators.pattern(/^[A-Z]{4}-[0-9]{6}-[0-9]{2}$/), Validators.maxLength(13)]],
       attributes: this.fb.group({}),
       production_cost: [null, [Validators.required, Validators.min(0)]],
       profit_margin: [null, [Validators.required, Validators.min(0.01), Validators.max(this.MAX_PROFIT_MARGIN)]],
@@ -115,19 +116,21 @@ export class ProductCatalogFormComponent implements OnInit {
   }
 
   generateSKU(productName: string, variantIndex: number): string {
-    const base = (productName.substring(0, 4) || 'PROD').toUpperCase();
-    const digits = (variantIndex + 1).toString().padStart(3, '0');
-    return `${base}-${digits}`;
+    const base = productName ? productName.replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase() : 'PROD';
+    const prefix = (base + 'XXXX').substring(0, 4);
+    const timestamp = Date.now().toString().slice(-6); // Últimos 6 dígitos del timestamp
+    const digits = (variantIndex + 1).toString().padStart(2, '0');
+    return `${prefix}-${timestamp}-${digits}`;
   }
 
   generateUniqueSku(baseSku: string): string {
     const existingSkus = this.variants.controls.map(v => v.get('sku')?.value as string);
-    const base = baseSku.split('-')[0];
+    const [prefix, timestamp] = baseSku.split('-');
     let newIndex = existingSkus.length + 1;
-    let newSku = `${base}-${newIndex.toString().padStart(3, '0')}`;
+    let newSku = `${prefix}-${timestamp}-${newIndex.toString().padStart(2, '0')}`;
     while (existingSkus.includes(newSku)) {
       newIndex++;
-      newSku = `${base}-${newIndex.toString().padStart(3, '0')}`;
+      newSku = `${prefix}-${timestamp}-${newIndex.toString().padStart(2, '0')}`;
     }
     return newSku;
   }
@@ -188,16 +191,18 @@ export class ProductCatalogFormComponent implements OnInit {
           description: product.description,
           category_id: product.category?.category_id || null,
           collaborator_id: product.collaborator?.collaborator_id || null,
-          product_type: product.product_type
+          product_type: product.product_type.toLowerCase() // Convertir a minúsculas para consistencia
         });
   
         // Cargar customizaciones
         while (this.customizations.length > 0) this.customizations.removeAt(0);
         if (product.customizations && product.customizations.length > 0) {
           product.customizations.forEach(cust => {
+            const displayType = customizationTypeMap.toDisplay[cust.type] || cust.type;
+            console.log('Cargando personalización:', { type: displayType, description: cust.description }); // Log para depuración
             this.customizations.push(this.fb.group({
-              type: [customizationTypeMap.toDisplay[cust.type] || cust.type, Validators.required],
-              description: [cust.description]
+              type: [displayType, Validators.required],
+              description: [cust.description || '']
             }));
           });
         }
@@ -234,9 +239,10 @@ export class ProductCatalogFormComponent implements OnInit {
           this.variants.push(variantGroup);
         });
   
-        // No necesitamos llamar a updateAllVariantAttributes aquí porque ya inicializamos los atributos
-        this.productForm.updateValueAndValidity();
+        // Forzar detección de cambios después de cargar las personalizaciones
+        this.cdr.detectChanges();
         console.log('Formulario después de cargar datos:', this.productForm.value);
+        console.log('Customizations FormArray:', this.customizations.value); // Log para depuración
       },
       error: (err) => {
         console.error('Error al cargar producto:', err);
@@ -364,7 +370,7 @@ export class ProductCatalogFormComponent implements OnInit {
   }
 
   isCustomizationRequired(): boolean {
-    const productType = this.productForm.get('product_type')?.value;
+    const productType = this.productForm.get('product_type')?.value?.toLowerCase(); // Convertir a minúsculas
     return productType === 'semi_personalizado' || productType === 'personalizado';
   }
 
@@ -443,7 +449,6 @@ export class ProductCatalogFormComponent implements OnInit {
     const newVariant = this.createVariantFormGroup(sku);
     this.variants.push(newVariant);
 
-    // Actualizar atributos para la nueva variante
     const categoryId = this.productForm.get('category_id')?.value;
     this.updateAllVariantAttributes(categoryId);
   }

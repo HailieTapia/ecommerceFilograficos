@@ -128,19 +128,6 @@ export class ProductVariantsComponent implements OnInit, OnChanges, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  private createVariantGroup(variant: Variant = this.getDefaultVariant()): FormGroup {
-    const attributesGroup = this.createAttributesGroup(variant);
-
-    return this.fb.group({
-      sku: [variant.sku || this.generateDefaultSKU(), [Validators.required, Validators.maxLength(50)]],
-      production_cost: [variant.production_cost || 0, [Validators.required, Validators.min(0.01)]],
-      profit_margin: [variant.profit_margin || 0, [Validators.required, Validators.min(0.01)]],
-      stock: [variant.stock || 0],
-      attributes: attributesGroup,
-      images: [variant.images || []]
-    });
-  }
-
   private createAttributesGroup(variant: Variant): FormGroup {
     const group: { [key: string]: FormControl } = {};
     this.attributes.forEach(attr => {
@@ -163,8 +150,24 @@ export class ProductVariantsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private generateDefaultSKU(): string {
-    const base = this.productName?.substring(0, 4).toUpperCase() || 'PROD';
-    return `${base}-${Date.now().toString().slice(-4)}`;
+    const base = this.productName ? this.productName.replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase() : 'PROD';
+    const prefix = (base + 'XXXX').substring(0, 4);
+    const timestamp = Date.now().toString().slice(-6);
+    const index = (this.variants.length + 1).toString().padStart(2, '0');
+    return `${prefix}-${timestamp}-${index}`;
+  }
+
+  private createVariantGroup(variant: Variant = this.getDefaultVariant()): FormGroup {
+    const attributesGroup = this.createAttributesGroup(variant);
+
+    return this.fb.group({
+      sku: [variant.sku || this.generateDefaultSKU(), [Validators.required, Validators.pattern(/^[A-Z]{4}-[0-9]{6}-[0-9]{2}$/), Validators.maxLength(13)]],
+      production_cost: [variant.production_cost || 0, [Validators.required, Validators.min(0.01)]],
+      profit_margin: [variant.profit_margin || 0, [Validators.required, Validators.min(0.01)]],
+      stock: [variant.stock || 0],
+      attributes: attributesGroup,
+      images: [variant.images || []]
+    });
   }
 
   addVariant(): void {
