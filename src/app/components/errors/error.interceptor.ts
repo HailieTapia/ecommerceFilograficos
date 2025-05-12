@@ -19,6 +19,8 @@ export const errorInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, n
         router.navigate(['/404']);
       } else if (error.status === 500) {
         router.navigate(['/500']);
+      } else {
+        router.navigate(['/404']);
       }
       return throwError(() => error);
     })
