@@ -37,6 +37,7 @@ import { ProductStockComponent } from './components/administrator/product-stock/
 import { AdministratorDashboardComponent } from './components/administrator/administrator-dashboard/administrator-dashboard.component';
 import { PriceManagementComponent } from './components/administrator/price-management/price-management.component';
 import { PromotionManagementComponent } from './components/administrator/promotion-management/promotion-management.component';
+import { BackupManagementComponent } from './components/administrator/backup-management/backup-management.component';
 
 // Errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -64,6 +65,7 @@ export const routes: Routes = [
   { path: 'banners', component: BannerAdminComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de banners' } },
   { path: 'price-management', component: PriceManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de precios de productos' } },
   { path: 'promotion-management', component: PromotionManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de promociones' } },
+  { path: 'backup-management', component: BackupManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de respaldos' } },
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
