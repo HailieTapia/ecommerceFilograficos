@@ -13,7 +13,6 @@ export class BackupService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
-  // Obtener la URL de autenticación con Google
   getGoogleAuthUrl(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -23,7 +22,6 @@ export class BackupService {
     );
   }
 
-  // Manejar el callback de Google OAuth2
   handleGoogleAuthCallback(code: string): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -33,52 +31,48 @@ export class BackupService {
     );
   }
 
-  // Configurar respaldos
-  configureBackup(configData: any): Observable<any> {
+  configureBackup(backupType: 'full' | 'differential' | 'transactional', configData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post(`${this.apiUrl}/config`, configData, { headers, withCredentials: true });
+        return this.http.post(`${this.apiUrl}/config/${backupType}`, configData, { headers, withCredentials: true });
       })
     );
   }
 
-  // Obtener la configuración de respaldos
-  getBackupConfig(): Observable<any> {
+  getBackupConfig(backupType: 'full' | 'differential' | 'transactional'): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get(`${this.apiUrl}/config/full`, { headers, withCredentials: true });
+        return this.http.get(`${this.apiUrl}/config/${backupType}`, { headers, withCredentials: true });
       })
     );
   }
 
-  // Listar respaldos
-  listBackups(): Observable<any> {
+  listBackups(backupType?: 'full' | 'differential' | 'transactional'): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get(`${this.apiUrl}/history`, { headers, withCredentials: true });
+        const url = backupType ? `${this.apiUrl}/history?backup_type=${backupType}` : `${this.apiUrl}/history`;
+        return this.http.get(url, { headers, withCredentials: true });
       })
     );
   }
 
-  // Ejecutar un respaldo manual
-  runBackup(): Observable<any> {
+  runBackup(backupType: 'full' | 'differential' | 'transactional'): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post(`${this.apiUrl}/run`, {}, { headers, withCredentials: true });
+        return this.http.post(`${this.apiUrl}/run/${backupType}`, {}, { headers, withCredentials: true });
       })
     );
   }
 
-  // Restaurar un respaldo
-  restoreBackup(backupData: any): Observable<any> {
+  restoreBackup(backupId: number): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post(`${this.apiUrl}/restore`, backupData, { headers, withCredentials: true });
+        return this.http.post(`${this.apiUrl}/restore`, { backup_id: backupId }, { headers, withCredentials: true });
       })
     );
   }

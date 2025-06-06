@@ -9,10 +9,11 @@ import { ToastService } from '../../services/toastService';
 import { ActivatedRoute } from '@angular/router';
 
 interface Backup {
-  backup_id: string;
-  created_at: string;
-  file_name: string;
+  backup_id: number;
+  backup_datetime: string;
   status: string;
+  data_type: string;
+  BackupFiles?: { file_name: string }[];
 }
 
 @Component({
@@ -36,8 +37,21 @@ export class BackupManagementComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 10;
   totalPages = 1;
-  backupForm: FormGroup;
-  dataTypesOptions = ['transactions', 'clients', 'configuration', 'full'];
+
+  fullBackupForm: FormGroup;
+  differentialBackupForm: FormGroup;
+
+  frequencyOptions = {
+    full: ['weekly'],
+    differential: ['daily']
+  };
+  dataTypesOptions = {
+    full: ['all'],
+    differential: ['all']
+  };
+
+  selectedBackupType: 'full' | 'differential' | undefined = undefined;
+  activeTab: 'full' | 'differential' = 'full';
 
   constructor(
     private backupService: BackupService,
@@ -45,26 +59,35 @@ export class BackupManagementComponent implements OnInit {
     private toastService: ToastService,
     private route: ActivatedRoute
   ) {
-    this.backupForm = this.fb.group({
-      frequency: ['', Validators.required],
-      destination: ['', Validators.required],
-      data_types: [[], Validators.required],
-      schedule_time: ['02:00:00', [Validators.required, Validators.pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)]]
+    this.fullBackupForm = this.fb.group({
+      frequency: ['weekly', Validators.required],
+      destination: ['google_drive', Validators.required],
+      data_types: [['all'], Validators.required],
+      schedule_time: ['00:00:00', [Validators.required, Validators.pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)]]
+    });
+
+    this.differentialBackupForm = this.fb.group({
+      frequency: ['daily', Validators.required],
+      destination: ['google_drive', Validators.required],
+      data_types: [['all'], Validators.required],
+      schedule_time: ['00:00:00', [Validators.required, Validators.pattern(/^([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)]]
     });
   }
 
   ngOnInit() {
     this.handleGoogleAuthCallback();
     this.checkAuthentication();
-    this.loadBackupConfig();
+    this.loadBackupConfigs();
+    this.loadBackups();
   }
 
   checkAuthentication() {
-    this.backupService.getBackupConfig().subscribe({
+    this.backupService.getBackupConfig('full').subscribe({
       next: (response) => {
         this.isAuthenticated = !!response.config?.refresh_token;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error checking authentication:', err);
         this.isAuthenticated = false;
       }
     });
@@ -77,7 +100,6 @@ export class BackupManagementComponent implements OnInit {
       },
       error: (err) => {
         this.toastService.showToast('Error al iniciar autenticación con Google', 'error');
-        console.error('Error:', err);
       }
     });
   }
@@ -93,42 +115,60 @@ export class BackupManagementComponent implements OnInit {
           },
           error: (err) => {
             this.toastService.showToast('Error en la autenticación con Google Drive', 'error');
-            console.error('Error:', err);
           }
         });
       }
     });
   }
 
-  loadBackupConfig() {
-    this.backupService.getBackupConfig().subscribe({
+  loadBackupConfigs() {
+    this.backupService.getBackupConfig('full').subscribe({
       next: (response) => {
         const config = response.config;
         if (config) {
-          this.backupForm.patchValue({
-            frequency: config.frequency || 'daily',
+          this.fullBackupForm.patchValue({
+            frequency: config.frequency || 'weekly',
             destination: config.storage_type || 'google_drive',
-            data_types: config.data_types || ['transactions', 'clients'],
-            schedule_time: config.schedule_time || '02:00:00'
+            data_types: config.data_types || ['all'],
+            schedule_time: config.schedule_time || '00:00:00'
           });
         }
       },
-      error: (err) => console.error('Error loading backup config:', err)
+      error: (err) => console.error('Error loading full backup config:', err)
+    });
+
+    this.backupService.getBackupConfig('differential').subscribe({
+      next: (response) => {
+        const config = response.config;
+        if (config) {
+          this.differentialBackupForm.patchValue({
+            frequency: config.frequency || 'daily',
+            destination: config.storage_type || 'google_drive',
+            data_types: config.data_types || ['all'],
+            schedule_time: config.schedule_time || '00:00:00'
+          });
+        }
+      },
+      error: (err) => console.error('Error loading differential backup config:', err)
     });
   }
 
   loadBackups() {
-    this.backupService.listBackups().subscribe({
+    this.backupService.listBackups(this.selectedBackupType).subscribe({
       next: (response) => {
-        this.backups = response.backups;
-        this.totalBackups = response.backups.length;
+        this.backups = response.backups || [];
+        this.totalBackups = this.backups.length;
         this.totalPages = Math.ceil(this.totalBackups / this.itemsPerPage);
       },
       error: (err) => {
         this.toastService.showToast('Error al cargar el historial de respaldos', 'error');
-        console.error('Error:', err);
       }
     });
+  }
+
+  onFilterChange() {
+    this.currentPage = 1;
+    this.loadBackups();
   }
 
   openConfigModal() {
@@ -139,58 +179,73 @@ export class BackupManagementComponent implements OnInit {
     this.configModal.close();
   }
 
+  switchTab(tab: 'full' | 'differential') {
+    this.activeTab = tab;
+  }
+
   saveBackupConfig() {
-    if (this.backupForm.valid) {
+    const form = this.activeTab === 'full' ? this.fullBackupForm : this.differentialBackupForm;
+    const backupType = this.activeTab;
+
+    if (!this.isAuthenticated) {
+      this.toastService.showToast('Primero autentica con Google Drive', 'error');
+      this.authenticateWithGoogle();
+      return;
+    }
+
+    if (form.valid) {
       const formData = {
-        frequency: this.backupForm.value.frequency,
-        data_types: this.backupForm.value.data_types,
-        schedule_time: this.backupForm.value.schedule_time
+        frequency: form.value.frequency,
+        data_types: form.value.data_types,
+        schedule_time: form.value.schedule_time
       };
-      this.backupService.configureBackup(formData).subscribe({
+      console.log('Datos enviados al backend:', formData);
+      this.backupService.configureBackup(backupType, formData).subscribe({
         next: () => {
-          this.toastService.showToast('Configuración guardada con éxito', 'success');
+          this.toastService.showToast(`Configuración de respaldo ${backupType} guardada con éxito`, 'success');
           this.closeConfigModal();
         },
         error: (err) => {
-          const errorMessage = err.error?.message || 'Error al guardar la configuración';
+          console.error('Error del backend:', err);
+          const errorMessage = err.error?.message || `Error al guardar la configuración de ${backupType}`;
           this.toastService.showToast(errorMessage, 'error');
-          console.error('Error:', err);
         }
       });
     } else {
-      this.backupForm.markAllAsTouched();
+      form.markAllAsTouched();
       this.toastService.showToast('Por favor, completa todos los campos requeridos', 'error');
     }
   }
 
-  runManualBackup() {
-    this.backupService.runBackup().subscribe({
+  runManualBackup(type: 'full' | 'differential') {
+    this.backupService.runBackup(type).subscribe({
       next: () => {
-        this.toastService.showToast('Respaldo manual iniciado con éxito', 'success');
+        this.toastService.showToast(`Respaldo manual ${type} iniciado con éxito`, 'success');
         this.loadBackups();
       },
       error: (err) => {
-        this.toastService.showToast('Error al iniciar respaldo manual', 'error');
-        console.error('Error:', err);
+        this.toastService.showToast(`Error al iniciar respaldo manual ${type}`, 'error');
       }
-    }); // <- este era el cierre correcto
+    });
   }
-  
+
+  getBackupFileName(backup: Backup): string {
+    return backup.BackupFiles && backup.BackupFiles.length > 0 ? backup.BackupFiles[0].file_name : 'N/A';
+  }
 
   restoreBackup(backup: Backup) {
     this.toastService.showToast(
-      `¿Estás seguro de que deseas restaurar el respaldo "${backup.file_name}"?`,
+      `¿Estás seguro de que deseas restaurar el respaldo "${this.getBackupFileName(backup)}"?`,
       'warning',
       'Confirmar',
       () => {
-        this.backupService.restoreBackup({ backup_id: backup.backup_id }).subscribe({
+        this.backupService.restoreBackup(backup.backup_id).subscribe({
           next: () => {
             this.toastService.showToast('Restauración iniciada con éxito', 'success');
             this.loadBackups();
           },
           error: (err) => {
             this.toastService.showToast('Error al restaurar el respaldo', 'error');
-            console.error('Error:', err);
           }
         });
       }
@@ -209,5 +264,9 @@ export class BackupManagementComponent implements OnInit {
 
   formatDate(date: string): string {
     return new Date(date).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  compareArrays(arr1: any[], arr2: any[]): boolean {
+    return JSON.stringify(arr1) === JSON.stringify(arr2);
   }
 }
