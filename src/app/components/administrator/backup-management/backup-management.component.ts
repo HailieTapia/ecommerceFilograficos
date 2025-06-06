@@ -7,6 +7,7 @@ import { PaginationComponent } from '../pagination/pagination.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastService } from '../../services/toastService';
 import { ActivatedRoute } from '@angular/router';
+import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 
 interface Backup {
   backup_id: number;
@@ -24,7 +25,8 @@ interface Backup {
     FormsModule,
     ReactiveFormsModule,
     ModalComponent,
-    PaginationComponent
+    PaginationComponent,
+    SpinnerComponent
   ],
   templateUrl: './backup-management.component.html'
 })
@@ -37,6 +39,7 @@ export class BackupManagementComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 10;
   totalPages = 1;
+  isLoading = false;
 
   fullBackupForm: FormGroup;
   differentialBackupForm: FormGroup;
@@ -82,29 +85,37 @@ export class BackupManagementComponent implements OnInit {
   }
 
   checkAuthentication() {
+    this.isLoading = true;
     this.backupService.getBackupConfig('full').subscribe({
       next: (response) => {
         this.isAuthenticated = !!response.config?.refresh_token;
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('Error checking authentication:', err);
         this.isAuthenticated = false;
+        this.isLoading = false;
+        this.toastService.showToast('Error al verificar autenticación', 'error');
       }
     });
   }
 
   authenticateWithGoogle() {
+    this.isLoading = true;
     this.backupService.getGoogleAuthUrl().subscribe({
       next: (response) => {
         window.location.href = response.authUrl;
+        this.isLoading = false;
       },
       error: (err) => {
+        this.isLoading = false;
         this.toastService.showToast('Error al iniciar autenticación con Google', 'error');
       }
     });
   }
 
   handleGoogleAuthCallback() {
+    this.isLoading = true;
     this.route.queryParams.subscribe(params => {
       const code = params['code'];
       if (code) {
@@ -112,16 +123,21 @@ export class BackupManagementComponent implements OnInit {
           next: () => {
             this.toastService.showToast('Autenticación con Google Drive exitosa', 'success');
             this.checkAuthentication();
+            this.isLoading = false;
           },
           error: (err) => {
+            this.isLoading = false;
             this.toastService.showToast('Error en la autenticación con Google Drive', 'error');
           }
         });
+      } else {
+        this.isLoading = false;
       }
     });
   }
 
   loadBackupConfigs() {
+    this.isLoading = true;
     this.backupService.getBackupConfig('full').subscribe({
       next: (response) => {
         const config = response.config;
@@ -133,8 +149,13 @@ export class BackupManagementComponent implements OnInit {
             schedule_time: config.schedule_time || '00:00:00'
           });
         }
+        this.isLoading = false;
       },
-      error: (err) => console.error('Error loading full backup config:', err)
+      error: (err) => {
+        console.error('Error loading full backup config:', err);
+        this.isLoading = false;
+        this.toastService.showToast('Error al cargar configuración de respaldo full', 'error');
+      }
     });
 
     this.backupService.getBackupConfig('differential').subscribe({
@@ -148,19 +169,27 @@ export class BackupManagementComponent implements OnInit {
             schedule_time: config.schedule_time || '00:00:00'
           });
         }
+        this.isLoading = false;
       },
-      error: (err) => console.error('Error loading differential backup config:', err)
+      error: (err) => {
+        console.error('Error loading differential backup config:', err);
+        this.isLoading = false;
+        this.toastService.showToast('Error al cargar configuración de respaldo diferencial', 'error');
+      }
     });
   }
 
   loadBackups() {
+    this.isLoading = true;
     this.backupService.listBackups(this.selectedBackupType).subscribe({
       next: (response) => {
         this.backups = response.backups || [];
         this.totalBackups = this.backups.length;
         this.totalPages = Math.ceil(this.totalBackups / this.itemsPerPage);
+        this.isLoading = false;
       },
       error: (err) => {
+        this.isLoading = false;
         this.toastService.showToast('Error al cargar el historial de respaldos', 'error');
       }
     });
@@ -194,6 +223,7 @@ export class BackupManagementComponent implements OnInit {
     }
 
     if (form.valid) {
+      this.isLoading = true;
       const formData = {
         frequency: form.value.frequency,
         data_types: form.value.data_types,
@@ -204,11 +234,13 @@ export class BackupManagementComponent implements OnInit {
         next: () => {
           this.toastService.showToast(`Configuración de respaldo ${backupType} guardada con éxito`, 'success');
           this.closeConfigModal();
+          this.isLoading = false;
         },
         error: (err) => {
           console.error('Error del backend:', err);
           const errorMessage = err.error?.message || `Error al guardar la configuración de ${backupType}`;
           this.toastService.showToast(errorMessage, 'error');
+          this.isLoading = false;
         }
       });
     } else {
@@ -218,13 +250,17 @@ export class BackupManagementComponent implements OnInit {
   }
 
   runManualBackup(type: 'full' | 'differential') {
+    this.isLoading = true;
     this.backupService.runBackup(type).subscribe({
       next: () => {
         this.toastService.showToast(`Respaldo manual ${type} iniciado con éxito`, 'success');
         this.loadBackups();
+        this.isLoading = false;
       },
       error: (err) => {
-        this.toastService.showToast(`Error al iniciar respaldo manual ${type}`, 'error');
+        const errorMessage = err.error?.message || `Error al iniciar respaldo manual ${type}`;
+        this.toastService.showToast(errorMessage, 'error');
+        this.isLoading = false;
       }
     });
   }
@@ -239,13 +275,17 @@ export class BackupManagementComponent implements OnInit {
       'warning',
       'Confirmar',
       () => {
+        this.isLoading = true;
         this.backupService.restoreBackup(backup.backup_id).subscribe({
           next: () => {
             this.toastService.showToast('Restauración iniciada con éxito', 'success');
             this.loadBackups();
+            this.isLoading = false;
           },
           error: (err) => {
-            this.toastService.showToast('Error al restaurar el respaldo', 'error');
+            const errorMessage = err.error?.message || 'Error al restaurar el respaldo';
+            this.toastService.showToast(errorMessage, 'error');
+            this.isLoading = false;
           }
         });
       }
