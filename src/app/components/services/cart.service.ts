@@ -3,8 +3,58 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
-import { AuthService } from './auth.service'; // Importar AuthService
+import { AuthService } from './auth.service';
 import { environment } from '../../environments/config';
+
+// Interfaces para tipar las respuestas del backend
+export interface CartItem {
+  cart_detail_id: number;
+  product_id: number;
+  product_name: string;
+  variant_id: number;
+  variant_sku: string;
+  calculated_price: number;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  unit_measure: string;
+  category_id: number;
+  customization: { option_id: number; option_type: string; description: string } | null;
+  images: { image_url: string; order: number }[];
+  applicable_promotions: {
+    promotion_id: number;
+    name: string;
+    discount_value: number;
+    promotion_type: string;
+  }[];
+}
+
+export interface Promotion {
+  promotion_id: number;
+  name: string;
+  promotion_type: string;
+  discount_value: string;
+  is_applicable: boolean;
+  progress_message: string;
+}
+
+export interface CartResponse {
+  items: CartItem[];
+  total: number;
+  promotions: Promotion[];
+}
+
+export interface AddToCartRequest {
+  product_id: number;
+  variant_id: number;
+  quantity: number;
+  option_id?: number;
+}
+
+export interface UpdateQuantityRequest {
+  cart_detail_id: number;
+  quantity: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +67,7 @@ export class CartService {
   constructor(
     private csrfService: CsrfService,
     private http: HttpClient,
-    private authService: AuthService // Inyectar AuthService
+    private authService: AuthService
   ) {
     // Escuchar eventos de login y logout para actualizar el carrito
     this.authService.onLogin().subscribe(() => this.loadInitialCartCount());
@@ -26,7 +76,7 @@ export class CartService {
     if (this.authService.isLoggedIn()) {
       this.loadInitialCartCount();
     } else {
-      this.cartItemCountSubject.next(0); // Establecer 0 para no autenticados
+      this.cartItemCountSubject.next(0);
     }
   }
 
@@ -37,23 +87,22 @@ export class CartService {
 
   // Cargar el número inicial de ítems en el carrito
   private loadInitialCartCount(): void {
-    this.loadCart().subscribe(
-      (response) => {
-        const cartResponse = response as { items?: { quantity: number }[] };
-        const count = cartResponse.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    this.loadCart().subscribe({
+      next: (response: CartResponse) => {
+        const count = response.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
         this.cartItemCountSubject.next(count);
       },
-      (error) => {
+      error: (error) => {
         console.error('Error al cargar el conteo inicial del carrito:', error);
-        this.cartItemCountSubject.next(0); // En caso de error, establecer 0
+        this.cartItemCountSubject.next(0);
       }
-    );
+    });
   }
 
   // Añadir producto al carrito
-  addToCart(data: any): Observable<any> {
+  addToCart(data: AddToCartRequest): Observable<any> {
     if (!this.authService.isLoggedIn()) {
-      return of({ error: 'Usuario no autenticado' }); // Retornar un Observable con error
+      return of({ error: 'Usuario no autenticado' });
     }
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -74,30 +123,29 @@ export class CartService {
   }
 
   // Obtener detalles del carrito
-  loadCart(): Observable<any> {
+  loadCart(): Observable<CartResponse> {
     if (!this.authService.isLoggedIn()) {
-      return of({ items: [], total: 0 }); // Retornar carrito vacío para no autenticados
+      return of({ items: [], total: 0, promotions: [] });
     }
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<any>(`${this.apiUrl}`, { headers, withCredentials: true }).pipe(
-          tap((response) => {
-            const cartResponse = response as { items?: { quantity: number }[]; total?: number };
-            const count = cartResponse.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+        return this.http.get<CartResponse>(`${this.apiUrl}`, { headers, withCredentials: true }).pipe(
+          tap((response: CartResponse) => {
+            const count = response.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
             this.cartItemCountSubject.next(count);
           })
         );
       }),
       catchError(error => {
         console.error('Error al cargar el carrito:', error);
-        return of({ items: [], total: 0 }); // Retornar carrito vacío en caso de error
+        return of({ items: [], total: 0, promotions: [] });
       })
     );
   }
 
   // Actualizar cantidad de un ítem
-  updateQuantity(data: any, oldQuantity: number): Observable<any> {
+  updateQuantity(data: UpdateQuantityRequest, oldQuantity: number): Observable<any> {
     if (!this.authService.isLoggedIn()) {
       return of({ error: 'Usuario no autenticado' });
     }
