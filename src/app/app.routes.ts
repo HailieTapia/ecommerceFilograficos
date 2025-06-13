@@ -18,6 +18,9 @@ import { ProfileComponent } from './components/authenticated/profile/profile.com
 import { AuthCatalogComponent } from './components/authenticated/auth-catalog/auth-catalog.component';
 import { ProductDetailAComponent } from './components/authenticated/auth-catalog/product-detail-a/product-detail-a.component';
 import { CartComponent } from './components/authenticated/auth-catalog/cart/cart.component';
+import { CheckoutComponent } from './components/authenticated/checkout/checkout.component';
+import { OrderConfirmationComponent } from './components/authenticated/order-confirmation/order-confirmation.component';
+import { OrdersComponent } from './components/authenticated/orders/orders.component';
 
 // Administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
@@ -70,6 +73,9 @@ export const routes: Routes = [
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Carrito' } },
+  { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Checkout' } },
+  { path: 'order-confirmation/:id', component: OrderConfirmationComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'order-confirmation' } },
+  { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'orders' } },
   // Rutas del catálogo autenticado (anidadas)
   {
     path: 'authcatalog',

@@ -1,0 +1,80 @@
+<div class="py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans w-full">
+  <app-spinner [isLoading]="isLoading"></app-spinner>
+
+  <div *ngIf="!isLoading">
+    <!-- Título -->
+    <h1 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6">Mis Órdenes</h1>
+
+    <!-- Sin órdenes -->
+    <div *ngIf="orders.length === 0" class="flex flex-col items-center justify-center min-h-[50vh] text-center text-light-text dark:text-dark-text">
+      <div class="mb-6">
+        <i class="fas fa-box-open text-6xl text-light-secondary dark:text-dark-secondary opacity-50"></i>
+      </div>
+      <h2 class="text-2xl font-semibold text-light-text dark:text-dark-text mb-2">¡No tienes órdenes!</h2>
+      <p class="text-lg text-light-secondary dark:text-dark-secondary mb-6">
+        No has realizado ninguna orden todavía. ¡Explora nuestros productos y haz tu primera compra!
+      </p>
+      <a routerLink="/products" class="inline-flex items-center gap-2 bg-light-primary dark:bg-dark-primary text-white font-semibold py-3 px-6 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+        Ver Productos
+      </a>
+    </div>
+
+    <!-- Lista de órdenes con cards -->
+    <div *ngIf="orders.length > 0" class="space-y-6">
+      <div *ngFor="let order of orders; trackBy: trackByOrderId" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mx-4">
+        <!-- Primera fila: Fecha -->
+        <div class="p-2 mb-2 border-b border-gray-200 dark:border-gray-600">
+          <span class="text-sm text-light-secondary dark:text-dark-secondary">{{ getFormattedDate(order.created_at) }}</span>
+        </div>
+        <!-- Segunda fila: Contenido principal (una fila con 3 columnas) -->
+        <div class="grid grid-cols-[100px,1fr,auto] gap-4 items-center">
+          <!-- Columna 1: Imagen (ancho fijo y alineada a la izquierda) -->
+          <div class="flex justify-start">
+            <img [src]="getImageUrl(order)" alt="{{ order.first_item_name }}" class="w-20 h-20 object-cover rounded">
+          </div>
+          <!-- Columna 2: Detalles del pedido -->
+          <div class="flex flex-col space-y-2">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-medium border"
+                  [ngClass]="{
+                    'border-green-500 text-green-500': order.order_status === 'delivered',
+                    'border-blue-500 text-blue-500': order.order_status === 'processing' || order.order_status === 'shipped',
+                    'border-yellow-500 text-yellow-500': order.order_status === 'pending'
+                  }">
+              {{ getOrderStatusInSpanish(order.order_status) }}
+            </span>
+            <p class="text-sm text-light-text dark:text-dark-text">{{ order.first_item_name }}</p>
+            <p class="text-xs text-light-secondary dark:text-dark-secondary">1 unidad</p>
+          </div>
+          <!-- Columna 3: Botones (ancho automático con botones más pequeños) -->
+          <div class="flex flex-col space-y-2">
+            <a [routerLink]="['/order-confirmation', order.order_id]" class="bg-blue-500 text-white py-1 px-3 rounded text-sm hover:bg-blue-600 transition-colors text-center">
+              Ver detalles
+            </a>
+            <button class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-1 px-3 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-center">
+              Volver a comprar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paginación -->
+      <div class="flex justify-between items-center mt-6 mx-4">
+        <p class="text-sm text-light-secondary dark:text-dark-secondary">
+          Mostrando {{ orders.length }} de {{ pagination.totalOrders }} órdenes
+        </p>
+        <div class="flex gap-2">
+          <button (click)="changePage(pagination.currentPage - 1)"
+                  [disabled]="pagination.currentPage === 1"
+                  class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">
+            Anterior
+          </button>
+          <button (click)="changePage(pagination.currentPage + 1)"
+                  [disabled]="pagination.currentPage === pagination.totalPages"
+                  class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
