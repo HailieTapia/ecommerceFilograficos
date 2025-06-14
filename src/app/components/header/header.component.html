@@ -49,10 +49,12 @@
               <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" role="tooltip" aria-label="Carrito">Carrito</span>
             </a>
             <app-profile-dropdown [userRole]="userRole" (logout)="logout()"></app-profile-dropdown>
-            <button (click)="toggleTheme()" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
-              <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
-            </button>
           </div>
+
+          <!-- Theme Toggle (always visible) -->
+          <button (click)="toggleTheme()" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+            <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
+          </button>
         </div>
       </div>
 
