@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { CompanyService } from '../services/company.service';
 import { ThemeService } from '../services/theme.service';
@@ -11,6 +11,8 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { NavigationComponent } from './navigation/navigation.component';
 import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';
 import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
+import { take, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -18,6 +20,7 @@ import { NotificationDropdownComponent } from '../notification-dropdown/notifica
   imports: [
     CommonModule,
     RouterModule,
+    FormsModule, // Agregado para ngModel
     SidebarComponent,
     NavigationComponent,
     ProfileDropdownComponent,
@@ -33,6 +36,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   logoPreview: string | ArrayBuffer | null = null;
   cartItemCount: number = 0;
   mobileMenuOpen: boolean = false;
+  searchTerm: string = ''; // Variable para el término de búsqueda
   private cartCountSubscription!: Subscription;
 
   constructor(
@@ -54,7 +58,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.isLoggedIn = !!user;
       this.userRole = user?.tipo || null;
     });
-    this.checkMobile(); // Verificar si es móvil al iniciar
+    this.checkMobile();
   }
 
   ngOnDestroy(): void {
@@ -93,7 +97,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   isMobile(): boolean {
-    return window.innerWidth < 768; // md breakpoint en Tailwind
+    return window.innerWidth < 768;
   }
 
   @HostListener('window:resize', ['$event'])
@@ -103,7 +107,25 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private checkMobile(): void {
     if (!this.isMobile()) {
-      this.mobileMenuOpen = false; // Cerrar menú móvil en pantallas grandes
+      this.mobileMenuOpen = false;
     }
+  }
+
+  /**
+   * Realiza la búsqueda y navega al catálogo correspondiente con el término de búsqueda.
+   */
+  performSearch(): void {
+    if (!this.searchTerm.trim()) {
+      return; // No realizar búsqueda si el término está vacío
+    }
+
+    this.authService.getUser().pipe(
+      take(1),
+      catchError(() => of(null))
+    ).subscribe(user => {
+      const route = user && user.tipo === 'cliente' ? '/authcatalog' : '/publiccatalog';
+      this.router.navigate([route], { queryParams: { search: this.searchTerm.trim() }, queryParamsHandling: 'merge' });
+      this.searchTerm = ''; // Opcional: limpiar el input después de buscar
+    });
   }
 }

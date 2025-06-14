@@ -19,8 +19,10 @@
         <!-- Search Bar (Hidden on mobile, shown on md+) -->
         <div class="hidden md:flex flex-1 mx-4 max-w-2xl">
           <div class="relative w-full">
-            <input type="text" placeholder="Buscar productos, marcas y más..." class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+            <input type="text" placeholder="Buscar productos, marcas y más..." 
+                   [(ngModel)]="searchTerm" (keydown.enter)="performSearch()"
+                   class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
+            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer" (click)="performSearch()"></i>
           </div>
         </div>
 
@@ -61,10 +63,12 @@
       <!-- Mobile Search Bar (Visible only on mobile) -->
       <div class="md:hidden px-4 py-2">
         <div class="relative">
-          <input type="text" placeholder="Buscar productos, marcas y más..." class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
-          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"></i>
+          <input type="text" placeholder="Buscar productos, marcas y más..." 
+                 [(ngModel)]="searchTerm" (keydown.enter)="performSearch()"
+                 class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-primary text-dark-text-dark-dark-placeholder-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-dark focus:border-primary-dark-primary-dark transition-all duration-300" />
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-dark-primary-dark cursor-pointer dark:text-dark-dark-primary-dark" (click)="performSearch()"></i>
+          </div>
         </div>
-      </div>
 
       <!-- Navigation -->
       <app-navigation *ngIf="mobileMenuOpen || !isMobile()" class="border-t border-gray-200 dark:border-gray-600 px-4 py-2"></app-navigation>

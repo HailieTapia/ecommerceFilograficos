@@ -1,4 +1,4 @@
-<div class="max-w-full mx-auto py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans">
+<div class="py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans w-full">
   <app-spinner [isLoading]="isLoading"></app-spinner>
 
   <div *ngIf="!isLoading" class="max-w-7xl mx-auto">
@@ -15,19 +15,38 @@
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div class="flex items-center gap-2 flex-wrap">
               <h1 class="text-2xl font-bold text-light-text dark:text-dark-text">Catálogo de Productos</h1>
-              <span *ngFor="let filter of activeFilters; trackBy: trackByFilter"
-                    class="inline-flex items-center bg-light-primary dark:bg-dark-primary text-white text-sm font-medium px-3 py-1 rounded-full">
+              <span
+                *ngFor="let filter of activeFilters; trackBy: trackByFilter"
+                class="inline-flex items-center bg-light-primary dark:bg-dark-primary text-white text-sm font-medium px-3 py-1 rounded-full"
+              >
                 {{ filter.value }}
-                <button (click)="removeFilter(filter.key)" class="ml-2 text-white hover:text-gray-200 focus:outline-none">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                <button
+                  (click)="removeFilter(filter.key)"
+                  class="ml-2 text-white hover:text-gray-200 focus:outline-none"
+                >
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
                   </svg>
                 </button>
               </span>
             </div>
             <!-- Dropdown de ordenamiento -->
-            <select [(ngModel)]="selectedSort" (ngModelChange)="onSortChange()"
-                    class="p-2 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-light-text dark:text-dark-text bg-light-background dark:bg-dark-background focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-transparent transition">
+            <select
+              [(ngModel)]="selectedSort"
+              (ngModelChange)="onSortChange()"
+              class="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-light-text dark:text-dark-text rounded-lg text-sm focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition"
+            >
               <option *ngFor="let option of sortOptions" [value]="option.value">
                 {{ option.label }}
               </option>
@@ -35,60 +54,121 @@
           </div>
         </div>
 
-        <!-- Mensaje cuando no hay productos -->
-        <div *ngIf="products.length === 0" class="flex flex-col items-center justify-center min-h-[50vh] text-center text-light-text dark:text-dark-text">
-          <div class="mb-6">
-            <svg class="w-16 h-16 text-light-secondary dark:text-dark-secondary opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18v18H3V3zm2 2v14h14V5H5z"/>
-            </svg>
-          </div>
-          <h2 class="text-2xl font-semibold text-light-text dark:text-dark-text mb-2">
-            ¡No hay productos disponibles!
-          </h2>
-          <p class="text-lg text-light-secondary dark:text-dark-secondary mb-6">
-            No encontramos productos para esta categoría. ¡Explora otras opciones!
-          </p>
-          <a routerLink="/product-categories"
-             class="inline-flex items-center gap-2 bg-light-primary dark:bg-dark-primary text-white font-semibold py-3 px-6 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
-            Ver Categorías
-          </a>
-        </div>
-
         <!-- Cuadrícula de productos -->
-        <div *ngIf="products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-          <div *ngFor="let product of products; trackBy: trackByProductId"
-               class="bg-light-background dark:bg-dark-background rounded-xl shadow-md overflow-hidden transform transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-            <img [src]="product.image_url || 'https://via.placeholder.com/300x300?text=Sin+Imagen'" class="w-full h-48 object-cover bg-gray-200 dark:bg-gray-600">
+        <div
+          *ngIf="products.length > 0; else noProducts"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8"
+        >
+          <div
+            *ngFor="let product of products; trackBy: trackByProductId"
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+          >
+            <!-- Imagen del producto -->
+            <img
+              [src]="product.image_url || 'https://via.placeholder.com/300x300?text=Sin+Imagen'"
+              alt="{{ product.name }}"
+              class="w-full h-48 object-cover bg-gray-200"
+            />
+
+            <!-- Información del producto -->
             <div class="p-4 text-center">
-              <h3 class="text-lg font-medium text-light-text dark:text-dark-text truncate">{{ product.name }}</h3>
-              <p class="text-sm text-light-secondary dark:text-dark-secondary mt-1">{{ product.category }}</p>
-              <p class="text-base font-semibold text-light-text dark:text-dark-text mt-2">
-                ${{ product.min_price.toFixed(2) }} - ${{ product.max_price.toFixed(2) }}
+              <h3
+                class="text-lg font-medium text-light-text dark:text-dark-text truncate"
+              >
+                {{ product.name }}
+              </h3>
+              <p
+                class="text-sm text-light-secondary dark:text-dark-secondary mt-1"
+              >
+                {{ product.category || 'Sin categoría' }}
               </p>
-              <p *ngIf="product.variant_count > 1" class="text-sm text-light-primary dark:text-dark-primary mt-1">
+              <p
+                class="text-base font-semibold text-light-text dark:text-dark-text mt-2"
+              >
+                ${{ product.min_price.toFixed(2) }} -
+                ${{ product.max_price.toFixed(2) }}
+              </p>
+              <p
+                *ngIf="product.variant_count > 1"
+                class="text-sm text-light-primary dark:text-dark-primary mt-1"
+              >
                 Disponible en {{ product.variant_count }} modelos
               </p>
-              <button (click)="viewProductDetails(product.product_id)"
-                      class="mt-3 bg-light-primary dark:bg-dark-primary text-white text-sm font-medium py-2 px-4 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors duration-200">
+              <button
+                (click)="viewProductDetails(product.product_id)"
+                class="mt-3 bg-light-primary dark:bg-dark-primary text-white text-sm font-medium py-2 px-4 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors duration-300"
+              >
                 Ver detalles
               </button>
             </div>
           </div>
         </div>
 
+        <!-- Estado vacío -->
+        <ng-template #noProducts>
+          <div
+            class="flex flex-col items-center justify-center min-h-[50vh] text-center text-light-text dark:text-dark-text"
+          >
+            <div class="mb-6">
+              <svg
+                class="w-16 h-16 text-light-secondary dark:text-dark-secondary opacity-50"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 3h18v18H3V3zm2 2v14h14V5H5z"
+                />
+              </svg>
+            </div>
+            <h2
+              class="text-2xl font-semibold text-light-text dark:text-dark-text mb-2"
+            >
+              ¡No hay productos disponibles!
+            </h2>
+            <p
+              class="text-lg text-light-secondary dark:text-dark-secondary mb-6"
+            >
+              No encontramos productos para esta búsqueda o filtros. ¡Explora
+              otras opciones!
+            </p>
+            <a
+              routerLink="/product-categories"
+              class="inline-flex items-center gap-2 bg-light-primary dark:bg-dark-primary text-white font-semibold py-3 px-6 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+            >
+              Ver Categorías
+            </a>
+          </div>
+        </ng-template>
+
         <!-- Paginación -->
-        <div *ngIf="total > 0" class="flex justify-between items-center gap-4 text-light-text dark:text-dark-text">
-          <button [disabled]="page === 1" (click)="changePage(page - 1)"
-                  class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:bg-light-disabled dark:disabled:bg-dark-disabled disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text disabled:cursor-not-allowed hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-colors">
-            Anterior
-          </button>
-          <span class="text-sm">
-            Página {{ page }} de {{ totalPages }} ({{ total }} productos)
-          </span>
-          <button [disabled]="page === totalPages" (click)="changePage(page + 1)"
-                  class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:bg-light-disabled dark:disabled:bg-dark-disabled disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text disabled:cursor-not-allowed hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-colors">
-            Siguiente
-          </button>
+        <div
+          *ngIf="products.length > 0"
+          class="flex justify-between items-center mt-6 text-light-text dark:text-dark-text"
+        >
+          <p class="text-sm text-light-secondary dark:text-dark-secondary">
+            Mostrando {{ products.length }} de {{ totalItems }} productos
+          </p>
+          <div class="flex gap-2">
+            <button
+              [disabled]="page === 1"
+              (click)="changePage(page - 1)"
+              class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+            >
+              Anterior
+            </button>
+            <button
+              [disabled]="page === totalPages"
+              (click)="changePage(page + 1)"
+              class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+            >
+              Siguiente
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,8 +8,8 @@ import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { ToastService } from '../../services/toastService';
 import { CategorieService } from '../../services/categorieService';
 import { CollaboratorsService } from '../../services/collaborators.service';
-import { take } from 'rxjs/operators';
-import { forkJoin, Observable, of } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
+import { forkJoin, Observable, Subject } from 'rxjs';
 
 // Interfaces para tipar categorías y colaboradores
 interface Category {
@@ -22,28 +22,40 @@ interface Collaborator {
   name: string;
 }
 
+// Tipo para las claves de filters
+type FilterKey = 'categoryId' | 'minPrice' | 'maxPrice' | 'collaboratorId' | 'search' | 'sort';
+
 @Component({
   selector: 'app-public-catalog',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, FilterSidebarComponent, SpinnerComponent],
   templateUrl: './public-catalog.component.html',
-  styleUrl: './public-catalog.component.css'
+  styleUrls: ['./public-catalog.component.css']
 })
-export class PublicCatalogComponent implements OnInit {
+export class PublicCatalogComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   products: ProductResponse['products'] = [];
   page = 1;
   pageSize = 10;
-  total = 0;
+  totalItems = 0;
   totalPages = 0;
-  filters: any = {
+  filters: {
+    categoryId: number | null;
+    minPrice: number | null;
+    maxPrice: number | null;
+    collaboratorId: number | null;
+    search: string | null;
+    sort: string | null;
+  } = {
     categoryId: null,
     minPrice: null,
     maxPrice: null,
     collaboratorId: null,
+    search: null,
     sort: null
   };
-  isLoading = false;
-  activeFilters: { key: string, value: string, rawValue: any }[] = [];
+  isLoadingSearch = false;
+  activeFilters: { key: FilterKey; value: string; rawValue: any }[] = [];
   categoriesMap: Map<number, string> = new Map();
   collaboratorsMap: Map<number, string> = new Map();
 
@@ -54,7 +66,7 @@ export class PublicCatalogComponent implements OnInit {
     { label: 'Nombre: A-Z', value: 'name:ASC' },
     { label: 'Nombre: Z-A', value: 'name:DESC' }
   ];
-  selectedSort: string = '';
+  selectedSortOrder: string = '';
 
   constructor(
     private productService: PublicProductService,
@@ -66,26 +78,26 @@ export class PublicCatalogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Cargar categorías y colaboradores para mapear nombres
-    this.loadCategoriesAndCollaborators().subscribe(() => {
-      // Leer query params
-      this.route.queryParams.pipe(take(1)).subscribe(params => {
-        if (params['categoryId']) {
-          this.filters.categoryId = +params['categoryId'];
-        }
-        if (params['minPrice']) {
-          this.filters.minPrice = +params['minPrice'];
-        }
-        if (params['maxPrice']) {
-          this.filters.maxPrice = +params['maxPrice'];
-        }
-        if (params['collaboratorId']) {
-          this.filters.collaboratorId = +params['collaboratorId'];
-        }
+    this.loadCategoriesAndCollaborators().pipe(take(1)).subscribe(() => {
+      this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+        this.filters = {
+          categoryId: params['categoryId'] ? +params['categoryId'] : null,
+          minPrice: params['minPrice'] ? +params['minPrice'] : null,
+          maxPrice: params['maxPrice'] ? +params['maxPrice'] : null,
+          collaboratorId: params['collaboratorId'] ? +params['collaboratorId'] : null,
+          search: params['search'] || null,
+          sort: this.selectedSortOrder || null
+        };
+        this.page = params['page'] ? +params['page'] : 1;
         this.updateActiveFilters();
         this.loadProducts();
       });
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private loadCategoriesAndCollaborators(): Observable<void> {
@@ -94,7 +106,8 @@ export class PublicCatalogComponent implements OnInit {
         this.categorieService.publicCategories().pipe(take(1)),
         this.collaboratorService.getPublicCollaborators().pipe(take(1))
       ]).subscribe({
-        next: ([categories, collaborators]: [Category[], Collaborator[]]) => {
+        next: (results: [Category[], Collaborator[]]) => {
+          const [categories, collaborators] = results;
           this.categoriesMap = new Map(categories.map(cat => [cat.category_id, cat.name]));
           this.collaboratorsMap = new Map(collaborators.map(col => [col.collaborator_id, col.name]));
           observer.next();
@@ -111,23 +124,23 @@ export class PublicCatalogComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.isLoading = true;
+    this.isLoadingSearch = true;
     this.productService.getAllProducts(this.page, this.pageSize, this.filters).subscribe({
       next: (response: ProductResponse) => {
         this.products = response.products;
-        this.total = response.total;
+        this.totalItems = response.total;
         this.page = response.page;
         this.pageSize = response.pageSize;
-        this.totalPages = Math.ceil(this.total / this.pageSize);
-        this.isLoading = false;
+        this.totalPages = Math.ceil(this.totalItems / this.pageSize);
+        this.isLoadingSearch = false;
         if (this.products.length === 0 && this.page === 1) {
           this.toastService.showToast('No hay productos disponibles para estos filtros.', 'info');
         }
       },
       error: (error) => {
-        this.isLoading = false;
+        this.isLoadingSearch = false;
         this.products = [];
-        this.total = 0;
+        this.totalItems = 0;
         this.totalPages = 0;
         const errorMessage = error?.error?.message || 'Error al cargar los productos';
         this.toastService.showToast(errorMessage, 'error');
@@ -136,55 +149,64 @@ export class PublicCatalogComponent implements OnInit {
   }
 
   onFiltersChange(newFilters: any): void {
-    this.filters = { ...this.filters, ...newFilters, sort: this.selectedSort };
+    this.filters = { ...this.filters, ...newFilters, search: this.filters.search, sort: this.selectedSortOrder };
     this.page = 1;
     this.updateActiveFilters();
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
+        page: 1,
         categoryId: this.filters.categoryId ?? null,
         minPrice: this.filters.minPrice ?? null,
         maxPrice: this.filters.maxPrice ?? null,
-        collaboratorId: this.filters.collaboratorId ?? null
+        collaboratorId: this.filters.collaboratorId ?? null,
+        search: this.filters.search ?? null
       },
       queryParamsHandling: 'merge'
     });
-    this.loadProducts();
   }
 
   onSortChange(): void {
-    this.filters.sort = this.selectedSort;
+    this.filters.sort = this.selectedSortOrder;
     this.page = 1;
-    this.loadProducts();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: 1, sort: this.selectedSortOrder || null },
+      queryParamsHandling: 'merge'
+    });
   }
 
-  removeFilter(key: string): void {
+  removeFilter(key: FilterKey): void {
     this.filters[key] = null;
     this.page = 1;
     this.updateActiveFilters();
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
+        page: 1,
         categoryId: this.filters.categoryId ?? null,
         minPrice: this.filters.minPrice ?? null,
         maxPrice: this.filters.maxPrice ?? null,
-        collaboratorId: this.filters.collaboratorId ?? null
+        collaboratorId: this.filters.collaboratorId ?? null,
+        search: this.filters.search ?? null
       },
       queryParamsHandling: 'merge'
     });
-    this.loadProducts();
   }
 
   private updateActiveFilters(): void {
     this.activeFilters = [];
+    if (this.filters.search !== null) {
+      this.activeFilters.push({ key: 'search', value: `Búsqueda: ${this.filters.search}`, rawValue: this.filters.search });
+    }
     if (this.filters.categoryId !== null) {
       const categoryName = this.categoriesMap.get(this.filters.categoryId) || `Categoría ${this.filters.categoryId}`;
       this.activeFilters.push({ key: 'categoryId', value: `Categoría: ${categoryName}`, rawValue: this.filters.categoryId });
     }
     if (this.filters.minPrice !== null || this.filters.maxPrice !== null) {
-      const min = this.filters.minPrice !== null ? `$${this.filters.minPrice}` : '0';
-      const max = this.filters.maxPrice !== null ? `$${this.filters.maxPrice}` : '∞';
-      this.activeFilters.push({ key: 'minPrice', value: `Precio: ${min} - ${max}`, rawValue: null });
+      const minPrice = this.filters.minPrice !== null ? `$${this.filters.minPrice}` : '0';
+      const maxPrice = this.filters.maxPrice !== null ? `$${this.filters.maxPrice}` : '∞';
+      this.activeFilters.push({ key: 'minPrice', value: `Precio: ${minPrice} - ${maxPrice}`, rawValue: null });
     }
     if (this.filters.collaboratorId !== null) {
       const collaboratorName = this.collaboratorsMap.get(this.filters.collaboratorId) || `Vendedor ${this.filters.collaboratorId}`;
@@ -199,7 +221,11 @@ export class PublicCatalogComponent implements OnInit {
   changePage(newPage: number): void {
     if (newPage >= 1 && newPage <= this.totalPages) {
       this.page = newPage;
-      this.loadProducts();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { page: newPage },
+        queryParamsHandling: 'merge'
+      });
     }
   }
 
@@ -207,7 +233,7 @@ export class PublicCatalogComponent implements OnInit {
     return product.product_id;
   }
 
-  trackByFilter(index: number, filter: { key: string, value: string }): string {
+  trackByFilter(index: number, filter: { key: FilterKey; value: string }): string {
     return filter.key;
   }
 }
