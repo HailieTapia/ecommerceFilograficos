@@ -1,0 +1,55 @@
+<div class="py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans w-full">
+  <app-spinner [isLoading]="isLoading"></app-spinner>
+
+  <div *ngIf="!isLoading">
+    <!-- Título -->
+    <h1 class="text-3xl font-bold text-light-text dark:text-dark-text mb-8 text-center">
+      Explora Nuestras Categorías
+    </h1>
+
+    <!-- Mosaico de categorías -->
+    <div *ngIf="categories.length > 0; else noCategories"
+         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mx-auto max-w-7xl">
+      <div *ngFor="let category of categories; trackBy: trackByCategoryId"
+           (click)="navigateToProducts(category.category_id)"
+           class="relative h-64 rounded-xl overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+           [ngClass]="{'opacity-0 translate-y-10 animate-fadeIn': !isLoaded, 'opacity-100 translate-y-0': isLoaded}">
+        <!-- Fondo: Imagen difuminada o color sólido -->
+        <div class="absolute inset-0 bg-cover bg-center"
+             [style.backgroundImage]="category.imagen_url ? 'url(' + category.imagen_url + ')' : 'none'"
+             [style.backgroundColor]="category.imagen_url ? 'transparent' : (category.color_fondo || '#6B7280')"
+             [ngClass]="{'custom-blur': category.imagen_url}">
+        </div>
+        
+        <!-- Capa de oscurecimiento para legibilidad -->
+        <div class="absolute inset-0 bg-black bg-opacity-30 transition-opacity duration-300 hover:bg-opacity-20"></div>
+        
+        <!-- Nombre de la categoría -->
+        <div class="absolute inset-0 flex items-center justify-center">
+          <h2 class="text-2xl font-semibold text-white text-center px-6 drop-shadow-lg">
+            {{ category.name }}
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <ng-template #noCategories>
+      <div class="flex flex-col items-center justify-center min-h-[50vh] text-center text-light-text dark:text-dark-text">
+        <div class="mb-6">
+          <i class="fas fa-folder-open text-6xl text-light-secondary dark:text-dark-secondary opacity-50"></i>
+        </div>
+        <h2 class="text-2xl font-semibold text-light-text dark:text-dark-text mb-2">
+          ¡No hay categorías disponibles!
+        </h2>
+        <p class="text-lg text-light-secondary dark:text-dark-secondary mb-6">
+          No tenemos categorías para mostrar en este momento. ¡Explora nuestros productos!
+        </p>
+        <a routerLink="/products"
+           class="inline-flex items-center gap-2 bg-light-primary dark:bg-dark-primary text-white font-semibold py-3 px-6 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+          Ver Productos
+        </a>
+      </div>
+    </ng-template>
+  </div>
+</div>

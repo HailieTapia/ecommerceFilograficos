@@ -41,6 +41,8 @@ import { AdministratorDashboardComponent } from './components/administrator/admi
 import { PriceManagementComponent } from './components/administrator/price-management/price-management.component';
 import { PromotionManagementComponent } from './components/administrator/promotion-management/promotion-management.component';
 import { BackupManagementComponent } from './components/administrator/backup-management/backup-management.component';
+import { ProductCategoriesComponent } from './components/public/product-categories/product-categories.component';
+
 
 // Errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -95,6 +97,7 @@ export const routes: Routes = [
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },
   { path: 'support-inquiry', component: SupportInquiryComponent, data: { breadcrumb: 'Consulta Soporte' } },
   { path: 'legal', component: LegalComponent, data: { breadcrumb: 'Legal' } },
+  { path: 'product-categories', component: ProductCategoriesComponent, data: { breadcrumb: 'Categorias' } },
 
   // Rutas del catálogo público (anidadas)
   {

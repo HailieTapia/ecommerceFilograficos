@@ -48,7 +48,7 @@ export class CategorieService {
     );
   }
 
-  //obtener el id y nombre de todas las categorias 
+  // Obtener el id y nombre de todas las categorías
   getCategories(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -57,6 +57,8 @@ export class CategorieService {
       })
     );
   }
+
+  // Obtener categorías públicas
   publicCategories(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -65,6 +67,8 @@ export class CategorieService {
       })
     );
   }
+
+  // Obtener categorías autenticadas
   authCategories(): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -85,21 +89,59 @@ export class CategorieService {
   }
 
   // Crear una nueva categoría
-  createCategory(data: any): Observable<any> {
+  createCategory(data: { name: string, description?: string, color_fondo?: string, imagen_url?: string, image?: File }): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post<any>(`${this.apiUrl}`, data, { headers, withCredentials: true });
+        const formData = new FormData();
+        
+        // Agregar campos al FormData
+        formData.append('name', data.name);
+        if (data.description) {
+          formData.append('description', data.description);
+        }
+        if (data.color_fondo) {
+          formData.append('color_fondo', data.color_fondo);
+        }
+        // Priorizar imagen_url sobre image
+        if (data.imagen_url) {
+          formData.append('imagen_url', data.imagen_url);
+        } else if (data.image) {
+          formData.append('categoryImage', data.image);
+        }
+
+        return this.http.post<any>(`${this.apiUrl}`, formData, { headers, withCredentials: true });
       })
     );
   }
 
   // Actualizar categoría por ID
-  updateCategory(id: number, data: any): Observable<any> {
+  updateCategory(id: number, data: { name?: string, description?: string, color_fondo?: string, imagen_url?: string, image?: File, removeImage?: boolean }): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.put<any>(`${this.apiUrl}/${id}`, data, { headers, withCredentials: true });
+        const formData = new FormData();
+
+        // Agregar campos al FormData
+        if (data.name) {
+          formData.append('name', data.name);
+        }
+        if (data.description !== undefined) {
+          formData.append('description', data.description);
+        }
+        if (data.color_fondo !== undefined) {
+          formData.append('color_fondo', data.color_fondo || '');
+        }
+        // Priorizar imagen_url sobre image y removeImage
+        if (data.imagen_url) {
+          formData.append('imagen_url', data.imagen_url);
+        } else if (data.image) {
+          formData.append('categoryImage', data.image);
+        } else if (data.removeImage) {
+          formData.append('removeImage', 'true');
+        }
+
+        return this.http.put<any>(`${this.apiUrl}/${id}`, formData, { headers, withCredentials: true });
       })
     );
   }
