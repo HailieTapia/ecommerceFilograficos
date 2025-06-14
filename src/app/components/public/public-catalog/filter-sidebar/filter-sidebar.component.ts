@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategorieService } from '../../../services/categorieService';
@@ -11,28 +11,48 @@ import { CollaboratorsService } from '../../../services/collaborators.service';
   templateUrl: './filter-sidebar.component.html',
   styleUrls: ['./filter-sidebar.component.css']
 })
-export class FilterSidebarComponent implements OnInit {
+export class FilterSidebarComponent implements OnInit, OnChanges {
+  @Input() initialFilters: any = {};
+  @Output() filtersChange = new EventEmitter<any>();
+
   categories: any[] = [];
   collaborators: any[] = [];
-
-  @Output() filtersChange = new EventEmitter<any>();
   filters: any = {
-    categoryId: '',
-    minPrice: '',
-    maxPrice: '',
-    collaboratorId: ''
+    categoryId: null,
+    minPrice: null,
+    maxPrice: null,
+    collaboratorId: null
   };
-  constructor(private categoriesService: CategorieService, private collaboratorService: CollaboratorsService) { }
 
-  ngOnInit() {
+  constructor(
+    private categoriesService: CategorieService,
+    private collaboratorService: CollaboratorsService
+  ) {}
+
+  ngOnInit(): void {
     this.loadCategories();
     this.loadCollaborators();
+    // Inicializar filtros desde initialFilters
+    this.updateFiltersFromInput();
   }
 
-  loadCategories() {
-    this.categoriesService
-      .publicCategories(
-    ).subscribe({
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialFilters'] && changes['initialFilters'].currentValue) {
+      this.updateFiltersFromInput();
+    }
+  }
+
+  private updateFiltersFromInput(): void {
+    this.filters = {
+      categoryId: this.initialFilters.categoryId ?? null,
+      minPrice: this.initialFilters.minPrice ?? null,
+      maxPrice: this.initialFilters.maxPrice ?? null,
+      collaboratorId: this.initialFilters.collaboratorId ?? null
+    };
+  }
+
+  loadCategories(): void {
+    this.categoriesService.publicCategories().subscribe({
       next: (response) => {
         this.categories = response;
       },
@@ -42,10 +62,10 @@ export class FilterSidebarComponent implements OnInit {
       }
     });
   }
-  loadCollaborators() {
+
+  loadCollaborators(): void {
     this.collaboratorService.getPublicCollaborators().subscribe({
       next: (response) => {
-        console.log(response);
         this.collaborators = response;
       },
       error: (error) => {
@@ -55,29 +75,29 @@ export class FilterSidebarComponent implements OnInit {
     });
   }
 
-  applyFilters() {
+  applyFilters(): void {
     const cleanedFilters: any = {};
-    if (this.filters.categoryId) {
+    if (this.filters.categoryId !== null) {
       cleanedFilters.categoryId = this.filters.categoryId;
     }
-    if (this.filters.minPrice) {
+    if (this.filters.minPrice !== null) {
       cleanedFilters.minPrice = this.filters.minPrice;
     }
-    if (this.filters.maxPrice) {
+    if (this.filters.maxPrice !== null) {
       cleanedFilters.maxPrice = this.filters.maxPrice;
     }
-    if (this.filters.collaboratorId) {
-      cleanedFilters.collaboratorId = this.filters.collaboratorId; 
+    if (this.filters.collaboratorId !== null) {
+      cleanedFilters.collaboratorId = this.filters.collaboratorId;
     }
     this.filtersChange.emit(cleanedFilters);
   }
 
-  clearFilters() {
+  clearFilters(): void {
     this.filters = {
-      categoryId: '',
-      minPrice: '',
-      maxPrice: '',
-      collaboratorId: ''
+      categoryId: null,
+      minPrice: null,
+      maxPrice: null,
+      collaboratorId: null
     };
     this.applyFilters();
   }

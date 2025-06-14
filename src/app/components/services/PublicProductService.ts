@@ -43,7 +43,7 @@ interface ProductDetail {
   customizations: { type: string; description: string }[];
 }
 
-interface ProductResponse {
+export interface ProductResponse {
   message: string;
   products: Product[];
   total: number;

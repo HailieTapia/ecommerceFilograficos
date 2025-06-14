@@ -17,8 +17,8 @@
       <li>
         <label class="flex items-center cursor-pointer space-x-2">
           <input type="radio" name="categoryFilter" [(ngModel)]="filters.categoryId" (ngModelChange)="applyFilters()"
-            value="" class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
-          <span [class.font-semibold]="filters.categoryId === ''" class="hover:text-blue-500 transition-colors">
+            [value]="null" class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
+          <span [class.font-semibold]="filters.categoryId === null" class="hover:text-blue-500 transition-colors">
             Todas
           </span>
         </label>
@@ -54,8 +54,8 @@
       <li>
         <label class="flex items-center cursor-pointer space-x-2">
           <input type="radio" name="collaboratorFilter" [(ngModel)]="filters.collaboratorId"
-            (ngModelChange)="applyFilters()" value="" class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
-          <span [class.font-semibold]="filters.collaboratorId === ''" class="hover:text-blue-500 transition-colors">
+            (ngModelChange)="applyFilters()" [value]="null" class="w-4 h-4 text-blue-500 focus:ring-blue-300 rounded-full">
+          <span [class.font-semibold]="filters.collaboratorId === null" class="hover:text-blue-500 transition-colors">
             Todos
           </span>
         </label>
