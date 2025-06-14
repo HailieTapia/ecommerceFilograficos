@@ -1,18 +1,28 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { AuthService } from '../services/auth.service';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 import { CompanyService } from '../services/company.service';
 import { ThemeService } from '../services/theme.service';
-import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 import { CartService } from '../services/cart.service';
 import { Subscription } from 'rxjs';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { NavigationComponent } from './navigation/navigation.component';
+import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';
+import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, NotificationDropdownComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    SidebarComponent,
+    NavigationComponent,
+    ProfileDropdownComponent,
+    NotificationDropdownComponent
+  ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
@@ -20,11 +30,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   userRole: string | null = null;
   isLoggedIn: boolean = false;
   company: any;
-  sidebarOpen = false;
   logoPreview: string | ArrayBuffer | null = null;
-  isProfileDropdownOpen = false; // Control para dropdown de perfil
-
   cartItemCount: number = 0;
+  mobileMenuOpen: boolean = false;
   private cartCountSubscription!: Subscription;
 
   constructor(
@@ -33,7 +41,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private companyService: CompanyService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.cartCountSubscription = this.cartService.cartItemCount$.subscribe(
@@ -46,6 +54,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.isLoggedIn = !!user;
       this.userRole = user?.tipo || null;
     });
+    this.checkMobile(); // Verificar si es móvil al iniciar
   }
 
   ngOnDestroy(): void {
@@ -54,12 +63,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Función para alternar el estado del sidebar
-  toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
-  }
-
-  // Obtener la información de la empresa
   getCompanyInfo(): void {
     this.companyService.getCompanyInfo().subscribe(
       (response) => {
@@ -85,16 +88,22 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return this.themeService.isDarkMode();
   }
 
-  // Métodos para controlar el dropdown de perfil
-  toggleProfileDropdown() {
-    this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
   }
 
-  openProfileDropdown() {
-    this.isProfileDropdownOpen = true;
+  isMobile(): boolean {
+    return window.innerWidth < 768; // md breakpoint en Tailwind
   }
 
-  closeProfileDropdown() {
-    this.isProfileDropdownOpen = false;
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event): void {
+    this.checkMobile();
+  }
+
+  private checkMobile(): void {
+    if (!this.isMobile()) {
+      this.mobileMenuOpen = false; // Cerrar menú móvil en pantallas grandes
+    }
   }
 }
