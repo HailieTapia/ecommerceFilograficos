@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms'; // Importar FormsModule
 import { OrderService, OrdersResponse } from '../../services/order.service';
 import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
@@ -8,7 +9,7 @@ import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterModule, SpinnerComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SpinnerComponent], // Añadir FormsModule
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css']
 })
@@ -21,6 +22,11 @@ export class OrdersComponent implements OnInit {
     totalPages: 0
   };
   isLoading: boolean = false;
+  searchTerm: string = '';
+  dateFilter: string = '';
+
+  // Opciones para el combo box
+  filterOptions: { value: string; label: string }[] = [];
 
   constructor(
     private orderService: OrderService,
@@ -28,19 +34,45 @@ export class OrdersComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.generateFilterOptions();
     this.loadOrders(1);
   }
 
+  // Generar opciones de filtro dinámicamente
+  generateFilterOptions(): void {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    this.filterOptions = [
+      { value: '', label: 'Todas' },
+      { value: this.getMonthRange(currentMonth, currentYear), label: 'Este mes' },
+      { value: this.getMonthRange(lastMonth, lastYear), label: 'Mes pasado' },
+      { value: currentYear.toString(), label: 'Este año' }
+    ];
+
+    // Añadir años desde 2024 hasta el actual (excepto el actual que ya es "Este año")
+    for (let year = 2024; year < currentYear; year++) {
+      this.filterOptions.push({ value: year.toString(), label: year.toString() });
+    }
+  }
+
+  // Obtener rango de fechas para un mes específico
+  getMonthRange(month: number, year: number): string {
+    const start = new Date(year, month, 1).toISOString().split('T')[0];
+    const end = new Date(year, month + 1, 0).toISOString().split('T')[0];
+    return `${start},${end}`;
+  }
+
+  // Cargar órdenes con filtros
   loadOrders(page: number): void {
     this.isLoading = true;
-    this.orderService.getOrders(page, this.pagination.pageSize).subscribe({
+    this.orderService.getOrders(page, this.pagination.pageSize, this.searchTerm, this.dateFilter).subscribe({
       next: (response: OrdersResponse) => {
         this.isLoading = false;
         if (response.success) {
-          this.orders = response.data.orders.map(order => ({
-            ...order,
-            total: typeof order.total === 'string' ? parseFloat(order.total) : order.total
-          }));
+          this.orders = response.data.orders;
           this.pagination = response.data.pagination;
           if (this.orders.length === 0 && page === 1) {
             this.toastService.showToast('No tienes órdenes registradas.', 'info');
@@ -57,12 +89,14 @@ export class OrdersComponent implements OnInit {
     });
   }
 
+  // Cambiar página
   changePage(page: number): void {
     if (page >= 1 && page <= this.pagination.totalPages) {
       this.loadOrders(page);
     }
   }
 
+  // Formatear fecha
   getFormattedDate(date: string): string {
     return new Date(date).toLocaleDateString('es-MX', {
       year: 'numeric',
@@ -73,16 +107,7 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  formatTotal(total: number | string | undefined): string {
-    if (total == null) return '0.00';
-    const num = typeof total === 'string' ? parseFloat(total) : total;
-    return isNaN(num) ? '0.00' : num.toFixed(2);
-  }
-
-  getImageUrl(order: OrdersResponse['data']['orders'][0]): string {
-    return order.first_item_name ? `https://via.placeholder.com/100?text=${encodeURIComponent(order.first_item_name)}` : 'https://via.placeholder.com/100?text=No+Image';
-  }
-
+  // Traducir estado de orden
   getOrderStatusInSpanish(status: string): string {
     const statusMap: { [key: string]: string } = {
       'delivered': 'Entregado',
@@ -93,7 +118,13 @@ export class OrdersComponent implements OnInit {
     return statusMap[status.toLowerCase()] || status;
   }
 
+  // Tracking por order_id
   trackByOrderId(index: number, order: OrdersResponse['data']['orders'][0]): number {
     return order.order_id;
+  }
+
+  // Filtrar al cambiar searchTerm o dateFilter
+  onFilterChange(): void {
+    this.loadOrders(1); // Reiniciar a la primera página al aplicar filtros
   }
 }

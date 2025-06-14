@@ -5,6 +5,45 @@
     <!-- Título -->
     <h1 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6">Mis Órdenes</h1>
 
+    <!-- Filtros y Búsqueda -->
+    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
+        <div class="relative w-full sm:w-1/2">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="onFilterChange()"
+            placeholder="Buscar por nombre de producto..."
+            class="w-full p-2 pl-10 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+
+        <select
+          [(ngModel)]="dateFilter"
+          (change)="onFilterChange()"
+          class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option *ngFor="let option of filterOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
     <!-- Sin órdenes -->
     <div *ngIf="orders.length === 0" class="flex flex-col items-center justify-center min-h-[50vh] text-center text-light-text dark:text-dark-text">
       <div class="mb-6">
@@ -22,15 +61,16 @@
     <!-- Lista de órdenes con cards -->
     <div *ngIf="orders.length > 0" class="space-y-6">
       <div *ngFor="let order of orders; trackBy: trackByOrderId" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mx-4">
-        <!-- Primera fila: Fecha -->
-        <div class="p-2 mb-2 border-b border-gray-200 dark:border-gray-600">
+        <!-- Primera fila: Fecha y Total -->
+        <div class="p-2 mb-2 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
           <span class="text-sm text-light-secondary dark:text-dark-secondary">{{ getFormattedDate(order.created_at) }}</span>
+          <span class="text-sm font-semibold text-light-text dark:text-dark-text">${{ order.total.toFixed(2) }}</span>
         </div>
         <!-- Segunda fila: Contenido principal (una fila con 3 columnas) -->
         <div class="grid grid-cols-[100px,1fr,auto] gap-4 items-center">
           <!-- Columna 1: Imagen (ancho fijo y alineada a la izquierda) -->
           <div class="flex justify-start">
-            <img [src]="getImageUrl(order)" alt="{{ order.first_item_name }}" class="w-20 h-20 object-cover rounded">
+            <img [src]="order.first_item_image" alt="Primer producto" class="w-20 h-20 object-cover rounded">
           </div>
           <!-- Columna 2: Detalles del pedido -->
           <div class="flex flex-col space-y-2">
@@ -42,8 +82,10 @@
                   }">
               {{ getOrderStatusInSpanish(order.order_status) }}
             </span>
-            <p class="text-sm text-light-text dark:text-dark-text">{{ order.first_item_name }}</p>
-            <p class="text-xs text-light-secondary dark:text-dark-secondary">1 unidad</p>
+            <ul class="text-sm text-light-text dark:text-dark-text">
+              <li *ngFor="let name of order.product_names" class="truncate">{{ name }}</li>
+            </ul>
+            <p class="text-xs text-light-secondary dark:text-dark-secondary">{{ order.total_items }} {{ order.total_items === 1 ? 'unidad' : 'unidades' }}</p>
           </div>
           <!-- Columna 3: Botones (ancho automático con botones más pequeños) -->
           <div class="flex flex-col space-y-2">

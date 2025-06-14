@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
@@ -97,9 +97,9 @@ export interface OrdersResponse {
       order_status: 'pending' | 'processing' | 'shipped' | 'delivered';
       payment_status: 'pending' | 'validated' | 'failed';
       created_at: string;
-      items_count: number;
-      first_item_name: string;
-      city: string | null;
+      total_items: number;
+      product_names: string[];
+      first_item_image: string;
     }[];
     pagination: {
       totalOrders: number;
@@ -154,14 +154,33 @@ export class OrderService {
     );
   }
 
-  // Obtener la lista paginada de órdenes
-  getOrders(page: number = 1, pageSize: number = 10): Observable<OrdersResponse> {
+  // Obtener la lista paginada de órdenes con filtros opcionales
+  getOrders(
+    page: number = 1,
+    pageSize: number = 10,
+    searchTerm: string = '',
+    dateFilter: string = ''
+  ): Observable<OrdersResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+
+        // Construir parámetros de consulta
+        let params = new HttpParams()
+          .set('page', page.toString())
+          .set('pageSize', pageSize.toString());
+
+        if (searchTerm.trim()) {
+          params = params.set('searchTerm', searchTerm.trim());
+        }
+
+        if (dateFilter.trim()) {
+          params = params.set('dateFilter', dateFilter.trim());
+        }
+
         return this.http.get<OrdersResponse>(
-          `${this.apiUrl}/?page=${page}&pageSize=${pageSize}`,
-          { headers, withCredentials: true }
+          this.apiUrl,
+          { headers, params, withCredentials: true }
         );
       }),
       catchError(this.handleError)
