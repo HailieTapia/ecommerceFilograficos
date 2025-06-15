@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectorRef } from '@angular/core'; // Agregar ChangeDetectorRef
+import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ProductService, NewProduct, Variant, DeleteVariantResponse } from '../../../services/product.service';
@@ -28,6 +28,9 @@ interface FormErrors {
   production_cost?: string;
   profit_margin?: string;
   calculated_price?: string;
+  standard_delivery_days?: string;
+  urgent_delivery_days?: string;
+  urgent_delivery_cost?: string;
   [key: string]: string | undefined;
 }
 
@@ -73,7 +76,7 @@ export class ProductCatalogFormComponent implements OnInit {
     private collaboratorsService: CollaboratorsService,
     private productAttributeService: ProductAttributeService,
     private fb: FormBuilder,
-    private cdr: ChangeDetectorRef // Inyectar ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100), Validators.pattern(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]+$/)]],
@@ -81,9 +84,13 @@ export class ProductCatalogFormComponent implements OnInit {
       category_id: [null, Validators.required],
       collaborator_id: [null],
       product_type: ['', Validators.required],
+      standard_delivery_days: [null, [Validators.required, Validators.min(1)]],
+      urgent_delivery_enabled: [false],
+      urgent_delivery_days: [null, [Validators.min(1)]],
+      urgent_delivery_cost: [null, [Validators.min(0)]],
       customizations: this.fb.array([]),
       variants: this.fb.array([], this.uniqueSkuValidator.bind(this))
-    });
+    }, { validators: this.urgentDeliveryValidator.bind(this) });
   }
 
   get customizations(): FormArray<FormGroup> {
@@ -115,10 +122,58 @@ export class ProductCatalogFormComponent implements OnInit {
     return duplicates.length > 0 ? { duplicateSku: true } : null;
   }
 
+  urgentDeliveryValidator(form: FormGroup): ValidationErrors | null {
+    const urgentEnabled = form.get('urgent_delivery_enabled')?.value;
+    const urgentDays = form.get('urgent_delivery_days')?.value;
+    const urgentCost = form.get('urgent_delivery_cost')?.value;
+    const standardDays = form.get('standard_delivery_days')?.value;
+
+    if (urgentEnabled) {
+      if (!urgentDays || urgentDays < 1) {
+        form.get('urgent_delivery_days')?.setErrors({ required: true });
+      } else if (urgentDays >= standardDays) {
+        form.get('urgent_delivery_days')?.setErrors({ mustBeLessThanStandard: true });
+      } else {
+        form.get('urgent_delivery_days')?.setErrors(null);
+      }
+      if (urgentCost === null || urgentCost < 0) {
+        form.get('urgent_delivery_cost')?.setErrors({ required: true });
+      } else {
+        form.get('urgent_delivery_cost')?.setErrors(null);
+      }
+    } else {
+      form.get('urgent_delivery_days')?.setErrors(null);
+      form.get('urgent_delivery_cost')?.setErrors(null);
+    }
+    return null;
+  }
+
+  toggleUrgentDeliveryFields() {
+    const urgentEnabled = this.productForm.get('urgent_delivery_enabled')?.value;
+    const urgentDaysControl = this.productForm.get('urgent_delivery_days');
+    const urgentCostControl = this.productForm.get('urgent_delivery_cost');
+
+    if (urgentEnabled) {
+      urgentDaysControl?.enable();
+      urgentCostControl?.enable();
+      urgentDaysControl?.setValidators([Validators.required, Validators.min(1)]);
+      urgentCostControl?.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      urgentDaysControl?.disable();
+      urgentCostControl?.disable();
+      urgentDaysControl?.clearValidators();
+      urgentCostControl?.clearValidators();
+      urgentDaysControl?.setValue(null);
+      urgentCostControl?.setValue(null);
+    }
+    urgentDaysControl?.updateValueAndValidity();
+    urgentCostControl?.updateValueAndValidity();
+  }
+
   generateSKU(productName: string, variantIndex: number): string {
     const base = productName ? productName.replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase() : 'PROD';
     const prefix = (base + 'XXXX').substring(0, 4);
-    const timestamp = Date.now().toString().slice(-6); // Últimos 6 dígitos del timestamp
+    const timestamp = Date.now().toString().slice(-6);
     const digits = (variantIndex + 1).toString().padStart(2, '0');
     return `${prefix}-${timestamp}-${digits}`;
   }
@@ -140,7 +195,6 @@ export class ProductCatalogFormComponent implements OnInit {
     this.loadCollaborators();
     this.loadAttributesByActiveCategories();
 
-    // Listener para actualizar atributos cuando cambia la categoría
     this.productForm.get('category_id')?.valueChanges.subscribe(categoryId => {
       this.updateAllVariantAttributes(categoryId);
     });
@@ -165,6 +219,11 @@ export class ProductCatalogFormComponent implements OnInit {
       }
     });
 
+    this.productForm.get('urgent_delivery_enabled')?.valueChanges.subscribe(() => {
+      this.toggleUrgentDeliveryFields();
+      this.validateStep1();
+    });
+
     this.variants.valueChanges.pipe(debounceTime(100)).subscribe(() => {
       this.variants.controls.forEach(variant => this.calculatePrice(variant as FormGroup));
       this.updateErrors();
@@ -174,8 +233,8 @@ export class ProductCatalogFormComponent implements OnInit {
       this.isEditMode = true;
       this.loadProductData(this.productId);
     } else {
-      // Inicializar con una variante vacía en modo creación
       this.addVariant();
+      this.toggleUrgentDeliveryFields();
     }
   }
 
@@ -184,30 +243,39 @@ export class ProductCatalogFormComponent implements OnInit {
       next: (response) => {
         console.log('Datos del producto cargados:', response.product);
         const product = response.product;
-  
-        // Cargar datos básicos del producto
+
+        // Map backend product_type to form-compatible values
+        const productTypeMap: { [key: string]: string } = {
+          'Existencia': 'Existencia',
+          'Semi Personalizado': 'semi_personalizado',
+          'Personalizado': 'Personalizado'
+        };
+
         this.productForm.patchValue({
           name: product.name,
           description: product.description,
           category_id: product.category?.category_id || null,
           collaborator_id: product.collaborator?.collaborator_id || null,
-          product_type: product.product_type.toLowerCase() // Convertir a minúsculas para consistencia
+          product_type: productTypeMap[product.product_type] || product.product_type, // Use mapped value or fallback
+          standard_delivery_days: product.standard_delivery_days,
+          urgent_delivery_enabled: product.urgent_delivery_enabled,
+          urgent_delivery_days: product.urgent_delivery_days,
+          urgent_delivery_cost: product.urgent_delivery_cost
         });
-  
-        // Cargar customizaciones
+
+        // Rest of the method remains unchanged
         while (this.customizations.length > 0) this.customizations.removeAt(0);
         if (product.customizations && product.customizations.length > 0) {
           product.customizations.forEach(cust => {
             const displayType = customizationTypeMap.toDisplay[cust.type] || cust.type;
-            console.log('Cargando personalización:', { type: displayType, description: cust.description }); // Log para depuración
+            console.log('Cargando personalización:', { type: displayType, description: cust.description });
             this.customizations.push(this.fb.group({
               type: [displayType, Validators.required],
               description: [cust.description || '']
             }));
           });
         }
-  
-        // Limpiar variantes existentes y cargar nuevas
+
         while (this.variants.length > 0) this.variants.removeAt(0);
         product.variants.forEach(variant => {
           const variantGroup = this.createVariantFormGroup(variant.sku);
@@ -221,8 +289,7 @@ export class ProductCatalogFormComponent implements OnInit {
             images: [],
             imagesToDelete: []
           });
-  
-          // Inicializar los atributos con sus valores existentes
+
           const attributesGroup = variantGroup.get('attributes') as FormGroup;
           const categoryId = product.category?.category_id || null;
           if (categoryId && this.attributesByCategory[categoryId]) {
@@ -235,14 +302,14 @@ export class ProductCatalogFormComponent implements OnInit {
               );
             });
           }
-  
+
           this.variants.push(variantGroup);
         });
-  
-        // Forzar detección de cambios después de cargar las personalizaciones
+
+        this.toggleUrgentDeliveryFields();
         this.cdr.detectChanges();
         console.log('Formulario después de cargar datos:', this.productForm.value);
-        console.log('Customizations FormArray:', this.customizations.value); // Log para depuración
+        console.log('Customizations FormArray:', this.customizations.value);
       },
       error: (err) => {
         console.error('Error al cargar producto:', err);
@@ -311,19 +378,17 @@ export class ProductCatalogFormComponent implements OnInit {
       });
       return;
     }
-  
+
     const attributes = this.attributesByCategory[categoryId];
     this.variants.controls.forEach((variant, index) => {
       const attributesGroup = variant.get('attributes') as FormGroup;
       const existingValues = { ...attributesGroup.value };
-  
-      // Limpiar controles existentes solo si cambian los atributos esperados
+
       const currentAttrIds = new Set(Object.keys(attributesGroup.controls));
       const expectedAttrIds = new Set(attributes.map(attr => attr.attribute_id.toString()));
       if (![...expectedAttrIds].every(id => currentAttrIds.has(id)) || ![...currentAttrIds].every(id => expectedAttrIds.has(id))) {
         Object.keys(attributesGroup.controls).forEach(key => attributesGroup.removeControl(key));
-  
-        // Agregar nuevos controles con valores preservados o vacíos
+
         attributes.forEach(attr => {
           const existingValue = existingValues[attr.attribute_id.toString()] || '';
           const validators = attr.is_required ? [Validators.required] : [];
@@ -334,7 +399,7 @@ export class ProductCatalogFormComponent implements OnInit {
         });
       }
     });
-  
+
     this.updateErrors();
   }
 
@@ -370,7 +435,7 @@ export class ProductCatalogFormComponent implements OnInit {
   }
 
   isCustomizationRequired(): boolean {
-    const productType = this.productForm.get('product_type')?.value?.toLowerCase(); // Convertir a minúsculas
+    const productType = this.productForm.get('product_type')?.value?.toLowerCase();
     return productType === 'semi_personalizado' || productType === 'personalizado';
   }
 
@@ -397,6 +462,19 @@ export class ProductCatalogFormComponent implements OnInit {
       newErrors['product_type'] = 'Selecciona un tipo de producto';
     }
 
+    if (this.productForm.get('standard_delivery_days')?.invalid) {
+      if (this.productForm.get('standard_delivery_days')?.errors?.['required']) newErrors['standard_delivery_days'] = 'Los días de entrega estándar son obligatorios';
+      else if (this.productForm.get('standard_delivery_days')?.errors?.['min']) newErrors['standard_delivery_days'] = 'Debe ser al menos 1 día';
+    }
+
+    if (this.productForm.get('urgent_delivery_enabled')?.value) {
+      if (this.productForm.get('urgent_delivery_days')?.errors?.['required']) newErrors['urgent_delivery_days'] = 'Los días de entrega urgente son obligatorios';
+      else if (this.productForm.get('urgent_delivery_days')?.errors?.['min']) newErrors['urgent_delivery_days'] = 'Debe ser al menos 1 día';
+      else if (this.productForm.get('urgent_delivery_days')?.errors?.['mustBeLessThanStandard']) newErrors['urgent_delivery_days'] = 'Debe ser menor que los días estándar';
+      if (this.productForm.get('urgent_delivery_cost')?.errors?.['required']) newErrors['urgent_delivery_cost'] = 'El costo de entrega urgente es obligatorio';
+      else if (this.productForm.get('urgent_delivery_cost')?.errors?.['min']) newErrors['urgent_delivery_cost'] = 'No puede ser negativo';
+    }
+
     if (this.isCustomizationRequired() && this.customizations.length === 0) {
       newErrors['customizations'] = 'Agrega al menos una opción de personalización';
     } else if (this.isCustomizationRequired()) {
@@ -419,6 +497,10 @@ export class ProductCatalogFormComponent implements OnInit {
         category_id: this.productForm.get('category_id')?.value,
         collaborator_id: this.productForm.get('collaborator_id')?.value,
         product_type: this.productForm.get('product_type')?.value,
+        standard_delivery_days: this.productForm.get('standard_delivery_days')?.value,
+        urgent_delivery_enabled: this.productForm.get('urgent_delivery_enabled')?.value,
+        urgent_delivery_days: this.productForm.get('urgent_delivery_days')?.value,
+        urgent_delivery_cost: this.productForm.get('urgent_delivery_cost')?.value,
         customizations: this.customizations.value
       };
       console.log('Datos del Paso 1 al pasar al Paso 2:', step1Data);
@@ -633,7 +715,11 @@ export class ProductCatalogFormComponent implements OnInit {
       description: '',
       category_id: null,
       collaborator_id: null,
-      product_type: ''
+      product_type: '',
+      standard_delivery_days: null,
+      urgent_delivery_enabled: false,
+      urgent_delivery_days: null,
+      urgent_delivery_cost: null
     });
 
     while (this.customizations.length > 0) {
@@ -643,12 +729,13 @@ export class ProductCatalogFormComponent implements OnInit {
     while (this.variants.length > 0) {
       this.variants.removeAt(0);
     }
-    this.addVariant(); // Agregar una variante inicial
+    this.addVariant();
 
     this.currentStep = 1;
     this.errors = {};
     this.isEditMode = false;
     this.variantsToDelete = [];
+    this.toggleUrgentDeliveryFields();
   }
 
   saveProduct() {
@@ -656,13 +743,17 @@ export class ProductCatalogFormComponent implements OnInit {
       window.alert('Por favor corrige los errores en las variantes antes de guardar');
       return;
     }
-  
+
     const productData: NewProduct = {
       name: this.productForm.get('name')?.value as string,
       description: this.productForm.get('description')?.value as string,
       product_type: this.productForm.get('product_type')?.value as 'Existencia' | 'semi_personalizado' | 'personalizado',
       category_id: this.productForm.get('category_id')?.value as number,
-      collaborator_id: this.productForm.get('collaborator_id')?.value, // Eliminamos || undefined
+      collaborator_id: this.productForm.get('collaborator_id')?.value,
+      standard_delivery_days: this.productForm.get('standard_delivery_days')?.value as number,
+      urgent_delivery_enabled: this.productForm.get('urgent_delivery_enabled')?.value as boolean,
+      urgent_delivery_days: this.productForm.get('urgent_delivery_enabled')?.value ? this.productForm.get('urgent_delivery_days')?.value as number : undefined,
+      urgent_delivery_cost: this.productForm.get('urgent_delivery_enabled')?.value ? this.productForm.get('urgent_delivery_cost')?.value as number : undefined,
       variants: this.variants.controls.map((variant) => {
         const attributesGroup = variant.get('attributes') as FormGroup;
         const categoryId = this.productForm.get('category_id')?.value;
@@ -688,12 +779,12 @@ export class ProductCatalogFormComponent implements OnInit {
           }))
         : undefined
     };
-  
+
     const saveAction = () => {
       const saveObservable = this.isEditMode && this.productId
         ? this.productService.updateProduct(this.productId, productData)
         : this.productService.createProduct(productData);
-  
+
       saveObservable.subscribe({
         next: (response) => {
           console.log(this.isEditMode ? 'Producto actualizado:' : 'Producto creado:', response);
@@ -707,7 +798,7 @@ export class ProductCatalogFormComponent implements OnInit {
         }
       });
     };
-  
+
     if (this.isEditMode && this.productId && this.variantsToDelete.length > 0) {
       const variantSkus = this.variantsToDelete.map(id => {
         const variant = this.productForm.value.variants.find((v: any) => v.variant_id === id);

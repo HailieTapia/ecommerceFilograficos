@@ -51,7 +51,7 @@ export class ProductCatalogComponent implements OnInit {
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
   selectedProductId: number | undefined = undefined;
-  modalTitle: string = 'Crear Nuevo Producto'; // Título dinámico para el modal
+  modalTitle: string = 'Crear Nuevo Producto';
 
   constructor(
     private productService: ProductService,

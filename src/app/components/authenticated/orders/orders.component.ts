@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms'; // Importar FormsModule
+import { FormsModule } from '@angular/forms';
 import { OrderService, OrdersResponse } from '../../services/order.service';
 import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
@@ -9,7 +9,7 @@ import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SpinnerComponent], // Añadir FormsModule
+  imports: [CommonModule, RouterModule, FormsModule, SpinnerComponent],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css']
 })
@@ -24,8 +24,10 @@ export class OrdersComponent implements OnInit {
   isLoading: boolean = false;
   searchTerm: string = '';
   dateFilter: string = '';
+  pendingCount: number = 0;
+  shippedCount: number = 0;
+  deliveredCount: number = 0;
 
-  // Opciones para el combo box
   filterOptions: { value: string; label: string }[] = [];
 
   constructor(
@@ -38,7 +40,6 @@ export class OrdersComponent implements OnInit {
     this.loadOrders(1);
   }
 
-  // Generar opciones de filtro dinámicamente
   generateFilterOptions(): void {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
@@ -52,20 +53,17 @@ export class OrdersComponent implements OnInit {
       { value: currentYear.toString(), label: 'Este año' }
     ];
 
-    // Añadir años desde 2024 hasta el actual (excepto el actual que ya es "Este año")
     for (let year = 2024; year < currentYear; year++) {
       this.filterOptions.push({ value: year.toString(), label: year.toString() });
     }
   }
 
-  // Obtener rango de fechas para un mes específico
   getMonthRange(month: number, year: number): string {
     const start = new Date(year, month, 1).toISOString().split('T')[0];
     const end = new Date(year, month + 1, 0).toISOString().split('T')[0];
     return `${start},${end}`;
   }
 
-  // Cargar órdenes con filtros
   loadOrders(page: number): void {
     this.isLoading = true;
     this.orderService.getOrders(page, this.pagination.pageSize, this.searchTerm, this.dateFilter).subscribe({
@@ -74,6 +72,7 @@ export class OrdersComponent implements OnInit {
         if (response.success) {
           this.orders = response.data.orders;
           this.pagination = response.data.pagination;
+          this.updateOrderCounts();
           if (this.orders.length === 0 && page === 1) {
             this.toastService.showToast('No tienes órdenes registradas.', 'info');
           }
@@ -89,14 +88,18 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  // Cambiar página
+  updateOrderCounts(): void {
+    this.pendingCount = this.orders.filter(o => o.order_status === 'pending').length;
+    this.shippedCount = this.orders.filter(o => o.order_status === 'shipped').length;
+    this.deliveredCount = this.orders.filter(o => o.order_status === 'delivered').length;
+  }
+
   changePage(page: number): void {
     if (page >= 1 && page <= this.pagination.totalPages) {
       this.loadOrders(page);
     }
   }
 
-  // Formatear fecha
   getFormattedDate(date: string): string {
     return new Date(date).toLocaleDateString('es-MX', {
       year: 'numeric',
@@ -107,7 +110,6 @@ export class OrdersComponent implements OnInit {
     });
   }
 
-  // Traducir estado de orden
   getOrderStatusInSpanish(status: string): string {
     const statusMap: { [key: string]: string } = {
       'delivered': 'Entregado',
@@ -118,13 +120,18 @@ export class OrdersComponent implements OnInit {
     return statusMap[status.toLowerCase()] || status;
   }
 
-  // Tracking por order_id
   trackByOrderId(index: number, order: OrdersResponse['data']['orders'][0]): number {
     return order.order_id;
   }
 
-  // Filtrar al cambiar searchTerm o dateFilter
+  performSearch(): void {
+    if (!this.searchTerm.trim()) {
+      this.searchTerm = ''; // Clear the search term if empty
+    }
+    this.loadOrders(1); // Trigger search and reset to first page
+  }
+
   onFilterChange(): void {
-    this.loadOrders(1); // Reiniciar a la primera página al aplicar filtros
+    this.loadOrders(1); // Trigger filter change for date filter
   }
 }

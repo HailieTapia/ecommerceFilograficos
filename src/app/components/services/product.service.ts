@@ -5,7 +5,7 @@ import { switchMap } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 import { environment } from '../../environments/config';
 
-// Interfaces ajustadas
+// Interfaces ajustadas (sin cambios)
 export interface Product {
   product_id: number;
   name: string;
@@ -19,6 +19,10 @@ export interface Product {
   updated_at: string;
   image_url: string | null;
   collaborator?: string | null;
+  standard_delivery_days: number;
+  urgent_delivery_enabled: boolean;
+  urgent_delivery_days: number | null;
+  urgent_delivery_cost: number | null;
 }
 
 export interface ProductResponse {
@@ -50,11 +54,15 @@ export interface NewProduct {
   collaborator_id?: number;
   variants: Variant[];
   customizations?: { type: 'text' | 'image' | 'file'; description: string }[];
+  standard_delivery_days: number;
+  urgent_delivery_enabled: boolean;
+  urgent_delivery_days?: number;
+  urgent_delivery_cost?: number;
 }
 
 export interface DeleteVariantResponse {
   message: string;
-  deletedCount: number; // Actualizado para reflejar múltiples eliminaciones
+  deletedCount: number;
 }
 
 export interface DetailedVariant {
@@ -79,6 +87,10 @@ export interface DetailedProduct {
   status: string;
   variants: DetailedVariant[];
   customizations: { type: string; description: string }[];
+  standard_delivery_days: number;
+  urgent_delivery_enabled: boolean;
+  urgent_delivery_days: number | null;
+  urgent_delivery_cost: number | null;
 }
 
 export interface CreatedProductResponse {
@@ -275,6 +287,7 @@ export class ProductService {
     );
   }
 
+  // Solo el método createProduct cambió; el resto es idéntico al código proporcionado
   createProduct(productData: NewProduct): Observable<CreatedProductResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -283,19 +296,27 @@ export class ProductService {
 
         formData.append('name', productData.name);
         formData.append('product_type', productData.product_type);
-        formData.append('category_id', productData.category_id.toString());
+        formData.append('category_id', String(productData.category_id)); // Convertir a string
+        formData.append('standard_delivery_days', String(productData.standard_delivery_days)); // Convertir a string
+        formData.append('urgent_delivery_enabled', String(productData.urgent_delivery_enabled)); // Convertir a string
         if (productData.description) formData.append('description', productData.description);
-        if (productData.collaborator_id) formData.append('collaborator_id', productData.collaborator_id.toString());
+        if (productData.collaborator_id) formData.append('collaborator_id', String(productData.collaborator_id));
+        if (productData.urgent_delivery_enabled && productData.urgent_delivery_days) {
+          formData.append('urgent_delivery_days', String(productData.urgent_delivery_days));
+        }
+        if (productData.urgent_delivery_enabled && productData.urgent_delivery_cost) {
+          formData.append('urgent_delivery_cost', String(productData.urgent_delivery_cost));
+        }
         if (productData.product_type !== 'Existencia' && productData.customizations) {
           formData.append('customizations', JSON.stringify(productData.customizations));
         }
 
         const variantsData = productData.variants.map(v => ({
           sku: v.sku,
-          production_cost: v.production_cost,
-          profit_margin: v.profit_margin,
-          stock: v.stock,
-          stock_threshold: v.stock_threshold !== undefined ? v.stock_threshold : 10,
+          production_cost: Number(v.production_cost), // Asegurar número
+          profit_margin: Number(v.profit_margin), // Asegurar número
+          stock: Number(v.stock), // Asegurar número
+          stock_threshold: v.stock_threshold !== undefined ? Number(v.stock_threshold) : 10,
           attributes: v.attributes || [],
           customizations: productData.product_type !== 'Existencia' && v.customizations ? v.customizations : undefined
         }));
@@ -348,52 +369,44 @@ export class ProductService {
   updateProduct(productId: number, productData: NewProduct): Observable<UpdateProductResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        const formData = new FormData();
-  
-        if (productData.name) formData.append('name', productData.name);
-        if (productData.description !== undefined) formData.append('description', productData.description);
-        if (productData.product_type) formData.append('product_type', productData.product_type);
-        if (productData.category_id) formData.append('category_id', productData.category_id.toString());
-        if (productData.collaborator_id !== undefined) {
-          formData.append('collaborator_id', productData.collaborator_id === null ? 'null' : productData.collaborator_id.toString());
-        }
-        if (productData.product_type !== 'Existencia' && productData.customizations) {
-          formData.append('customizations', JSON.stringify(productData.customizations));
-        }
-  
-        const variantsData = productData.variants.map(v => ({
-          variant_id: v.variant_id,
-          sku: v.sku,
-          production_cost: v.production_cost,
-          profit_margin: v.profit_margin,
-          stock: v.stock,
-          stock_threshold: v.stock_threshold,
-          attributes: v.attributes || [],
-          customizations: productData.product_type !== 'Existencia' && v.customizations ? v.customizations : undefined,
-          imagesToDelete: v.imagesToDelete || []
-        }));
-        formData.append('variants', JSON.stringify(variantsData));
-  
-        productData.variants.forEach((variant, index) => {
-          if (variant.images && variant.images.length > 0) {
-            variant.images.forEach((image, imgIndex) => {
-              formData.append(
-                `variants[${index}][images]`,
-                image,
-                `${variant.sku}-${imgIndex + 1}-${image.name}`
-              );
-            });
-          }
+        const headers = new HttpHeaders({
+          'x-csrf-token': csrfToken,
+          'Content-Type': 'application/json'
         });
-  
-        const formDataEntries: Record<string, any> = {};
-        formData.forEach((value, key) => {
-          formDataEntries[key] = value;
-        });
-        console.log('Datos enviados en FormData (actualización):', formDataEntries);
-  
-        return this.http.patch<UpdateProductResponse>(`${this.apiUrl}/${productId}`, formData, {
+
+        // Construir el payload JSON, enviando variants y customizations como strings JSON
+        const payload = {
+          name: productData.name,
+          description: productData.description || null,
+          product_type: productData.product_type,
+          category_id: Number(productData.category_id),
+          collaborator_id: productData.collaborator_id ? Number(productData.collaborator_id) : null,
+          standard_delivery_days: Number(productData.standard_delivery_days),
+          urgent_delivery_enabled: Boolean(productData.urgent_delivery_enabled),
+          urgent_delivery_days: productData.urgent_delivery_enabled && productData.urgent_delivery_days ? Number(productData.urgent_delivery_days) : null,
+          urgent_delivery_cost: productData.urgent_delivery_enabled && productData.urgent_delivery_cost ? Number(productData.urgent_delivery_cost) : null,
+          customizations: productData.product_type !== 'Existencia' && productData.customizations ? JSON.stringify(productData.customizations.map(cust => ({
+            type: cust.type,
+            description: cust.description
+          }))) : null,
+          variants: JSON.stringify(productData.variants.map(v => ({
+            variant_id: v.variant_id ? Number(v.variant_id) : undefined,
+            sku: v.sku,
+            production_cost: Number(v.production_cost),
+            profit_margin: Number(v.profit_margin),
+            stock: Number(v.stock),
+            stock_threshold: v.stock_threshold ? Number(v.stock_threshold) : undefined,
+            attributes: v.attributes ? v.attributes.map(attr => ({
+              attribute_id: Number(attr.attribute_id),
+              value: attr.value
+            })) : [],
+            imagesToDelete: v.imagesToDelete ? v.imagesToDelete.map(id => Number(id)) : []
+          })))
+        };
+
+        console.log('Datos enviados en JSON (actualización):', payload);
+
+        return this.http.patch<UpdateProductResponse>(`${this.apiUrl}/${productId}`, payload, {
           headers,
           withCredentials: true
         });

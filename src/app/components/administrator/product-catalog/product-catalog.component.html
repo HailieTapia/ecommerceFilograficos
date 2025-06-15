@@ -20,9 +20,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
       <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
         <select [(ngModel)]="selectedCollaboratorId" (ngModelChange)="onFilterChange()" class="w-full sm:w-48 p-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary">
-          <option [ngValue]="null
-
-">Todos los colaboradores</option>
+          <option [ngValue]="null">Todos los colaboradores</option>
           <option *ngFor="let collaborator of collaborators" [ngValue]="collaborator.collaborator_id">{{ collaborator.name }}</option>
         </select>
         <select [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()" class="w-full sm:w-48 p-2 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary">

@@ -1,6 +1,6 @@
 <div class="relative z-20 w-full flex items-center justify-center p-4">
   <div class="w-full max-w-4xl bg-light-background dark:bg-dark-background bg-opacity-80 dark:bg-opacity-80 rounded-2xl shadow-xl p-8 transform transition-all duration-300 hover:shadow-2xl" style="backdrop-filter: blur(10px);">
-    <!-- Progress Steps (sin cambios) -->
+    <!-- Progress Steps -->
     <div class="flex justify-center mb-8">
       <div class="flex items-center space-x-1">
         <div [ngClass]="{'bg-light-primary dark:bg-dark-primary': currentStep === 1, 'bg-light-closed dark:bg-dark-closed': currentStep !== 1}" class="w-10 h-10 rounded-full text-white flex items-center justify-center font-bold shadow-lg">
@@ -73,10 +73,63 @@
         >
           <option value="">Selecciona un tipo</option>
           <option value="Existencia">Existencia</option>
-          <option value="semi_personalizado">Semi Personalizado</option>
-          <option value="personalizado">Personalizado</option>
+          <option value="Personalizado">Personalizado</option>
         </select>
         <p *ngIf="errors['product_type']" class="mt-1 text-sm text-red-500">{{ errors['product_type'] }}</p>
+      </div>
+
+      <!-- Tiempos de Entrega -->
+      <div class="mt-2">
+        <label class="block text-sm font-medium mb-1">Tiempos de Entrega <span class="text-red-500">*</span></label>
+        <div class="border border-gray-200 p-4 rounded-lg space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Días de Entrega Estándar <span class="text-red-500">*</span></label>
+            <input
+              formControlName="standard_delivery_days"
+              type="number"
+              min="1"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+              [ngClass]="{'border-red-500': errors['standard_delivery_days'], 'border-gray-300': !errors['standard_delivery_days']}"
+              placeholder="Ej. 5"
+            >
+            <p *ngIf="errors['standard_delivery_days']" class="mt-1 text-sm text-red-500">{{ errors['standard_delivery_days'] }}</p>
+          </div>
+          <div class="flex items-center">
+            <input
+              formControlName="urgent_delivery_enabled"
+              type="checkbox"
+              class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+            >
+            <label class="ml-2 text-sm font-medium">Habilitar Entrega Urgente</label>
+          </div>
+          <div *ngIf="productForm.get('urgent_delivery_enabled')?.value" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Días de Entrega Urgente <span class="text-red-500">*</span></label>
+              <input
+                formControlName="urgent_delivery_days"
+                type="number"
+                min="1"
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+                [ngClass]="{'border-red-500': errors['urgent_delivery_days'], 'border-gray-300': !errors['urgent_delivery_days']}"
+                placeholder="Ej. 3"
+              >
+              <p *ngIf="errors['urgent_delivery_days']" class="mt-1 text-sm text-red-500">{{ errors['urgent_delivery_days'] }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Costo de Entrega Urgente (MXN) <span class="text-red-500">*</span></label>
+              <input
+                formControlName="urgent_delivery_cost"
+                type="number"
+                min="0"
+                step="0.01"
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-dark-background dark:border-gray-600"
+                [ngClass]="{'border-red-500': errors['urgent_delivery_cost'], 'border-gray-300': !errors['urgent_delivery_cost']}"
+                placeholder="Ej. 50.00"
+              >
+              <p *ngIf="errors['urgent_delivery_cost']" class="mt-1 text-sm text-red-500">{{ errors['urgent_delivery_cost'] }}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div *ngIf="isCustomizationRequired()" class="mt-2">
@@ -174,7 +227,7 @@
             </button>
           </div>
         </div>
-      
+
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1">SKU <span class="text-red-500">*</span></label>
           <input
@@ -190,7 +243,7 @@
                'El SKU debe tener el formato AAAA-NNNNNN-NN, ej. LAMP-250419-01.' }}
           </p>
         </div>
-      
+
         <div *ngIf="productForm.get('category_id')?.value" class="mb-4">
           <label class="block text-sm font-medium mb-2">Atributos <span class="text-red-500">*</span></label>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4" [formGroup]="getVariantAttributes(i)">

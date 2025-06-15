@@ -1,27 +1,29 @@
-<div class="py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans w-full">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 font-sans w-full">
   <app-spinner [isLoading]="isLoading"></app-spinner>
 
-  <div *ngIf="!isLoading">
-    <!-- Título -->
-    <h1 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6">Mis Órdenes</h1>
+  <div *ngIf="!isLoading" class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="bg-purple-600 p-3 rounded-full">
+          <i class="fas fa-box text-white text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mis Órdenes</h1>
+          <p class="text-gray-600 dark:text-gray-400">{{ orders.length }} órdenes encontradas</p>
+        </div>
+      </div>
 
-    <!-- Filtros y Búsqueda -->
-    <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
-        <div class="relative w-full sm:w-1/2">
-          <input
-            type="text"
-            [(ngModel)]="searchTerm"
-            (input)="onFilterChange()"
-            placeholder="Buscar por nombre de producto..."
-            class="w-full p-2 pl-10 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
-          />
+      <!-- Filtros y Búsqueda -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1 relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            (click)="performSearch()"
           >
             <path
               stroke-linecap="round"
@@ -30,12 +32,18 @@
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (keydown.enter)="performSearch()"
+            placeholder="Buscar por nombre de producto o número de orden..."
+            class="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+          />
         </div>
-
         <select
           [(ngModel)]="dateFilter"
           (change)="onFilterChange()"
-          class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 appearance-none cursor-pointer min-w-[140px]"
         >
           <option *ngFor="let option of filterOptions" [value]="option.value">
             {{ option.label }}
@@ -45,54 +53,73 @@
     </div>
 
     <!-- Sin órdenes -->
-    <div *ngIf="orders.length === 0" class="flex flex-col items-center justify-center min-h-[50vh] text-center text-light-text dark:text-dark-text">
-      <div class="mb-6">
-        <i class="fas fa-box-open text-6xl text-light-secondary dark:text-dark-secondary opacity-50"></i>
-      </div>
-      <h2 class="text-2xl font-semibold text-light-text dark:text-dark-text mb-2">¡No tienes órdenes!</h2>
-      <p class="text-lg text-light-secondary dark:text-dark-secondary mb-6">
-        No has realizado ninguna orden todavía. ¡Explora nuestros productos y haz tu primera compra!
-      </p>
-      <a routerLink="/products" class="inline-flex items-center gap-2 bg-light-primary dark:bg-dark-primary text-white font-semibold py-3 px-6 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+    <div *ngIf="orders.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
+      <i class="fas fa-box-open text-6xl text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+      <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No se encontraron órdenes</h2>
+      <p class="text-gray-500 dark:text-gray-400 mb-6">Intenta ajustar tus filtros de búsqueda o explora nuestros productos.</p>
+      <a routerLink="/products" class="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
         Ver Productos
       </a>
     </div>
 
-    <!-- Lista de órdenes con cards -->
-    <div *ngIf="orders.length > 0" class="space-y-6">
-      <div *ngFor="let order of orders; trackBy: trackByOrderId" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mx-4">
-        <!-- Primera fila: Fecha y Total -->
-        <div class="p-2 mb-2 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
-          <span class="text-sm text-light-secondary dark:text-dark-secondary">{{ getFormattedDate(order.created_at) }}</span>
-          <span class="text-sm font-semibold text-light-text dark:text-dark-text">${{ order.total.toFixed(2) }}</span>
+    <!-- Lista de órdenes -->
+    <div *ngIf="orders.length > 0" class="space-y-4">
+      <div *ngFor="let order of orders; trackBy: trackByOrderId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+        <!-- Order Header -->
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">#ORD-{{ order.order_id }}</h3>
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
+                      [ngClass]="{
+                        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': order.order_status === 'delivered',
+                        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': order.order_status === 'processing' || order.order_status === 'shipped',
+                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': order.order_status === 'pending'
+                      }">
+                  <i class="fas"
+                     [ngClass]="{
+                       'fa-check-circle': order.order_status === 'delivered',
+                       'fa-truck': order.order_status === 'shipped',
+                       'fa-clock': order.order_status === 'processing' || order.order_status === 'pending'
+                     }"></i>
+                  {{ getOrderStatusInSpanish(order.order_status) }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+                <i class="fas fa-calendar-alt w-4 h-4"></i>
+                <span class="text-sm">{{ getFormattedDate(order.created_at) }}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">${{ order.total.toFixed(2) }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ order.total_items }} {{ order.total_items === 1 ? 'unidad' : 'unidades' }}</p>
+            </div>
+          </div>
         </div>
-        <!-- Segunda fila: Contenido principal (una fila con 3 columnas) -->
-        <div class="grid grid-cols-[100px,1fr,auto] gap-4 items-center">
-          <!-- Columna 1: Imagen (ancho fijo y alineada a la izquierda) -->
-          <div class="flex justify-start">
-            <img [src]="order.first_item_image" alt="Primer producto" class="w-20 h-20 object-cover rounded">
+
+        <!-- Products -->
+        <div class="p-6">
+          <div class="space-y-3">
+            <div *ngFor="let name of order.product_names; let i = index" class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+              <div class="w-12 h-12 rounded-lg flex items-center justify-center shadow-sm">
+                <img [src]="order.first_item_image" alt="Primer producto" class="w-12 h-12 object-cover rounded-lg" *ngIf="i === 0">
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate">{{ name }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Cantidad: {{ order.total_items }}</p>
+              </div>
+            </div>
           </div>
-          <!-- Columna 2: Detalles del pedido -->
-          <div class="flex flex-col space-y-2">
-            <span class="inline-block px-3 py-1 rounded-full text-xs font-medium border"
-                  [ngClass]="{
-                    'border-green-500 text-green-500': order.order_status === 'delivered',
-                    'border-blue-500 text-blue-500': order.order_status === 'processing' || order.order_status === 'shipped',
-                    'border-yellow-500 text-yellow-500': order.order_status === 'pending'
-                  }">
-              {{ getOrderStatusInSpanish(order.order_status) }}
-            </span>
-            <ul class="text-sm text-light-text dark:text-dark-text">
-              <li *ngFor="let name of order.product_names" class="truncate">{{ name }}</li>
-            </ul>
-            <p class="text-xs text-light-secondary dark:text-dark-secondary">{{ order.total_items }} {{ order.total_items === 1 ? 'unidad' : 'unidades' }}</p>
-          </div>
-          <!-- Columna 3: Botones (ancho automático con botones más pequeños) -->
-          <div class="flex flex-col space-y-2">
-            <a [routerLink]="['/order-confirmation', order.order_id]" class="bg-blue-500 text-white py-1 px-3 rounded text-sm hover:bg-blue-600 transition-colors text-center">
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3 mt-6">
+            <a [routerLink]="['/order-confirmation', order.order_id]" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2">
+              <i class="fas fa-eye w-4 h-4"></i>
               Ver detalles
             </a>
-            <button class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-1 px-3 rounded text-sm hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-center">
+            <button class="flex-1 bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2">
+              <i class="fas fa-shopping-bag w-4 h-4"></i>
               Volver a comprar
             </button>
           </div>
@@ -100,21 +127,69 @@
       </div>
 
       <!-- Paginación -->
-      <div class="flex justify-between items-center mt-6 mx-4">
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
+      <div class="flex justify-between items-center mt-6">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
           Mostrando {{ orders.length }} de {{ pagination.totalOrders }} órdenes
         </p>
         <div class="flex gap-2">
           <button (click)="changePage(pagination.currentPage - 1)"
                   [disabled]="pagination.currentPage === 1"
-                  class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">
+                  class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">
             Anterior
           </button>
           <button (click)="changePage(pagination.currentPage + 1)"
                   [disabled]="pagination.currentPage === pagination.totalPages"
-                  class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">
+                  class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">
             Siguiente
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-lg">
+            <i class="fas fa-clock w-5 h-5 text-yellow-600 dark:text-yellow-200"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Pendientes</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ pendingCount }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg">
+            <i class="fas fa-truck w-5 h-5 text-blue-600 dark:text-blue-200"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">En Tránsito</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ shippedCount }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="bg-green-100 dark:bg-green-900 p-2 rounded-lg">
+            <i class="fas fa-check-circle w-5 h-5 text-green-600 dark:text-green-200"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Entregadas</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ deliveredCount }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
+        <div class="flex items-center gap-3">
+          <div class="bg-purple-100 dark:bg-purple-900 p-2 rounded-lg">
+            <i class="fas fa-box w-5 h-5 text-purple-600 dark:text-purple-200"></i>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ orders.length }}</p>
+          </div>
         </div>
       </div>
     </div>
