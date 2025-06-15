@@ -1,0 +1,4 @@
+/* CSS puro solo para gradientes personalizados en modo oscuro, ya que Tailwind no permite gradientes dinámicos complejos */
+.dark .bg-gradient-to-r.from-amber-900.to-orange-900 {
+  background-image: linear-gradient(to right, #451a03, #431407);
+}
