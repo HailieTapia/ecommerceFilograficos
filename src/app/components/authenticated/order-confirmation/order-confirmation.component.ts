@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { OrderService, OrderResponse, OrderDetail, Address, PaymentInstructions } from '../../services/order.service';
+import { OrderService, OrderResponse, OrderDetail, Address, OrderHistory } from '../../services/order.service';
 import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 
@@ -25,7 +25,7 @@ export class OrderConfirmationComponent implements OnInit {
 
   ngOnInit(): void {
     const orderId = this.route.snapshot.paramMap.get('id');
-    if (orderId) {
+    if (orderId && !isNaN(+orderId)) {
       this.loadOrderDetails(+orderId);
     } else {
       this.toastService.showToast('ID de orden no válido.', 'error');
@@ -75,6 +75,10 @@ export class OrderConfirmationComponent implements OnInit {
   }
 
   trackByOrderDetailId(index: number, item: OrderDetail): number {
-    return item.order_detail_id;
+    return item.detail_id; // Actualizado para usar detail_id
+  }
+
+  trackByHistoryId(index: number, history: OrderHistory): number {
+    return history.history_id;
   }
 }

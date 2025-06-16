@@ -101,7 +101,7 @@ export class OrdersComponent implements OnInit {
   }
 
   getFormattedDate(date: string): string {
-    return new Date(date).toLocaleDateString('es-MX', {
+    return new Date(date).toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -126,12 +126,12 @@ export class OrdersComponent implements OnInit {
 
   performSearch(): void {
     if (!this.searchTerm.trim()) {
-      this.searchTerm = ''; // Clear the search term if empty
+      this.searchTerm = '';
     }
-    this.loadOrders(1); // Trigger search and reset to first page
+    this.loadOrders(1);
   }
 
   onFilterChange(): void {
-    this.loadOrders(1); // Trigger filter change for date filter
+    this.loadOrders(1);
   }
 }

@@ -36,14 +36,6 @@
           </select>
         </div>
 
-        <!-- Pedido urgente -->
-        <div class="mb-4">
-          <label class="flex items-center text-sm font-medium text-light-text dark:text-dark-text">
-            <input type="checkbox" [(ngModel)]="isUrgent" class="mr-2">
-            Pedido urgente (+$50.00 de envío)
-          </label>
-        </div>
-
         <!-- Método de pago -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-2">Método de pago</label>
@@ -51,6 +43,14 @@
             <option value="bank_transfer_bbva">Transferencia BBVA</option>
             <option value="bank_transfer_oxxo">OXXO</option>
             <option value="bank_transfer">Otra transferencia bancaria</option>
+          </select>
+        </div>
+
+        <!-- Opción de envío (placeholder) -->
+        <div class="mb-4">
+          <label for="deliveryOption" class="block text-sm font-medium text-light-text dark:text-dark-text mb-2">Opción de envío</label>
+          <select id="deliveryOption" disabled class="w-full p-2 border rounded-lg bg-gray-100 dark:bg-gray-700 text-light-text dark:text-dark-text opacity-50">
+            <option value="home_delivery">Entrega a domicilio (próximamente)</option>
           </select>
         </div>
 
@@ -71,20 +71,31 @@
         <div *ngFor="let item of cart.items; trackBy: trackByCartDetailId" class="flex items-center gap-4 mb-4">
           <img [src]="getImageUrl(item)" class="w-16 h-16 object-cover rounded-lg" alt="{{ item.product_name }}">
           <div class="flex-1">
-            <h3 class="text-sm font-medium text-light-text dark:text-dark">{{ item.product_name }}</h3>
+            <h3 class="text-sm font-medium text-light-text dark:text-dark-text">
+              {{ item.product_name }}
+              <span *ngIf="item.is_urgent" class="inline-block ml-2 text-xs text-red-500 font-semibold">[Urgente]</span>
+            </h3>
             <p class="text-sm text-muted dark:text-gray-400">Cantidad: {{ item.quantity }}</p>
-            <p class="text-sm font-semibold text-dark">${{ item.subtotal.toFixed(2) }}</p>
+            <p class="text-sm font-semibold text-light-text dark:text-dark-text">${{ item.subtotal.toFixed(2) }}</p>
+            <p *ngIf="item.is_urgent && item.urgent_delivery_fee" class="text-xs text-red-500">
+              Costo urgente: ${{ (item.urgent_delivery_fee * item.quantity).toFixed(2) }}
+            </p>
           </div>
         </div>
         <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
-          <p class="text-base font-semibold text-light-text dark:text-light">Total: ${{ calculateTotals().subtotal.toFixed(2) }}</p>
-          <p class="text-base font-semibold text-success dark:text-green-400" *ngIf="calculateTotals().discount > 0">
+          <p class="text-sm text-light-text dark:text-dark-text">Subtotal: ${{ calculateTotals().subtotal.toFixed(2) }}</p>
+          <p *ngIf="calculateTotals().discount > 0" class="text-sm text-green-500 dark:text-green-400">
             Descuento: -${{ calculateTotals().discount.toFixed(2) }}
           </p>
-          <p class="text-sm font-medium" *ngIf="isUrgent">Costo de entrega (urgente): $50.00</p>
-          <p class="text-sm font-medium" *ngIf="!isUrgent">Costo de entrega: $20.00</p>
-          <p class="text-lg font-bold text-dark dark:text-light">
-            Total: ${{ (calculateTotals().total + (isUrgent ? 50 : 20)).toFixed(2) }}
+          <p *ngIf="calculateTotals().total_urgent_cost > 0" class="text-sm text-red-500">
+            Costo urgente (incluido): ${{ calculateTotals().total_urgent_cost.toFixed(2) }}
+          </p>
+          <p class="text-sm text-light-text dark:text-dark-text">Envío: ${{ calculateTotals().shipping_cost.toFixed(2) }}</p>
+          <p class="text-base font-semibold text-light-text dark:text-dark-text">
+            Total: ${{ calculateTotals().total.toFixed(2) }}
+          </p>
+          <p *ngIf="cart.estimated_delivery_days > 0" class="text-sm text-light-secondary dark:text-dark-secondary mt-2">
+            Entrega estimada en {{ cart.estimated_delivery_days }} día{{ cart.estimated_delivery_days > 1 ? 's' : '' }}
           </p>
         </div>
       </div>

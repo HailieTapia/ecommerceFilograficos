@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService, CartResponse, CartItem } from '../../services/cart.service';
@@ -20,21 +20,23 @@ interface Address {
   standalone: true,
   imports: [CommonModule, FormsModule, SpinnerComponent],
   templateUrl: './checkout.component.html',
-  styleUrls: ['./checkout.component.css']
+  styleUrls: ['./checkout.component.css'],
+  providers: [DatePipe]
 })
 export class CheckoutComponent implements OnInit {
-  cart: CartResponse = { items: [], total: 0,  total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] };
+  cart: CartResponse = { items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] };
   addresses: Address[] = [];
   selectedAddressId: number | null = null;
-  isUrgent: boolean = false;
   paymentMethod: 'bank_transfer_oxxo' | 'bank_transfer_bbva' | 'bank_transfer' = 'bank_transfer_bbva';
   isLoading: boolean = false;
+  shippingCost: number = 20.00; // Alineado con el backend
 
   constructor(
     private cartService: CartService,
     private orderService: OrderService,
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private datePipe: DatePipe
   ) {}
 
   ngOnInit(): void {
@@ -63,17 +65,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   loadAddresses(): void {
-    // TODO: Implementar un servicio para obtener las direcciones del usuario
-    // Ejemplo simulado:
-    // this.addressService.getAddresses().subscribe({
-    //   next: (addresses) => {
-    //     this.addresses = addresses;
-    //     this.selectedAddressId = addresses.length > 0 ? addresses[0].address_id : null;
-    //   },
-    //   error: (error) => {
-    //     this.toastService.showToast('No se pudieron cargar las direcciones.', 'error');
-    //   }
-    // });
+    // TODO: Implementar AddressService para obtener direcciones reales
     // Simulación temporal de direcciones
     this.addresses = [
       { address_id: 8, street: 'Calle Ejemplo 123', city: 'Ciudad', state: 'Estado', postal_code: '12345' }
@@ -89,16 +81,22 @@ export class CheckoutComponent implements OnInit {
 
     const orderData: OrderCreateRequest = {
       address_id: this.selectedAddressId,
-      is_urgent: this.isUrgent,
-      payment_method: this.paymentMethod
+      payment_method: this.paymentMethod,
+      delivery_option: null // Placeholder para opciones de envío
     };
 
     this.isLoading = true;
     this.orderService.createOrder(orderData).subscribe({
       next: (response: OrderCreateResponse) => {
         this.isLoading = false;
-        this.toastService.showToast(`Orden creada con éxito. ID: ${response.data.order_id}`, 'success');
-        this.router.navigate(['/order-confirmation', response.data.order_id]);
+        const { order_id, total_urgent_cost, estimated_delivery_date } = response.data;
+        this.toastService.showToast(
+          `Orden creada con éxito. ID: ${order_id}${total_urgent_cost > 0 ? ` (Costo urgente: $${total_urgent_cost.toFixed(2)})` : ''}`,
+          'success'
+        );
+        this.router.navigate(['/order-confirmation', order_id], {
+          state: { total_urgent_cost, estimated_delivery_date }
+        });
       },
       error: (error: any) => {
         this.isLoading = false;
@@ -108,8 +106,8 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  calculateTotals(): { subtotal: number; discount: number; total: number } {
-    const subtotal = this.cart.items.reduce((sum: number, item: CartItem) => sum + item.subtotal, 0);
+  calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
+    const subtotal = this.cart.total; // Total del carrito (incluye costos urgentes)
     const discount = this.cart.items.reduce((totalDiscount: number, item: CartItem) => {
       const itemDiscount = item.applicable_promotions.reduce(
         (sum: number, promo: any) => sum + item.subtotal * (promo.discount_value / 100),
@@ -117,8 +115,14 @@ export class CheckoutComponent implements OnInit {
       );
       return totalDiscount + itemDiscount;
     }, 0);
-    const total = Math.max(0, subtotal - discount);
-    return { subtotal, discount, total };
+    const total_urgent_cost = this.cart.total_urgent_delivery_fee || 0;
+    const shipping_cost = this.shippingCost;
+    const total = Math.max(0, subtotal + shipping_cost - discount);
+    return { subtotal, discount, total_urgent_cost, shipping_cost, total };
+  }
+
+  isAnyItemUrgent(): boolean {
+    return this.cart.items.some(item => item.is_urgent);
   }
 
   trackByCartDetailId(index: number, item: CartItem): number {
@@ -131,5 +135,9 @@ export class CheckoutComponent implements OnInit {
 
   goBackToCart(): void {
     this.router.navigate(['/cart']);
+  }
+
+  formatDate(date: string): string {
+    return this.datePipe.transform(date, 'dd/MM/yyyy', 'es-MX') || date;
   }
 }

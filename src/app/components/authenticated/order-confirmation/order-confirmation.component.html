@@ -4,7 +4,7 @@
   <div *ngIf="!isLoading && order" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
     <!-- Título -->
     <h1 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6">
-      Confirmación de Orden #{{ order.order_id }}
+      Confirmación de Orden #{{ order.order.order_id }}
     </h1>
 
     <!-- Información general de la orden -->
@@ -12,19 +12,22 @@
       <div>
         <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-2">Detalles de la Orden</h2>
         <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Fecha:</span> {{ getFormattedDate(order.created_at) }}
+          <span class="font-medium">Fecha:</span> {{ getFormattedDate(order.order.created_at) }}
         </p>
         <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Estado:</span> {{ order.order_status | titlecase }}
+          <span class="font-medium">Estado:</span> {{ order.order.status | titlecase }}
         </p>
         <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Método de Pago:</span> {{ order.payment_method | titlecase }}
+          <span class="font-medium">Método de Pago:</span> {{ order.payment.method | titlecase }}
         </p>
         <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Estado del Pago:</span> {{ order.payment_status | titlecase }}
+          <span class="font-medium">Estado del Pago:</span> {{ order.payment.status | titlecase }}
         </p>
         <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Urgente:</span> {{ order.is_urgent ? 'Sí (+$50.00)' : 'No (+$20.00)' }}
+          <span class="font-medium">Fecha Estimada de Entrega:</span> {{ getFormattedDate(order.order.estimated_delivery_date) }}
+        </p>
+        <p class="text-sm text-light-secondary dark:text-dark-secondary" *ngIf="order.order.delivery_days">
+          <span class="font-medium">Días de Entrega:</span> {{ order.order.delivery_days }}
         </p>
       </div>
       <div>
@@ -39,17 +42,20 @@
     <div class="mb-6">
       <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Productos</h2>
       <div *ngFor="let item of order.items; trackBy: trackByOrderDetailId" class="flex items-center gap-4 mb-4 border-b border-gray-200 dark:border-gray-600 pb-4">
-        <div class="w-16 h-16 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-          <span class="text-xs text-light-secondary dark:text-dark-secondary">Imagen</span>
+        <div class="w-16 h-16 rounded-lg overflow-hidden">
+          <img [src]="item.product_image" [alt]="item.product_name" class="w-full h-full object-cover" />
         </div>
         <div class="flex-1">
           <h3 class="text-sm font-medium text-light-text dark:text-dark-text">{{ item.product_name }}</h3>
           <p class="text-sm text-light-secondary dark:text-dark-secondary">Cantidad: {{ item.quantity }}</p>
           <p class="text-sm text-light-secondary dark:text-dark-secondary">Precio Unitario: ${{ item.unit_price.toFixed(2) }}</p>
-          <p class="text-sm text-light-secondary dark:text-dark-secondary" *ngIf="item.discount_applied > 0">
+          <p class="text-sm text-success dark:text-green-400" *ngIf="item.discount_applied > 0">
             Descuento: -${{ item.discount_applied.toFixed(2) }}
           </p>
           <p class="text-sm font-semibold text-light-text dark:text-dark-text">Subtotal: ${{ item.subtotal.toFixed(2) }}</p>
+          <p class="text-sm text-light-secondary dark:text-dark-secondary" *ngIf="item.is_urgent">
+            Entrega Urgente: +${{ item.additional_cost.toFixed(2) }}
+          </p>
           <div *ngIf="item.customization" class="mt-2 text-sm text-light-secondary dark:text-dark-secondary">
             <p><span class="font-medium">Personalización:</span></p>
             <p *ngIf="item.customization.content">Contenido: {{ item.customization.content }}</p>
@@ -62,25 +68,37 @@
       </div>
     </div>
 
+    <!-- Historial de la orden -->
+    <div class="mb-6" *ngIf="order.history.length > 0">
+      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Historial de la Orden</h2>
+      <div class="bg-light-background dark:bg-dark-background p-4 rounded-lg">
+        <ul class="list-disc pl-5">
+          <li *ngFor="let history of order.history; trackBy: trackByHistoryId" class="text-sm text-light-secondary dark:text-dark-secondary mb-2">
+            <span class="font-medium">{{ history.status | titlecase }}</span> - {{ getFormattedDate(history.date) }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <!-- Instrucciones de pago -->
     <div class="mb-6">
       <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Instrucciones de Pago</h2>
       <div class="bg-light-background dark:bg-dark-background p-4 rounded-lg">
-        <p class="text-sm font-medium text-light-text dark:text-dark-text">Método: {{ order.payment_instructions.method }}</p>
-        <p *ngIf="order.payment_instructions.reference" class="text-sm text-light-secondary dark:text-dark-secondary">
-          Referencia: {{ order.payment_instructions.reference }}
+        <p class="text-sm font-medium text-light-text dark:text-dark-text">Método: {{ order.payment.instructions.method }}</p>
+        <p *ngIf="order.payment.instructions.reference" class="text-sm text-light-secondary dark:text-dark-secondary">
+          Referencia: {{ order.payment.instructions.reference }}
         </p>
-        <p *ngIf="order.payment_instructions.account" class="text-sm text-light-secondary dark:text-dark-secondary">
-          Cuenta: {{ order.payment_instructions.account }}
+        <p *ngIf="order.payment.instructions.account" class="text-sm text-light-secondary dark:text-dark-secondary">
+          Cuenta: {{ order.payment.instructions.account }}
         </p>
-        <p *ngIf="order.payment_instructions.clabe" class="text-sm text-light-secondary dark:text-dark-secondary">
-          CLABE: {{ order.payment_instructions.clabe }}
+        <p *ngIf="order.payment.instructions.clabe" class="text-sm text-light-secondary dark:text-dark-secondary">
+          CLABE: {{ order.payment.instructions.clabe }}
         </p>
         <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          Monto: ${{ order.payment_instructions.amount.toFixed(2) }}
+          Monto: ${{ order.payment.instructions.amount.toFixed(2) }}
         </p>
         <p class="text-sm text-light-secondary dark:text-dark-secondary mt-2">
-          {{ order.payment_instructions.instructions }}
+          {{ order.payment.instructions.instructions }}
         </p>
       </div>
     </div>
@@ -88,15 +106,15 @@
     <!-- Resumen financiero -->
     <div class="border-t border-gray-200 dark:border-gray-600 pt-4 mb-6">
       <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Resumen Financiero</h2>
-      <p class="text-sm text-light-secondary dark:text-dark-secondary">Subtotal: ${{ order.subtotal.toFixed(2) }}</p>
-      <p class="text-sm text-success dark:text-green-400" *ngIf="order.discount > 0">
-        Descuento: -${{ order.discount.toFixed(2) }}
+      <p class="text-sm text-light-secondary dark:text-dark-secondary">Subtotal: ${{ order.order.subtotal.toFixed(2) }}</p>
+      <p class="text-sm text-success dark:text-green-400" *ngIf="order.order.discount > 0">
+        Descuento: -${{ order.order.discount.toFixed(2) }}
       </p>
       <p class="text-sm text-light-secondary dark:text-dark-secondary">
-        Costo de Envío: ${{ order.shipping_cost.toFixed(2) }}
+        Costo de Envío: ${{ order.order.shipping_cost.toFixed(2) }}
       </p>
       <p class="text-lg font-bold text-light-text dark:text-dark-text">
-        Total: ${{ order.total.toFixed(2) }}
+        Total: ${{ order.order.total.toFixed(2) }}
       </p>
     </div>
 
