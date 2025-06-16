@@ -11,13 +11,14 @@ import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
   standalone: true,
   imports: [SpinnerComponent, CommonModule, FormsModule],
   templateUrl: './cart.component.html',
-  styleUrls: ['./cart.component.css'] // Asegúrate de que sea styleUrls, plural
+  styleUrls: ['./cart.component.css']
 })
 export class CartComponent implements OnInit {
-  cart: CartResponse = { items: [], total: 0, promotions: [] };
+  cart: CartResponse = { items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] };
   subtotal: number = 0;
   discount: number = 0;
   total: number = 0;
+  totalUrgentDeliveryFee: number = 0;
   isLoading: boolean = false;
   orderCountPromotion: Promotion | null = null;
 
@@ -36,7 +37,6 @@ export class CartComponent implements OnInit {
     this.cartService.loadCart().subscribe({
       next: (response: CartResponse) => {
         this.cart = response;
-        // Encontrar la promoción de conteo de pedidos
         this.orderCountPromotion = this.cart.promotions.find(
           (promo) => promo.promotion_type === 'order_count_discount'
         ) || null;
@@ -52,44 +52,70 @@ export class CartComponent implements OnInit {
   }
 
   calculateTotals(): void {
-    // Calcular subtotal (suma de item.subtotal)
-    this.subtotal = this.cart.items.reduce((sum, item) => sum + item.subtotal, 0);
-
-    // Calcular descuento total basado en applicable_promotions
+    this.subtotal = this.cart.items.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0);
+    this.totalUrgentDeliveryFee = this.cart.total_urgent_delivery_fee || 0;
     this.discount = this.cart.items.reduce((totalDiscount, item) => {
       const itemDiscount = item.applicable_promotions.reduce(
-        (sum, promo) => sum + item.subtotal * (promo.discount_value / 100),
+        (sum, promo) => sum + (item.unit_price * item.quantity) * (promo.discount_value / 100),
         0
       );
       return totalDiscount + itemDiscount;
     }, 0);
-
-    // Calcular total final
-    this.total = Math.max(0, this.subtotal - this.discount);
+    this.total = Math.max(0, this.subtotal + this.totalUrgentDeliveryFee - this.discount);
   }
 
-  updateQuantity(item: CartItem, newQuantity: number): void {
+  canBeUrgent(item: CartItem): boolean {
+    return item.urgent_delivery_enabled; // Usar urgent_delivery_enabled en lugar de urgent_delivery_cost
+  }
+
+  updateQuantity(item: CartItem, newQuantity: number, isUrgent?: boolean): void {
     if (newQuantity < 1) {
       this.removeItem(item.cart_detail_id);
       return;
     }
 
     const oldQuantity = item.quantity;
+    const oldIsUrgent = item.is_urgent;
+    const newIsUrgent = isUrgent !== undefined ? isUrgent : item.is_urgent;
+
+    console.log('Antes de enviar - item.is_urgent:', item.is_urgent, 'newIsUrgent:', newIsUrgent); // Depuración
+
     const data = {
       cart_detail_id: item.cart_detail_id,
-      quantity: newQuantity
+      quantity: newQuantity,
+      is_urgent: newIsUrgent
     };
+
+    // Actualización optimista
+    item.quantity = newQuantity;
+    item.is_urgent = newIsUrgent;
+    item.urgent_delivery_fee = newIsUrgent ? item.urgent_delivery_cost : 0;
+    item.subtotal = (newQuantity * item.unit_price) + item.urgent_delivery_fee;
+    this.calculateTotals();
 
     this.cartService.updateQuantity(data, oldQuantity).subscribe({
       next: () => {
-        this.loadCart(); // Recargar el carrito para reflejar cambios en promociones
-        this.toastService.showToast('Cantidad actualizada', 'success');
+        this.loadCart(); // Recargar para sincronizar con el backend
+        this.toastService.showToast('Carrito actualizado', 'success');
       },
       error: (error) => {
-        const errorMessage = error?.error?.message || 'No se pudo actualizar la cantidad.';
+        // Revertir cambios optimistas
+        item.quantity = oldQuantity;
+        item.is_urgent = oldIsUrgent;
+        item.urgent_delivery_fee = oldIsUrgent ? item.urgent_delivery_cost : 0;
+        item.subtotal = (oldQuantity * item.unit_price) + item.urgent_delivery_fee;
+        this.calculateTotals();
+        const errorMessage = error?.error?.message || 'No se pudo actualizar el carrito.';
         this.toastService.showToast(errorMessage, 'error');
+        console.error('Error al actualizar:', error); // Depuración adicional
       }
     });
+  }
+
+  toggleUrgent(item: CartItem, event?: Event): void {
+    const newIsUrgent = event ? (event.target as HTMLInputElement).checked : !item.is_urgent;
+    console.log('toggleUrgent - Nuevo valor de is_urgent:', newIsUrgent); // Depuración
+    this.updateQuantity(item, item.quantity, newIsUrgent);
   }
 
   removeItem(cartDetailId: number): void {
@@ -98,7 +124,7 @@ export class CartComponent implements OnInit {
 
     this.cartService.removeItem(cartDetailId, quantityToRemove).subscribe({
       next: () => {
-        this.loadCart(); // Recargar el carrito
+        this.loadCart();
         this.toastService.showToast('Producto eliminado del carrito', 'success');
       },
       error: (error) => {
@@ -116,7 +142,6 @@ export class CartComponent implements OnInit {
     return item.cart_detail_id;
   }
 
-  // Método auxiliar para obtener la URL de la imagen de forma segura
   getImageUrl(item: CartItem): string {
     return item.images.length > 0 ? item.images[0].image_url : 'https://via.placeholder.com/100?text=No+Image';
   }

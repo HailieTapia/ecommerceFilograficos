@@ -1,4 +1,3 @@
-<!-- product-detail-a.component.html -->
 <div class="max-full mx-auto py-3 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans">
   <!-- Spinner -->
   <app-spinner [isLoading]="isLoading"></app-spinner>
@@ -19,7 +18,7 @@
         <!-- Miniaturas verticales (a la izquierda) -->
         <div class="absolute top-0 left-0 w-20 hidden lg:block">
           <div class="flex flex-col gap-2 overflow-y-auto max-h-[500px]">
-            <img *ngFor="let image of selectedVariant?.images" [src]="image.image_url" alt="Miniatura"
+            <img *ngFor="let image of selectedVariant!.images" [src]="image.image_url" alt="Miniatura"
               class="w-16 h-16 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-light-primary dark:hover:border-dark-primary"
               [ngClass]="{'border-light-primary dark:border-dark-primary': image.image_url === selectedImage}"
               (click)="changeImage(image.image_url)">
@@ -28,18 +27,19 @@
         <!-- Imagen principal con zoom -->
         <div class="ml-0 lg:ml-24 relative">
           <div class="zoom-container">
-            <img [src]="selectedImage"
+            <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'"
+              [alt]="product!.name || 'Producto'"
               class="w-full h-[500px] object-contain rounded-xl bg-gray-200 dark:bg-gray-600 zoom-image">
           </div>
 
           <!-- Flechas de navegación para imágenes -->
-          <div *ngIf="selectedVariant?.images?.length > 1"
+          <div *ngIf="selectedVariant!.images.length > 1"
             class="absolute top-1/2 transform -translate-y-1/2 w-full flex justify-between px-4">
-            <button
+            <button (click)="prevImage()"
               class="bg-light-background dark:bg-dark-background p-2 rounded-full shadow-md hover:bg-light-row-hover dark:hover:bg-dark-row-hover">
               <i class="fas fa-chevron-left text-light-secondary dark:text-dark-secondary"></i>
             </button>
-            <button
+            <button (click)="nextImage()"
               class="bg-light-background dark:bg-dark-background p-2 rounded-full shadow-md hover:bg-light-row-hover dark:hover:bg-dark-row-hover">
               <i class="fas fa-chevron-right text-light-secondary dark:text-dark-secondary"></i>
             </button>
@@ -48,7 +48,7 @@
 
         <!-- Miniaturas horizontales (móviles) -->
         <div class="flex gap-2 overflow-x-auto mt-4 lg:hidden">
-          <img *ngFor="let image of selectedVariant?.images" [src]="image.image_url" alt="Miniatura"
+          <img *ngFor="let image of selectedVariant!.images" [src]="image.image_url" alt="Miniatura"
             class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 border-transparent hover:border-light-primary dark:hover:border-dark-primary"
             [ngClass]="{'border-light-primary dark:border-dark-primary': image.image_url === selectedImage}"
             (click)="changeImage(image.image_url)">
@@ -58,16 +58,16 @@
       <!-- Sección de detalles -->
       <div class="space-y-6">
         <div>
-          <h1 class="text-4xl font-bold text-light-text dark:text-dark-text mb-2 leading-tight">{{ product?.name ||
+          <h1 class="text-4xl font-bold text-light-text dark:text-dark-text mb-2 leading-tight">{{ product!.name ||
             'Producto sin nombre' }}</h1>
         </div>
         <!-- Información de envío -->
         <div class="text-sm text-light-secondary dark:text-dark-secondary space-y-1">
-          <p><i class="fas fa-store mr-2 text-light-secondary dark:text-dark-secondary"></i> Vendido por: {{ product?.collaborator?.name || 'Tienda Oficial' }}</p>
+          <p><i class="fas fa-store mr-2 text-light-secondary dark:text-dark-secondary"></i> Vendido por: {{ product!.collaborator?.name || 'Tienda Oficial' }}</p>
           <p><i class="fas fa-box mr-2 text-light-secondary dark:text-dark-secondary"></i>Stock: {{
-            selectedVariant?.stock || 0 }}</p>
-          <p *ngIf="selectedVariant?.stock === 0"
-            class="text-sm text-light-danger dark:text-dark-danger font-medium bg-light-danger dark:bg-dark-danger bg-opacity-10 dark:bg-opacity-10 px-3 py-1 rounded-full inline-block">
+            selectedVariant!.stock || 0 }}</p>
+          <p *ngIf="selectedVariant!.stock === 0"
+            class="text-sm text-light-danger dark:text-dark-danger font-medium bg-light-danger dark:bg-danger bg-opacity-10 dark:bg-opacity-10 px-3 py-1 rounded-full inline-block">
             <i class="fas fa-exclamation-circle mr-1"></i> Producto agotado
           </p>
         </div>
@@ -75,19 +75,15 @@
         <!-- Precio -->
         <div class="flex items-baseline gap-3">
           <p class="text-3xl font-bold text-light-success-text dark:text-dark-success-text">
-            ${{ selectedVariant?.calculated_price || 'N/A' }}
-          </p>
-          <p class="text-lg text-light-secondary dark:text-dark-secondary line-through"
-            *ngIf="selectedVariant?.original_price">
-            ${{ selectedVariant.original_price }}
+            ${{ formatPrice((selectedVariant!.calculated_price || 0) + (isUrgent && product!.urgent_delivery_enabled ? product!.urgent_delivery_cost : 0)) }}
           </p>
         </div>
 
         <!-- Variantes -->
-        <div *ngIf="product?.variants?.length > 0">
+        <div *ngIf="product!.variants.length > 0">
           <h3 class="text-sm font-semibold text-light-text dark:text-dark-text mb-3">Modelos:</h3>
           <div class="flex flex-wrap gap-3">
-            <button *ngFor="let variant of product.variants" (click)="selectVariant(variant)"
+            <button *ngFor="let variant of product!.variants" (click)="selectVariant(variant)"
               class="px-4 py-2 rounded-lg border shadow-sm transition-all duration-200"
               [ngClass]="{'bg-light-primary dark:bg-dark-primary text-white border-light-primary dark:border-dark-primary shadow-md': selectedVariant === variant, 'bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text border-gray-200 dark:border-gray-600 hover:bg-light-row-hover dark:hover:bg-dark-row-hover': selectedVariant !== variant}">
               {{ variant.sku || 'Variante ' + variant.variant_id }}
@@ -95,14 +91,32 @@
           </div>
         </div>
 
+        <!-- Opciones de entrega -->
+        <div class="mb-6">
+          <h3 class="text-sm font-semibold text-light-text dark:text-dark-text mb-3">Opciones de entrega</h3>
+          <div class="flex flex-col gap-2">
+            <label class="flex items-center gap-2">
+              <input type="radio" [(ngModel)]="isUrgent" [value]="false" class="form-radio text-light-primary dark:text-dark-primary">
+              <span class="text-sm text-light-text dark:text-dark-text">Estándar: {{ product!.standard_delivery_days || 0 }} días naturales</span>
+            </label>
+            <label class="flex items-center gap-2" *ngIf="product!.urgent_delivery_enabled">
+              <input type="radio" [(ngModel)]="isUrgent" [value]="true" class="form-radio text-light-primary dark:text-dark-primary">
+              <span class="text-sm text-light-text dark:text-dark-text">Urgente: {{ product!.urgent_delivery_days || 0 }} días naturales, +${{ formatPrice(product!.urgent_delivery_cost || 0) }}</span>
+            </label>
+          </div>
+          <p class="text-xs text-light-secondary dark:text-dark-secondary mt-2">
+            Nota: El tiempo de entrega final se calculará en el carrito según todos los productos. En el checkout, elegirás entre entrega a domicilio, punto de entrega, o retiro en local.
+          </p>
+        </div>
+
         <!-- Descripción (colapsable) -->
         <div class="mb-6">
           <h3 class="text-sm font-medium text-light-text dark:text-dark-text mb-3">Descripción</h3>
           <p class="text-sm text-light-secondary dark:text-dark-secondary"
             [ngClass]="{'line-clamp-3': !showFullDescription}">
-            {{ product?.description || 'Sin descripción disponible.' }}
+            {{ product!.description || 'Sin descripción disponible.' }}
           </p>
-          <button *ngIf="product?.description?.length > 150" (click)="showFullDescription = !showFullDescription"
+          <button *ngIf="product!.description && product!.description.length > 150" (click)="showFullDescription = !showFullDescription"
             class="text-light-primary dark:text-dark-primary text-sm mt-2 hover:underline">
             {{ showFullDescription ? 'Ver menos' : 'Ver más' }}
           </button>
@@ -113,21 +127,21 @@
           <h3 class="text-sm font-medium text-light-text dark:text-dark-text mb-3">Características</h3>
           <ul class="text-xs text-light-secondary dark:text-dark-secondary space-y-1"
             [ngClass]="{'line-clamp-3': !showFullAttributes}">
-            <li *ngFor="let attr of selectedVariant?.attributes">
-              <span class="font-medium">{{ attr.attribute_name || attr.name }}:</span> {{ attr.value }}
+            <li *ngFor="let attr of selectedVariant!.attributes">
+              <span class="font-medium">{{ attr.attribute_name }}:</span> {{ attr.value }}
             </li>
           </ul>
-          <button *ngIf="selectedVariant?.attributes?.length > 3" (click)="showFullAttributes = !showFullAttributes"
+          <button *ngIf="selectedVariant!.attributes.length > 3" (click)="showFullAttributes = !showFullAttributes"
             class="text-light-primary dark:text-dark-primary text-sm mt-2 hover:underline">
             {{ showFullAttributes ? 'Ver menos' : 'Ver más' }}
           </button>
         </div>
 
         <!-- Opciones de personalización -->
-        <div *ngIf="product?.customizations?.length > 0">
-          <h3 class="text-lg font-semibold text-light-text dark:text-dark-text mb-3">Personalización</h3>
+        <div *ngIf="product!.customizations.length > 0">
+          <h3 class="text-sm font-semibold text-light-text dark:text-dark-text mb-3">Personalización</h3>
           <div class="flex flex-wrap gap-3">
-            <button *ngFor="let cust of product.customizations" (click)="selectCustomization(cust)"
+            <button *ngFor="let cust of product!.customizations" (click)="selectCustomization(cust)"
               class="px-4 py-2 rounded-lg border shadow-sm transition-all duration-200"
               [ngClass]="{'bg-light-primary dark:bg-dark-primary text-white border-light-primary dark:border-dark-primary shadow-md': selectedCustomization === cust, 'bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text border-gray-200 dark:border-gray-600 hover:bg-light-row-hover dark:hover:bg-dark-row-hover': selectedCustomization !== cust}">
               {{ cust.description }}
@@ -145,27 +159,27 @@
                 class="px-4 py-2 text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover">
                 −
               </button>
-              <input type="number" id="quantity" [(ngModel)]="quantity" min="1" [max]="selectedVariant?.stock || 0"
+              <input type="number" id="quantity" [(ngModel)]="quantity" min="1" [max]="selectedVariant!.stock || 0"
                 class="w-16 p-2 text-center border-none focus:ring-0 text-light-text dark:text-dark-text bg-light-background dark:bg-dark-background"
-                [disabled]="selectedVariant?.stock === 0">
-              <button (click)="quantity = quantity < (selectedVariant?.stock || 0) ? quantity + 1 : quantity"
+                [disabled]="selectedVariant!.stock === 0">
+              <button (click)="quantity = quantity < (selectedVariant!.stock || 0) ? quantity + 1 : quantity"
                 class="px-4 py-2 text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover">
                 +
               </button>
             </div>
-            <p class="text-sm text-light-secondary dark:text-dark-secondary" *ngIf="selectedVariant?.stock > 0">
-              (Máximo disponible: {{ selectedVariant?.stock }})
+            <p class="text-sm text-light-secondary dark:text-dark-secondary" *ngIf="selectedVariant!.stock > 0">
+              (Máximo disponible: {{ selectedVariant!.stock }})
             </p>
           </div>
         </div>
 
         <!-- Botones de acción -->
         <div class="flex gap-4">
-          <button (click)="addToCart()" [disabled]="selectedVariant?.stock === 0 || quantity <= 0 || isAddingToCart"
+          <button (click)="addToCart()" [disabled]="selectedVariant!.stock === 0 || quantity <= 0 || isAddingToCart"
             class="flex-1 bg-light-primary dark:bg-dark-primary text-white font-semibold py-4 px-8 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-200 disabled:bg-light-disabled dark:disabled:bg-dark-disabled disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text disabled:cursor-not-allowed shadow-md">
             Añadir al carrito
           </button>
-          <button [disabled]="selectedVariant?.stock === 0 || quantity <= 0 || isAddingToCart"
+          <button [disabled]="selectedVariant!.stock === 0 || quantity <= 0 || isAddingToCart"
             class="flex-1 bg-light-success dark:bg-dark-success text-light-success-text dark:text-dark-success-text font-semibold py-4 px-8 rounded-lg hover:bg-light-success dark:hover:bg-dark-success hover:bg-opacity-80 dark:hover:bg-opacity-80 transition-all duration-200 disabled:bg-light-disabled dark:disabled:bg-dark-disabled disabled:text-light-disabled-text dark:disabled:text-dark-disabled-text disabled:cursor-not-allowed shadow-md">
             Comprar ahora
           </button>

@@ -34,7 +34,7 @@ interface ProductVariant {
   }[];
 }
 
-interface ProductDetail {
+export interface ProductDetail {
   product_id: number;
   name: string;
   description: string | null;
@@ -42,6 +42,11 @@ interface ProductDetail {
   category: { category_id: number; name: string } | null;
   variants: ProductVariant[];
   customizations: { type: string; description: string }[];
+  standard_delivery_days: number;
+  urgent_delivery_enabled: boolean;
+  urgent_delivery_days: number | null;
+  urgent_delivery_cost: number;
+  collaborator?: { id: number; name: string } | null; // Añadido para soportar collaborator
 }
 
 export interface ProductResponse {

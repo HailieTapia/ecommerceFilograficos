@@ -23,7 +23,7 @@ interface Address {
   styleUrls: ['./checkout.component.css']
 })
 export class CheckoutComponent implements OnInit {
-  cart: CartResponse = { items: [], total: 0, promotions: [] };
+  cart: CartResponse = { items: [], total: 0,  total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] };
   addresses: Address[] = [];
   selectedAddressId: number | null = null;
   isUrgent: boolean = false;

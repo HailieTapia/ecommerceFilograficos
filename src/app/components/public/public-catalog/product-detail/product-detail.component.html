@@ -7,7 +7,7 @@
   </div>
 
   <!-- Contenido principal -->
-  <div *ngIf="!isLoading && !error" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div *ngIf="!isLoading && !error && product" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
     <!-- Sección de imágenes -->
     <div class="relative">
       <!-- Miniaturas verticales (a la izquierda) -->
@@ -22,7 +22,7 @@
       <!-- Imagen principal con zoom -->
       <div class="ml-0 lg:ml-24 relative">
         <div class="zoom-container">
-          <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'" alt="{{ product.name }}"
+          <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'" [alt]="product.name"
             class="w-full h-[500px] object-contain rounded-xl bg-gray-200 zoom-image">
         </div>
 
@@ -59,12 +59,12 @@
           <i class="fas fa-star text-yellow-400 mr-1"></i>
           4.5 (120 reseñas) <a href="#reviews" class="text-blue-600 hover:underline">Ver reseñas</a>
         </p>
-        <p class="text-sm text-gray-500 mb-4">{{ product.category.name }}</p>
+        <p class="text-sm text-gray-500 mb-4">{{ product.category?.name || 'Sin categoría' }}</p>
 
         <!-- Precio y stock -->
         <div class="mb-6">
           <p class="text-3xl font-bold text-gray-900 mb-2">
-            ${{ formatPrice(selectedVariant?.calculated_price) }}
+            ${{ formatPrice(selectedVariant?.calculated_price + (isUrgent ? product.urgent_delivery_cost : 0)) }}
           </p>
           <p class="text-sm text-gray-500 mb-2">
             <i class="fas fa-box text-gray-600 mr-1"></i>
@@ -74,7 +74,7 @@
         </div>
 
         <!-- Selector de variantes -->
-        <div class="mb-6" *ngIf="product.variants?.length > 1">
+        <div class="mb-6" *ngIf="product.variants?.length && product.variants.length > 1">
           <h3 class="text-lg font-medium text-gray-900 mb-3">Seleccionar modelo</h3>
           <div class="flex flex-wrap gap-2">
             <button *ngFor="let variant of product.variants" (click)="selectVariant(variant)"
@@ -85,13 +85,39 @@
           </div>
         </div>
 
+        <!-- Cantidad -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Cantidad</h3>
+          <input type="number" [(ngModel)]="quantity" min="1" [max]="selectedVariant?.stock || 1"
+            class="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            [disabled]="selectedVariant?.stock === 0">
+        </div>
+
+        <!-- Opciones de entrega -->
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Opciones de entrega</h3>
+          <div class="flex flex-col gap-2">
+            <label class="flex items-center gap-2">
+              <input type="radio" [(ngModel)]="isUrgent" [value]="false" class="form-radio text-blue-600">
+              <span>Estándar: {{ product.standard_delivery_days }} días naturales</span>
+            </label>
+            <label class="flex items-center gap-2" *ngIf="product.urgent_delivery_enabled">
+              <input type="radio" [(ngModel)]="isUrgent" [value]="true" class="form-radio text-blue-600">
+              <span>Urgente: {{ product.urgent_delivery_days }} días naturales, +${{ formatPrice(product.urgent_delivery_cost) }}</span>
+            </label>
+          </div>
+          <p class="text-sm text-gray-500 mt-2">
+            Nota: El tiempo de entrega final se calculará en el carrito según todos los productos. En el checkout, elegirás entre entrega a domicilio, punto de entrega, o retiro en local.
+          </p>
+        </div>
+
         <!-- Descripción (colapsable) -->
         <div class="mb-6">
           <h3 class="text-lg font-medium text-gray-900 mb-3">Descripción</h3>
           <p class="text-base text-gray-700" [ngClass]="{'line-clamp-3': !showFullDescription}">
             {{ product.description || 'Sin descripción disponible.' }}
           </p>
-          <button *ngIf="product.description?.length > 150" (click)="showFullDescription = !showFullDescription"
+          <button *ngIf="product.description && product.description.length > 150" (click)="showFullDescription = !showFullDescription"
             class="text-blue-600 text-sm mt-2 hover:underline">
             {{ showFullDescription ? 'Ver menos' : 'Ver más' }}
           </button>
@@ -112,14 +138,14 @@
         </div>
 
         <!-- Opciones de personalización (colapsable) -->
-        <div class="mb-6" *ngIf="product.customizations?.length > 0">
+        <div class="mb-6" *ngIf="product.customizations && product.customizations.length > 0">
           <h3 class="text-lg font-medium text-gray-900 mb-3">Personalización</h3>
           <div class="text-sm text-gray-700" [ngClass]="{'line-clamp-3': !showFullCustomizations}">
             <p *ngFor="let cust of product.customizations">
               <span class="font-medium">{{ cust.type }}:</span> {{ cust.description }}
             </p>
           </div>
-          <button *ngIf="product.customizations?.length > 3" (click)="showFullCustomizations = !showFullCustomizations"
+          <button *ngIf="product.customizations.length > 3" (click)="showFullCustomizations = !showFullCustomizations"
             class="text-blue-600 text-sm mt-2 hover:underline">
             {{ showFullCustomizations ? 'Ver menos' : 'Ver más' }}
           </button>
@@ -127,7 +153,7 @@
 
         <!-- Botones de acción -->
         <div class="flex gap-4 mb-6">
-          <button (click)="requireLogin()" [disabled]="selectedVariant?.stock === 0"
+          <button (click)="requireLogin()" [disabled]="selectedVariant?.stock === 0 || quantity <= 0 || quantity > selectedVariant?.stock"
             class="flex-1 bg-blue-600 text-white text-sm font-medium py-3 rounded-full hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
             Añadir al carrito
           </button>

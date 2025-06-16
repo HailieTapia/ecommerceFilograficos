@@ -16,9 +16,15 @@ export interface CartItem {
   calculated_price: number;
   quantity: number;
   unit_price: number;
+  urgent_delivery_fee: number;
   subtotal: number;
   unit_measure: string;
   category_id: number;
+  is_urgent: boolean;
+  urgent_delivery_cost: number;
+  urgent_delivery_enabled: boolean; // Nuevo campo
+  standard_delivery_days: number;
+  urgent_delivery_days: number | null;
   customization: { option_id: number; option_type: string; description: string } | null;
   images: { image_url: string; order: number }[];
   applicable_promotions: {
@@ -41,6 +47,8 @@ export interface Promotion {
 export interface CartResponse {
   items: CartItem[];
   total: number;
+  total_urgent_delivery_fee: number;
+  estimated_delivery_days: number;
   promotions: Promotion[];
 }
 
@@ -49,11 +57,13 @@ export interface AddToCartRequest {
   variant_id: number;
   quantity: number;
   option_id?: number;
+  is_urgent: boolean;
 }
 
 export interface UpdateQuantityRequest {
   cart_detail_id: number;
   quantity: number;
+  is_urgent: boolean;
 }
 
 @Injectable({
@@ -112,12 +122,12 @@ export class CartService {
             const quantity = data.quantity || 1;
             const currentCount = this.cartItemCountSubject.getValue();
             this.cartItemCountSubject.next(currentCount + quantity);
+          }),
+          catchError(error => {
+            console.error('Error al añadir al carrito:', error);
+            return of({ error: error.error?.message || 'No se pudo añadir al carrito' });
           })
         );
-      }),
-      catchError(error => {
-        console.error('Error al añadir al carrito:', error);
-        return of({ error: 'No se pudo añadir al carrito' });
       })
     );
   }
@@ -125,7 +135,7 @@ export class CartService {
   // Obtener detalles del carrito
   loadCart(): Observable<CartResponse> {
     if (!this.authService.isLoggedIn()) {
-      return of({ items: [], total: 0, promotions: [] });
+      return of({ items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] });
     }
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -134,20 +144,25 @@ export class CartService {
           tap((response: CartResponse) => {
             const count = response.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
             this.cartItemCountSubject.next(count);
+          }),
+          catchError(error => {
+            console.error('Error al cargar el carrito:', error);
+            return of({ items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] });
           })
         );
-      }),
-      catchError(error => {
-        console.error('Error al cargar el carrito:', error);
-        return of({ items: [], total: 0, promotions: [] });
       })
     );
   }
 
   // Actualizar cantidad de un ítem
   updateQuantity(data: UpdateQuantityRequest, oldQuantity: number): Observable<any> {
+    console.log('Datos enviados al backend:', data); // Depuración
     if (!this.authService.isLoggedIn()) {
       return of({ error: 'Usuario no autenticado' });
+    }
+    if (typeof data.is_urgent !== 'boolean') {
+      console.warn('is_urgent debe ser un valor booleano, valor recibido:', data.is_urgent);
+      data.is_urgent = false; // Valor por defecto
     }
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -158,6 +173,13 @@ export class CartService {
             const quantityChange = newQuantity - oldQuantity;
             const currentCount = this.cartItemCountSubject.getValue();
             this.cartItemCountSubject.next(currentCount + quantityChange);
+          }),
+          catchError(error => {
+            console.error('Error al actualizar la cantidad:', error);
+            return of({ 
+              error: error.error?.message || error.message || 'No瘫痪 pudo actualizar la cantidad',
+              status: error.status
+            });
           })
         );
       })
@@ -176,6 +198,10 @@ export class CartService {
           tap(() => {
             const currentCount = this.cartItemCountSubject.getValue();
             this.cartItemCountSubject.next(currentCount - quantityToRemove);
+          }),
+          catchError(error => {
+            console.error('Error al eliminar el ítem:', error);
+            return of({ error: error.error?.message || 'No se pudo eliminar el ítem' });
           })
         );
       })

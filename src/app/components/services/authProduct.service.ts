@@ -14,7 +14,7 @@ export interface Product {
   min_price: number;
   max_price: number;
   total_stock: number;
-  variant_count: number; // Añadido para reflejar la respuesta del backend
+  variant_count: number;
   image_url: string | null;
   collaborator?: { id: number; name: string } | null;
 }
@@ -36,14 +36,18 @@ interface ProductVariant {
   }[];
 }
 
-interface ProductDetail {
+export interface ProductDetail {
   product_id: number;
   name: string;
   description: string | null;
   product_type: string;
   category: { category_id: number; name: string } | null;
   variants: ProductVariant[];
-  customizations: { type: string; description: string }[];
+  customizations: { option_id: number; type: string; description: string }[]; // Añadido option_id
+  standard_delivery_days: number;
+  urgent_delivery_enabled: boolean;
+  urgent_delivery_days: number | null;
+  urgent_delivery_cost: number;
   collaborator?: { id: number; name: string } | null;
 }
 

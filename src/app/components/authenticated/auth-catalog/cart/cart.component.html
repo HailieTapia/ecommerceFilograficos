@@ -45,7 +45,7 @@
         <!-- Ítems del carrito -->
         <div class="space-y-4 mb-6">
           <div *ngFor="let item of cart.items; trackBy: trackByCartDetailId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-            <div class="flex items-center gap-4">
+            <div class="flex items-start gap-4">
               <!-- Imagen -->
               <img [src]="getImageUrl(item)" class="w-16 h-16 object-cover rounded-xl shadow-md" alt="{{ item.product_name }}">
 
@@ -53,8 +53,26 @@
               <div class="flex-1">
                 <h3 class="font-semibold text-gray-800 dark:text-gray-100 text-lg mb-1">{{ item.product_name }}</h3>
                 <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">Modelo: {{ item.variant_sku }}</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">${{ item.calculated_price.toFixed(2) }}</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                  ${{ (item.unit_price * item.quantity).toFixed(2) }}
+                  <span *ngIf="item.urgent_delivery_fee > 0" class="text-sm text-blue-600 dark:text-blue-400">
+                    + ${{ item.urgent_delivery_fee.toFixed(2) }} (Envío urgente)
+                  </span>
+                </p>
                 
+                <!-- Opción de envío urgente -->
+                <div *ngIf="canBeUrgent(item)" class="mt-2 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    [checked]="item.is_urgent"
+                    (change)="toggleUrgent(item, $event)"
+                    class="form-checkbox h-4 w-4 text-blue-600 dark:text-blue-400"
+                  >
+                  <label class="text-sm text-gray-600 dark:text-gray-400">
+                    Envío urgente ({{ item.urgent_delivery_days || item.standard_delivery_days }} días, +${{ item.urgent_delivery_cost.toFixed(2) }})
+                  </label>
+                </div>
+
                 <!-- Promociones aplicables -->
                 <div *ngIf="item.applicable_promotions.length > 0" class="mt-2">
                   <p class="text-sm font-semibold text-green-600 dark:text-green-400">Promociones aplicadas:</p>
@@ -67,7 +85,7 @@
               </div>
 
               <!-- Control de cantidad y eliminar -->
-              <div class="flex items-center gap-3">
+              <div class="flex flex-col items-end gap-3">
                 <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full p-1">
                   <button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1" class="w-10 h-10 rounded-full bg-white dark:bg-gray-600 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors disabled:bg-gray-300 disabled:text-gray-500" aria-label="Reducir cantidad">
                     <i class="fas fa-minus text-gray-600 dark:text-gray-300 text-sm"></i>
@@ -92,6 +110,10 @@
             <div class="flex justify-between text-gray-600 dark:text-gray-400">
               <span>Subtotal:</span>
               <span class="font-semibold">${{ subtotal.toFixed(2) }}</span>
+            </div>
+            <div *ngIf="totalUrgentDeliveryFee > 0" class="flex justify-between text-blue-600 dark:text-blue-400">
+              <span>Costos de envío urgente:</span>
+              <span class="font-semibold">${{ totalUrgentDeliveryFee.toFixed(2) }}</span>
             </div>
             <div *ngIf="discount > 0" class="flex justify-between text-green-600 dark:text-green-400">
               <span>Descuento:</span>
