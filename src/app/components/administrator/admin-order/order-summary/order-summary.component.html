@@ -1,0 +1,25 @@
+<div class="bg-light-background dark:bg-dark-background rounded-lg shadow-sm p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
+  <h3 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Resumen</h3>
+  <div class="space-y-4" *ngIf="summary">
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-light-secondary dark:text-dark-secondary">Total órdenes</span>
+      <span class="font-semibold text-light-text dark:text-dark-text">{{ summary.totalOrders }}</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-light-secondary dark:text-dark-secondary">Pendientes</span>
+      <span class="font-semibold text-yellow-600 dark:text-yellow-400">{{ summary.pendingCount }}</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-light-secondary dark:text-dark-secondary">En proceso</span>
+      <span class="font-semibold text-blue-600 dark:text-blue-400">{{ summary.processingCount }}</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-light-secondary dark:text-dark-secondary">Enviadas</span>
+      <span class="font-semibold text-purple-600 dark:text-purple-400">{{ summary.shippedCount }}</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-light-secondary dark:text-dark-secondary">Entregadas</span>
+      <span class="font-semibold text-green-600 dark:text-green-400">{{ summary.deliveredCount }}</span>
+    </div>
+  </div>
+</div>

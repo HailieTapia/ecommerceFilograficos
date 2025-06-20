@@ -18,6 +18,7 @@ export class SidebarComponent {
 
   navItems = [
     { path: '/company', icon: 'fa-building', label: 'Empresa' },
+    { path: '/dashboard-orders', icon: 'fa-building', label: 'Gestión de ordenes' },
     { path: '/banners', icon: 'fa-building', label: 'Banners' },
     { path: '/support-panel', icon: 'fa-headset', label: 'Soporte' },
     { path: '/faq-categories', icon: 'fa-list-ul', label: 'Categorías FAQ' },

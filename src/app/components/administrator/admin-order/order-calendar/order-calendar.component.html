@@ -1,0 +1,85 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+  <!-- Encabezado del calendario -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        {{ currentDate | date: 'MMMM yyyy' : '' : 'es-ES' }}
+      </h2>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+        {{ dateFilter === 'delivery' ? 'Organizadas por fecha de entrega' : 'Organizadas por fecha de creación' }}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button (click)="previousMonth()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button
+        (click)="goToToday()"
+        class="px-3 py-1 text-sm bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+      >
+        Hoy
+      </button>
+      <button (click)="nextMonth()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Días de la semana -->
+  <div class="grid grid-cols-7 gap-1 mb-2">
+    <div *ngFor="let day of ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']" class="p-2 text-center text-sm font-medium text-gray-600 dark:text-gray-400">
+      {{ day }}
+    </div>
+  </div>
+
+  <!-- Calendario -->
+  <mat-calendar
+    [selected]="selectedDate"
+    [dateClass]="getDateClass"
+    (selectedChange)="onDateSelected($event)"
+    [startAt]="currentDate"
+    class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+    (monthSelected)="currentDate = $event"
+  >
+    <ng-template matCalendarCell let-cell>
+      <div
+        class="relative h-full flex flex-col p-2 min-h-[100px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-center cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-700"
+        [ngClass]="getDateClass(cell.date)"
+      >
+        <span class="text-sm font-medium mb-1" [ngClass]="getSpanClasses(cell.date)">
+          {{ cell.date.getDate() }}
+        </span>
+        <ng-container *ngIf="getOrdersForDate(cell.date).length > 0">
+          <span
+            class="inline-flex items-center px-2 py-1 mt-1 rounded-full text-xs font-medium"
+            [ngClass]="{
+              'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100': getOrdersForDate(cell.date).length > 5,
+              'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100': getOrdersForDate(cell.date).length > 2 && getOrdersForDate(cell.date).length <= 5,
+              'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100': getOrdersForDate(cell.date).length <= 2
+            }"
+          >
+            {{ getOrdersForDate(cell.date).length }} orden{{ getOrdersForDate(cell.date).length !== 1 ? 'es' : '' }}
+          </span>
+          <div class="space-y-1 mt-1">
+            <div
+              *ngFor="let order of getOrdersForDate(cell.date) | slice:0:2"
+              class="flex items-center gap-2 text-xs p-1 rounded border truncate cursor-pointer"
+              [ngClass]="getStatusColor(order.order_status)"
+              (click)="onOrderSelected(order, $event)"
+              [title]="'#' + order.order_id + ' - ' + order.customer_name + ' - ' + formatCurrency(order.total)"
+            >
+              <i class="fas {{ getStatusIcon(order.order_status) }} text-light-primary dark:text-dark-primary"></i>
+              #{{ order.order_id }} - {{ order.customer_name }}
+            </div>
+            <div
+              *ngIf="getOrdersForDate(cell.date).length > 2"
+              class="text-xs text-gray-500 dark:text-gray-400 font-medium"
+            >
+              +{{ getOrdersForDate(cell.date).length - 2 }} más...
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </ng-template>
+  </mat-calendar>
+</div>
