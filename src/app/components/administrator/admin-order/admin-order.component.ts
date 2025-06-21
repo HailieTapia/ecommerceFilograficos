@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AdminOrder, AdminOrderService, AdminOrderSummary, AdminOrdersResponse } from '../../services/admin-order.service';
 import { OrderCalendarComponent } from './order-calendar/order-calendar.component';
 import { OrderFilterComponent } from './order-filter/order-filter.component';
@@ -15,6 +16,7 @@ import { of } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
+    MatDialogModule,
     OrderCalendarComponent,
     OrderFilterComponent,
     OrderSummaryComponent,
@@ -39,7 +41,8 @@ export class AdminOrderComponent implements OnInit {
   constructor(
     private orderService: AdminOrderService,
     private toastService: ToastService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -51,7 +54,7 @@ export class AdminOrderComponent implements OnInit {
     this.orderService
       .getOrders(
         1,
-        10,
+        20,
         this.searchTerm,
         this.statusFilter as 'all' | 'pending' | 'processing' | 'shipped' | 'delivered',
         this.selectedDate ? this.datePipeTransform(this.selectedDate) : '',
@@ -59,7 +62,7 @@ export class AdminOrderComponent implements OnInit {
       )
       .subscribe({
         next: (response: AdminOrdersResponse) => {
-          this.orders = response.data.orders; // No convertimos fechas, ya que son strings
+          this.orders = response.data.orders;
           this.summary = response.data.summary || {
             totalOrders: response.data.pagination.totalOrders,
             pendingCount: response.data.orders.filter((o: AdminOrder) => o.order_status === 'pending').length,
@@ -67,15 +70,18 @@ export class AdminOrderComponent implements OnInit {
             shippedCount: response.data.orders.filter((o: AdminOrder) => o.order_status === 'shipped').length,
             deliveredCount: response.data.orders.filter((o: AdminOrder) => o.order_status === 'delivered').length,
           };
+          console.log("Orders:",this.orders)
+          console.log("Summary:",this.summary)
         },
         error: (err) => {
-          this.toastService.showToast('Error al cargar las órdenes', 'error');
+          this.toastService.showToast(`Error al cargar las órdenes: ${err.message}`, 'error');
         },
       });
   }
 
   private datePipeTransform(date: Date): string {
-    return this.datePipe.transform(date, 'yyyy-MM-dd')!;
+    // Enviar solo el año si se selecciona una fecha, o un rango si es necesario
+    return this.datePipe.transform(date, 'yyyy')!;
   }
 
   setupFilterDebounce(): void {
@@ -118,7 +124,14 @@ export class AdminOrderComponent implements OnInit {
   onOrderSelected(order: AdminOrder): void {
     this.orderService.getOrderById(order.order_id).subscribe({
       next: (response) => {
-        this.selectedOrder = response.data; // No convertimos fechas, ya que son strings
+        this.selectedOrder = response.data;
+        this.dialog.open(OrderModalComponent, {
+          data: { order: this.selectedOrder },
+          width: '600px',
+          maxHeight: '90vh'
+        }).afterClosed().subscribe(() => {
+          this.onCloseModal();
+        });
       },
       error: () => {
         this.toastService.showToast('Error al cargar los detalles de la orden', 'error');

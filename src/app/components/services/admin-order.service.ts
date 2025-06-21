@@ -108,8 +108,8 @@ export class AdminOrderService {
   // Manejo de errores
   private handleError(error: HttpErrorResponse): Observable<never> {
     let message = 'Error en la comunicación con el servidor';
-    if (error.status === 400) {
-      message = error.error?.message || 'Solicitud inválida';
+    if (error.status === 400 && error.error?.errors) {
+      message = error.error.errors.map((err: any) => `${err.path}: ${err.msg}`).join('; ');
     } else if (error.status === 404) {
       message = error.error?.message || 'Orden no encontrada';
     } else if (error.status === 500) {
@@ -122,7 +122,7 @@ export class AdminOrderService {
   // Obtener la lista paginada de órdenes con filtros opcionales
   getOrders(
     page: number = 1,
-    pageSize: number = 10,
+    pageSize: number = 20,
     searchTerm: string = '',
     statusFilter: 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' = 'all',
     dateFilter: string = '',

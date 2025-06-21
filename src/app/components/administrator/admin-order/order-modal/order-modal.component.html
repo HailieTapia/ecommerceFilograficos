@@ -1,113 +1,96 @@
-<app-modal #orderModal [title]="'Orden #' + (order?.order_id || '')">
-  <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto" *ngIf="order">
-    <form [formGroup]="orderForm" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Cliente</h3>
-          <div>
-            <p class="text-sm text-light-secondary dark:text-dark-secondary"><strong>Nombre:</strong> {{ order.customer_name }}</p>
-            <p class="text-sm text-light-secondary dark:text-dark-secondary"><strong>ID Usuario:</strong> {{ order.user_id }}</p>
-            <p class="text-sm text-light-secondary dark:text-dark-secondary"><strong>Entrega:</strong> {{ order.delivery_option || 'N/A' }}</p>
-            <p class="text-sm text-light-secondary dark:text-dark-secondary"><strong>Fecha creación:</strong> {{ formatDate(order.created_at) }}</p>
-            <p class="text-sm text-light-secondary dark:text-dark-secondary"><strong>Fecha estimada entrega:</strong> {{ formatDate(order.estimated_delivery_date) }}</p>
-          </div>
-        </div>
-        <div>
-          <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Estado y Pago</h3>
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">
-                Estado de la orden
-              </label>
-              <select
-                formControlName="order_status"
-                class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base"
-              >
-                <option value="pending">Pendiente</option>
-                <option value="processing">Procesando</option>
-                <option value="shipped">Enviado</option>
-                <option value="delivered">Entregado</option>
-              </select>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-medium text-light-text dark:text-dark-text">Pago:</span>
-              <span class="px-2 py-1 rounded-full text-xs font-medium" [ngClass]="paymentStatusColors[order.payment_status]">
-                {{ order.payment_status }}
-              </span>
-            </div>
-            <p class="text-sm text-light-secondary dark:text-dark-secondary"><strong>Método:</strong> {{ order.payment_method }}</p>
-          </div>
-        </div>
-      </div>
-      <div class="mt-6">
-        <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Productos</h3>
-        <div class="space-y-2">
-          <div
-            *ngFor="let detail of order.order_details; trackBy: trackByDetailId"
-            class="flex justify-between items-center p-3 bg-light-row-hover dark:bg-dark-row-hover rounded-lg"
-          >
-            <div>
-              <span the="font-medium text-light-text dark:text-dark-text">{{ detail.product_name }}</span>
-              <span
-                *ngIf="detail.is_urgent"
-                class="ml-2 px-2 py-1 bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 text-xs rounded-full"
-              >
-                Urgente
-              </span>
-              <p class="text-sm text-light-secondary dark:text-dark-secondary">Cantidad: {{ detail.quantity }}</p>
-            </div>
-            <span class="font-medium text-sm text-light-text dark:text-dark-text">{{ formatCurrency(detail.unit_price * detail.quantity) }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="mt-6 border-t pt-4 border-gray-200 dark:border-gray-600">
-        <div class="space-y-2">
-          <div class="flex justify-between">
-            <span class="text-sm text-light-secondary dark:text-dark-secondary">Subtotal:</span>
-            <span class="text-sm text-light-text dark:text-dark-text">{{ formatCurrency(order.total - order.shipping_cost + order.discount) }}</span>
-          </div>
-          <div
-            *ngIf="order.discount > 0"
-            class="flex justify-between text-green-600 dark:text-green-400"
-          >
-            <span class="text-sm text-light-secondary dark:text-dark-secondary">Descuento:</span>
-            <span class="text-sm text-green-600 dark:text-green-400">{{ formatCurrency(-order.discount) }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-sm text-light-secondary dark:text-dark-secondary">Envío:</span>
-            <span class="text-sm text-light-text dark:text-dark-text">{{ formatCurrency(order.shipping_cost) }}</span>
-          </div>
-          <div class="flex justify-between font-semibold text-lg border-t pt-2 border-gray-200 dark:border-gray-600">
-            <span class="text-light-text dark:text-dark-text">Total:</span>
-            <span class="text-light-text dark:text-dark-text">{{ formatCurrency(order.total) }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="mt-6 flex flex-col sm:flex-row gap-3">
-        <button
-          (click)="editOrder()"
-          class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-800 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2"
-        >
-          <i class="fas fa-edit w-4 h-4"></i>
-          Editar orden
-        </button>
-        <button
-          (click)="viewDetails()"
-          class="w-full sm:w-auto px-4 py-2 bg-gray-600 dark:bg-gray-600 text-white rounded-md hover:bg-gray-700 dark:hover:bg-gray-500 transition-all duration-300 flex items-center justify-center gap-2"
-        >
-          <i class="fas fa-eye w-4 h-4"></i>
-          Ver detalles completos
-        </button>
-      </div>
-    </form>
-  </div>
-  <div class="flex justify-end gap-4 p-4 sm:p-6 bg-light-background dark:bg-dark-background">
-    <button
-      (click)="closeModal()"
-      class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300 flex items-center justify-center gap-2"
-    >
-      <i class="fas fa-times"></i>
-      Cerrar
+<div *ngIf="order" class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Orden #{{ order.order_id }}</h2>
+    <button mat-icon-button (click)="onClose()" class="hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+      <mat-icon>close</mat-icon>
     </button>
   </div>
-</app-modal>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Cliente</h3>
+      <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Nombre:</strong> {{ order.customer_name }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400"><strong>ID Usuario:</strong> {{ order.user_id }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Entrega:</strong> {{ order.delivery_option || 'No especificada' }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Fecha creación:</strong> {{ formatDate(order.created_at) }}</p>
+      <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Fecha estimada entrega:</strong> {{ formatDate(order.estimated_delivery_date) }}</p>
+      <ng-container *ngIf="order.address">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mt-4 mb-2">Dirección</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Calle:</strong> {{ order.address.street }}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Ciudad:</strong> {{ order.address.city }}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Estado:</strong> {{ order.address.state }}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Código postal:</strong> {{ order.address.postal_code }}</p>
+      </ng-container>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Estado y Pago</h3>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Estado de la orden</mat-label>
+        <mat-select [(ngModel)]="order.order_status" (ngModelChange)="onStatusChange($event)">
+          <mat-option value="pending">Pendiente</mat-option>
+          <mat-option value="processing">Procesando</mat-option>
+          <mat-option value="shipped">Enviado</mat-option>
+          <mat-option value="delivered">Entregado</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Pago:</strong>
+        <span class="px-2 py-1 rounded-full text-xs font-medium {{ paymentStatusColors[order.payment_status] }}">
+          {{ order.payment_status }}
+        </span>
+      </p>
+      <p class="text-sm text-gray-600 dark:text-gray-400"><strong>Método:</strong> {{ order.payment_method }}</p>
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-3">Productos</h3>
+    <div class="space-y-2">
+      <ng-container *ngFor="let detail of order.order_details">
+        <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+          <div>
+            <span class="font-medium text-gray-900 dark:text-gray-100">{{ detail.product_name }}</span>
+            <ng-container *ngIf="detail.is_urgent">
+              <span class="ml-2 px-2 py-1 bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 text-xs rounded-full">Urgente</span>
+            </ng-container>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Cantidad: {{ detail.quantity }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Unidad: {{ detail.unit_measure }}</p>
+          </div>
+          <span class="font-medium text-gray-900 dark:text-gray-100">{{ formatCurrency(detail.subtotal) }}</span>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="mt-6 border-t pt-4">
+    <div class="space-y-2">
+      <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+        <span>Subtotal:</span>
+        <span>{{ formatCurrency(order.total - order.shipping_cost + order.discount) }}</span>
+      </div>
+      <ng-container *ngIf="order.discount > 0">
+        <div class="flex justify-between text-sm text-green-600 dark:text-green-400">
+          <span>Descuento:</span>
+          <span>-{{ formatCurrency(order.discount) }}</span>
+        </div>
+      </ng-container>
+      <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+        <span>Envío:</span>
+        <span>{{ formatCurrency(order.shipping_cost) }}</span>
+      </div>
+      <div class="flex justify-between font-semibold text-lg text-gray-900 dark:text-gray-100 border-t pt-2">
+        <span>Total:</span>
+        <span>{{ formatCurrency(order.total) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex gap-3">
+    <button mat-raised-button color="primary" class="flex-1 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600" (click)="onStatusChange(order.order_status)">
+      <mat-icon>save</mat-icon> Guardar
+    </button>
+    <button mat-raised-button color="accent" class="flex-1 bg-gray-600 text-white hover:bg-gray-700 dark:bg-gray-500 dark:hover:bg-gray-600" (click)="viewDetails()">
+      <mat-icon>visibility</mat-icon> Ver detalles completos
+    </button>
+  </div>
+</div>
