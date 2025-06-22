@@ -1,26 +1,35 @@
 :host ::ng-deep {
-  .fc {
-    @apply border border-gray-200 dark:border-gray-700 rounded-lg;
+  .mat-calendar {
+    width: 100%;
+    max-width: 700px;
   }
-  .fc-daygrid-day {
-    @apply min-h-[100px] p-2;
+
+  .mat-calendar-body-cell {
+    position: relative;
+    height: 100px !important;
+    transition: background-color 0.2s;
   }
-  .fc-day-today {
-    @apply bg-blue-50 dark:bg-blue-900 ring-2 ring-blue-500 dark:ring-blue-400;
+
+  .has-orders::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444;
+    border-radius: 50%;
   }
-  .fc-daygrid-day-frame {
-    @apply flex flex-col;
+
+  .mat-calendar-body-today {
+    border: 2px solid #3b82f6 !important;
   }
-  .fc-daygrid-event {
-    @apply mb-1;
+
+  .mat-calendar-body-selected {
+    background-color: #dbeafe !important;
   }
-  .fc-day-other {
-    @apply bg-gray-50 dark:bg-gray-700 text-gray-400 dark:text-gray-500;
-  }
-  .fc-timegrid-slot {
-    @apply h-10;
-  }
-  .fc-timegrid-event {
-    @apply text-xs p-1 rounded border;
+
+  :host-context(.dark) .mat-calendar-body-selected {
+    background-color: #1e3a8a !important;
   }
 }
