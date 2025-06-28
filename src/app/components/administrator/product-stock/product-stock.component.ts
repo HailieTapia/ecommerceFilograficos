@@ -1,10 +1,16 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ProductService, StockVariant, StockVariantsResponse, UpdateStockRequest } from '../../services/product.service';
 import { CategorieService } from '../../services/categorieService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+import { LOCALE_ID } from '@angular/core';
+
+// Registrar los datos de localización para español
+registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-product-stock',
@@ -14,9 +20,14 @@ import { ModalComponent } from '../../../modal/modal.component';
     FormsModule,
     ReactiveFormsModule,
     PaginationComponent,
-    ModalComponent
+    ModalComponent,
+    DatePipe
   ],
-  templateUrl: './product-stock.component.html'
+  templateUrl: './product-stock.component.html',
+  providers: [
+    DatePipe,
+    { provide: LOCALE_ID, useValue: 'es' }
+  ]
 })
 export class ProductStockComponent implements OnInit {
   @ViewChild('updateModal') updateModal!: ModalComponent;
@@ -28,7 +39,7 @@ export class ProductStockComponent implements OnInit {
   totalItems: number = 0;
 
   selectedCategoryId: string = '';
-  selectedStockStatus: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock' | '' = ''; // Añadido 'no_stock'
+  selectedStockStatus: 'in_stock' | 'low_stock' | 'out_of_stock' | 'no_stock' | '' = '';
   allCategories: { category_id: string; name: string }[] = [];
   searchQuery: string = '';
 
@@ -38,7 +49,8 @@ export class ProductStockComponent implements OnInit {
   constructor(
     private productService: ProductService,
     private categorieService: CategorieService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private datePipe: DatePipe
   ) {
     this.updateForm = this.fb.group({
       stock: ['', [Validators.required, Validators.min(0)]],
@@ -183,7 +195,7 @@ export class ProductStockComponent implements OnInit {
       case 'in_stock': return 'bg-green-500 text-white';
       case 'low_stock': return 'bg-yellow-500 text-white';
       case 'out_of_stock': return 'bg-red-500 text-white';
-      case 'no_stock': return 'bg-gray-500 text-white'; // Estilo para 'no_stock'
+      case 'no_stock': return 'bg-gray-500 text-white';
       default: return 'bg-gray-500 text-white';
     }
   }
@@ -196,5 +208,11 @@ export class ProductStockComponent implements OnInit {
       case 'no_stock': return 'Sin stock';
       default: return 'Desconocido';
     }
+  }
+
+  formatDate(date: string | null | undefined, withTime: boolean = false): string {
+    if (!date) return 'Nunca';
+    const format = withTime ? "d 'de' MMMM 'de' yyyy HH:mm" : "d 'de' MMMM 'de' yyyy";
+    return this.datePipe.transform(date, format, undefined, 'es') || 'Nunca';
   }
 }

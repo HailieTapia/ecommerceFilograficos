@@ -1,13 +1,18 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, OnDestroy, LOCALE_ID } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FaqService, Faq, GroupedFaq, FaqResponse } from '../../services/faq.service';
-import { FaqCategoryService } from '../../services/faq-category.service'; // Importar el nuevo servicio
+import { FaqCategoryService } from '../../services/faq-category.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
 import { ToastService } from '../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
+// Registrar los datos de localización para español
+registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-faq',
@@ -18,9 +23,14 @@ import { of, Subscription } from 'rxjs';
     ReactiveFormsModule,
     PaginationComponent,
     ModalComponent,
+    DatePipe
   ],
   templateUrl: './faq.component.html',
   styleUrls: ['./faq.component.css'],
+  providers: [
+    DatePipe,
+    { provide: LOCALE_ID, useValue: 'es' }
+  ]
 })
 export class FaqComponentAdmin implements OnInit, OnDestroy {
   @ViewChild('faqModal') faqModal!: ModalComponent;
@@ -33,16 +43,17 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
   searchTerm = '';
   selectedCategoryId: number | null = null;
   isGrouped = false;
-  categories: { id: number; name: string; description?: string }[] = []; // Ajustar para que description sea opcional
+  categories: { id: number; name: string; description?: string }[] = [];
   faqForm!: FormGroup;
   selectedFaqId: number | null = null;
   private subscriptions: Subscription = new Subscription();
 
   constructor(
     private faqService: FaqService,
-    private faqCategoryService: FaqCategoryService, // Inyectar el nuevo servicio
+    private faqCategoryService: FaqCategoryService,
     private toastService: ToastService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private datePipe: DatePipe
   ) {
     this.faqForm = this.fb.group({
       category_id: ['', [Validators.required]],
@@ -90,7 +101,7 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
           this.categories = categories.map(cat => ({
             id: cat.category_id,
             name: cat.name,
-            description: '' // Asignamos una descripción vacía ya que el endpoint público no la incluye
+            description: ''
           }));
         },
         error: (err) => {
@@ -199,8 +210,10 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
     );
   }
 
-  formatDate(date?: string): string {
-    return date ? new Date(date).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+  formatDate(date?: string, withTime: boolean = false): string {
+    if (!date) return 'Fecha no disponible';
+    const format = withTime ? "d 'de' MMMM 'de' yyyy HH:mm" : "d 'de' MMMM 'de' yyyy";
+    return this.datePipe.transform(date, format, undefined, 'es') || 'Fecha no disponible';
   }
 
   isGroupedFaq(item: Faq | GroupedFaq): item is GroupedFaq {

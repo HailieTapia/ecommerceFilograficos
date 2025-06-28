@@ -93,9 +93,9 @@
               <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ promotionTypeLabels[promotion.promotion_type] }}</td>
               <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ promotion.discount_value }}%</td>
               <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(promotion.start_date) }}</td>
-              <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">{{ formatDate(promotion.end_date) }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">{{ formatDateTime(promotion.end_date) }}</td>
               <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ promotion.product_variants_count || 0 }}</td>
-              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(promotion.created_at || '') }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDateTime(promotion.created_at) }}</td>
               <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
                 <button (click)="openPromotionModal('edit', promotion)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                   <i class="fas fa-edit"></i>

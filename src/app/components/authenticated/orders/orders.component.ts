@@ -1,17 +1,26 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, LOCALE_ID } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { OrderService, OrdersResponse } from '../../services/order.service';
 import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
+// Registrar los datos de localización para español
+registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SpinnerComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SpinnerComponent, DatePipe],
   templateUrl: './orders.component.html',
-  styleUrls: ['./orders.component.css']
+  styleUrls: ['./orders.component.css'],
+  providers: [
+    DatePipe,
+    { provide: LOCALE_ID, useValue: 'es' }
+  ]
 })
 export class OrdersComponent implements OnInit {
   orders: OrdersResponse['data']['orders'] = [];
@@ -32,7 +41,8 @@ export class OrdersComponent implements OnInit {
 
   constructor(
     private orderService: OrderService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private datePipe: DatePipe
   ) {}
 
   ngOnInit(): void {
@@ -101,13 +111,7 @@ export class OrdersComponent implements OnInit {
   }
 
   getFormattedDate(date: string): string {
-    return new Date(date).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return this.datePipe.transform(date, "d 'de' MMMM 'de' yyyy HH:mm", undefined, 'es') || 'Fecha no disponible';
   }
 
   getOrderStatusInSpanish(status: string): string {

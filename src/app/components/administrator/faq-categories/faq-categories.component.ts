@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, LOCALE_ID } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FaqCategoryService } from '../../services/faq-category.service';
 import { PaginationComponent } from '../pagination/pagination.component';
@@ -7,6 +7,11 @@ import { ModalComponent } from '../../../modal/modal.component';
 import { ToastService } from '../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
+// Registrar los datos de localización para español
+registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-faq-categories',
@@ -17,9 +22,14 @@ import { of } from 'rxjs';
     ReactiveFormsModule,
     PaginationComponent,
     ModalComponent,
+    DatePipe
   ],
   templateUrl: './faq-categories.component.html',
   styleUrls: ['./faq-categories.component.css'],
+  providers: [
+    DatePipe,
+    { provide: LOCALE_ID, useValue: 'es' }
+  ]
 })
 export class FaqCategoriesComponent implements OnInit {
   @ViewChild('faqCategoryModal') faqCategoryModal!: ModalComponent;
@@ -36,7 +46,8 @@ export class FaqCategoriesComponent implements OnInit {
   constructor(
     private faqCategoryService: FaqCategoryService,
     private toastService: ToastService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private datePipe: DatePipe
   ) {
     this.categoryForm = this.fb.group({
       name: ['', [
@@ -190,6 +201,6 @@ export class FaqCategoriesComponent implements OnInit {
   }
 
   formatDate(date: string): string {
-    return date ? new Date(date).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+    return this.datePipe.transform(date, "d 'de' MMMM 'de' yyyy", undefined, 'es') || 'Fecha no disponible';
   }
 }

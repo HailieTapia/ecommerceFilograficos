@@ -155,8 +155,8 @@
             <td class="p-3">
               <app-status-badge [status]="consultation.status"></app-status-badge>
             </td>
-            <td class="p-3 text-sm">{{ consultation.created_at | date:'short' }}</td>
-            <td class="p-3 text-sm">{{ consultation.updated_at | date:'short' }}</td>
+            <td class="p-3 text-sm">{{ getFormattedDate(consultation.created_at) }}</td>
+            <td class="p-3 text-sm">{{ getFormattedDate(consultation.updated_at, true) }}</td>
             <td class="p-3">
               <button (click)="openModal(consultation.inquiry_id)"
                 class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">

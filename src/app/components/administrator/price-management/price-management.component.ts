@@ -1,5 +1,5 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, Inject } from '@angular/core';
+import { CommonModule, DatePipe, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductService, PriceVariant, PriceVariantsResponse, UpdatePriceRequest, PriceHistoryResponse, PriceHistoryEntry } from '../../services/product.service';
 import { CategorieService } from '../../services/categorieService';
@@ -7,13 +7,21 @@ import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { BulkPriceUpdateComponent } from './bulk-price-update/bulk-price-update.component'; // Importamos el nuevo componente hijo
+import { BulkPriceUpdateComponent } from './bulk-price-update/bulk-price-update.component';
+import localeEs from '@angular/common/locales/es';
+import { LOCALE_ID } from '@angular/core';
+
+registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-price-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, PaginationComponent, ModalComponent, BulkPriceUpdateComponent], // Añadimos el nuevo componente
-  templateUrl: './price-management.component.html'
+  imports: [CommonModule, FormsModule, PaginationComponent, ModalComponent, BulkPriceUpdateComponent],
+  templateUrl: './price-management.component.html',
+  providers: [
+    DatePipe,
+    { provide: LOCALE_ID, useValue: 'es' }
+  ]
 })
 export class PriceManagementComponent implements OnInit {
   @ViewChild('editModal') editModal!: ModalComponent;
@@ -38,13 +46,11 @@ export class PriceManagementComponent implements OnInit {
   notification: string = '';
   isFormValid: boolean = true;
 
-  // Nuevas propiedades para el historial
   selectedHistoryVariant: PriceVariant | null = null;
   priceHistory: PriceHistoryEntry[] = [];
   historyMessage: string = '';
 
-  // Propiedad para gestionar las pestañas
-  activeTab: 'prices' | 'bulk' = 'prices'; // Pestaña activa por defecto: "Precios de Productos"
+  activeTab: 'prices' | 'bulk' = 'prices';
 
   readonly MAX_PROFIT_MARGIN: number = 500;
 
@@ -52,7 +58,8 @@ export class PriceManagementComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private categorieService: CategorieService
+    private categorieService: CategorieService,
+    private datePipe: DatePipe
   ) {}
 
   ngOnInit() {
@@ -122,7 +129,7 @@ export class PriceManagementComponent implements OnInit {
     this.loadVariants();
   }
 
-  sort(column: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name' | 'updated_at') { 
+  sort(column: 'sku' | 'calculated_price' | 'production_cost' | 'profit_margin' | 'product_name' | 'updated_at') {
     if (this.sortBy === column) {
       this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC';
     } else {
@@ -225,6 +232,27 @@ export class PriceManagementComponent implements OnInit {
     return `$ ${formatted} MXN`;
   }
 
+  formatDate(date: string | null | undefined): string {
+    if (!date) return 'Nunca';
+
+    // Handle DD/MM/YYYY format
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      const [day, month, year] = date.split('/').map(Number);
+      const parsedDate = new Date(year, month - 1, day);
+      if (!isNaN(parsedDate.getTime())) {
+        return this.datePipe.transform(parsedDate, "d 'de' MMMM 'de' yyyy", undefined, 'es') || 'Nunca';
+      }
+    }
+
+    // Try parsing as ISO or other formats
+    const parsedDate = new Date(date);
+    if (!isNaN(parsedDate.getTime())) {
+      return this.datePipe.transform(parsedDate, "d 'de' MMMM 'de' yyyy", undefined, 'es') || 'Nunca';
+    }
+
+    return 'Nunca';
+  }
+
   restrictInput(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', '.'];
     const isNumberKey = event.key >= '0' && event.key <= '9';
@@ -254,7 +282,6 @@ export class PriceManagementComponent implements OnInit {
     return calculatedPriceNum < this.editProductionCost;
   }
 
-  // Método para cambiar entre pestañas
   setActiveTab(tab: 'prices' | 'bulk') {
     this.activeTab = tab;
   }

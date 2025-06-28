@@ -130,7 +130,13 @@
                   <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
                 </span>
               </th>
-              <th class="p-2 sm:p-3 text-left font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden lg:table-cell">Actualizado</th>
+              <th class="p-2 sm:p-3 text-left font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap cursor-pointer hidden lg:table-cell" (click)="sort('updated_at')">
+                Actualizado
+                <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-light-primary dark:text-dark-primary': sortBy === 'updated_at', 'text-gray-500 dark:text-gray-400': sortBy !== 'updated_at'}"></i>
+                <span *ngIf="sortBy === 'updated_at'" class="ml-1">
+                  <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                </span>
+              </th>
               <th class="p-2 sm:p-3 text-left font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
             </tr>
           </thead>
@@ -146,7 +152,7 @@
               <td class="p-2 sm:p-3 text-light-secondary dark:text-dark-secondary whitespace-nowrap truncate max-w-[100px]">{{ variant.sku }}</td>
               <td class="p-2 sm:p-3 text-light-secondary dark:text-dark-secondary whitespace-nowrap hidden sm:table-cell">{{ formatPrice(variant.production_cost) }}</td>
               <td class="p-2 sm:p-3 text-light-text dark:text-dark-text font-semibold whitespace-nowrap hidden md:table-cell">{{ formatPrice(variant.calculated_price) }}</td>
-              <td class="p-2 sm:p-3 text-light-secondary dark:text-dark-secondary whitespace-nowrap hidden lg:table-cell truncate max-w-[120px]">{{ variant.updated_at }}</td>
+              <td class="p-2 sm:p-3 text-light-secondary dark:text-dark-secondary whitespace-nowrap hidden lg:table-cell truncate max-w-[120px]">{{ formatDate(variant.updated_at) }}</td>
               <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
                 <button
                   (click)="openEditModal(variant)"
@@ -280,7 +286,7 @@
             <div class="space-y-2">
               <p>
                 <span class="font-semibold text-light-text dark:text-dark-text">Fecha:</span>
-                <span class="text-light-secondary dark:text-dark-secondary block break-words">{{ entry.change_date }}</span>
+                <span class="text-light-secondary dark:text-dark-secondary block break-words">{{ formatDate(entry.change_date) }}</span>
               </p>
               <p>
                 <span class="font-semibold text-light-text dark:text-dark-text">Por:</span>

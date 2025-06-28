@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms'; 
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, LOCALE_ID } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CommonModule, DatePipe } from '@angular/common';
 import { SupportInquiryService } from '../../services/support-inquiry.service';
 import { StatusCardsComponent } from './status-cards/status-cards.component';
 import { ConsultationRowComponent } from './consultation-row/consultation-row.component';
@@ -8,6 +8,11 @@ import { StatusBadgeComponent } from './status-badge/status-badge.component';
 import { ConsultationDetailsComponent } from './consultation-details/consultation-details.component';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FiltersPanelComponent } from './filters-panel/filters-panel.component';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
+// Registrar los datos de localización para español
+registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-support-panel',
@@ -15,16 +20,21 @@ import { FiltersPanelComponent } from './filters-panel/filters-panel.component';
   imports: [
     CommonModule,
     FormsModule,
-    StatusCardsComponent, 
-    ConsultationRowComponent, 
-    StatusBadgeComponent, 
+    StatusCardsComponent,
+    ConsultationRowComponent,
+    StatusBadgeComponent,
     ConsultationDetailsComponent,
     PaginationComponent,
-    FiltersPanelComponent
+    FiltersPanelComponent,
+    DatePipe
   ],
   templateUrl: './support-panel.component.html',
+  providers: [
+    DatePipe,
+    { provide: LOCALE_ID, useValue: 'es' }
+  ]
 })
-export class SupportPanelComponent {
+export class SupportPanelComponent implements OnInit {
   consultationCounts: any = {};
   consultations: any[] = [];
   selectedConsultationId: string | null = null;
@@ -42,7 +52,10 @@ export class SupportPanelComponent {
   // Almacenar los filtros actuales
   currentFilters: any = {};
 
-  constructor(private supportService: SupportInquiryService) {}
+  constructor(
+    private supportService: SupportInquiryService,
+    private datePipe: DatePipe
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -105,7 +118,7 @@ export class SupportPanelComponent {
       return acc;
     }, {});
   }
-  
+
   // Manejar cambios en los filtros
   onFiltersChanged(filters: any): void {
     this.currentFilters = filters; // Almacenar los filtros actuales
@@ -121,5 +134,11 @@ export class SupportPanelComponent {
   closeModal(): void {
     this.showModal = false;
     this.selectedConsultationId = null;
+  }
+
+  // Formatear fechas
+  getFormattedDate(date: string, withTime: boolean = false): string {
+    const format = withTime ? "d 'de' MMMM 'de' yyyy HH:mm" : "d 'de' MMMM 'de' yyyy";
+    return this.datePipe.transform(date, format, undefined, 'es') || 'Fecha no disponible';
   }
 }

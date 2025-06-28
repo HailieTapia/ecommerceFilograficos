@@ -1,13 +1,17 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe, registerLocaleData } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PromotionService, Promotion, PromotionQueryParams, Variant, VariantQueryParams, PromotionData } from '../../services/promotion.service';
-import { CategorieService } from '../../services/categorieService'; // Importamos el servicio de categorías
+import { CategorieService } from '../../services/categorieService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
 import { ToastService } from '../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import localeEs from '@angular/common/locales/es';
+import { LOCALE_ID } from '@angular/core';
+
+registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-promotion-management',
@@ -20,7 +24,11 @@ import { of } from 'rxjs';
     ModalComponent
   ],
   templateUrl: './promotion-management.component.html',
-  styleUrls: ['./promotion-management.component.css']
+  styleUrls: ['./promotion-management.component.css'],
+  providers: [
+    DatePipe,
+    { provide: LOCALE_ID, useValue: 'es' }
+  ]
 })
 export class PromotionManagementComponent implements OnInit {
   @ViewChild('promotionModal') promotionModal!: ModalComponent;
@@ -56,17 +64,17 @@ export class PromotionManagementComponent implements OnInit {
 
   constructor(
     private promotionService: PromotionService,
-    private categorieService: CategorieService, // Inyectamos el servicio de categorías
+    private categorieService: CategorieService,
     private fb: FormBuilder,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private datePipe: DatePipe
   ) {
-    // Establecer la fecha mínima como la actual
     this.minStartDate = new Date().toISOString().slice(0, 16);
 
     this.promotionForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       promotion_type: ['', Validators.required],
-      discount_value: ['', [Validators.required, Validators.min(1), Validators.max(100), Validators.pattern('^[0-9]*$')]], // Solo enteros del 1 al 100
+      discount_value: ['', [Validators.required, Validators.min(1), Validators.max(100), Validators.pattern('^[0-9]*$')]],
       min_quantity: [{ value: null, disabled: true }, Validators.min(1)],
       min_order_count: [{ value: null, disabled: true }, Validators.min(1)],
       min_unit_measure: [{ value: null, disabled: true }, Validators.min(0)],
@@ -92,16 +100,15 @@ export class PromotionManagementComponent implements OnInit {
   ngOnInit() {
     this.loadPromotions();
     this.loadAvailableVariants();
-    this.loadAvailableCategories(); // Cambiamos a esta función para cargar desde el backend
+    this.loadAvailableCategories();
     this.setupVariantSearch();
     this.setupCategorySearch();
   }
 
-  // Validador personalizado para evitar fechas anteriores a hoy
   dateNotBeforeToday(control: any) {
     const selectedDate = new Date(control.value);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalizar a medianoche
+    today.setHours(0, 0, 0, 0);
     return selectedDate < today ? { dateBeforeToday: true } : null;
   }
 
@@ -129,7 +136,6 @@ export class PromotionManagementComponent implements OnInit {
     });
   }
 
-  // Nueva función para cargar categorías desde el backend
   loadAvailableCategories() {
     this.categorieService.getCategories().subscribe({
       next: (response: any) => {
@@ -474,8 +480,14 @@ export class PromotionManagementComponent implements OnInit {
     );
   }
 
-  formatDate(date: string): string {
-    return date ? new Date(date).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+  formatDate(date: string | null | undefined): string {
+    if (!date) return 'Nunca';
+    return this.datePipe.transform(date, "d 'de' MMMM 'de' yyyy", undefined, 'es') || 'Nunca';
+  }
+
+  formatDateTime(date: string | null | undefined): string {
+    if (!date) return 'Nunca';
+    return this.datePipe.transform(date, "d 'de' MMMM 'de' yyyy HH:mm", undefined, 'es') || 'Nunca';
   }
 
   formatDateForInput(date: string): string {

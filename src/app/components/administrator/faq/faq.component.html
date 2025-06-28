@@ -81,7 +81,7 @@
               <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-normal break-words max-w-[200px] sm:max-w-[300px]">{{ faq.answer }}</td>
               <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ faq.category.name }}</td>
               <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(faq.createdAt) }}</td>
-              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(faq.updatedAt) }}</td>
+              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(faq.updatedAt, true) }}</td>
               <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
                 <button (click)="openFaqModal('edit', faq)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                   <i class="fas fa-edit"></i>
@@ -95,7 +95,7 @@
             </tr>
           </ng-container>
           <tr *ngIf="faqs.length === 0">
-            <td colspan="6" class="p-2 sm:p-3 text-center text-sm text-light-secondary dark:text-dark-secondary">No hay FAQs activas disponibles</td>
+            <td colspan="7" class="p-2 sm:p-3 text-center text-sm text-light-secondary dark:text-dark-secondary">No hay FAQs activas disponibles</td>
           </tr>
         </tbody>
       </table>
