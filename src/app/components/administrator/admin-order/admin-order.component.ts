@@ -190,7 +190,6 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
     this.orderService.getOrdersByDate(date, this.dateField).subscribe({
       next: (response: AdminOrdersByDateResponse) => {
         this.orders = response.data;
-        this.updateCalendarEvents();
         this.toastService.showToast(`Órdenes cargadas para ${this.formatDate(date)}`, 'info');
       },
       error: (err) => {
@@ -225,7 +224,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   updateOrderStatus(orderId: number, newStatus: OrderStatus): void {
     const request: UpdateOrderStatusRequest = { newStatus };
     this.orderService.updateOrderStatus(orderId, request).subscribe({
-      next: (response: any) => { // Adjust type if needed based on your response
+      next: (response: any) => {
         this.orders = this.orders.map(order =>
           order.order_id === orderId ? response.data : order
         );
@@ -247,7 +246,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
       id: order.order_id.toString(),
       title: `#${order.order_id} - ${order.customer_name}`,
       start: this.dateField === 'delivery' ? order.estimated_delivery_date : order.created_at,
-      end: this.dateField === 'delivery' ? moment(order.estimated_delivery_date).add(1, 'day').format('YYYY-MM-DD') : moment(order.created_at).add(1, 'day').format('YYYY-MM-DD'), // Ensure event spans the day
+      end: this.dateField === 'delivery' ? moment(order.estimated_delivery_date).add(1, 'day').format('YYYY-MM-DD') : moment(order.created_at).add(1, 'day').format('YYYY-MM-DD'),
       backgroundColor: this.getEventColor(order.order_status),
       borderColor: this.getEventBorderColor(order.order_status),
       textColor: this.getEventTextColor(order.order_status),
