@@ -43,6 +43,14 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   // Exponer moment como propiedad para uso en el componente
   protected moment = moment;
 
+  // Mapa de traducción de estados
+  private statusTranslations: { [key in OrderStatus]: string } = {
+    pending: 'Pendiente',
+    processing: 'Procesando',
+    shipped: 'Enviado',
+    delivered: 'Entregado'
+  };
+
   // Configuración del calendario
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin],
@@ -226,7 +234,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
       currentOrdersByDay[date].forEach(order => {
         events.push({
           id: order.order_id.toString(),
-          title: `#${order.order_id} - ${order.customer_name} (${order.order_status})`,
+          title: `#${order.order_id} - ${order.customer_name} (${this.statusTranslations[order.order_status]})`,
           start: date,
           backgroundColor: this.getEventColor(order.order_status),
           borderColor: this.getEventBorderColor(order.order_status),
@@ -278,6 +286,22 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
       delivered: '#065F46',
     };
     return colors[status] || '#E5E7EB';
+  }
+
+  // Método para obtener la traducción del estado
+  getStatusTranslation(status: OrderStatus): string {
+    return this.statusTranslations[status] || status;
+  }
+
+  // Método para obtener las clases de Tailwind según el estado
+  getStatusClasses(status: OrderStatus): string {
+    const classes: { [key in OrderStatus]: string } = {
+      pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      processing: 'bg-blue-100 text-blue-800 border-blue-200',
+      shipped: 'bg-purple-100 text-purple-800 border-purple-200',
+      delivered: 'bg-green-100 text-green-800 border-green-200'
+    };
+    return classes[status] || 'bg-gray-100 text-gray-800 border-gray-200';
   }
 
   // Aplicar filtros
