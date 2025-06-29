@@ -157,32 +157,15 @@ export class AdminOrderService {
           .set('statusFilter', statusFilter)
           .set('dateField', dateField);
 
-        if (searchTerm.trim()) {
-          params = params.set('searchTerm', searchTerm.trim());
-        }
-        if (dateFilter.trim()) {
-          params = params.set('dateFilter', dateFilter.trim());
-        }
-        if (paymentMethod) {
-          params = params.set('paymentMethod', paymentMethod);
-        }
-        if (deliveryOption) {
-          params = params.set('deliveryOption', deliveryOption);
-        }
-        if (minTotal !== null) {
-          params = params.set('minTotal', minTotal.toString());
-        }
-        if (maxTotal !== null) {
-          params = params.set('maxTotal', maxTotal.toString());
-        }
-        if (isUrgent !== null) {
-          params = params.set('isUrgent', isUrgent.toString());
-        }
+        if (searchTerm.trim()) params = params.set('searchTerm', searchTerm.trim());
+        if (dateFilter.trim()) params = params.set('dateFilter', dateFilter.trim());
+        if (paymentMethod) params = params.set('paymentMethod', paymentMethod);
+        if (deliveryOption) params = params.set('deliveryOption', deliveryOption);
+        if (minTotal !== null) params = params.set('minTotal', minTotal.toString());
+        if (maxTotal !== null) params = params.set('maxTotal', maxTotal.toString());
+        if (isUrgent !== null) params = params.set('isUrgent', isUrgent.toString());
 
-        return this.http.get<AdminOrdersResponse>(
-          this.apiUrl,
-          { headers, params, withCredentials: true }
-        );
+        return this.http.get<AdminOrdersResponse>(this.apiUrl, { headers, params, withCredentials: true });
       }),
       catchError(this.handleError)
     );
@@ -197,10 +180,7 @@ export class AdminOrderService {
           .set('date', date)
           .set('dateField', dateField);
 
-        return this.http.get<AdminOrdersByDateResponse>(
-          `${this.apiUrl}/by-date`,
-          { headers, params, withCredentials: true }
-        );
+        return this.http.get<AdminOrdersByDateResponse>(`${this.apiUrl}/by-date`, { headers, params, withCredentials: true });
       }),
       catchError(this.handleError)
     );
@@ -211,10 +191,7 @@ export class AdminOrderService {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<AdminOrderResponse>(
-          `${this.apiUrl}/${orderId}`,
-          { headers, withCredentials: true }
-        );
+        return this.http.get<AdminOrderResponse>(`${this.apiUrl}/${orderId}`, { headers, withCredentials: true });
       }),
       catchError(this.handleError)
     );
@@ -225,11 +202,7 @@ export class AdminOrderService {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.put<UpdateOrderStatusResponse>(
-          `${this.apiUrl}/${orderId}/status`,
-          newStatus,
-          { headers, withCredentials: true }
-        );
+        return this.http.put<UpdateOrderStatusResponse>(`${this.apiUrl}/${orderId}/status`, newStatus, { headers, withCredentials: true });
       }),
       catchError(this.handleError)
     );
@@ -240,10 +213,7 @@ export class AdminOrderService {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<AdminOrderSummaryResponse>(
-          `${this.apiUrl}/summary`,
-          { headers, withCredentials: true }
-        );
+        return this.http.get<AdminOrderSummaryResponse>(`${this.apiUrl}/summary`, { headers, withCredentials: true });
       }),
       catchError(this.handleError)
     );

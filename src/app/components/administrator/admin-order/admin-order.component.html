@@ -9,25 +9,22 @@
     </div>
   </div>
 
-  <!-- Filtros y Búsqueda - Versión actualizada -->
+  <!-- Filtros y Búsqueda -->
   <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm mb-6 border border-gray-200 dark:border-gray-700">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      <!-- Búsqueda -->
       <div class="relative">
         <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
         <input
           [(ngModel)]="searchTerm"
           (ngModelChange)="applyFilters()"
           placeholder="Buscar por ID o cliente..."
-          class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-sm"
         />
       </div>
-
-      <!-- Filtro de estado -->
       <select
         [(ngModel)]="statusFilter"
         (ngModelChange)="applyFilters()"
-        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-sm"
       >
         <option value="all">Todos los estados</option>
         <option value="pending">Pendiente</option>
@@ -35,42 +32,34 @@
         <option value="shipped">Enviado</option>
         <option value="delivered">Entregado</option>
       </select>
-
-      <!-- Campo de fecha -->
       <select
         [(ngModel)]="dateField"
         (ngModelChange)="applyFilters()"
-        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-sm"
       >
         <option value="delivery">Fecha de entrega</option>
         <option value="creation">Fecha de creación</option>
       </select>
-
-      <!-- Método de pago -->
       <select
         [(ngModel)]="paymentMethod"
         (ngModelChange)="applyFilters()"
-        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-sm"
       >
         <option value="">Todos los métodos</option>
         <option value="bank_transfer_oxxo">Oxxo</option>
         <option value="bank_transfer_bbva">BBVA</option>
         <option value="bank_transfer">Transferencia Bancaria</option>
       </select>
-
-      <!-- Opción de entrega -->
       <select
         [(ngModel)]="deliveryOption"
         (ngModelChange)="applyFilters()"
-        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-sm"
       >
         <option value="">Todas las opciones</option>
         <option value="home_delivery">Entrega a domicilio</option>
         <option value="pickup_point">Punto de recogida</option>
         <option value="store_pickup">Recogida en tienda</option>
       </select>
-
-      <!-- Total mínimo -->
       <div class="relative">
         <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">MXN</span>
         <input
@@ -78,11 +67,9 @@
           [(ngModel)]="minTotal"
           (ngModelChange)="applyFilters()"
           placeholder="Total mínimo"
-          class="w-full p-2 pl-12 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          class="w-full p-2 pl-12 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-sm"
         />
       </div>
-
-      <!-- Total máximo -->
       <div class="relative">
         <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">MXN</span>
         <input
@@ -90,15 +77,13 @@
           [(ngModel)]="maxTotal"
           (ngModelChange)="applyFilters()"
           placeholder="Total máximo"
-          class="w-full p-2 pl-12 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          class="w-full p-2 pl-12 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-sm"
         />
       </div>
-
-      <!-- Urgente -->
       <select
         [(ngModel)]="isUrgent"
         (ngModelChange)="applyFilters()"
-        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-sm"
       >
         <option [ngValue]="null">Todos (urgente/no urgente)</option>
         <option [ngValue]="true">Urgente</option>
@@ -107,82 +92,83 @@
     </div>
   </div>
 
-  <!-- Calendario - Versión actualizada -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 p-4">
-    <full-calendar [options]="calendarOptions"></full-calendar>
-  </div>
-
-  <!-- Panel de estadísticas - Versión actualizada -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-200 dark:border-gray-700">
-    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Resumen</h3>
-    <div class="space-y-4">
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-600 dark:text-gray-400">Total órdenes</span>
-        <span class="font-semibold">{{ summary?.total || 0 }}</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-600 dark:text-gray-400">Pendientes</span>
-        <span class="font-semibold text-yellow-600 dark:text-yellow-400">
-          {{ summary?.pending || 0 }}
-        </span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-600 dark:text-gray-400">En proceso</span>
-        <span class="font-semibold text-blue-600 dark:text-blue-400">
-          {{ summary?.processing || 0 }}
-        </span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-600 dark:text-gray-400">Enviadas</span>
-        <span class="font-semibold text-purple-600 dark:text-purple-400">
-          {{ summary?.shipped || 0 }}
-        </span>
-      </div>
-      <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-600 dark:text-gray-400">Entregadas</span>
-        <span class="font-semibold text-green-600 dark:text-green-400">
-          {{ summary?.delivered || 0 }}
-        </span>
+  <!-- Calendario -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 p-4">
+        <full-calendar [options]="calendarOptions"></full-calendar>
       </div>
     </div>
-  </div>
 
-  <!-- Lista de órdenes -->
-  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-600 mt-6" *ngIf="orders.length > 0">
-    <div class="p-4 border-b border-gray-200 dark:border-gray-600">
-      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text">Órdenes</h2>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="w-full table-auto border-collapse min-w-[640px]">
-        <thead class="bg-light-table-header dark:bg-dark-table-header">
-          <tr>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">ID</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Cliente</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Total</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Estado</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Fecha</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-          <tr *ngFor="let order of orders" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
-            <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text whitespace-nowrap">{{ order.order_id }}</td>
-            <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-normal break-words max-w-[150px] sm:max-w-[200px]">{{ order.customer_name }}</td>
-            <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatCurrency(order.total) }}</td>
-            <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ order.order_status | titlecase }}</td>
-            <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(order[dateField === 'delivery' ? 'estimated_delivery_date' : 'created_at']) }}</td>
-            <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
-              <button (click)="handleEventClick({ event: { id: order.order_id } })" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                <i class="fas fa-eye"></i>
-                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  Ver Detalles
+    <!-- Panel Lateral -->
+    <div class="space-y-6">
+      <!-- Estadísticas Rápidas -->
+       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Resumen</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Total órdenes</span>
+            <span class="font-semibold">{{ summary?.total || 0 }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Pendientes</span>
+            <span class="font-semibold text-yellow-600 dark:text-yellow-400">
+              {{ summary?.pending || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">En proceso</span>
+            <span class="font-semibold text-blue-600 dark:text-blue-400">
+              {{ summary?.processing || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Enviadas</span>
+            <span class="font-semibold text-purple-600 dark:text-purple-400">
+              {{ summary?.shipped || 0 }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Entregadas</span>
+            <span class="font-semibold text-green-600 dark:text-green-400">
+              {{ summary?.delivered || 0 }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Órdenes -->
+       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            {{ selectedDate ? 'Ordenes del ' + formatDate(selectedDate) : 'Todas las ordenes' }}
+          </h3>
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            <div *ngFor="let order of (selectedDate ? orders : orders.slice(0, 10))" class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-colors cursor-pointer" (click)="handleOrderClick(order.order_id)">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium">#{{order.order_id}}</span>
+                <span class="px-2 py-1 rounded-full text-xs font-medium" [ngClass]="{
+                  'bg-pending text-pending-text': order.order_status === 'pending',
+                  'bg-in-progress text-in-progress-text': order.order_status === 'processing',
+                  'bg-closed text-closed-text': order.order_status === 'shipped',
+                  'bg-resolved text-resolved-text': order.order_status === 'delivered'
+                }">
+                  {{ order.order_status }}
                 </span>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+              </div>
+              <div class="text-sm text-light-secondary dark:text-dark-secondary mb-1">{{ order.customer_name }}</div>
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{{ formatCurrency(order.total) }}</div>
+              <div class="text-xs text-gray-500 space-y-1">
+                <div class="flex justify-between"><span>Creada:</span> <span>{{ formatDate(order.created_at) }}</span></div>
+                <div class="flex justify-between"><span>Entrega:</span> <span>{{ formatDate(order.estimated_delivery_date) }}</span></div>
+              </div>
+            </div>
+            <div *ngIf="selectedDate && orders.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <i class="fas fa-box-open w-8 h-8 mx-auto mb-2 opacity-50"></i>
+              <p>No hay ordenes para esta fecha</p>
+            </div>
+          </div>
+        </div>
+    </div>  
   </div>
 
   <!-- Modal para detalles de la orden -->
@@ -249,11 +235,11 @@
         </div>
       </div>
     </div>
-  </app-modal>
+  </app-modal> 
 
   <!-- Indicador de carga y errores -->
   <div *ngIf="isLoading" class="text-center p-4 text-light-text dark:text-dark-text">
     <i class="fas fa-spinner animate-spin"></i> Cargando...
-  </div>
-  <div *ngIf="error" class="p-4 text-red-500 dark:text-red-400 text-center">{{ error }}</div>
+  </div> 
+  <div *ngIf="error" class="p-4 text-danger dark:text-dark-danger text-center">{{ error }}</div> 
 </div>

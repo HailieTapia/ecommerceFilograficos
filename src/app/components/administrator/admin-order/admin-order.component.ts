@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import { CalendarOptions, EventInput, EventClickArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { AdminOrderService, AdminOrder, AdminOrdersResponse, AdminOrderResponse, AdminOrderSummaryResponse, UpdateOrderStatusRequest, AdminOrdersByDateResponse, UpdateOrderStatusResponse } from '../../services/admin-order.service';
@@ -10,37 +10,38 @@ import { ToastService } from '../../services/toastService';
 import { ModalComponent } from '../../../modal/modal.component';
 import moment from 'moment';
 
+// Definir tipos de estado para usar como claves
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
+
 @Component({
   selector: 'app-admin-order',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    FullCalendarModule,
-    ModalComponent
-  ],
+  imports: [CommonModule, FormsModule, FullCalendarModule, ModalComponent],
   templateUrl: './admin-order.component.html',
   providers: [DatePipe]
 })
-export class AdminOrderComponent implements OnInit {
+export class AdminOrderComponent implements OnInit, AfterViewInit {
   @ViewChild('orderModal') orderModal!: ModalComponent;
 
   orders: AdminOrder[] = [];
   summary: AdminOrderSummaryResponse['data'] | null = null;
   selectedOrder: AdminOrder | null = null;
+  selectedDate: Date | null = null;
   isLoading = false;
   error: string | null = null;
 
-  // Filtros de búsqueda
+  // Filtros
   searchTerm = '';
   statusFilter: 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' = 'all';
-  dateFilter = '';
   dateField: 'delivery' | 'creation' = 'delivery';
   paymentMethod = '';
   deliveryOption = '';
   minTotal: number | null = null;
   maxTotal: number | null = null;
   isUrgent: boolean | null = null;
+
+  // Exponer moment como propiedad para uso en el componente
+  protected moment = moment;
 
   // Configuración del calendario
   calendarOptions: CalendarOptions = {
@@ -53,49 +54,46 @@ export class AdminOrderComponent implements OnInit {
     locale: 'es',
     firstDay: 1,
     headerToolbar: {
-      left: 'title',
-      center: '',
-      right: 'today prev,next'
+      left: 'prev,today,next',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay',
     },
     buttonText: {
       today: 'Hoy',
       month: 'Mes',
       week: 'Semana',
       day: 'Día',
-      list: 'Lista'
     },
-    dayHeaderClassNames: 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium',
-    dayCellClassNames: 'hover:bg-gray-50 dark:hover:bg-gray-700',
-    eventClassNames: 'cursor-pointer text-xs font-medium',
+    dayHeaderClassNames: 'bg-light-table-header dark:bg-dark-table-header text-light-text dark:text-dark-text font-medium',
+    dayCellClassNames: 'hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-colors',
+    eventClassNames: (info) => {
+      const order = info.event.extendedProps['order'] as AdminOrder;
+      return [`fc-event-${order.order_status.toLowerCase()}`, 'cursor-pointer', 'text-xs', 'font-medium'];
+    },
     eventContent: this.customEventContent.bind(this),
     eventDisplay: 'block',
-    eventTimeFormat: { 
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    },
-    themeSystem: 'bootstrap5'
+    eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: true },
+    themeSystem: 'standard',
   };
 
   // Método para personalizar el contenido de los eventos
   private customEventContent(arg: any): { html: string } {
-    const order = arg.event.extendedProps.order;
+    const order = arg.event.extendedProps['order'] as AdminOrder;
     const statusColor = this.getEventColor(order.order_status);
-    
     return {
       html: `
         <div class="p-1 rounded border-l-4" style="border-color: ${statusColor}">
           <div class="font-semibold truncate">#${order.order_id}</div>
           <div class="text-xs truncate">${order.customer_name}</div>
         </div>
-      `
+      `,
     };
   }
 
   // Formateador de moneda
   private currencyFormatter = new Intl.NumberFormat('es-MX', {
     style: 'currency',
-    currency: 'MXN'
+    currency: 'MXN',
   });
 
   constructor(
@@ -109,19 +107,21 @@ export class AdminOrderComponent implements OnInit {
     this.loadSummary();
   }
 
+  ngAfterViewInit(): void {
+    this.updateCalendarEvents();
+  }
+
   // Cargar órdenes con filtros
   loadOrders(): void {
     this.isLoading = true;
     const startDate = moment().startOf('month').format('YYYY-MM-DD');
     const endDate = moment().endOf('month').format('YYYY-MM-DD');
-    this.dateFilter = `${startDate},${endDate}`;
-
     this.orderService.getOrders(
       1,
       50,
       this.searchTerm,
       this.statusFilter,
-      this.dateFilter,
+      `${startDate},${endDate}`,
       this.dateField,
       this.paymentMethod,
       this.deliveryOption,
@@ -138,7 +138,7 @@ export class AdminOrderComponent implements OnInit {
         this.error = err.message;
         this.isLoading = false;
         this.toastService.showToast(err.message || 'Error al cargar las órdenes', 'error');
-      }
+      },
     });
   }
 
@@ -147,33 +147,44 @@ export class AdminOrderComponent implements OnInit {
     this.orderService.getOrderSummary().subscribe({
       next: (response: AdminOrderSummaryResponse) => {
         this.summary = response.data;
-        console.log(this.summary)
       },
       error: (err) => {
         this.error = err.message;
         this.toastService.showToast(err.message || 'Error al cargar el resumen', 'error');
-      }
+      },
     });
   }
 
   // Cargar órdenes para una fecha específica
   handleDateClick(arg: any): void {
+    this.selectedDate = arg.date;
     const date = moment(arg.date).format('YYYY-MM-DD');
     this.orderService.getOrdersByDate(date, this.dateField).subscribe({
       next: (response: AdminOrdersByDateResponse) => {
         this.orders = response.data;
+        this.updateCalendarEvents();
         this.toastService.showToast(`Órdenes cargadas para ${this.formatDate(date)}`, 'info');
       },
       error: (err) => {
         this.error = err.message;
         this.toastService.showToast(err.message || 'Error al cargar órdenes por fecha', 'error');
-      }
+      },
     });
   }
 
-  // Mostrar detalles de una orden
-  handleEventClick(arg: any): void {
+  // Mostrar detalles de una orden desde el calendario
+  handleEventClick(arg: EventClickArg): void {
     const orderId = parseInt(arg.event.id, 10);
+    this.loadOrderDetails(orderId);
+  }
+
+  // Mostrar detalles de una orden desde la lista
+  handleOrderClick(orderId: number): void {
+    this.loadOrderDetails(orderId);
+  }
+
+  // Método auxiliar para cargar detalles de una orden
+  private loadOrderDetails(orderId: number): void {
     this.orderService.getOrderById(orderId).subscribe({
       next: (response: AdminOrderResponse) => {
         this.selectedOrder = response.data;
@@ -182,7 +193,7 @@ export class AdminOrderComponent implements OnInit {
       error: (err) => {
         this.error = err.message;
         this.toastService.showToast(err.message || 'Error al cargar detalles de la orden', 'error');
-      }
+      },
     });
   }
 
@@ -197,42 +208,76 @@ export class AdminOrderComponent implements OnInit {
         if (this.selectedOrder?.order_id === orderId) {
           this.selectedOrder = response.data;
         }
-        this.updateCalendarEvents({}); // Actualizar eventos si es necesario
+        this.updateCalendarEvents();
         this.toastService.showToast('Estado de la orden actualizado exitosamente', 'success');
       },
       error: (err) => {
         this.error = err.message;
         this.toastService.showToast(err.message || 'Error al actualizar el estado', 'error');
-      }
+      },
     });
   }
 
   // Actualizar eventos del calendario
-  private updateCalendarEvents(ordersByDay: { [date: string]: AdminOrder[] }): void {
+  private updateCalendarEvents(ordersByDay: { [date: string]: AdminOrder[] } = {}): void {
     const events: EventInput[] = [];
-    Object.keys(ordersByDay).forEach(date => {
-      ordersByDay[date].forEach(order => {
+    const currentOrdersByDay = ordersByDay || this.groupOrdersByDate(this.orders);
+    Object.keys(currentOrdersByDay).forEach(date => {
+      currentOrdersByDay[date].forEach(order => {
         events.push({
           id: order.order_id.toString(),
-          title: `Orden #${order.order_id} - ${order.customer_name}`,
+          title: `#${order.order_id} - ${order.customer_name} (${order.order_status})`,
           start: date,
           backgroundColor: this.getEventColor(order.order_status),
-          extendedProps: { order }
+          borderColor: this.getEventBorderColor(order.order_status),
+          textColor: this.getEventTextColor(order.order_status),
+          extendedProps: { order },
         });
       });
     });
     this.calendarOptions.events = events;
   }
 
-  // Obtener color según el estado - Versión actualizada
-  private getEventColor(status: string): string {
-    switch (status) {
-      case 'pending': return '#f59e0b'; // amber-500
-      case 'processing': return '#3b82f6'; // blue-500
-      case 'shipped': return '#8b5cf6'; // violet-500
-      case 'delivered': return '#10b981'; // emerald-500
-      default: return '#6b7280'; // gray-500
-    }
+  // Agrupar órdenes por fecha
+  private groupOrdersByDate(orders: AdminOrder[]): { [date: string]: AdminOrder[] } {
+    const grouped: { [date: string]: AdminOrder[] } = {};
+    orders.forEach(order => {
+      const date = moment(this.dateField === 'delivery' ? order.estimated_delivery_date : order.created_at).format('YYYY-MM-DD');
+      if (!grouped[date]) grouped[date] = [];
+      grouped[date].push(order);
+    });
+    return grouped;
+  }
+
+  // Obtener colores según el estado con índice de firma
+  private getEventColor(status: OrderStatus): string {
+    const colors: { [key in OrderStatus]: string } = {
+      pending: '#FACC15',
+      processing: '#DBEAFE',
+      shipped: '#E0E7FF',
+      delivered: '#DCFCE7',
+    };
+    return colors[status] || '#E5E7EB';
+  }
+
+  private getEventBorderColor(status: OrderStatus): string {
+    const colors: { [key in OrderStatus]: string } = {
+      pending: '#92400E',
+      processing: '#1E3A8A',
+      shipped: '#4B5563',
+      delivered: '#065F46',
+    };
+    return colors[status] || '#6B7280';
+  }
+
+  private getEventTextColor(status: OrderStatus): string {
+    const colors: { [key in OrderStatus]: string } = {
+      pending: '#92400E',
+      processing: '#1E3A8A',
+      shipped: '#4B5563',
+      delivered: '#065F46',
+    };
+    return colors[status] || '#E5E7EB';
   }
 
   // Aplicar filtros
@@ -241,8 +286,9 @@ export class AdminOrderComponent implements OnInit {
   }
 
   // Formatear fecha
-  formatDate(date: string): string {
-    return this.datePipe.transform(date, 'dd MMM yyyy', 'es-MX') || date;
+  formatDate(date: string | Date): string {
+    const dateStr = typeof date === 'string' ? date : moment(date).format('YYYY-MM-DD');
+    return this.datePipe.transform(dateStr, 'dd MMM yyyy', 'es-MX') || dateStr;
   }
 
   // Formatear moneda
