@@ -1,160 +1,252 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { AdminOrder, AdminOrderService, AdminOrderSummary, AdminOrdersResponse } from '../../services/admin-order.service';
-import { OrderCalendarComponent } from './order-calendar/order-calendar.component';
-import { OrderFilterComponent } from './order-filter/order-filter.component';
-import { OrderSummaryComponent } from './order-summary/order-summary.component';
-import { OrderListComponent } from './order-list/order-list.component';
-import { OrderModalComponent } from './order-modal/order-modal.component';
+import { FormsModule } from '@angular/forms';
+import { FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { AdminOrderService, AdminOrder, AdminOrdersResponse, AdminOrderResponse, AdminOrderSummaryResponse, UpdateOrderStatusRequest, AdminOrdersByDateResponse, UpdateOrderStatusResponse } from '../../services/admin-order.service';
 import { ToastService } from '../../services/toastService';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { ModalComponent } from '../../../modal/modal.component';
+import moment from 'moment';
 
 @Component({
   selector: 'app-admin-order',
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
-    OrderCalendarComponent,
-    OrderFilterComponent,
-    OrderSummaryComponent,
-    OrderListComponent,
-    OrderModalComponent,
+    FormsModule,
+    FullCalendarModule,
+    ModalComponent
   ],
   templateUrl: './admin-order.component.html',
-  styleUrls: ['./admin-order.component.css'],
-  providers: [DatePipe],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [DatePipe]
 })
 export class AdminOrderComponent implements OnInit {
+  @ViewChild('orderModal') orderModal!: ModalComponent;
+
   orders: AdminOrder[] = [];
-  summary: AdminOrderSummary | null = null;
-  currentDate: Date = new Date();
-  selectedDate: Date | null = null;
+  summary: AdminOrderSummaryResponse['data'] | null = null;
   selectedOrder: AdminOrder | null = null;
-  searchTerm: string = '';
-  statusFilter: string = 'all';
-  dateFilter: 'delivery' | 'creation' = 'delivery';
+  isLoading = false;
+  error: string | null = null;
+
+  // Filtros de búsqueda
+  searchTerm = '';
+  statusFilter: 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' = 'all';
+  dateFilter = '';
+  dateField: 'delivery' | 'creation' = 'delivery';
+  paymentMethod = '';
+  deliveryOption = '';
+  minTotal: number | null = null;
+  maxTotal: number | null = null;
+  isUrgent: boolean | null = null;
+
+  // Configuración del calendario
+  calendarOptions: CalendarOptions = {
+    plugins: [dayGridPlugin, interactionPlugin],
+    initialView: 'dayGridMonth',
+    events: [],
+    dateClick: this.handleDateClick.bind(this),
+    eventClick: this.handleEventClick.bind(this),
+    height: 'auto',
+    locale: 'es',
+    firstDay: 1,
+    headerToolbar: {
+      left: 'title',
+      center: '',
+      right: 'today prev,next'
+    },
+    buttonText: {
+      today: 'Hoy',
+      month: 'Mes',
+      week: 'Semana',
+      day: 'Día',
+      list: 'Lista'
+    },
+    dayHeaderClassNames: 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium',
+    dayCellClassNames: 'hover:bg-gray-50 dark:hover:bg-gray-700',
+    eventClassNames: 'cursor-pointer text-xs font-medium',
+    eventContent: this.customEventContent.bind(this),
+    eventDisplay: 'block',
+    eventTimeFormat: { 
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    },
+    themeSystem: 'bootstrap5'
+  };
+
+  // Método para personalizar el contenido de los eventos
+  private customEventContent(arg: any): { html: string } {
+    const order = arg.event.extendedProps.order;
+    const statusColor = this.getEventColor(order.order_status);
+    
+    return {
+      html: `
+        <div class="p-1 rounded border-l-4" style="border-color: ${statusColor}">
+          <div class="font-semibold truncate">#${order.order_id}</div>
+          <div class="text-xs truncate">${order.customer_name}</div>
+        </div>
+      `
+    };
+  }
+
+  // Formateador de moneda
+  private currencyFormatter = new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN'
+  });
 
   constructor(
     private orderService: AdminOrderService,
     private toastService: ToastService,
-    private datePipe: DatePipe,
-    private dialog: MatDialog
+    private datePipe: DatePipe
   ) {}
 
   ngOnInit(): void {
     this.loadOrders();
-    this.setupFilterDebounce();
+    this.loadSummary();
   }
 
+  // Cargar órdenes con filtros
   loadOrders(): void {
-    this.orderService
-      .getOrders(
-        1,
-        20,
-        this.searchTerm,
-        this.statusFilter as 'all' | 'pending' | 'processing' | 'shipped' | 'delivered',
-        this.selectedDate ? this.datePipeTransform(this.selectedDate) : '',
-        this.dateFilter
-      )
-      .subscribe({
-        next: (response: AdminOrdersResponse) => {
-          this.orders = response.data.orders;
-          this.summary = response.data.summary || {
-            totalOrders: response.data.pagination.totalOrders,
-            pendingCount: response.data.orders.filter((o: AdminOrder) => o.order_status === 'pending').length,
-            processingCount: response.data.orders.filter((o: AdminOrder) => o.order_status === 'processing').length,
-            shippedCount: response.data.orders.filter((o: AdminOrder) => o.order_status === 'shipped').length,
-            deliveredCount: response.data.orders.filter((o: AdminOrder) => o.order_status === 'delivered').length,
-          };
-          console.log("Orders:",this.orders)
-          console.log("Summary:",this.summary)
-        },
-        error: (err) => {
-          this.toastService.showToast(`Error al cargar las órdenes: ${err.message}`, 'error');
-        },
-      });
-  }
+    this.isLoading = true;
+    const startDate = moment().startOf('month').format('YYYY-MM-DD');
+    const endDate = moment().endOf('month').format('YYYY-MM-DD');
+    this.dateFilter = `${startDate},${endDate}`;
 
-  private datePipeTransform(date: Date): string {
-    // Enviar solo el año si se selecciona una fecha, o un rango si es necesario
-    return this.datePipe.transform(date, 'yyyy')!;
-  }
-
-  setupFilterDebounce(): void {
-    of(this.searchTerm)
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap(() => {
-          this.loadOrders();
-          return of(null);
-        })
-      )
-      .subscribe();
-  }
-
-  onSearchTermChange(searchTerm: string): void {
-    this.searchTerm = searchTerm;
-    this.loadOrders();
-  }
-
-  onStatusFilterChange(status: string): void {
-    this.statusFilter = status;
-    this.loadOrders();
-  }
-
-  onDateFilterChange(dateFilter: string): void {
-    if (dateFilter === 'delivery' || dateFilter === 'creation') {
-      this.dateFilter = dateFilter;
-      this.loadOrders();
-    } else {
-      this.toastService.showToast('Filtro de fecha inválido', 'error');
-    }
-  }
-
-  onDateSelected(date: Date): void {
-    this.selectedDate = date;
-    this.loadOrders();
-  }
-
-  onOrderSelected(order: AdminOrder): void {
-    this.orderService.getOrderById(order.order_id).subscribe({
-      next: (response) => {
-        this.selectedOrder = response.data;
-        this.dialog.open(OrderModalComponent, {
-          data: { order: this.selectedOrder },
-          width: '600px',
-          maxHeight: '90vh'
-        }).afterClosed().subscribe(() => {
-          this.onCloseModal();
-        });
+    this.orderService.getOrders(
+      1,
+      50,
+      this.searchTerm,
+      this.statusFilter,
+      this.dateFilter,
+      this.dateField,
+      this.paymentMethod,
+      this.deliveryOption,
+      this.minTotal,
+      this.maxTotal,
+      this.isUrgent
+    ).subscribe({
+      next: (response: AdminOrdersResponse) => {
+        this.orders = response.data.orders;
+        this.updateCalendarEvents(response.data.ordersByDay);
+        this.isLoading = false;
       },
-      error: () => {
-        this.toastService.showToast('Error al cargar los detalles de la orden', 'error');
-      },
+      error: (err) => {
+        this.error = err.message;
+        this.isLoading = false;
+        this.toastService.showToast(err.message || 'Error al cargar las órdenes', 'error');
+      }
     });
   }
 
-  onUpdateStatus(request: { newStatus: 'pending' | 'processing' | 'shipped' | 'delivered' }): void {
-    if (this.selectedOrder) {
-      this.orderService.updateOrderStatus(this.selectedOrder.order_id, request).subscribe({
-        next: () => {
-          this.loadOrders();
-          this.selectedOrder = null;
-          this.toastService.showToast('Estado de la orden actualizado', 'success');
-        },
-        error: () => {
-          this.toastService.showToast('Error al actualizar el estado de la orden', 'error');
-        },
+  // Cargar estadísticas
+  loadSummary(): void {
+    this.orderService.getOrderSummary().subscribe({
+      next: (response: AdminOrderSummaryResponse) => {
+        this.summary = response.data;
+        console.log(this.summary)
+      },
+      error: (err) => {
+        this.error = err.message;
+        this.toastService.showToast(err.message || 'Error al cargar el resumen', 'error');
+      }
+    });
+  }
+
+  // Cargar órdenes para una fecha específica
+  handleDateClick(arg: any): void {
+    const date = moment(arg.date).format('YYYY-MM-DD');
+    this.orderService.getOrdersByDate(date, this.dateField).subscribe({
+      next: (response: AdminOrdersByDateResponse) => {
+        this.orders = response.data;
+        this.toastService.showToast(`Órdenes cargadas para ${this.formatDate(date)}`, 'info');
+      },
+      error: (err) => {
+        this.error = err.message;
+        this.toastService.showToast(err.message || 'Error al cargar órdenes por fecha', 'error');
+      }
+    });
+  }
+
+  // Mostrar detalles de una orden
+  handleEventClick(arg: any): void {
+    const orderId = parseInt(arg.event.id, 10);
+    this.orderService.getOrderById(orderId).subscribe({
+      next: (response: AdminOrderResponse) => {
+        this.selectedOrder = response.data;
+        this.orderModal.open();
+      },
+      error: (err) => {
+        this.error = err.message;
+        this.toastService.showToast(err.message || 'Error al cargar detalles de la orden', 'error');
+      }
+    });
+  }
+
+  // Actualizar estado de una orden
+  updateOrderStatus(orderId: number, newStatus: 'pending' | 'processing' | 'shipped' | 'delivered'): void {
+    const request: UpdateOrderStatusRequest = { newStatus };
+    this.orderService.updateOrderStatus(orderId, request).subscribe({
+      next: (response: UpdateOrderStatusResponse) => {
+        this.orders = this.orders.map(order =>
+          order.order_id === orderId ? response.data : order
+        );
+        if (this.selectedOrder?.order_id === orderId) {
+          this.selectedOrder = response.data;
+        }
+        this.updateCalendarEvents({}); // Actualizar eventos si es necesario
+        this.toastService.showToast('Estado de la orden actualizado exitosamente', 'success');
+      },
+      error: (err) => {
+        this.error = err.message;
+        this.toastService.showToast(err.message || 'Error al actualizar el estado', 'error');
+      }
+    });
+  }
+
+  // Actualizar eventos del calendario
+  private updateCalendarEvents(ordersByDay: { [date: string]: AdminOrder[] }): void {
+    const events: EventInput[] = [];
+    Object.keys(ordersByDay).forEach(date => {
+      ordersByDay[date].forEach(order => {
+        events.push({
+          id: order.order_id.toString(),
+          title: `Orden #${order.order_id} - ${order.customer_name}`,
+          start: date,
+          backgroundColor: this.getEventColor(order.order_status),
+          extendedProps: { order }
+        });
       });
+    });
+    this.calendarOptions.events = events;
+  }
+
+  // Obtener color según el estado - Versión actualizada
+  private getEventColor(status: string): string {
+    switch (status) {
+      case 'pending': return '#f59e0b'; // amber-500
+      case 'processing': return '#3b82f6'; // blue-500
+      case 'shipped': return '#8b5cf6'; // violet-500
+      case 'delivered': return '#10b981'; // emerald-500
+      default: return '#6b7280'; // gray-500
     }
   }
 
-  onCloseModal(): void {
-    this.selectedOrder = null;
+  // Aplicar filtros
+  applyFilters(): void {
+    this.loadOrders();
+  }
+
+  // Formatear fecha
+  formatDate(date: string): string {
+    return this.datePipe.transform(date, 'dd MMM yyyy', 'es-MX') || date;
+  }
+
+  // Formatear moneda
+  formatCurrency(amount: number): string {
+    return this.currencyFormatter.format(amount);
   }
 }
