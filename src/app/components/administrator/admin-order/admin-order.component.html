@@ -1,32 +1,30 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 font-sans">
   <!-- Header -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-200 dark:border-gray-700">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-          <i class="fas fa-calendar-alt text-blue-600 dark:text-blue-400"></i> Panel de Órdenes
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">Gestiona y visualiza todas las órdenes de tu tienda</p>
-      </div>
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-4">
+    <div>
+      <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-calendar-alt text-blue-600 dark:text-blue-400"></i> Panel de Órdenes
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">Gestiona y visualiza todas las órdenes de tu tienda</p>
     </div>
   </div>
 
   <!-- Filtros -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-200 dark:border-gray-700">
-    <div class="flex flex-col sm:flex-row gap-3">
-      <div class="relative flex-1">
+  <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm mb-6 border border-gray-200 dark:border-gray-700">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div class="relative">
         <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
         <input
           [(ngModel)]="searchTerm"
           (ngModelChange)="applyFilters()"
           placeholder="Buscar por cliente o ID..."
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-white dark:bg-gray-700"
+          class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
         />
       </div>
       <select
         [(ngModel)]="statusFilter"
         (ngModelChange)="applyFilters()"
-        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-white dark:bg-gray-700"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
       >
         <option value="all">Todos los estados</option>
         <option value="pending">Pendiente</option>
@@ -37,7 +35,7 @@
       <select
         [(ngModel)]="dateField"
         (ngModelChange)="applyFilters()"
-        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
       >
         <option value="delivery">Por fecha de entrega</option>
         <option value="creation">Por fecha de creación</option>
@@ -45,7 +43,7 @@
       <select
         [(ngModel)]="paymentMethod"
         (ngModelChange)="applyFilters()"
-        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-white dark:bg-gray-700"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
       >
         <option value="">Todos los métodos</option>
         <option value="bank_transfer_oxxo">Oxxo</option>
@@ -57,7 +55,7 @@
       <select
         [(ngModel)]="deliveryOption"
         (ngModelChange)="applyFilters()"
-        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-white dark:bg-gray-700"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
       >
         <option value="">Todas las opciones</option>
         <option value="home_delivery">Entrega a domicilio</option>
@@ -71,7 +69,7 @@
           [(ngModel)]="minTotal"
           (ngModelChange)="applyFilters()"
           placeholder="Total mínimo"
-          class="w-full pl-12 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-white dark:bg-gray-700"
+          class="w-full p-2 pl-12 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
         />
       </div>
       <div class="relative">
@@ -81,13 +79,13 @@
           [(ngModel)]="maxTotal"
           (ngModelChange)="applyFilters()"
           placeholder="Total máximo"
-          class="w-full pl-12 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-white dark:bg-gray-700"
+          class="w-full p-2 pl-12 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
         />
       </div>
       <select
         [(ngModel)]="isUrgent"
         (ngModelChange)="applyFilters()"
-        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-white dark:bg-gray-700"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
       >
         <option [ngValue]="null">Todos (urgente/no urgente)</option>
         <option [ngValue]="true">Urgente</option>
@@ -202,7 +200,7 @@
                 <select
                   [(ngModel)]="selectedOrder.order_status"
                   (ngModelChange)="updateOrderStatus(selectedOrder.order_id, $event)"
-                  class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm bg-white dark:bg-gray-700"
+                  class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
                 >
                   <option value="pending">Pendiente</option>
                   <option value="processing">Procesando</option>
@@ -261,7 +259,7 @@
           </div>
         </div>
         <!-- Botones de acción -->
-        <div class="flex gap-3">
+        <div class="flex flex-col sm:flex-row gap-3">
           <button
             class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
           >
