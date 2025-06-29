@@ -1,60 +1,289 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-4 sm:p-6 font-sans">
-  <!-- Encabezado -->
-  <div
-    class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-4"
-  >
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-4">
     <div>
       <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-        <i class="fas fa-calendar-alt text-blue-600 dark:text-blue-400"></i>
-        Gestión de Órdenes
+        <i class="fas fa-calendar-alt text-blue-600 dark:text-blue-400"></i> Panel de Órdenes
       </h1>
-      <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">Administra las órdenes de la tienda</p>
+      <p class="text-gray-600 dark:text-gray-400 text-sm mt-1">Gestiona y visualiza todas las órdenes de tu tienda</p>
     </div>
   </div>
 
   <!-- Filtros -->
   <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm mb-6 border border-gray-200 dark:border-gray-700">
-    <app-order-filter
-      [searchTerm]="searchTerm"
-      [statusFilter]="statusFilter"
-      [dateFilter]="dateFilter"
-      (searchTermChange)="onSearchTermChange($event)"
-      (statusFilterChange)="onStatusFilterChange($event)"
-      (dateFilterChange)="onDateFilterChange($event)"
-    ></app-order-filter>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div class="relative">
+        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+        <input
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="applyFilters()"
+          placeholder="Buscar por cliente o ID..."
+          class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+        />
+      </div>
+      <select
+        [(ngModel)]="statusFilter"
+        (ngModelChange)="applyFilters()"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+      >
+        <option value="all">Todos los estados</option>
+        <option value="pending">Pendiente</option>
+        <option value="processing">Procesando</option>
+        <option value="shipped">Enviado</option>
+        <option value="delivered">Entregado</option>
+      </select>
+      <select
+        [(ngModel)]="dateField"
+        (ngModelChange)="applyFilters()"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+      >
+        <option value="delivery">Por fecha de entrega</option>
+        <option value="creation">Por fecha de creación</option>
+      </select>
+      <select
+        [(ngModel)]="paymentMethod"
+        (ngModelChange)="applyFilters()"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+      >
+        <option value="">Todos los métodos</option>
+        <option value="bank_transfer_oxxo">Oxxo</option>
+        <option value="bank_transfer_bbva">BBVA</option>
+        <option value="bank_transfer">Transferencia Bancaria</option>
+        <option value="stripe">Stripe</option>
+        <option value="paypal">PayPal</option>
+      </select>
+      <select
+        [(ngModel)]="deliveryOption"
+        (ngModelChange)="applyFilters()"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+      >
+        <option value="">Todas las opciones</option>
+        <option value="home_delivery">Entrega a domicilio</option>
+        <option value="pickup_point">Punto de recogida</option>
+        <option value="store_pickup">Recogida en tienda</option>
+      </select>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">MXN</span>
+        <input
+          type="number"
+          [(ngModel)]="minTotal"
+          (ngModelChange)="applyFilters()"
+          placeholder="Total mínimo"
+          class="w-full p-2 pl-12 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+        />
+      </div>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm">MXN</span>
+        <input
+          type="number"
+          [(ngModel)]="maxTotal"
+          (ngModelChange)="applyFilters()"
+          placeholder="Total máximo"
+          class="w-full p-2 pl-12 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+        />
+      </div>
+      <select
+        [(ngModel)]="isUrgent"
+        (ngModelChange)="applyFilters()"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+      >
+        <option [ngValue]="null">Todos (urgente/no urgente)</option>
+        <option [ngValue]="true">Urgente</option>
+        <option [ngValue]="false">No urgente</option>
+      </select>
+    </div>
   </div>
 
-  <!-- Contenido Principal -->
+  <!-- Contenido principal -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Calendario -->
     <div class="lg:col-span-2">
-      <app-order-calendar
-        [currentDate]="currentDate"
-        [selectedDate]="selectedDate"
-        [orders]="orders"
-        [dateFilter]="dateFilter"
-        (dateSelected)="onDateSelected($event)"
-        (orderSelected)="onOrderSelected($event)"
-      ></app-order-calendar>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700 p-4">
+        <full-calendar [options]="calendarOptions"></full-calendar>
+      </div>
     </div>
 
     <!-- Panel Lateral -->
-    <div class="flex flex-col gap-6">
-      <app-order-summary [summary]="summary"></app-order-summary>
-      <app-order-list
-        [orders]="orders"
-        [selectedDate]="selectedDate"
-        [dateFilter]="dateFilter"
-        (orderSelected)="onOrderSelected($event)"
-      ></app-order-list>
+    <div class="space-y-6">
+      <!-- Estadísticas Rápidas -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Resumen</h3>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Total órdenes</span>
+            <span class="font-semibold">{{ summary?.total || 0 }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Pendientes</span>
+            <span class="font-semibold text-yellow-600 dark:text-yellow-400">{{ summary?.pending || 0 }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">En proceso</span>
+            <span class="font-semibold text-blue-600 dark:text-blue-400">{{ summary?.processing || 0 }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Enviadas</span>
+            <span class="font-semibold text-purple-600 dark:text-purple-400">{{ summary?.shipped || 0 }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Entregadas</span>
+            <span class="font-semibold text-green-600 dark:text-green-400">{{ summary?.delivered || 0 }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de Órdenes -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          {{ selectedDate ? 'Órdenes del ' + formatDate(selectedDate) : 'Todas las órdenes' }}
+        </h3>
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          <div
+            *ngFor="let order of (selectedDate ? orders : orders.slice(0, 10))"
+            class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+            (click)="handleOrderClick(order.order_id)"
+          >
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-medium">#{{ order.order_id }}</span>
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ getStatusClasses(order.order_status) }}">
+                <i class="mr-1 fa-solid" [ngClass]="{
+                  'fa-clock': order.order_status === 'pending',
+                  'fa-box': order.order_status === 'processing',
+                  'fa-truck': order.order_status === 'shipped',
+                  'fa-check-circle': order.order_status === 'delivered'
+                }"></i>
+                {{ getStatusTranslation(order.order_status) }}
+              </span>
+            </div>
+            <div class="text-sm text-Gray-600 dark:text-gray-400 mb-1">{{ order.customer_name }}</div>
+            <div class="text-sm font-medium text-gray-900 darkening:text-gray-100 mb-1">{{ formatCurrency(order.total) }}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+              <div class="flex justify-justify-between">
+                <span>Creada:</span>
+                <span>{{ formatDate(order.created_at) }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Entrega:</span>
+                <span>{{ formatDate(order.estimated_delivery_date) }}</span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="selectedDate && orders.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <i class="fas fa-box-open w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            <p>No hay órdenes para esta fecha</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Modal de Detalles -->
-  <app-order-modal
-    *ngIf="selectedOrder"
-    [order]="selectedOrder"
-    (updateStatus)="onUpdateStatus($event)"
-    (close)="onCloseModal()"
-  ></app-order-modal>
+  <!-- Modal para detalles de la orden -->
+  <app-modal #orderModal title="Detalles de la Orden">
+    <div class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto" *ngIf="selectedOrder">
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Información del cliente -->
+          <div>
+            <h3 class="text-lg font-semibold mb-3">Cliente</h3>
+            <p><strong>Nombre:</strong> {{ selectedOrder.customer_name }}</p>
+            <p><strong>ID Usuario:</strong> {{ selectedOrder.user_id }}</p>
+            <p><strong>Opción de entrega:</strong> {{ selectedOrder.delivery_option | titlecase }}</p>
+            <p><strong>Fecha de creación:</strong> {{ formatDate(selectedOrder.created_at) }}</p>
+            <p><strong>Fecha de entrega estimada:</strong> {{ formatDate(selectedOrder.estimated_delivery_date) }}</p>
+          </div>
+          <!-- Estado y pago -->
+          <div>
+            <h3 class="text-lg font-semibold mb-3">Estado y Pago</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium mb-1">Estado de la orden</label>
+                <select
+                  [(ngModel)]="selectedOrder.order_status"
+                  (ngModelChange)="updateOrderStatus(selectedOrder.order_id, $event)"
+                  class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
+                >
+                  <option value="pending">Pendiente</option>
+                  <option value="processing">Procesando</option>
+                  <option value="shipped">Enviado</option>
+                  <option value="delivered">Entregado</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium">Pago:</span>
+                <span class="px-2 py-1 rounded-full text-xs font-medium {{ getPaymentStatusClasses(selectedOrder.payment_status) }}">
+                  {{ selectedOrder.payment_status | titlecase }}
+                </span>
+              </div>
+              <p><strong>Método:</strong> {{ selectedOrder.payment_method | titlecase }}</p>
+            </div>
+          </div>
+        </div>
+        <!-- Dirección -->
+        <div *ngIf="selectedOrder.address">
+          <h3 class="text-lg font-semibold mb-3">Dirección de entrega</h3>
+          <p>{{ selectedOrder.address.street }}, {{ selectedOrder.address.city }}, {{ selectedOrder.address.state }} {{ selectedOrder.address.postal_code }}</p>
+        </div>
+        <!-- Productos -->
+        <div>
+          <h3 class="text-lg font-semibold mb-3">Productos</h3>
+          <div class="space-y-2">
+            <div *ngFor="let detail of selectedOrder.order_details" class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div>
+                <span class="font-medium">{{ detail.product_name }}</span>
+                <span *ngIf="detail.is_urgent" class="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Urgente</span>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Cantidad: {{ detail.quantity }} {{ detail.unit_measure }}</p>
+              </div>
+              <span class="font-medium">{{ formatCurrency(detail.subtotal) }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Totales -->
+        <div class="border-t pt-4">
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="text-sm">Subtotal:</span>
+              <span class="text-sm">{{ formatCurrency(selectedOrder.total - selectedOrder.shipping_cost + (selectedOrder.discount || 0)) }}</span>
+            </div>
+            <div *ngIf="selectedOrder.discount > 0" class="flex justify-between text-green-600 dark:text-green-400">
+              <span class="text-sm">Descuento:</span>
+              <span class="text-sm">-{{ formatCurrency(selectedOrder.discount) }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm">Envío:</span>
+              <span class="text-sm">{{ formatCurrency(selectedOrder.shipping_cost) }}</span>
+            </div>
+            <div class="flex justify-between font-semibold text-lg border-t pt-2">
+              <span>Total:</span>
+              <span>{{ formatCurrency(selectedOrder.total) }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Botones de acción -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
+          >
+            <i class="fas fa-edit w-4 h-4"></i> Editar orden
+          </button>
+          <button
+            class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2"
+          >
+            <i class="fas fa-eye w-4 h-4"></i> Ver detalles completos
+          </button>
+          <button
+            (click)="orderModal.close()"
+            class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </app-modal>
+
+  <!-- Indicador de carga y errores -->
+  <div *ngIf="isLoading" class="text-center p-4 text-gray-600 dark:text-gray-400">
+    <i class="fas fa-spinner animate-spin"></i> Cargando...
+  </div>
+  <div *ngIf="error" class="p-4 text-red-600 dark:text-red-400 text-center">{{ error }}</div>
 </div>

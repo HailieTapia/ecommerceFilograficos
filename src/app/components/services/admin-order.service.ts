@@ -55,11 +55,11 @@ export interface AdminOrder {
 
 // Interfaz para el resumen estadístico
 export interface AdminOrderSummary {
-  totalOrders: number;
-  pendingCount: number;
-  processingCount: number;
-  shippedCount: number;
-  deliveredCount: number;
+  total: number;
+  pending: number;
+  processing: number;
+  shipped: number;
+  delivered: number;
 }
 
 // Interfaz para la respuesta de la lista de órdenes (getOrdersForAdmin)
@@ -68,6 +68,7 @@ export interface AdminOrdersResponse {
   message: string;
   data: {
     orders: AdminOrder[];
+    ordersByDay: { [date: string]: AdminOrder[] };
     pagination: {
       totalOrders: number;
       currentPage: number;
@@ -97,6 +98,20 @@ export interface UpdateOrderStatusResponse {
   data: AdminOrder;
 }
 
+// Interfaz para la respuesta del resumen (getOrderSummary)
+export interface AdminOrderSummaryResponse {
+  success: boolean;
+  message: string;
+  data: AdminOrderSummary;
+}
+
+// Interfaz para la respuesta de órdenes por fecha (getOrdersByDateForAdmin)
+export interface AdminOrdersByDateResponse {
+  success: boolean;
+  message: string;
+  data: AdminOrder[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -108,8 +123,8 @@ export class AdminOrderService {
   // Manejo de errores
   private handleError(error: HttpErrorResponse): Observable<never> {
     let message = 'Error en la comunicación con el servidor';
-    if (error.status === 400) {
-      message = error.error?.message || 'Solicitud inválida';
+    if (error.status === 400 && error.error?.errors) {
+      message = error.error.errors.map((err: any) => `${err.path}: ${err.msg}`).join('; ');
     } else if (error.status === 404) {
       message = error.error?.message || 'Orden no encontrada';
     } else if (error.status === 500) {
@@ -119,14 +134,19 @@ export class AdminOrderService {
     return throwError(() => new Error(message));
   }
 
-  // Obtener la lista paginada de órdenes con filtros opcionales
+  // Obtener la lista paginada de órdenes con filtros avanzados
   getOrders(
     page: number = 1,
-    pageSize: number = 10,
+    pageSize: number = 20,
     searchTerm: string = '',
     statusFilter: 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' = 'all',
     dateFilter: string = '',
-    dateField: 'delivery' | 'creation' = 'delivery'
+    dateField: 'delivery' | 'creation' = 'delivery',
+    paymentMethod: string = '',
+    deliveryOption: string = '',
+    minTotal: number | null = null,
+    maxTotal: number | null = null,
+    isUrgent: boolean | null = null
   ): Observable<AdminOrdersResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -137,18 +157,30 @@ export class AdminOrderService {
           .set('statusFilter', statusFilter)
           .set('dateField', dateField);
 
-        if (searchTerm.trim()) {
-          params = params.set('searchTerm', searchTerm.trim());
-        }
+        if (searchTerm.trim()) params = params.set('searchTerm', searchTerm.trim());
+        if (dateFilter.trim()) params = params.set('dateFilter', dateFilter.trim());
+        if (paymentMethod) params = params.set('paymentMethod', paymentMethod);
+        if (deliveryOption) params = params.set('deliveryOption', deliveryOption);
+        if (minTotal !== null) params = params.set('minTotal', minTotal.toString());
+        if (maxTotal !== null) params = params.set('maxTotal', maxTotal.toString());
+        if (isUrgent !== null) params = params.set('isUrgent', isUrgent.toString());
 
-        if (dateFilter.trim()) {
-          params = params.set('dateFilter', dateFilter.trim());
-        }
+        return this.http.get<AdminOrdersResponse>(this.apiUrl, { headers, params, withCredentials: true });
+      }),
+      catchError(this.handleError)
+    );
+  }
 
-        return this.http.get<AdminOrdersResponse>(
-          this.apiUrl,
-          { headers, params, withCredentials: true }
-        );
+  // Obtener órdenes por fecha específica
+  getOrdersByDate(date: string, dateField: 'delivery' | 'creation'): Observable<AdminOrdersByDateResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        const params = new HttpParams()
+          .set('date', date)
+          .set('dateField', dateField);
+
+        return this.http.get<AdminOrdersByDateResponse>(`${this.apiUrl}/by-date`, { headers, params, withCredentials: true });
       }),
       catchError(this.handleError)
     );
@@ -159,10 +191,7 @@ export class AdminOrderService {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<AdminOrderResponse>(
-          `${this.apiUrl}/${orderId}`,
-          { headers, withCredentials: true }
-        );
+        return this.http.get<AdminOrderResponse>(`${this.apiUrl}/${orderId}`, { headers, withCredentials: true });
       }),
       catchError(this.handleError)
     );
@@ -173,11 +202,18 @@ export class AdminOrderService {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.patch<UpdateOrderStatusResponse>(
-          `${this.apiUrl}/${orderId}/status`,
-          newStatus,
-          { headers, withCredentials: true }
-        );
+        return this.http.put<UpdateOrderStatusResponse>(`${this.apiUrl}/${orderId}/status`, newStatus, { headers, withCredentials: true });
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // Obtener el resumen de estadísticas de órdenes
+  getOrderSummary(): Observable<AdminOrderSummaryResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<AdminOrderSummaryResponse>(`${this.apiUrl}/summary`, { headers, withCredentials: true });
       }),
       catchError(this.handleError)
     );
