@@ -31,6 +31,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   selectedDate: Date | null = null;
   isLoading = false;
   error: string | null = null;
+  tempOrderStatus: OrderStatus | null = null; // Temporary variable for status
 
   // Filtros
   searchTerm = '';
@@ -212,6 +213,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
     this.orderService.getOrderById(orderId).subscribe({
       next: (response: AdminOrderResponse) => {
         this.selectedOrder = response.data;
+        this.tempOrderStatus = response.data.order_status; // Initialize temp status
         this.orderModal.open();
       },
       error: (err) => {
@@ -219,6 +221,24 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
         this.toastService.showToast(err.message || 'Error al cargar detalles de la orden', 'error');
       }
     });
+  }
+
+  confirmUpdateStatus(): void {
+    if (this.selectedOrder && this.tempOrderStatus && this.tempOrderStatus !== this.selectedOrder.order_status) {
+      this.toastService.showToast(
+        `¿Estás seguro de cambiar el estado de la orden #${this.selectedOrder.order_id} a ${this.statusTranslations[this.tempOrderStatus]}?`,
+        'warning',
+        'Confirmar',
+        () => {
+          this.updateOrderStatus(this.selectedOrder!.order_id, this.tempOrderStatus!);
+          this.orderModal.close();
+          this.toastService.hideToast();
+        }
+      );
+    } else {
+      this.orderModal.close();
+      this.toastService.hideToast();
+    }
   }
 
   updateOrderStatus(orderId: number, newStatus: OrderStatus): void {
@@ -230,6 +250,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
         );
         if (this.selectedOrder?.order_id === orderId) {
           this.selectedOrder = response.data;
+          this.tempOrderStatus = response.data.order_status;
         }
         this.updateCalendarEvents();
         this.toastService.showToast('Estado de la orden actualizado exitosamente', 'success');

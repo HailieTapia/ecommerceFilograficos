@@ -155,10 +155,10 @@
                 {{ getStatusTranslation(order.order_status) }}
               </span>
             </div>
-            <div class="text-sm text-Gray-600 dark:text-gray-400 mb-1">{{ order.customer_name }}</div>
-            <div class="text-sm font-medium text-gray-900 darkening:text-gray-100 mb-1">{{ formatCurrency(order.total) }}</div>
+            <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">{{ order.customer_name }}</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">{{ formatCurrency(order.total) }}</div>
             <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
-              <div class="flex justify-justify-between">
+              <div class="flex justify-between">
                 <span>Creada:</span>
                 <span>{{ formatDate(order.created_at) }}</span>
               </div>
@@ -198,8 +198,7 @@
               <div>
                 <label class="block text-sm font-medium mb-1">Estado de la orden</label>
                 <select
-                  [(ngModel)]="selectedOrder.order_status"
-                  (ngModelChange)="updateOrderStatus(selectedOrder.order_id, $event)"
+                  [(ngModel)]="tempOrderStatus"
                   class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-sm"
                 >
                   <option value="pending">Pendiente</option>
@@ -231,7 +230,7 @@
               <div>
                 <span class="font-medium">{{ detail.product_name }}</span>
                 <span *ngIf="detail.is_urgent" class="ml-2 px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Urgente</span>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Cantidad: {{ detail.quantity }} {{ detail.unit_measure }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Cantidad: {{ detail.quantity }}</p>
               </div>
               <span class="font-medium">{{ formatCurrency(detail.subtotal) }}</span>
             </div>
@@ -258,23 +257,13 @@
             </div>
           </div>
         </div>
-        <!-- Botones de acción -->
-        <div class="flex flex-col sm:flex-row gap-3">
+        <!-- Botón de acción -->
+        <div class="flex justify-end">
           <button
-            class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
+            (click)="confirmUpdateStatus()"
+            class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
           >
-            <i class="fas fa-edit w-4 h-4"></i> Editar orden
-          </button>
-          <button
-            class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-500 transition-colors flex items-center justify-center gap-2"
-          >
-            <i class="fas fa-eye w-4 h-4"></i> Ver detalles completos
-          </button>
-          <button
-            (click)="orderModal.close()"
-            class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 py-2 px-4 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors"
-          >
-            Cerrar
+            <i class="fas fa-save w-4 h-4"></i> Actualizar
           </button>
         </div>
       </div>
