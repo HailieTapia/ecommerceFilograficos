@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
-import { AuthService } from '../services/auth.service'; // Importar AuthService
+import { AuthService } from '../services/auth.service';
 import { environment } from '../../environments/config';
 
 // Interfaces para tipado
@@ -16,8 +16,8 @@ export interface Faq {
     name: string;
     description: string;
   };
-  createdAt?: string; // Opcional, solo para administradores
-  updatedAt?: string; // Opcional, solo para administradores
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface GroupedFaq {
@@ -57,10 +57,17 @@ export class FaqService {
   constructor(
     private csrfService: CsrfService,
     private http: HttpClient,
-    private authService: AuthService // Inyectar AuthService
+    private authService: AuthService
   ) {}
 
-  // Método genérico para construir y realizar solicitudes HTTP
+  /**
+   * Realiza una solicitud HTTP con CSRF token
+   * @param method Método HTTP (GET, POST, PUT, DELETE)
+   * @param endpoint Endpoint de la API
+   * @param body Cuerpo de la solicitud (opcional)
+   * @param params Parámetros de consulta (opcional)
+   * @returns Observable con la respuesta
+   */
   private request<T>(method: string, endpoint: string, body?: any, params?: HttpParams): Observable<T> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -75,18 +82,30 @@ export class FaqService {
     );
   }
 
-  // Determinar si el usuario es administrador
+  /**
+   * Determina si el usuario es administrador
+   * @returns true si el usuario tiene rol de administrador
+   */
   private isAdminUser(): boolean {
     const userRole = this.authService.getUserRole();
     return userRole === 'administrador';
   }
 
-  // Crear una nueva pregunta frecuente
+  /**
+   * Crea una nueva pregunta frecuente
+   * @param faqData Datos de la FAQ (category_id, question, answer)
+   * @returns Observable con la respuesta del servidor
+   */
   createFaq(faqData: { category_id: number; question: string; answer: string }): Observable<any> {
     return this.request('POST', '/', faqData);
   }
 
-  // Obtener todas las preguntas frecuentes activas con opciones de paginación, búsqueda, filtro y agrupación
+  /**
+   * Obtiene todas las preguntas frecuentes activas
+   * @param params Parámetros de paginación, búsqueda, filtro y agrupación
+   * @param isAdmin Forzar ruta admin o pública (opcional)
+   * @returns Observable con la lista de FAQs y metadatos
+   */
   getAllFaqs(params: FaqParams = {}, isAdmin?: boolean): Observable<FaqResponse> {
     let httpParams = new HttpParams();
 
@@ -96,28 +115,40 @@ export class FaqService {
     if (params.categoryId !== undefined) httpParams = httpParams.set('category_id', params.categoryId.toString());
     if (params.grouped !== undefined) httpParams = httpParams.set('grouped', params.grouped.toString());
 
-    // Determinar si usar la ruta de admin o pública
     const useAdminRoute = isAdmin !== undefined ? isAdmin : this.isAdminUser();
     const endpoint = useAdminRoute ? '/' : '/public';
 
     return this.request<FaqResponse>('GET', endpoint, undefined, httpParams);
   }
 
-  // Obtener una pregunta frecuente por ID
+  /**
+   * Obtiene una pregunta frecuente por ID
+   * @param id ID de la FAQ
+   * @param isAdmin Forzar ruta admin o pública (opcional)
+   * @returns Observable con la FAQ
+   */
   getFaqById(id: string, isAdmin?: boolean): Observable<Faq> {
-    // Determinar si usar la ruta de admin o pública
     const useAdminRoute = isAdmin !== undefined ? isAdmin : this.isAdminUser();
     const endpoint = useAdminRoute ? `/${id}` : `/public/${id}`;
 
     return this.request<Faq>('GET', endpoint);
   }
 
-  // Actualizar una pregunta frecuente
+  /**
+   * Actualiza una pregunta frecuente
+   * @param id ID de la FAQ
+   * @param updatedData Datos actualizados
+   * @returns Observable con la respuesta del servidor
+   */
   updateFaq(id: number, updatedData: { category_id?: number; question?: string; answer?: string; status?: 'active' | 'inactive' }): Observable<any> {
     return this.request('PUT', `/${id}`, updatedData);
   }
 
-  // Eliminar (lógicamente) una pregunta frecuente
+  /**
+   * Elimina (lógicamente) una pregunta frecuente
+   * @param id ID de la FAQ
+   * @returns Observable con la respuesta del servidor
+   */
   deleteFaq(id: string): Observable<any> {
     return this.request('DELETE', `/${id}`);
   }

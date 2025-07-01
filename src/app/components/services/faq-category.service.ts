@@ -5,6 +5,12 @@ import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
 import { environment } from '../../environments/config';
 
+// Interfaz para categorías públicas
+export interface FaqCategory {
+  category_id: number;
+  name: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -13,7 +19,11 @@ export class FaqCategoryService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
-  // Crear una nueva categoría de FAQ
+  /**
+   * Crea una nueva categoría de FAQ
+   * @param categoryData Datos de la categoría
+   * @returns Observable con la respuesta del servidor
+   */
   createCategory(categoryData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -23,7 +33,11 @@ export class FaqCategoryService {
     );
   }
 
-  // Obtener una categoría de FAQ por ID
+  /**
+   * Obtiene una categoría de FAQ por ID
+   * @param id ID de la categoría
+   * @returns Observable con la categoría
+   */
   getCategoryById(id: string): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -33,17 +47,27 @@ export class FaqCategoryService {
     );
   }
 
-  // Obtener todas las categorías de FAQ activas con paginación y búsqueda (admin)
-  getAllCategories(page: number = 1, pageSize: number = 10, search: string = ''): Observable<any> {
+  /**
+   * Obtiene todas las categorías de FAQ activas con paginación y búsqueda (admin)
+   * @param page Número de página
+   * @param pageSize Tamaño de página
+   * @param search Término de búsqueda
+   * @returns Observable con la lista de categorías
+   */
+  getAllCategories(page?: number, pageSize?: number, search?: string): Observable<any> {
+    const pageValue = page ?? 1;
+    const pageSizeValue = pageSize ?? 10;
+    const searchValue = search ?? '';
+
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         let params = new HttpParams()
-          .set('page', page.toString())
-          .set('pageSize', pageSize.toString());
+          .set('page', pageValue.toString())
+          .set('pageSize', pageSizeValue.toString());
 
-        if (search) {
-          params = params.set('search', search);
+        if (searchValue) {
+          params = params.set('search', searchValue);
         }
 
         return this.http.get(`${this.apiUrl}/`, {
@@ -55,7 +79,12 @@ export class FaqCategoryService {
     );
   }
 
-  // Actualizar una categoría de FAQ
+  /**
+   * Actualiza una categoría de FAQ
+   * @param id ID de la categoría
+   * @param updatedData Datos actualizados
+   * @returns Observable con la respuesta del servidor
+   */
   updateCategory(id: string, updatedData: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -65,7 +94,11 @@ export class FaqCategoryService {
     );
   }
 
-  // Eliminar (lógicamente) una categoría de FAQ
+  /**
+   * Elimina (lógicamente) una categoría de FAQ
+   * @param id ID de la categoría
+   * @returns Observable con la respuesta del servidor
+   */
   deleteCategory(id: string): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -75,8 +108,11 @@ export class FaqCategoryService {
     );
   }
 
-  // Obtener ID y nombre de categorías activas (público)
-  getPublicCategories(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/public`);
+  /**
+   * Obtiene ID y nombre de categorías activas (público)
+   * @returns Observable con la lista de categorías públicas
+   */
+  getPublicCategories(): Observable<FaqCategory[]> {
+    return this.http.get<FaqCategory[]>(`${this.apiUrl}/public`);
   }
 }
