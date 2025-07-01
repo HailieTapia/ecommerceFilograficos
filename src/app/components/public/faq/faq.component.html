@@ -1,115 +1,185 @@
-<div class="min-h-screen bg-gray-50 text-gray-800 font-sans">
-  <!-- Barra de búsqueda -->
-  <div class="search-bar mb-6 mx-4 md:mx-auto md:max-w-7xl md:px-6">
-    <h2 class="text-3xl font-bold text-gray-800 mb-3 pt-8 md:text-center">
-      ¿Con qué podemos ayudarte?
-    </h2>
-    <div class="relative">
-      <input
-        type="text"
-        [(ngModel)]="searchQuery"
-        (ngModelChange)="onSearch()"
-        placeholder="Buscar preguntas..."
-        class="w-full p-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 md:mx-auto"
-      />
-      <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="text-red-500 text-sm mt-1">
-        Escribe al menos 3 caracteres para buscar.
-      </p>
-      <svg
-        class="absolute left-3 top-2.5 h-5 w-5 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        ></path>
-      </svg>
-    </div>
-  </div>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 font-sans w-full">
+  <app-spinner [isLoading]="isLoading"></app-spinner>
 
-  <!-- Contenedor principal -->
-  <div class="faq-container flex flex-col md:flex-row w-full max-w-7xl mx-auto pt-4 pb-8 px-4 md:px-6 relative">
-    <!-- Botón de menú en móviles -->
-    <button
-      class="faq-menu-toggle md:hidden bg-blue-600 text-white border-none py-2 px-4 text-lg cursor-pointer mb-4 rounded-lg"
-      (click)="toggleSidebar()"
-    >
-      ☰ Categorías
-    </button>
+  <div *ngIf="!isLoading" class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="bg-blue-600 p-3 rounded-full">
+          <i class="fas fa-question-circle text-white text-xl"></i>
+        </div>
+        <div>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Preguntas Frecuentes</h1>
+          <p class="text-gray-600 dark:text-gray-400">{{ totalFaqs }} preguntas encontradas</p>
+        </div>
+      </div>
 
-    <!-- Menú lateral de categorías -->
-    <div
-      class="faq-sidebar w-full md:w-64 bg-white rounded-lg shadow-md md:sticky md:top-4 md:mr-6 transition-transform duration-300 ease-in-out transform md:transform-none overflow-y-auto md:max-h-[80vh]"
-      [class.open]="isSidebarOpen"
-      [class.hidden]="!isSidebarOpen && !isDesktopView"
-      [class.block]="isSidebarOpen || isDesktopView"
-    >
-      <ul class="list-none p-0 m-0">
-        <li
-          *ngFor="let category of categories"
-          [class.active]="selectedCategoryId === category.id"
-          (click)="selectCategory(category.id)"
-          class="p-3 cursor-pointer rounded-lg text-center transition-colors duration-300 hover:bg-blue-600 hover:text-white"
-          [class.bg-blue-700]="selectedCategoryId === category.id"
-          [class.text-white]="selectedCategoryId === category.id"
+      <!-- Search Bar -->
+      <div class="relative">
+        <button
+          (click)="onSearch()"
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          [attr.aria-label]="'Realizar búsqueda'"
         >
-          {{ category.name }}
-        </li>
-      </ul>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </button>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (keydown.enter)="onSearch()"
+          placeholder="Buscar preguntas..."
+          class="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+          [attr.aria-label]="'Buscar preguntas frecuentes'"
+        />
+        <button
+          *ngIf="searchQuery"
+          (click)="clearSearch()"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          [attr.aria-label]="'Borrar búsqueda'"
+        >
+          <i class="fas fa-times w-5 h-5"></i>
+        </button>
+        <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="text-red-500 text-sm mt-1">
+          Escribe al menos 3 caracteres para buscar.
+        </p>
+      </div>
     </div>
 
-    <!-- Contenido de preguntas frecuentes -->
-    <div class="faq-content flex-grow p-5 bg-white rounded-lg shadow-md">
-      <!-- Nombre y descripción de la categoría (solo si no hay búsqueda activa) -->
-      <div *ngIf="!searchQuery || searchQuery.length < 3">
-        <h2 class="text-2xl font-bold text-gray-800 mb-3">{{ getSelectedCategoryName() }}</h2>
-        <p class="category-description italic text-gray-600 text-base mb-4">{{ getSelectedCategoryDescription() }}</p>
-      </div>
-
-      <!-- Mensaje si no hay preguntas -->
-      <p *ngIf="faqs.length === 0 && (!searchQuery || searchQuery.length < 3)" class="text-gray-600">
-        No hay preguntas en esta categoría.
-      </p>
-
-      <!-- Lista de FAQs -->
-      <div *ngFor="let faq of faqs" class="faq-item bg-gray-50 p-4 rounded-lg shadow-sm mb-4 text-left">
-        <h3 class="text-xl font-bold mb-2 text-gray-800">{{ faq.question }}</h3>
-        <p class="text-base text-gray-700">{{ faq.answer }}</p>
-      </div>
-
-      <!-- Mensaje cuando no hay resultados de búsqueda -->
-      <div *ngIf="searchQuery.length >= 3 && faqs.length === 0" class="text-center">
-        <p class="font-semibold text-gray-800 mb-2">No encontramos resultados para tu búsqueda.</p>
-        <p class="text-gray-600">Revisa que esté bien escrita, o prueba con una frase más general y vuelve a intentar.</p>
-      </div>
-
-      <!-- Controles de paginación -->
+    <!-- Main Content -->
+    <div class="flex flex-col md:flex-row gap-6">
+      <!-- Sidebar -->
       <div
-        class="pagination flex justify-center items-center mt-6"
-        *ngIf="totalFaqs > itemsPerPage"
+        class="faq-sidebar bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 md:w-64 md:sticky md:top-6 transition-transform duration-300 ease-in-out"
+        [class.translate-x-0]="isSidebarOpen"
+        [class.-translate-x-full]="!isSidebarOpen && !isDesktopView"
+        [class.block]="isSidebarOpen || isDesktopView"
+        role="navigation"
+        [attr.aria-label]="'Categorías de preguntas frecuentes'"
       >
         <button
-          (click)="changePage(-1)"
-          [disabled]="currentPage === 1"
-          class="bg-blue-600 text-white border-none py-2 px-4 rounded-lg cursor-pointer transition-colors duration-300 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          class="md:hidden bg-blue-600 text-white py-2 px-4 rounded-xl mb-4 flex items-center gap-2"
+          (click)="toggleSidebar()"
+          [attr.aria-label]="'Toggle categorías'"
+          [attr.aria-expanded]="isSidebarOpen"
         >
-          Anterior
+          <i class="fas fa-bars"></i> Categorías
         </button>
-        <span class="mx-4 text-base font-bold text-gray-800">
-          Página {{ currentPage }} de {{ totalPages }}
-        </span>
-        <button
-          (click)="changePage(1)"
-          [disabled]="currentPage === totalPages"
-          class="bg-blue-600 text-white border-none py-2 px-4 rounded-lg cursor-pointer transition-colors duration-300 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-        >
-          Siguiente
-        </button>
+        <ul class="list-none p-0 m-0">
+          <li
+            *ngFor="let category of categories; trackBy: trackByCategoryId"
+            [class.bg-blue-100]="selectedCategoryId === category.id"
+            [class.dark:bg-blue-900]="selectedCategoryId === category.id"
+            (click)="selectCategory(category.id)"
+            (keydown.enter)="selectCategory(category.id)"
+            class="p-3 cursor-pointer rounded-lg text-center transition-colors duration-300 hover:bg-blue-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+            role="option"
+            tabindex="0"
+            [attr.aria-selected]="selectedCategoryId === category.id"
+            [attr.aria-label]="'Seleccionar categoría ' + category.name"
+          >
+            {{ category.name }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- FAQ Content -->
+      <div class="flex-grow">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">{{ getSelectedCategoryName() }}</h2>
+          <p class="text-gray-600 dark:text-gray-400 italic mb-6">{{ getSelectedCategoryDescription() }}</p>
+
+          <!-- No FAQs -->
+          <div *ngIf="faqs.length === 0 && (!searchQuery || searchQuery.length < 3)" class="text-center p-12">
+            <i class="fas fa-question-circle text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+            <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No hay preguntas en esta categoría</h2>
+            <p class="text-gray-500 dark:text-gray-400">Selecciona otra categoría o realiza una búsqueda.</p>
+          </div>
+
+          <!-- Search No Results -->
+          <div *ngIf="searchQuery.length >= 3 && faqs.length === 0" class="text-center p-12">
+            <i class="fas fa-search text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+            <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No se encontraron resultados</h2>
+            <p class="text-gray-500 dark:text-gray-400">Revisa tu búsqueda o prueba con una frase más general.</p>
+          </div>
+
+          <!-- FAQ List -->
+          <div *ngFor="let faq of faqs; trackBy: trackByFaqId" class="faq-item bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-4 shadow-sm hover:shadow-md transition-all duration-300">
+            <button
+              class="w-full text-left flex items-center justify-between gap-2"
+              (click)="faq.isExpanded = !faq.isExpanded"
+              [attr.aria-expanded]="faq.isExpanded"
+              [attr.aria-controls]="'faq-content-' + faq.id"
+              [attr.aria-label]="'Toggle respuesta para ' + faq.question"
+            >
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ faq.question }}</h3>
+              <i class="fas" [ngClass]="faq.isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+            <div
+              [attr.id]="'faq-content-' + faq.id"
+              *ngIf="faq.isExpanded"
+              class="mt-2 text-gray-700 dark:text-gray-300"
+              [@expandCollapse]="faq.isExpanded ? 'expanded' : 'collapsed'"
+            >
+              <p>{{ faq.answer }}</p>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div *ngIf="totalFaqs > itemsPerPage" class="flex justify-between items-center mt-6">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              Mostrando {{ faqs.length }} de {{ totalFaqs }} preguntas
+            </p>
+            <div class="flex gap-2">
+              <button
+                *ngFor="let page of getPageNumbers()"
+                (click)="changePage(page)"
+                [disabled]="currentPage === page"
+                class="px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300"
+                [class.bg-blue-600]="currentPage === page"
+                [class.text-white]="currentPage === page"
+                [class.bg-gray-200]="currentPage !== page"
+                [class.dark:bg-gray-600]="currentPage !== page"
+                [class.text-gray-700]="currentPage !== page"
+                [class.dark:text-gray-200]="currentPage !== page"
+                [class.hover:bg-gray-300]="currentPage !== page"
+                [class.dark:hover:bg-gray-500]="currentPage !== page"
+                [attr.aria-current]="currentPage === page ? 'page' : null"
+                [attr.aria-label]="'Ir a la página ' + page"
+              >
+                {{ page }}
+              </button>
+              <button
+                (click)="changePage(currentPage - 1)"
+                [disabled]="currentPage === 1"
+                class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50"
+                [attr.aria-label]="'Página anterior'"
+              >
+                Anterior
+              </button>
+              <button
+                (click)="changePage(currentPage + 1)"
+                [disabled]="currentPage === totalPages"
+                class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50"
+                [attr.aria-label]="'Página siguiente'"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

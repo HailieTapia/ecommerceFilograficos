@@ -92,7 +92,7 @@ export const routes: Routes = [
 
   // Públicos
   { path: 'register', component: RegisterComponent, data: { breadcrumb: 'Registrar' } },
-  { path: 'faq', component: FaqComponent, data: { breadcrumb: 'FAQ' } },
+  { path: 'help', component: FaqComponent, data: { breadcrumb: 'Help' } },
   { path: 'login', component: LoginComponent, data: { breadcrumb: 'Iniciar sesión' } },
   { path: 'recovery', component: RecoverComponent, data: { breadcrumb: 'Recuperar cuenta' } },
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },
