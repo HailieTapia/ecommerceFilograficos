@@ -3,6 +3,7 @@ import { RegulatoryService } from '../../services/regulatory.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe'; // Ajusta la ruta si es necesario
 
 // Registrar los datos de localización para español
 registerLocaleData(localeEs);
@@ -10,7 +11,7 @@ registerLocaleData(localeEs);
 @Component({
   selector: 'app-legal',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, SafeHtmlPipe], // Importa el pipe standalone
   templateUrl: './legal.component.html',
   styleUrl: './legal.component.css',
   providers: [
@@ -69,5 +70,27 @@ export class LegalComponent implements OnInit {
         this.documentContent = 'Error al cargar el documento.';
       }
     });
+  }
+
+  // Formatear el contenido del documento
+  formatDocumentContent(content: string): string {
+    if (!content) return '<p>No hay contenido disponible.</p>';
+
+    // Dividir el texto en secciones basadas en preguntas o títulos
+    let formattedContent = '<div class="space-y-6">';
+    const lines = content.split('\n').filter(line => line.trim());
+
+    lines.forEach(line => {
+      if (line.startsWith('¿') || line.includes('?')) {
+        formattedContent += `<h3 class="text-lg font-semibold text-gray-800">${line.trim()}</h3>`;
+      } else if (line.includes(':')) {
+        formattedContent += `<p class="text-gray-700"><strong>${line.split(':')[0]}:</strong> ${line.split(':')[1].trim()}</p>`;
+      } else {
+        formattedContent += `<p class="text-gray-700">${line.trim()}</p>`;
+      }
+    });
+
+    formattedContent += '</div>';
+    return formattedContent;
   }
 }

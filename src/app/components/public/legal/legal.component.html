@@ -62,7 +62,8 @@
                     <!-- Contenido del documento -->
                     <div class="px-8 py-8 prose max-w-none">
                         <section id="seccion1" class="mb-8">
-                            <p class="text-gray-700 leading-relaxed" [innerHTML]="documentContent"></p>
+                            <div *ngIf="documentContent" [innerHTML]="formatDocumentContent(documentContent) | safeHtml"></div>
+                            <p *ngIf="!documentContent" class="text-gray-700 leading-relaxed">No hay contenido disponible.</p>
                         </section>
                     </div>
 
