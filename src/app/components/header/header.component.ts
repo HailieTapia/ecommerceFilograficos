@@ -123,7 +123,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   performSearch(): void {
-    if (!this.searchTerm.trim()) {
+    if (!this.searchTerm.trim() || this.userRole === 'administrador') {
       return;
     }
     this.authService.getUser().pipe(

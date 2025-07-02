@@ -16,8 +16,8 @@
           </a>
         </div>
 
-        <!-- Search Bar (Hidden on mobile, shown on md+) -->
-        <div class="hidden md:flex flex-1 mx-4 max-w-2xl">
+        <!-- Search Bar (Hidden on mobile, shown on md+ for non-admins) -->
+        <div *ngIf="userRole !== 'administrador'" class="hidden md:flex flex-1 mx-4 max-w-2xl">
           <div class="relative w-full">
             <input type="text" placeholder="Buscar productos, marcas y más..." 
                    [(ngModel)]="searchTerm" (keydown.enter)="performSearch()"
@@ -45,7 +45,7 @@
           <!-- Authenticated (client or admin) -->
           <div *ngIf="isLoggedIn" class="flex items-center space-x-4">
             <app-notification-dropdown></app-notification-dropdown>
-            <a href="/cart" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            <a *ngIf="userRole === 'cliente'" href="/cart" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
               <i class="fas fa-shopping-cart text-xl"></i>
               <span class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemCount }}</span>
               <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" role="tooltip" aria-label="Carrito">Carrito</span>
@@ -61,15 +61,15 @@
         </div>
       </div>
 
-      <!-- Mobile Search Bar (Visible only on mobile) -->
-      <div class="md:hidden px-4 py-2">
+      <!-- Mobile Search Bar (Visible only on mobile for non-admins) -->
+      <div *ngIf="userRole !== 'administrador'" class="md:hidden px-4 py-2">
         <div class="relative">
           <input type="text" placeholder="Buscar productos, marcas y más..." 
                  [(ngModel)]="searchTerm" (keydown.enter)="performSearch()"
-                 class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-primary text-dark-text-dark-dark-placeholder-gray-600 focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-dark focus:border-primary-dark-primary-dark transition-all duration-300" />
-          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-primary-dark-primary-dark cursor-pointer dark:text-dark-dark-primary-dark" (click)="performSearch()"></i>
-          </div>
+                 class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer" (click)="performSearch()"></i>
         </div>
+      </div>
 
       <!-- Navigation -->
       <app-navigation *ngIf="mobileMenuOpen || !isMobile()" class="border-t border-gray-200 dark:border-gray-600 px-4 py-2"></app-navigation>
