@@ -118,8 +118,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private formatUserName(fullName: string): string {
     if (!fullName) return '';
     const nameParts = fullName.trim().split(/\s+/);
-    const firstTwoParts = nameParts.slice(0, 2).join(' ');
-    return firstTwoParts.toUpperCase();
+    return this.isMobile() ? nameParts[0].toUpperCase() : nameParts.slice(0, 2).join(' ').toUpperCase();
   }
 
   performSearch(): void {

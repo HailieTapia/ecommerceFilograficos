@@ -1,7 +1,7 @@
 <footer class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text py-6">
   <div class="max-w-screen-xl mx-auto px-4">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-      <div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 justify-items-center">
+      <div class="text-center">
         <h4 class="font-bold text-lg mb-4">Compañía</h4>
         <ul class="space-y-3">
           <li><a href="#" class="hover:text-light-primary dark:hover:text-dark-primary">Acerca de</a></li>
@@ -9,7 +9,7 @@
           <li><a href="legal" class="hover:text-light-primary dark:hover:text-dark-primary">Documentos legales</a></li>
         </ul>
       </div>
-      <div>
+      <div class="text-center">
         <h4 class="font-bold text-lg mb-4">Atención al cliente</h4>
         <ul class="space-y-3">
           <li><a href="help" class="hover:text-light-primary dark:hover:text-dark-primary">Ayuda</a></li>
@@ -18,9 +18,9 @@
           <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: 15 }" class="hover:text-light-primary dark:hover:text-dark-primary">Métodos de Pago</a></li>
         </ul>
       </div>
-      <div>
+      <div class="text-center">
         <h4 class="font-bold text-lg mb-4">Contáctanos</h4>
-        <div class="flex space-x-4">
+        <div class="flex justify-center space-x-4">
           <a *ngIf="companyInfo?.phone_number" [href]="'https://wa.me/' + companyInfo.phone_number" class="hover:text-light-primary dark:hover:text-dark-primary" target="_blank">
             <i class="fab fa-whatsapp text-2xl"></i>
           </a>
@@ -32,9 +32,9 @@
           </a>
         </div>
       </div>
-      <div>
+      <div class="text-center">
         <h4 class="font-bold text-lg mb-4">Síguenos</h4>
-        <div class="flex flex-wrap gap-4">
+        <div class="flex flex-wrap justify-center gap-4">
           <a
             *ngFor="let social of companyInfo?.SocialMedia"
             [href]="social.link"

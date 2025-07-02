@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -17,4 +17,7 @@ export class NavigationComponent {
     { path: '/authcatalog', label: 'CatalogoA' },
     { path: '/help', label: 'Ayuda' }
   ];
+
+  @Input() isLoggedIn: boolean = false;
+  @Input() userRole: string | null = null;
 }
