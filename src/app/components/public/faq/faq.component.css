@@ -11,12 +11,34 @@
   transform: translateX(-100%);
 }
 
+@media (max-width: 767px) {
+  .faq-sidebar {
+    width: 75%;
+    max-width: 300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 50;
+  }
+}
+
+@media (min-width: 768px) {
+  .faq-sidebar {
+    position: relative;
+    width: 16rem;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
 .faq-item {
   transition: all 0.3s ease-in-out;
 }
 
 .faq-item button:focus {
-  outline: 2px solid #3b82f6; /* blue-500 */
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 
@@ -26,7 +48,7 @@
 }
 
 input:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* blue-500/30 */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 select:focus {
@@ -34,16 +56,16 @@ select:focus {
 }
 
 .dark .faq-item {
-  background-color: #1f2937; /* gray-700 */
+  background-color: #374151;
 }
 
 .dark .faq-sidebar {
-  background-color: #1f2937;
+  background-color: #374151;
 }
 
 .dark input {
-  background-color: #374151; /* gray-700 */
-  border-color: #4b5563; /* gray-600 */
+  background-color: #374151;
+  border-color: #4b5563;
 }
 
 .dark select {
@@ -51,12 +73,12 @@ select:focus {
   border-color: #4b5563;
 }
 
-.text-gray-800 {
-  color: #1f2937; /* Alto contraste para modo claro */
+.text-light-text {
+  color: #1f2937;
 }
 
-.dark .text-gray-100 {
-  color: #f3f4f6; /* Alto contraste para modo oscuro */
+.dark .text-dark-text {
+  color: #f3f4f6;
 }
 
 .faq-sidebar::-webkit-scrollbar {
@@ -64,10 +86,18 @@ select:focus {
 }
 
 .faq-sidebar::-webkit-scrollbar-thumb {
-  background-color: #9ca3af; /* gray-400 */
+  background-color: #9ca3af;
   border-radius: 4px;
 }
 
 .faq-sidebar::-webkit-scrollbar-track {
-  background-color: #f3f4f6; /* gray-100 */
+  background-color: #f3f4f6;
+}
+
+.dark .faq-sidebar::-webkit-scrollbar-thumb {
+  background-color: #9ca3af;
+}
+
+.dark .faq-sidebar::-webkit-scrollbar-track {
+  background-color: #374151;
 }

@@ -50,7 +50,8 @@
               <span class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemCount }}</span>
               <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" role="tooltip" aria-label="Carrito">Carrito</span>
             </a>
-            <app-profile-dropdown [userRole]="userRole" (logout)="logout()"></app-profile-dropdown>
+            <!-- Dentro del div donde se muestra el profile-dropdown -->
+            <app-profile-dropdown [userRole]="userRole" [userName]="userName" (logout)="logout()"></app-profile-dropdown>
           </div>
 
           <!-- Theme Toggle (always visible) -->

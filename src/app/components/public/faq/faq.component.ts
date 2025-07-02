@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { FaqService, Faq, FaqResponse } from '../../services/faq.service';
 import { FaqCategoryService, FaqCategory } from '../../services/faq-category.service';
 import { Subscription } from 'rxjs';
@@ -12,7 +13,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
   standalone: true,
   templateUrl: './faq.component.html',
   styleUrls: ['./faq.component.css'],
-  imports: [CommonModule, FormsModule, SpinnerComponent],
+  imports: [CommonModule, FormsModule, SpinnerComponent, RouterModule],
   animations: [
     trigger('expandCollapse', [
       state('collapsed', style({ height: '0px', opacity: 0, overflow: 'hidden' })),
@@ -36,7 +37,11 @@ export class FaqComponent implements OnInit, OnDestroy {
   errorMessage: string = '';
   private subscriptions: Subscription = new Subscription();
 
-  constructor(private faqService: FaqService, private faqCategoryService: FaqCategoryService) {
+  constructor(
+    private faqService: FaqService,
+    private faqCategoryService: FaqCategoryService,
+    private route: ActivatedRoute
+  ) {
     window.addEventListener('resize', () => {
       this.isDesktopView = window.innerWidth >= 768;
       if (this.isDesktopView) this.isSidebarOpen = false;
@@ -44,8 +49,16 @@ export class FaqComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadCategories();
-    this.loadFaqs();
+    this.subscriptions.add(
+      this.route.queryParams.subscribe(params => {
+        const categoryId = params['categoryId'];
+        if (categoryId) {
+          this.selectedCategoryId = +categoryId; // Convertir a número
+          this.currentPage = 1;
+        }
+        this.loadCategories();
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -89,9 +102,15 @@ export class FaqComponent implements OnInit, OnDestroy {
           this.categories = response.map((cat: FaqCategory) => ({
             id: cat.category_id,
             name: cat.name,
-            description: '', // La ruta pública no devuelve description
+            description: '',
           }));
           this.isLoading = false;
+          // Validar selectedCategoryId
+          if (this.selectedCategoryId && !this.categories.some(cat => cat.id === this.selectedCategoryId)) {
+            this.selectedCategoryId = null;
+            this.errorMessage = 'La categoría seleccionada no existe.';
+          }
+          this.loadFaqs(); // Cargar FAQs después de cargar categorías
         },
         error: (err: any) => {
           this.errorMessage = 'Error al cargar las categorías. Por favor, intenta de nuevo.';
@@ -128,7 +147,7 @@ export class FaqComponent implements OnInit, OnDestroy {
 
   onSearch(): void {
     if (this.searchQuery.length > 0 && this.searchQuery.length < 3) {
-      return; // No realizar búsqueda si hay menos de 3 caracteres
+      return;
     }
     this.currentPage = 1;
     this.loadFaqs();
