@@ -50,7 +50,7 @@
     <div class="md:col-span-2">
       <!-- Contenido dinámico -->
       <div>
-        <app-personal-info *ngIf="activeTab === 'info'" [userProfile]="userProfile"></app-personal-info>
+        <app-personal-info *ngIf="activeTab === 'info'" [userProfile]="userProfile" (profileUpdated)="onProfileUpdated($event)"></app-personal-info>
         <app-addresses *ngIf="activeTab === 'addresses'"></app-addresses>
         <app-change-password *ngIf="activeTab === 'password'"></app-change-password>
       </div>

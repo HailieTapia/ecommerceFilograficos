@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
-import { UserService } from '../services/user.service'; // Importa UserService
 import { CompanyService } from '../services/company.service';
 import { ThemeService } from '../services/theme.service';
 import { CartService } from '../services/cart.service';
@@ -32,7 +31,7 @@ import { of } from 'rxjs';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   userRole: string | null = null;
-  userName: string | null = null; // Nueva propiedad para el nombre
+  userName: string | null = null;
   isLoggedIn: boolean = false;
   company: any;
   logoPreview: string | ArrayBuffer | null = null;
@@ -46,7 +45,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     public themeService: ThemeService,
     private router: Router,
     private authService: AuthService,
-    private userService: UserService, // Inyecta UserService
     private companyService: CompanyService
   ) {}
 
@@ -60,18 +58,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.authService.getUser().subscribe(user => {
       this.isLoggedIn = !!user;
       this.userRole = user?.tipo || null;
-      if (user) {
-        
-        // Obtener el perfil del usuario para el nombre
-        this.userService.getProfile().pipe(take(1)).subscribe({
-          next: (profile) => {
-            this.userName = profile.name || null; // Ajusta según la estructura de tu respuesta
-          },
-          error: (err) => console.error('Error al obtener el perfil:', err)
-        });
-      } else {
-        this.userName = null;
-      }
+      this.userName = user?.nombre ? this.formatUserName(user.nombre) : null; // Procesar el nombre
     });
   }
 
@@ -94,7 +81,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
-        this.userName = null; // Limpia el nombre al cerrar sesión
+        this.userName = null;
         this.router.navigate(['login']);
       },
       error: (err) => console.error(err)
@@ -128,9 +115,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Realiza la búsqueda y navega al catálogo correspondiente con el término de búsqueda.
-   */
+  private formatUserName(fullName: string): string {
+    if (!fullName) return '';
+    const nameParts = fullName.trim().split(/\s+/);
+    const firstTwoParts = nameParts.slice(0, 2).join(' ');
+    return firstTwoParts.toUpperCase();
+  }
+
   performSearch(): void {
     if (!this.searchTerm.trim()) {
       return;

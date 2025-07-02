@@ -29,7 +29,8 @@ export class AuthService {
         next: (response) => {
           const normalizedUser = {
             userId: response.user_id,
-            tipo: response.user_type
+            tipo: response.user_type,
+            nombre: response.name // Incluir el nombre
           };
           localStorage.setItem('userData', JSON.stringify(normalizedUser));
           this.userSubject.next(normalizedUser);
@@ -62,7 +63,8 @@ export class AuthService {
         if (!response.mfaRequired) {
           const normalizedUser = {
             userId: response.userId,
-            tipo: response.tipo
+            tipo: response.tipo,
+            nombre: response.name // Incluir el nombre
           };
           localStorage.setItem('userData', JSON.stringify(normalizedUser));
           this.userSubject.next(normalizedUser);
@@ -92,7 +94,8 @@ export class AuthService {
       tap((response: any) => {
         const normalizedUser = {
           userId: response.userId,
-          tipo: response.tipo
+          tipo: response.tipo,
+          nombre: response.name // Incluir el nombre
         };
         localStorage.setItem('userData', JSON.stringify(normalizedUser));
         this.userSubject.next(normalizedUser);
@@ -133,7 +136,15 @@ export class AuthService {
     );
   }
 
-  // Método para obtener el usuario logueado
+  updateUserProfile(profile: any) {
+    const currentUser = this.userSubject.getValue();
+    if (currentUser) {
+      const updatedUser = { ...currentUser, nombre: profile.name };
+      localStorage.setItem('userData', JSON.stringify(updatedUser));
+      this.userSubject.next(updatedUser);
+    }
+  }
+
   getUser(): Observable<any> {
     return this.userSubject.asObservable();
   }

@@ -1,12 +1,14 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service'; // Importar AuthService
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastService } from '../../services/toastService';
 import { PersonalInfoComponent } from './personal-info/personal-info.component';
 import { AddressesComponent } from './addresses/addresses.component';
 import { Router } from '@angular/router';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -24,15 +26,14 @@ export class ProfileComponent implements OnInit {
   constructor(
     private toastService: ToastService,
     private userService: UserService,
-    private fb: FormBuilder,
+    private authService: AuthService, // Inyectar AuthService
     private router: Router 
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     this.getUserInfo();
   }
-  // Obtener la información de la empresa
+
   getUserInfo(): void {
     this.userService.getProfile().subscribe(
       (profile) => {
@@ -45,10 +46,17 @@ export class ProfileComponent implements OnInit {
     );
   }
 
+  // Método para manejar la actualización del perfil desde el componente hijo
+  onProfileUpdated(updatedProfile: any): void {
+    this.userProfile = { ...this.userProfile, ...updatedProfile }; // Actualizar userProfile
+    this.authService.updateUserProfile(updatedProfile); // Sincronizar con AuthService
+    this.toastService.showToast('Perfil actualizado exitosamente', 'success');
+  }
+
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
-  // Eliminar la cuenta del usuario
+
   deleteAccount() {
     this.toastService.showToast(
       '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',

@@ -82,11 +82,11 @@ export class LegalComponent implements OnInit {
 
     lines.forEach(line => {
       if (line.startsWith('¿') || line.includes('?')) {
-        formattedContent += `<h3 class="text-lg font-semibold text-gray-800">${line.trim()}</h3>`;
+        formattedContent += `<h3 class="text-lg font-semibold">${line.trim()}</h3>`;
       } else if (line.includes(':')) {
-        formattedContent += `<p class="text-gray-700"><strong>${line.split(':')[0]}:</strong> ${line.split(':')[1].trim()}</p>`;
+        formattedContent += `<p><strong>${line.split(':')[0]}:</strong> ${line.split(':')[1].trim()}</p>`;
       } else {
-        formattedContent += `<p class="text-gray-700">${line.trim()}</p>`;
+        formattedContent += `<p>${line.trim()}</p>`;
       }
     });
 
