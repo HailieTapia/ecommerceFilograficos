@@ -6,6 +6,7 @@ import { AlexaAuthService } from '../../services/alexa-auth.service';
 import { ToastService } from '../../services/toastService';
 import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
 import { noXSSValidator } from '../../administrator/shared/validators';
+import { environment } from '../../../environments/config';
 
 @Component({
   selector: 'app-alexa-login',
@@ -16,7 +17,7 @@ import { noXSSValidator } from '../../administrator/shared/validators';
 })
 export class AlexaLoginComponent implements OnInit {
   loginForm: FormGroup;
-  private alexaRedirectUrl = 'https://layla.amazon.com/spa/skill/account-linking-status.html?vendorId=M34IVTO0VOKV0U';
+  private alexaRedirectUrl = environment.alexaRedirectUrls[0];
 
   constructor(
     private toastService: ToastService,
