@@ -3,22 +3,22 @@
   <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-md p-6 mb-6 flex flex-col md:flex-row md:items-center border border-gray-200 dark:border-gray-600">
     <div class="flex justify-center md:flex-shrink-0">
       <div class="relative">
-        <div *ngIf="!userProfile?.Account?.profile_picture_url; else profileImage" 
+        <div *ngIf="!userProfile?.profile_picture_url; else profileImage" 
              class="h-24 w-24 rounded-full bg-light-primary dark:bg-dark-primary flex items-center justify-center text-white text-2xl font-bold border-4 border-light-primary dark:border-dark-primary">
           {{ getInitials(userProfile?.name) }}
         </div>
         <ng-template #profileImage>
           <img class="h-24 w-24 object-cover rounded-full border-4 border-light-primary dark:border-dark-primary" 
-               [src]="userProfile?.Account?.profile_picture_url" 
+               [src]="userProfile?.profile_picture_url" 
                alt="Foto de perfil"
-               (error)="userProfile.Account.profile_picture_url = null">
+               (error)="userProfile.profile_picture_url = null">
         </ng-template>
         <div class="absolute bottom-0 right-0 flex gap-2">
           <label class="cursor-pointer bg-light-primary dark:bg-dark-primary text-white rounded-full p-2 shadow-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300">
             <i class="fas fa-camera text-sm"></i>
             <input type="file" class="hidden" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)">
           </label>
-          <button *ngIf="userProfile?.Account?.profile_picture_url"
+          <button *ngIf="userProfile?.profile_picture_url"
                   class="bg-light-danger dark:bg-dark-danger text-white rounded-full p-2 shadow-lg hover:bg-light-danger-hover dark:hover:bg-dark-danger-hover transition-all duration-300"
                   (click)="deleteProfilePicture()">
             <i class="fas fa-trash-alt text-sm"></i>
@@ -28,13 +28,13 @@
     </div>
     <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
       <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center justify-center md:justify-start gap-2">
-        {{ userProfile?.name }}
+        {{ userProfile?.name || 'Cargando...' }}
       </h1>
-      <p class="text-light-secondary dark:text-dark-secondary">{{ userProfile?.email }}</p>
+      <p class="text-light-secondary dark:text-dark-secondary">{{ userProfile?.email || '' }}</p>
       <div class="mt-3 flex justify-center md:justify-start">
         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-success dark:bg-dark-success text-light-success-text dark:text-dark-success-text">
           <span class="h-2 w-2 rounded-full bg-light-resolved-text dark:bg-dark-resolved mr-1"></span>
-          Cuenta activa
+          {{ userProfile?.status === 'activo' ? 'Cuenta activa' : 'Estado desconocido' }}
         </span>
       </div>
     </div>
@@ -78,7 +78,7 @@
       <div class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-600">
         <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Actividad reciente</h3>
         <div class="space-y-3">
-          <div *ngIf="userProfile?.Account?.profile_picture_url" class="flex items-start">
+          <div *ngIf="userProfile?.profile_picture_url" class="flex items-start">
             <div class="h-8 w-8 rounded-full bg-light-in-progress dark:bg-dark-in-progress flex items-center justify-center">
               <i class="fas fa-camera text-light-in-progress-text dark:text-dark-in-progress-text"></i>
             </div>

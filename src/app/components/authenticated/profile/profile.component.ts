@@ -36,20 +36,21 @@ export class ProfileComponent implements OnInit {
   }
 
   getUserInfo(): void {
-    this.userService.getProfile().subscribe(
-      (profile) => {
+    this.userService.getProfile().subscribe({
+      next: (profile) => {
         this.userProfile = profile;
+        console.log('Perfil del usuario:', this.userProfile);
       },
-      (error) => {
+      error: (error) => {
         const errorMessage = error?.error?.message || 'Error al obtener el perfil';
         this.toastService.showToast(errorMessage, 'error');
       }
-    );
+    });
   }
 
   // Método para obtener las iniciales del nombre
-  getInitials(name: string): string {
-    if (!name) return '??';
+  getInitials(name: string | undefined | null): string {
+    if (!name || name.trim() === '') return '??';
     const words = name.trim().split(/\s+/);
     if (words.length === 1) {
       return words[0].substring(0, 2).toUpperCase();
@@ -73,46 +74,40 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    this.userService.uploadProfilePicture(this.selectedFile).subscribe(
-      (response) => {
-        this.userProfile.Account = {
-          ...this.userProfile.Account,
-          profile_picture_url: response.profile_picture_url
-        };
+    this.userService.uploadProfilePicture(this.selectedFile).subscribe({
+      next: (response) => {
+        this.userProfile.profile_picture_url = response.profile_picture_url;
         this.authService.updateUserProfile(this.userProfile);
         this.toastService.showToast('Foto de perfil actualizada exitosamente', 'success');
         this.selectedFile = null;
       },
-      (error) => {
+      error: (error) => {
         const errorMessage = error?.error?.message || 'Error al subir la foto de perfil';
         this.toastService.showToast(errorMessage, 'error');
         this.selectedFile = null;
       }
-    );
+    });
   }
 
   // Método para eliminar la foto de perfil
   deleteProfilePicture(): void {
-    this.userService.deleteProfilePicture().subscribe(
-      () => {
-        this.userProfile.Account = {
-          ...this.userProfile.Account,
-          profile_picture_url: null
-        };
+    this.userService.deleteProfilePicture().subscribe({
+      next: () => {
+        this.userProfile.profile_picture_url = null;
         this.authService.updateUserProfile(this.userProfile);
         this.toastService.showToast('Foto de perfil eliminada exitosamente', 'success');
       },
-      (error) => {
+      error: (error) => {
         const errorMessage = error?.error?.message || 'Error al eliminar la foto de perfil';
         this.toastService.showToast(errorMessage, 'error');
       }
-    );
+    });
   }
 
   // Método para manejar la actualización del perfil desde el componente hijo
   onProfileUpdated(updatedProfile: any): void {
     this.userProfile = { ...this.userProfile, ...updatedProfile };
-    this.authService.updateUserProfile(updatedProfile);
+    this.authService.updateUserProfile(this.userProfile);
     this.toastService.showToast('Perfil actualizado exitosamente', 'success');
   }
 
@@ -126,16 +121,16 @@ export class ProfileComponent implements OnInit {
       'warning',
       'Confirmar',
       () => {
-        this.userService.deleteMyAccount().subscribe(
-          (response) => {
+        this.userService.deleteMyAccount().subscribe({
+          next: (response) => {
             this.toastService.showToast(response.message || 'Cuenta eliminada exitosamente', 'success');
             this.router.navigate(['/login']);
           },
-          (error) => {
+          error: (error) => {
             const errorMessage = error?.error?.message || 'Error al eliminar tu cuenta';
             this.toastService.showToast(errorMessage, 'error');
           }
-        );
+        });
       }
     );
   }  
