@@ -30,7 +30,8 @@ export class AuthService {
           const normalizedUser = {
             userId: response.user_id,
             tipo: response.user_type,
-            nombre: response.name // Incluir el nombre
+            nombre: response.name,
+            profilePictureUrl: response.profile_picture_url || null // Incluir la URL de la imagen
           };
           localStorage.setItem('userData', JSON.stringify(normalizedUser));
           this.userSubject.next(normalizedUser);
@@ -64,7 +65,8 @@ export class AuthService {
           const normalizedUser = {
             userId: response.userId,
             tipo: response.tipo,
-            nombre: response.name // Incluir el nombre
+            nombre: response.name,
+            profilePictureUrl: response.profile_picture_url || null // Incluir la URL de la imagen
           };
           localStorage.setItem('userData', JSON.stringify(normalizedUser));
           this.userSubject.next(normalizedUser);
@@ -95,7 +97,8 @@ export class AuthService {
         const normalizedUser = {
           userId: response.userId,
           tipo: response.tipo,
-          nombre: response.name // Incluir el nombre
+          nombre: response.name,
+          profilePictureUrl: response.profile_picture_url || null // Incluir la URL de la imagen
         };
         localStorage.setItem('userData', JSON.stringify(normalizedUser));
         this.userSubject.next(normalizedUser);
@@ -136,15 +139,21 @@ export class AuthService {
     );
   }
 
+  // Actualizar el perfil del usuario en el estado local
   updateUserProfile(profile: any) {
     const currentUser = this.userSubject.getValue();
     if (currentUser) {
-      const updatedUser = { ...currentUser, nombre: profile.name };
+      const updatedUser = {
+        ...currentUser,
+        nombre: profile.name,
+        profilePictureUrl: profile.profile_picture_url || null // Incluir la URL de la imagen
+      };
       localStorage.setItem('userData', JSON.stringify(updatedUser));
       this.userSubject.next(updatedUser);
     }
   }
 
+  // Obtener el usuario actual
   getUser(): Observable<any> {
     return this.userSubject.asObservable();
   }
@@ -175,5 +184,11 @@ export class AuthService {
   getUserRole(): string | null {
     const userData = localStorage.getItem('userData');
     return userData ? JSON.parse(userData).tipo : null;
+  }
+
+  // Obtener la URL de la imagen de perfil
+  getProfilePictureUrl(): string | null {
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData).profilePictureUrl : null;
   }
 }

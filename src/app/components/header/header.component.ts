@@ -18,7 +18,8 @@ import { RegisterComponent } from '../../components/public/register/register.com
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [LoginComponent,
+  imports: [
+    LoginComponent,
     RegisterComponent,
     CommonModule,
     RouterModule,
@@ -33,6 +34,7 @@ import { RegisterComponent } from '../../components/public/register/register.com
 export class HeaderComponent implements OnInit, OnDestroy {
   userRole: string | null = null;
   userName: string | null = null;
+  profilePictureUrl: string | null = null;
   isLoggedIn: boolean = false;
   company: any;
   logoPreview: string | ArrayBuffer | null = null;
@@ -61,7 +63,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.authService.getUser().subscribe(user => {
       this.isLoggedIn = !!user;
       this.userRole = user?.tipo || null;
-      this.userName = user?.nombre ? this.formatUserName(user.nombre) : null; // Procesar el nombre
+      this.userName = user?.nombre ? this.formatUserName(user.nombre) : null;
+      this.profilePictureUrl = user?.profilePictureUrl || null; // Obtener la URL de la imagen
     });
   }
 
@@ -85,6 +88,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.authService.logout().subscribe({
       next: () => {
         this.userName = null;
+        this.profilePictureUrl = null; // Limpiar la URL de la imagen
         this.router.navigate(['login']);
       },
       error: (err) => console.error(err)

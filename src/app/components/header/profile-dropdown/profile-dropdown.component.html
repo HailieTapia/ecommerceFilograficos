@@ -1,8 +1,15 @@
 <div class="relative p-2" (mouseenter)="openProfileDropdown()" (mouseleave)="closeProfileDropdown()">
   <div class="flex items-center space-x-2 cursor-pointer" (click)="toggleProfileDropdown()">
-    <span class="w-8 h-8 bg-light-primary dark:bg-dark-primary text-white rounded-md border border-gray-200 dark:border-gray-600 flex items-center justify-center text-sm font-medium">
-      {{ userRole === 'administrador' ? 'AD' : (userName ? (userName | slice:0:2 | uppercase) : 'MT') }}
-    </span>
+    <!-- Mostrar imagen de perfil si existe, de lo contrario mostrar iniciales -->
+    <ng-container *ngIf="profilePictureUrl; else initialsAvatar">
+      <img [src]="profilePictureUrl" alt="Profile Picture"
+        class="w-8 h-8 rounded-md border border-gray-200 dark:border-gray-600 object-cover">
+    </ng-container>
+    <ng-template #initialsAvatar>
+      <span class="w-8 h-8 bg-light-primary dark:bg-dark-primary text-white rounded-md border border-gray-200 dark:border-gray-600 flex items-center justify-center text-sm font-medium">
+        {{ userRole === 'administrador' ? 'AD' : (userName ? (userName | slice:0:2 | uppercase) : 'MT') }}
+      </span>
+    </ng-template>
     <span class="text-light-blanco dark:text-dark-primary">{{ userName || (userRole === 'administrador' ? 'Admin' : 'Usuario') }}</span>
     <i class="fas fa-chevron-down text-light-blanco dark:text-dark-primary"></i>
   </div>

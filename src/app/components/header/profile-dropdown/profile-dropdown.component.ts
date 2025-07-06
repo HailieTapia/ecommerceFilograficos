@@ -11,7 +11,8 @@ import { RouterModule } from '@angular/router';
 })
 export class ProfileDropdownComponent {
   @Input() userRole: string | null = null;
-  @Input() userName: string | null = null; // Nueva Input para el nombre
+  @Input() userName: string | null = null;
+  @Input() profilePictureUrl: string | null = null; // Nueva Input para la URL de la imagen
   @Output() logout = new EventEmitter<void>();
   isProfileDropdownOpen = false;
 
