@@ -3,60 +3,62 @@
   @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700;
 }
 
-.fc .fc-toolbar {
+.fc-toolbar {
   @apply bg-gray-100 dark:bg-gray-700 p-4 rounded-t-lg;
 }
 
-.fc .fc-toolbar-title {
+.fc-toolbar-title {
   @apply text-lg font-semibold text-gray-900 dark:text-gray-100;
 }
 
-.fc .fc-button {
+.fc-button {
   @apply bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-lg px-3 py-1 text-sm hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors;
 }
 
-.fc .fc-button-primary:not(:disabled):active,
-.fc .fc-button-primary:not(:disabled).fc-button-active {
+.fc-button-primary:not(:disabled):active,
+.fc-button-primary:not(:disabled).fc-button-active {
   @apply bg-blue-200 dark:bg-blue-800;
 }
 
-.fc .fc-daygrid-day-number {
+.fc-daygrid-day-number {
   @apply text-sm font-medium text-gray-700 dark:text-gray-300;
 }
 
-.fc .fc-daygrid-day.fc-day-today {
+.fc-daygrid-day.fc-day-today {
   @apply ring-2 ring-blue-500 dark:ring-blue-400;
 }
 
-.fc .fc-daygrid-day:hover {
+.fc-daygrid-day:hover {
   @apply bg-gray-50 dark:bg-gray-600;
 }
 
+/* Combinar estilos de eventos para reducir redundancia */
+.fc-event {
+  @apply rounded-none overflow-hidden text-xs font-medium border-l-4;
+  max-width: 100%;
+}
+
+/* Definir solo las diferencias de color para cada tipo de evento */
 .fc-event-pending {
-  @apply bg-yellow-100 text-yellow-800 border-l-4 border-yellow-200;
+  @apply bg-yellow-100 text-yellow-800 border-yellow-200;
 }
 
 .fc-event-processing {
-  @apply bg-blue-100 text-blue-800 border-l-4 border-blue-200;
+  @apply bg-blue-100 text-blue-800 border-blue-200;
 }
 
 .fc-event-shipped {
-  @apply bg-purple-100 text-purple-800 border-l-4 border-purple-200;
+  @apply bg-purple-100 text-purple-800 border-purple-200;
 }
 
 .fc-event-delivered {
-  @apply bg-green-100 text-green-800 border-l-4 border-green-200;
+  @apply bg-green-100 text-green-800 border-green-200;
 }
 
-.fc .fc-event {
-  @apply rounded-none overflow-hidden text-xs font-medium;
-  max-width: 100% !important; /* Prevent overflow */
-}
-
-.fc .fc-daygrid-event-harness {
+.fc-daygrid-event-harness {
   @apply w-full;
 }
 
-.fc .fc-daygrid-day-bottom {
+.fc-daygrid-day-bottom {
   @apply mt-auto text-right;
 }

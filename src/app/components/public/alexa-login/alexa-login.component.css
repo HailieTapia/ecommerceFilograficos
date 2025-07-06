@@ -1,0 +1,12 @@
+/* Reutilizar los estilos del login normal para mantener consistencia */
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+/* Asegurar que el formulario sea responsivo */
+@media (max-width: 768px) {
+  .min-h-screen {
+    flex-direction: column;
+  }
+}

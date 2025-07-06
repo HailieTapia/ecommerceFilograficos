@@ -10,7 +10,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { AdminOrderService, AdminOrder, AdminOrdersResponse, AdminOrderResponse, AdminOrderSummaryResponse, UpdateOrderStatusRequest, AdminOrdersByDateResponse } from '../../services/admin-order.service';
 import { ToastService } from '../../services/toastService';
 import { ModalComponent } from '../../../modal/modal.component';
-import moment from 'moment';
+import { format, startOfMonth, endOfMonth, isSameDay, addDays } from 'date-fns';
 
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
 
@@ -42,8 +42,6 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   minTotal: number | null = null;
   maxTotal: number | null = null;
   isUrgent: boolean | null = null;
-
-  protected moment = moment;
 
   private statusTranslations: { [key in OrderStatus]: string } = {
     pending: 'Pendiente',
@@ -116,12 +114,12 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   }
 
   customDayCellContent(arg: any): { html: string } {
-    const dateStr = moment(arg.date).format('YYYY-MM-DD');
+    const dateStr = format(arg.date, 'yyyy-MM-dd');
     const dayOrders = this.orders.filter(order => {
       const orderDate = this.dateField === 'delivery' ? order.estimated_delivery_date : order.created_at;
-      return moment(orderDate).format('YYYY-MM-DD') === dateStr;
+      return format(new Date(orderDate), 'yyyy-MM-dd') === dateStr;
     });
-    const isToday = moment(arg.date).isSame(moment(), 'day');
+    const isToday = isSameDay(arg.date, new Date());
     const countText = `${dayOrders.length} orden${dayOrders.length !== 1 ? 'es' : ''}`;
     const countClass = dayOrders.length > 5 ? 'bg-red-100 text-red-800' :
                       dayOrders.length > 2 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800';
@@ -145,8 +143,8 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
 
   loadOrders(): void {
     this.isLoading = true;
-    const startDate = moment().startOf('month').format('YYYY-MM-DD');
-    const endDate = moment().endOf('month').format('YYYY-MM-DD');
+    const startDate = format(startOfMonth(new Date()), 'yyyy-MM-dd');
+    const endDate = format(endOfMonth(new Date()), 'yyyy-MM-dd');
     this.orderService.getOrders(
       1,
       50,
@@ -187,7 +185,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
 
   handleDateClick(arg: DateClickArg): void {
     this.selectedDate = arg.date;
-    const date = moment(arg.date).format('YYYY-MM-DD');
+    const date = format(arg.date, 'yyyy-MM-dd');
     this.orderService.getOrdersByDate(date, this.dateField).subscribe({
       next: (response: AdminOrdersByDateResponse) => {
         this.orders = response.data;
@@ -267,7 +265,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
       id: order.order_id.toString(),
       title: `#${order.order_id} - ${order.customer_name}`,
       start: this.dateField === 'delivery' ? order.estimated_delivery_date : order.created_at,
-      end: this.dateField === 'delivery' ? moment(order.estimated_delivery_date).add(1, 'day').format('YYYY-MM-DD') : moment(order.created_at).add(1, 'day').format('YYYY-MM-DD'),
+      end: this.dateField === 'delivery' ? format(addDays(new Date(order.estimated_delivery_date), 1), 'yyyy-MM-dd') : format(addDays(new Date(order.created_at), 1), 'yyyy-MM-dd'),
       backgroundColor: this.getEventColor(order.order_status),
       borderColor: this.getEventBorderColor(order.order_status),
       textColor: this.getEventTextColor(order.order_status),
@@ -334,7 +332,7 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   }
 
   formatDate(date: string | Date): string {
-    const dateStr = typeof date === 'string' ? date : moment(date).format('YYYY-MM-DD');
+    const dateStr = typeof date === 'string' ? date : format(date, 'yyyy-MM-dd');
     return this.datePipe.transform(dateStr, 'dd MMM yyyy', 'es-MX') || dateStr;
   }
 
