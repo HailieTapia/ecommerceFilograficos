@@ -4,64 +4,80 @@
 
   <!-- Main content -->
   <div class="flex-1 flex flex-col">
-    <header class="bg-light-background dark:bg-dark-background shadow-md sticky top-0 z-50">
+    <header class="bg-light-encabezado dark:bg-dark-background shadow-md sticky top-0 z-50">
       <div class="flex items-center justify-between px-4 py-3 md:px-20 max-w-full">
         <!-- Logo and Company Name -->
         <div class="flex items-center space-x-3">
           <a routerLink="/" class="flex items-center space-x-3">
-            <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="h-10 w-12 md:h-12 md:w-16 rounded-md border border-gray-200 dark:border-gray-600">
-            <span class="hidden md:inline text-xl font-bold text-light-primary dark:text-dark-primary font-sans hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+            <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo"
+              class="h-10 w-12 md:h-12 md:w-16 rounded-md border border-gray-200 dark:border-gray-600">
+            <span
+              class="hidden md:inline text-xl font-bold text-light-blanco dark:text-dark-primary font-sans hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
               {{ company?.name || 'Filográficos' }}
             </span>
           </a>
           <div *ngIf="isLoggedIn && userRole === 'administrador'" class="flex items-center space-x-2">
-            <span class="text-xs md:text-md text-red-600 font-semibold bg-red-100 px-2 py-0.5 rounded-full">ADMIN PANEL</span>
+            <span
+              class="text-xs md:text-sm text-light-encabezado font-semibold bg-light-blanco px-4 py-1.5 rounded-full border border-blue-200">
+              ÁREA DE ADMINSTRACIÓN
+            </span>
           </div>
         </div>
 
         <!-- Search Bar (Hidden on mobile, shown on md+ for non-admins) -->
         <div *ngIf="userRole !== 'administrador'" class="hidden md:flex flex-1 mx-4 max-w-2xl">
           <div class="relative w-full">
-            <input type="text" placeholder="Buscar productos, marcas y más..." 
-                   [(ngModel)]="searchTerm" (keydown.enter)="performSearch()"
-                   class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer" (click)="performSearch()"></i>
+            <input type="text" placeholder="Buscar productos, marcas y más..." [(ngModel)]="searchTerm"
+              (keydown.enter)="performSearch()"
+              class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
+            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer"
+              (click)="performSearch()"></i>
           </div>
         </div>
 
-        <!-- Actions -->
         <div class="flex items-center space-x-4">
-          <!-- Mobile Menu Toggle -->
-          <button class="md:hidden text-light-primary dark:text-dark-primary" (click)="toggleMobileMenu()">
-            <i class="fas fa-bars text-xl"></i>
-          </button>
-
-          <!-- Public (not logged in) -->
           <div *ngIf="!isLoggedIn" class="flex items-center space-x-4">
-            <a href="/register" class="text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">Crea tu cuenta</a>
-            <a href="/login" class="text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">Iniciar sesión</a>
-            <a href="/cart" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+
+            <button (click)="showModal2 = true"
+              class="text-white/80 hover:text-white transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-white after:transition-all after:duration-300">
+              Regístrate
+            </button>
+            <button (click)="showModal = true"
+              class="px-6 py-2 bg-white text-blue-600 hover:bg-gray-100 rounded-full transition-all duration-300 font-medium">
+              Iniciar sesión
+            </button>
+            <a href="/cart"
+              class="flex items-center space-x-2 px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-lg transition-all duration-300">
               <i class="fas fa-shopping-cart"></i>
+              <span class="text-sm">Carrito</span>
             </a>
           </div>
 
           <!-- Authenticated (client or admin) -->
           <div *ngIf="isLoggedIn" class="flex items-center space-x-4">
             <app-notification-dropdown></app-notification-dropdown>
-            <a *ngIf="userRole === 'cliente'" href="/cart" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
+            <a *ngIf="userRole === 'cliente'" href="/cart"
+              class="relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
               <i class="fas fa-shopping-cart text-xl"></i>
-              <span class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemCount }}</span>
-              <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" role="tooltip" aria-label="Carrito">Carrito</span>
+              <span
+                class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{
+                cartItemCount }}</span>
+              <span
+                class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                role="tooltip" aria-label="Carrito">Carrito</span>
             </a>
-            <a *ngIf="userRole === 'administrador'" href="/dashboard-orders" class="text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+            <a *ngIf="userRole === 'administrador'" href="/dashboard-orders"
+              class="text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
               <i class="fas fa-calendar-alt text-xl"></i>
             </a>
             <!-- Dentro del div donde se muestra el profile-dropdown -->
-            <app-profile-dropdown [userRole]="userRole" [userName]="userName" (logout)="logout()"></app-profile-dropdown>
+            <app-profile-dropdown [userRole]="userRole" [userName]="userName"
+              (logout)="logout()"></app-profile-dropdown>
           </div>
 
           <!-- Theme Toggle (always visible) -->
-          <button (click)="toggleTheme()" class="relative text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
+          <button (click)="toggleTheme()"
+            class="relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
             <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
           </button>
         </div>
@@ -70,18 +86,18 @@
       <!-- Mobile Search Bar (Visible only on mobile for non-admins) -->
       <div *ngIf="userRole !== 'administrador'" class="md:hidden px-4 py-2">
         <div class="relative">
-          <input type="text" placeholder="Buscar productos, marcas y más..." 
-                 [(ngModel)]="searchTerm" (keydown.enter)="performSearch()"
-                 class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
-          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer" (click)="performSearch()"></i>
+          <input type="text" placeholder="Buscar productos, marcas y más..." [(ngModel)]="searchTerm"
+            (keydown.enter)="performSearch()"
+            class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer"
+            (click)="performSearch()"></i>
         </div>
       </div>
-
-      <!-- Navigation -->
-      <app-navigation [isLoggedIn]="isLoggedIn" [userRole]="userRole" *ngIf="mobileMenuOpen || !isMobile()" class="border-t border-gray-200 dark:border-gray-600 px-4 py-2"></app-navigation>
     </header>
 
     <div>
+      <app-login *ngIf="showModal" (closed)="showModal = false"></app-login>
+      <app-register *ngIf="showModal2" (closed)="showModal2 = false"></app-register>
       <router-outlet></router-outlet>
     </div>
   </div>

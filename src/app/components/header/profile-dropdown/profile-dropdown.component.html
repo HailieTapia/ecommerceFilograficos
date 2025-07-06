@@ -3,19 +3,19 @@
     <span class="w-8 h-8 bg-light-primary dark:bg-dark-primary text-white rounded-md border border-gray-200 dark:border-gray-600 flex items-center justify-center text-sm font-medium">
       {{ userRole === 'administrador' ? 'AD' : (userName ? (userName | slice:0:2 | uppercase) : 'MT') }}
     </span>
-    <span class="text-light-primary dark:text-dark-primary">{{ userName || (userRole === 'administrador' ? 'Admin' : 'Usuario') }}</span>
-    <i class="fas fa-chevron-down text-light-primary dark:text-dark-primary"></i>
+    <span class="text-light-blanco dark:text-dark-primary">{{ userName || (userRole === 'administrador' ? 'Admin' : 'Usuario') }}</span>
+    <i class="fas fa-chevron-down text-light-blanco dark:text-dark-primary"></i>
   </div>
-  <div *ngIf="isProfileDropdownOpen" class="absolute right-0 mt-2 w-48 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg transition-opacity duration-300 z-10">
+  <div *ngIf="isProfileDropdownOpen" class="absolute right-0 mt-2 w-48 bg-light-encabezado dark:bg-dark-background rounded-md shadow-lg transition-opacity duration-300 z-10">
     <ng-container *ngIf="userRole === 'cliente'">
-      <a href="/profile" class="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi cuenta</a>
-      <a href="/authcatalog" class="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi catálogo</a>
-      <a href="/orders" class="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Pedidos</a>
+      <a href="/profile" class="block px-4 py-2 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi cuenta</a>
+      <a href="/authcatalog" class="block px-4 py-2 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi catálogo</a>
+      <a href="/orders" class="block px-4 py-2 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Pedidos</a>
     </ng-container>
     <ng-container *ngIf="userRole === 'administrador'">
-      <a href="/company" class="block px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi cuenta</a>
+      <a href="/company" class="block px-4 py-2 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi cuenta</a>
     </ng-container>
-    <button (click)="logout.emit()" class="block w-full text-left px-4 py-2 text-light-text dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">
+    <button (click)="logout.emit()" class="block w-full text-left px-4 py-2 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">
       Cerrar sesión
     </button>
   </div>

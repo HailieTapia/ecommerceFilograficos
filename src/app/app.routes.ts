@@ -2,9 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 
 // Públicos
-import { RegisterComponent } from './components/public/register/register.component';
 import { RecoverComponent } from './components/public/recover/recover.component';
-import { LoginComponent } from './components/public/login/login.component';
 import { FaqComponent } from './components/public/faq/faq.component';
 import { MfaVerificationComponent } from './components/public/mfa-verification/mfa-verification.component';
 import { SupportInquiryComponent } from './components/public/support-inquiry/support-inquiry.component';
@@ -91,9 +89,7 @@ export const routes: Routes = [
   },
 
   // Públicos
-  { path: 'register', component: RegisterComponent, data: { breadcrumb: 'Registrar' } },
   { path: 'help', component: FaqComponent, data: { breadcrumb: 'Help' } },
-  { path: 'login', component: LoginComponent, data: { breadcrumb: 'Iniciar sesión' } },
   { path: 'recovery', component: RecoverComponent, data: { breadcrumb: 'Recuperar cuenta' } },
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },
   { path: 'support-inquiry', component: SupportInquiryComponent, data: { breadcrumb: 'Consulta Soporte' } },

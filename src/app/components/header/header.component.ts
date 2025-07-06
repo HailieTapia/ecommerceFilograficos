@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,21 +8,22 @@ import { ThemeService } from '../services/theme.service';
 import { CartService } from '../services/cart.service';
 import { Subscription } from 'rxjs';
 import { SidebarComponent } from './sidebar/sidebar.component';
-import { NavigationComponent } from './navigation/navigation.component';
 import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';
 import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 import { take, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { LoginComponent } from '../../components/public/login/login.component';
+import { RegisterComponent } from '../../components/public/register/register.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [
+  imports: [LoginComponent,
+    RegisterComponent,
     CommonModule,
     RouterModule,
     FormsModule,
     SidebarComponent,
-    NavigationComponent,
     ProfileDropdownComponent,
     NotificationDropdownComponent
   ],
@@ -36,8 +37,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   company: any;
   logoPreview: string | ArrayBuffer | null = null;
   cartItemCount: number = 0;
-  mobileMenuOpen: boolean = false;
   searchTerm: string = '';
+  showModal = false;
+  showModal2 = false;
+
   private cartCountSubscription!: Subscription;
 
   constructor(
@@ -46,7 +49,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private companyService: CompanyService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cartCountSubscription = this.cartService.cartItemCount$.subscribe(
@@ -96,31 +99,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return this.themeService.isDarkMode();
   }
 
-  toggleMobileMenu(): void {
-    this.mobileMenuOpen = !this.mobileMenuOpen;
-  }
-
-  isMobile(): boolean {
-    return window.innerWidth < 768;
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: Event): void {
-    this.checkMobile();
-  }
-
-  private checkMobile(): void {
-    if (!this.isMobile()) {
-      this.mobileMenuOpen = false;
-    }
-  }
-
-  private formatUserName(fullName: string): string {
-    if (!fullName) return '';
-    const nameParts = fullName.trim().split(/\s+/);
-    return this.isMobile() ? nameParts[0].toUpperCase() : nameParts.slice(0, 2).join(' ').toUpperCase();
-  }
-
   performSearch(): void {
     if (!this.searchTerm.trim() || this.userRole === 'administrador') {
       return;
@@ -133,5 +111,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.router.navigate([route], { queryParams: { search: this.searchTerm.trim() }, queryParamsHandling: 'merge' });
       this.searchTerm = '';
     });
+  }
+
+  private formatUserName(fullName: string): string {
+    if (!fullName) return '';
+    const nameParts = fullName.trim().split(/\s+/);
+    return nameParts.slice(0, 2).join(' ').toUpperCase();
   }
 }

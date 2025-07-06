@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit, EventEmitter, Output, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -19,6 +19,7 @@ import { ToastService } from '../../services/toastService';
 export class LoginComponent implements OnInit, AfterViewInit {
   loginForm: FormGroup;
   siteKey = environment.recaptchaSiteKey;
+  @Output() closed = new EventEmitter<void>();
 
   constructor(
     private toastService: ToastService,
@@ -61,7 +62,16 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   // Limpiar el estado de autenticación
   clearAuthState(): void {
-    this.authService.resetAuthState(); 
+    this.authService.resetAuthState();
+  }
+  // Cierra el modal al presionar "Escape"
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscapeKey(event: KeyboardEvent) {
+    this.closeModal();
+  }
+
+  closeModal() {
+    this.closed.emit();
   }
 
   onSubmit() {
@@ -69,7 +79,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       this.toastService.showToast('Por favor, completa los campos correctamente.', 'warning');
       return;
     }
-  
+
     this.authService.login(this.loginForm.value).subscribe(
       (response) => {
         if (response.mfaRequired) {
@@ -80,6 +90,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         } else {
           this.toastService.showToast('Inicio de sesión exitoso.', 'success');
           this.loginForm.reset();
+          this.closeModal();
           // Redirigir según el rol del usuario
           this.authService.getUser().subscribe(user => {
             if (user?.tipo === 'administrador') {

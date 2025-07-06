@@ -1,33 +1,32 @@
-<footer class="bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text py-6">
-  <div class="max-w-screen-xl mx-auto px-4">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8 justify-items-center">
+<footer class="bg-light-pie dark:bg-dark-background text-light-blanco dark:text-dark-text py-3">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-1 justify-items-center">
       <div class="text-center">
         <h4 class="font-bold text-lg mb-4">Compañía</h4>
         <ul class="space-y-3">
-          <li><a href="#" class="hover:text-light-primary dark:hover:text-dark-primary">Acerca de</a></li>
-          <li><a href="support-inquiry" class="hover:text-light-primary dark:hover:text-dark-primary">Consulta soporte</a></li>
-          <li><a href="legal" class="hover:text-light-primary dark:hover:text-dark-primary">Documentos legales</a></li>
+          <li><a href="#" class="hover:text-light-fondo dark:hover:text-dark-primary">Acerca de</a></li>
+          <li><a href="support-inquiry" class="hover:text-light-fondo dark:hover:text-dark-primary">Consulta soporte</a></li>
+          <li><a href="legal" class="hover:text-light-fondo dark:hover:text-dark-primary">Documentos legales</a></li>
         </ul>
       </div>
       <div class="text-center">
         <h4 class="font-bold text-lg mb-4">Atención al cliente</h4>
         <ul class="space-y-3">
-          <li><a href="help" class="hover:text-light-primary dark:hover:text-dark-primary">Ayuda</a></li>
-          <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: 13 }" class="hover:text-light-primary dark:hover:text-dark-primary">Envíos</a></li>
-          <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: 14 }" class="hover:text-light-primary dark:hover:text-dark-primary">Devoluciones</a></li>
-          <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: 15 }" class="hover:text-light-primary dark:hover:text-dark-primary">Métodos de Pago</a></li>
+          <li><a href="help" class="hover:text-light-fondo dark:hover:text-dark-primary">Ayuda</a></li>
+          <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: 13 }" class="hover:text-light-fondo dark:hover:text-dark-primary">Envíos</a></li>
+          <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: 14 }" class="hover:text-light-fondo dark:hover:text-dark-primary">Devoluciones</a></li>
+          <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: 15 }" class="hover:text-light-fondo dark:hover:text-dark-primary">Métodos de Pago</a></li>
         </ul>
       </div>
       <div class="text-center">
         <h4 class="font-bold text-lg mb-4">Contáctanos</h4>
         <div class="flex justify-center space-x-4">
-          <a *ngIf="companyInfo?.phone_number" [href]="'https://wa.me/' + companyInfo.phone_number" class="hover:text-light-primary dark:hover:text-dark-primary" target="_blank">
+          <a *ngIf="companyInfo?.phone_number" [href]="'https://wa.me/' + companyInfo.phone_number" class="hover:text-light-fondo dark:hover:text-dark-primary" target="_blank">
             <i class="fab fa-whatsapp text-2xl"></i>
           </a>
-          <a *ngIf="companyInfo?.email" [href]="'mailto:' + companyInfo.email" class="hover:text-light-primary dark:hover:text-dark-primary">
+          <a *ngIf="companyInfo?.email" [href]="'mailto:' + companyInfo.email" class="hover:text-light-fondo dark:hover:text-dark-primary">
             <i class="fas fa-envelope text-2xl"></i>
           </a>
-          <a *ngIf="companyInfo?.address_street" href="https://maps.app.goo.gl/irSjJ9RzgT6yxpCz7" class="hover:text-light-primary dark:hover:text-dark-primary" target="_blank">
+          <a *ngIf="companyInfo?.address_street" href="https://maps.app.goo.gl/irSjJ9RzgT6yxpCz7" class="hover:text-light-fondo dark:hover:text-dark-primary" target="_blank">
             <i class="fas fa-map-marker-alt text-2xl"></i>
           </a>
         </div>
@@ -39,7 +38,7 @@
             *ngFor="let social of companyInfo?.SocialMedia"
             [href]="social.link"
             target="_blank"
-            class="hover:text-light-primary dark:hover:text-dark-primary"
+            class="hover:text-light-fondo dark:hover:text-dark-primary"
           >
             <i [class]="companyService.getSocialMediaIcon(social.name)" class="text-2xl"></i>
           </a>
@@ -50,10 +49,4 @@
         </div>
       </div>
     </div>
-    <div class="border-t border-gray-300 dark:border-gray-600 pt-4 text-center">
-      <p class="text-sm text-light-secondary dark:text-dark-secondary">
-        © 2025 {{ companyInfo?.name || 'Filográficos' }}. Todos los derechos reservados.
-      </p>
-    </div>
-  </div>
 </footer>

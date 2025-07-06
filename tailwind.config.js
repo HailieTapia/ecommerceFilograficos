@@ -8,10 +8,20 @@ module.exports = {
     extend: {
       colors: {
         light: {
-          background: '#F9FAFB',
+          fondo: '#ccdaeb',
+          encabezado: '#001e70', 
+          pie: '#191c33', 
+          texto: '#0390b7', 
+          blanco: '#ffffff', 
+          negro: '#000000',
+          azulclaro: '#2558eb',
+          gris: '#4b5563',
+          verde: '#22c55a',
+
+          background: '#f3f7fb',
           text: '#1F2937',
           primary: '#1E3A8A',
-          'primary-hover': '#3B82F6',
+          'primary-hover': '#0034b0',
           secondary: '#4B5563',
           'secondary-hover': '#6B7280',
           'table-header': '#E0E7FF',
