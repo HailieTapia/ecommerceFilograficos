@@ -28,7 +28,12 @@
               {
                 "glob": "firebase-messaging-sw.js",
                 "input": "src"
-              } 
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "/assets/"
+              }
             ],
             "styles": [
               "src/custom-theme.scss",
