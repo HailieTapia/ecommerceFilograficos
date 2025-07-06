@@ -1,148 +1,25 @@
-<style>
-  @keyframes float {
-    0% {
-      transform: translateY(0px) rotate(0deg);
-    }
+<div class="min-h-screen grid place-items-center relative overflow-hidden">
+  <!-- Imagen de fondo con blur -->
+  <img src="assets/images/400.png" alt="Error 404"
+    class="absolute inset-0 w-full h-full object-cover blur-sm scale-110">
 
-    50% {
-      transform: translateY(-20px) rotate(5deg);
-    }
+  <div class="relative z-10 text-center bg-light-background dark:bg-dark-background bg-opacity-95 dark:bg-opacity-95 p-8 rounded-lg shadow-xl max-w-md mx-auto 
+            border border-light-border dark:border-dark-border
+            transform transition-all hover:scale-105 hover:shadow-2xl">
 
-    100% {
-      transform: translateY(0px) rotate(0deg);
-    }
-  }
+    <p class="text-xl text-light-secondary dark:text-dark-secondary mt-2">Algo salió mal con tu solicitud. ¡No te
+      preocupes! Asegúrate de que los datos sean correctos y vuelve a intentarlo.
+    </p>
 
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes bounce {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-
-    50% {
-      transform: translateY(-15px);
-    }
-  }
-
-  .floating {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .floating-slow {
-    animation: float 8s ease-in-out infinite;
-  }
-
-  .spinning {
-    animation: spin 10s linear infinite;
-  }
-
-  .bouncing {
-    animation: bounce 2s infinite;
-  }
-</style>
-
-<body class="bg-gray-50 min-h-screen">
-  <div class="container mx-auto px-4 py-12">
-    <!-- Logo placeholder -->
-    <div class="flex justify-center mb-6">
-    </div>
-    <div class="flex flex-col md:flex-row items-center justify-center gap-8 max-w-6xl mx-auto">
-      <!-- Ilustración creativa -->
-      <div class="relative w-full md:w-1/2 h-96 md:h-[400px]">
-        <!-- Bloque de construcción roto -->
-        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 w-64 h-20 bg-gray-200 rounded-lg"></div>
-        <div class="absolute bottom-30 left-1/2 transform -translate-x-1/2 w-6 h-40 bg-gray-400 rounded-t-lg"></div>
-
-        <!-- Cartel "400" flotante -->
-        <div class="absolute top-10 left-10 floating-slow">
-          <div class="w-32 h-40 bg-white rounded-lg relative">
-            <!-- Cuello de la camiseta -->
-            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-12 h-6 bg-gray-50 rounded-b-full"></div>
-            <!-- Mangas -->
-            <div class="absolute top-8 left-0 w-6 h-10 bg-white transform -translate-x-4 rounded-l-lg"></div>
-            <div class="absolute top-8 right-0 w-6 h-10 bg-white transform translate-x-4 rounded-r-lg"></div>
-            <!-- Estampado 400 -->
-            <div
-              class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-red-500 font-bold text-xl">
-              400
-            </div>
-          </div>
-        </div>
-
-        <!-- Herramientas de personalización flotando -->
-        <div class="absolute top-20 right-20 floating">
-          <div class="w-6 h-24 bg-sky-400 rounded-t-lg">
-            <div class="w-6 h-6 bg-red-500 rounded-t-lg"></div>
-            <div
-              class="w-0 h-0 border-l-[3px] border-r-[3px] border-b-[10px] border-l-transparent border-r-transparent border-b-sky-600 absolute -bottom-2 left-0">
-            </div>
-          </div>
-        </div>
-
-        <!-- Hilo desenrollándose en espiral -->
-        <div class="absolute bottom-40 right-30">
-          <div class="w-16 h-16 bg-green-500 rounded-full spinning">
-            <div
-              class="absolute top-1/2 left-1/2 w-6 h-6 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2">
-            </div>
-          </div>
-          <div class="absolute top-0 left-1/2 w-2 bg-green-500 h-40 rounded-full transform origin-bottom rotate-45">
-          </div>
-        </div>
-
-        <!-- Tijeras abiertas animadas -->
-        <div class="absolute bottom-20 left-20">
-          <div class="relative w-24 h-24">
-            <div class="absolute w-4 h-24 bg-gray-400 rounded-full transform origin-bottom rotate-45"></div>
-            <div class="absolute w-4 h-24 bg-gray-400 rounded-full transform origin-bottom -rotate-45"></div>
-            <div class="absolute top-16 left-1/2 transform -translate-x-1/2 w-6 h-6 bg-red-500 rounded-full"></div>
-          </div>
-        </div>
-
-        <!-- Pieza de rompecabezas faltante (que sería la página) botando -->
-        <div class="absolute top-1/2 right-1/4 bouncing">
-          <div class="w-20 h-20 relative">
-            <div class="absolute inset-0 bg-sky-400 rounded-lg"></div>
-            <div class="absolute -right-4 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-sky-400 rounded-full"></div>
-            <div class="absolute left-1/2 -bottom-4 transform -translate-x-1/2 w-8 h-8 bg-sky-400 rounded-full"></div>
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white font-bold">?
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contenido de texto -->
-      <div class="w-full md:w-1/2 text-center md:text-left">
-        <h1 class="text-6xl font-bold text-gray-800 mb-4">¡Vaya!</h1>
-        <h2 class="text-4xl font-semibold text-sky-500 mb-6">400: Solicitud incorrecta</h2>
-        <p class="text-xl text-gray-600 mb-8">
-          Algo salió mal con tu solicitud. ¡No te preocupes! Asegúrate de que los datos sean correctos y vuelve a intentarlo.
-        </p>
-        <p class="text-lg text-gray-500 mb-8">
-          Mientras tanto, ¿por qué no exploras otros productos personalizados que están esperando por ti?
-        </p>
-
-        <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
-          <a href="/"
-            class="px-6 py-3 bg-sky-400 hover:bg-sky-500 text-white font-medium rounded-lg transition-colors">
-            Volver al inicio
-          </a>
-          <a href="/register"
-            class="px-6 py-3 bg-white border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-white font-medium rounded-lg transition-colors">
-            Ver productos
-          </a>
-        </div>
-      </div>
+    <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
+      <a href="/"
+        class="px-2 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
+        Volver al inicio
+      </a>
+      <a href="/product-categories"
+        class="px-2 py-2 border border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary rounded-md hover:bg-light-primary dark:hover:bg-dark-primary hover:text-white transition-colors">
+        Ver productos
+      </a>
     </div>
   </div>
-</body>
+</div>
