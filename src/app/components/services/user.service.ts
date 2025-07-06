@@ -24,7 +24,7 @@ export class UserService {
         );
     }
 
-    //Añadir una dirección al usuario 
+    // Añadir una dirección al usuario 
     addAddress(data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -43,6 +43,7 @@ export class UserService {
             })
         );
     }
+
     // Función para obtener el perfil del usuario autenticado
     getProfile(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -53,12 +54,34 @@ export class UserService {
         );
     }
 
-    // Eliminar la cuenta del cliente autenticado(NO)
+    // Subir la foto de perfil del usuario
+    uploadProfilePicture(file: File): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const formData = new FormData();
+                formData.append('profilePicture', file);
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.post(`${this.apiUrl}/users/upload-profile-picture`, formData, { headers, withCredentials: true });
+            })
+        );
+    }
+
+    // Eliminar la foto de perfil del usuario
+    deleteProfilePicture(): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                return this.http.delete(`${this.apiUrl}/users/profile-picture`, { headers, withCredentials: true });
+            })
+        );
+    }
+
+    // Eliminar la cuenta del cliente autenticado
     deleteMyAccount(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.delete(`${this.apiUrl}/users/delete-account`, { headers, withCredentials: true })
+                return this.http.delete(`${this.apiUrl}/users/delete-account`, { headers, withCredentials: true });
             })
         );
     }
