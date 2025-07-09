@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -23,16 +23,31 @@ export class ProfileComponent implements OnInit {
   activeTab: string = 'info';
   addAddressId: number | null = null;
   selectedFile: File | null = null;
+  showTooltip: boolean = false;
 
   constructor(
+    private elRef: ElementRef,
     private toastService: ToastService,
     private userService: UserService,
     private authService: AuthService,
     private router: Router 
   ) {}
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const tooltip = this.elRef.nativeElement.querySelector('.tooltip'); // Selector del tooltip
+    const button = this.elRef.nativeElement.querySelector('.h-24.w-24'); // Selector del botón o contenedor circular
+    const clickedInside = (tooltip && tooltip.contains(target)) || (button && button.contains(target));
+    if (!clickedInside && this.showTooltip) {
+      this.showTooltip = false;
+    }
+  }
 
   ngOnInit(): void {
     this.getUserInfo();
+  }
+  toggleTooltip(): void {
+    this.showTooltip = !this.showTooltip;
   }
 
   getUserInfo(): void {

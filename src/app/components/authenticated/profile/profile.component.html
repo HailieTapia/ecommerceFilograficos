@@ -1,38 +1,59 @@
 <div class="bg-light-background dark:bg-dark-background p-6 font-sans">
   <!-- Cabecera de perfil -->
-  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-md p-6 mb-6 flex flex-col md:flex-row md:items-center border border-gray-200 dark:border-gray-600">
+  <div
+    class="bg-light-background dark:bg-dark-background rounded-lg shadow-md p-6 mb-6 flex flex-col md:flex-row md:items-center border border-gray-200 dark:border-gray-600">
     <div class="flex justify-center md:flex-shrink-0">
       <div class="relative">
-        <div *ngIf="!userProfile?.profile_picture_url; else profileImage" 
-             class="h-24 w-24 rounded-full bg-light-primary dark:bg-dark-primary flex items-center justify-center text-white text-2xl font-bold border-4 border-light-primary dark:border-dark-primary">
+        <div *ngIf="!userProfile?.profile_picture_url; else profileImage"
+          class="h-24 w-24 rounded-full bg-light-primary dark:bg-dark-primary flex items-center justify-center text-white text-2xl font-bold border-4 border-light-primary dark:border-dark-primary cursor-pointer relative group"
+          (click)="toggleTooltip()">
           {{ getInitials(userProfile?.name) }}
+          <div
+            class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <i class="fas fa-camera text-white text-lg"></i>
+          </div>
         </div>
         <ng-template #profileImage>
-          <img class="h-24 w-24 object-cover rounded-full border-4 border-light-primary dark:border-dark-primary" 
-               [src]="userProfile?.profile_picture_url" 
-               alt="Foto de perfil"
-               (error)="userProfile.profile_picture_url = null">
-        </ng-template>
-        <div class="absolute bottom-0 right-0 flex gap-2">
-          <label class="cursor-pointer bg-light-primary dark:bg-dark-primary text-white rounded-full p-2 shadow-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300">
-            <i class="fas fa-camera text-sm"></i>
-            <input type="file" class="hidden" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)">
-          </label>
-          <button *ngIf="userProfile?.profile_picture_url"
-                  class="bg-light-danger dark:bg-dark-danger text-white rounded-full p-2 shadow-lg hover:bg-light-danger-hover dark:hover:bg-dark-danger-hover transition-all duration-300"
-                  (click)="deleteProfilePicture()">
-            <i class="fas fa-trash-alt text-sm"></i>
+          <button
+            class="h-24 w-24 rounded-full border-4 border-light-primary dark:border-dark-primary overflow-hidden focus:outline-none relative group"
+            (click)="toggleTooltip()">
+            <img class="h-full w-full object-cover" [src]="userProfile?.profile_picture_url" alt="Foto de perfil"
+              (error)="userProfile.profile_picture_url = null">
+            <div
+              class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <i class="fas fa-camera text-white text-lg"></i>
+            </div>
           </button>
+        </ng-template>
+        <div *ngIf="showTooltip"
+          class="tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-800 text-light-text dark:text-dark-text rounded-lg shadow-lg z-10 border border-gray-300 dark:border-gray-600 w-48">
+          <div class="flex flex-col gap-2">
+            <label
+              class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-light-primary dark:hover:bg-dark-primary hover:text-white rounded transition-all duration-300">
+              <i class="fas fa-camera text-sm"></i>
+              <span class="text-sm">Actualizar</span>
+              <input type="file" class="hidden" accept="image/jpeg,image/png,image/webp"
+                (change)="onFileSelected($event)">
+            </label>
+            <button *ngIf="userProfile?.profile_picture_url"
+              class="flex items-center gap-1 px-4 py-2 hover:bg-light-danger dark:hover:bg-dark-danger hover:text-white rounded transition-all duration-300"
+              (click)="deleteProfilePicture()">
+              <i class="fas fa-trash-alt text-sm"></i>
+              <span class="text-sm">Eliminar</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
     <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
-      <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center justify-center md:justify-start gap-2">
+      <h1
+        class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center justify-center md:justify-start gap-2">
         {{ userProfile?.name || 'Cargando...' }}
       </h1>
       <p class="text-light-secondary dark:text-dark-secondary">{{ userProfile?.email || '' }}</p>
       <div class="mt-3 flex justify-center md:justify-start">
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-success dark:bg-dark-success text-light-success-text dark:text-dark-success-text">
+        <span
+          class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-light-success dark:bg-dark-success text-light-success-text dark:text-dark-success-text">
           <span class="h-2 w-2 rounded-full bg-light-resolved-text dark:bg-dark-resolved mr-1"></span>
           {{ userProfile?.status === 'activo' ? 'Cuenta activa' : 'Estado desconocido' }}
         </span>
@@ -43,17 +64,20 @@
   <!-- Pestañas de navegación -->
   <div class="mb-6 border-b border-gray-200 dark:border-gray-600">
     <nav class="flex space-x-4">
-      <button class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
+      <button
+        class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
         [ngClass]="{ 'text-light-primary dark:text-dark-primary border-b-2 border-light-primary dark:border-dark-primary': activeTab === 'info' }"
         (click)="setActiveTab('info')">
         Información Personal
       </button>
-      <button class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
+      <button
+        class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
         [ngClass]="{ 'text-light-primary dark:text-dark-primary border-b-2 border-light-primary dark:border-dark-primary': activeTab === 'addresses' }"
         (click)="setActiveTab('addresses')">
         Direcciones
       </button>
-      <button class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
+      <button
+        class="relative py-3 px-4 text-light-secondary dark:text-dark-secondary font-semibold hover:text-light-primary dark:hover:text-dark-primary transition-all duration-300"
         [ngClass]="{ 'text-light-primary dark:text-dark-primary border-b-2 border-light-primary dark:border-dark-primary': activeTab === 'password' }"
         (click)="setActiveTab('password')">
         Cambio de Contraseña
@@ -67,7 +91,8 @@
     <div class="md:col-span-2">
       <!-- Contenido dinámico -->
       <div>
-        <app-personal-info *ngIf="activeTab === 'info'" [userProfile]="userProfile" (profileUpdated)="onProfileUpdated($event)"></app-personal-info>
+        <app-personal-info *ngIf="activeTab === 'info'" [userProfile]="userProfile"
+          (profileUpdated)="onProfileUpdated($event)"></app-personal-info>
         <app-addresses *ngIf="activeTab === 'addresses'"></app-addresses>
         <app-change-password *ngIf="activeTab === 'password'"></app-change-password>
       </div>
@@ -75,11 +100,13 @@
 
     <!-- Panel lateral (1/3) -->
     <div>
-      <div class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-600">
+      <div
+        class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-600">
         <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Actividad reciente</h3>
         <div class="space-y-3">
           <div *ngIf="userProfile?.profile_picture_url" class="flex items-start">
-            <div class="h-8 w-8 rounded-full bg-light-in-progress dark:bg-dark-in-progress flex items-center justify-center">
+            <div
+              class="h-8 w-8 rounded-full bg-light-in-progress dark:bg-dark-in-progress flex items-center justify-center">
               <i class="fas fa-camera text-light-in-progress-text dark:text-dark-in-progress-text"></i>
             </div>
             <div class="ml-3">
@@ -88,7 +115,8 @@
             </div>
           </div>
           <div class="flex items-start">
-            <div class="h-8 w-8 rounded-full bg-light-in-progress dark:bg-dark-in-progress flex items-center justify-center">
+            <div
+              class="h-8 w-8 rounded-full bg-light-in-progress dark:bg-dark-in-progress flex items-center justify-center">
               <i class="fas fa-edit text-light-in-progress-text dark:text-dark-in-progress-text"></i>
             </div>
             <div class="ml-3">
@@ -99,24 +127,28 @@
         </div>
       </div>
 
-      <div class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 border border-gray-200 dark:border-gray-600">
+      <div
+        class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 border border-gray-200 dark:border-gray-600">
         <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Acciones de cuenta</h3>
         <div class="space-y-3">
-          <button class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded-md transition-all duration-300">
+          <button
+            class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded-md transition-all duration-300">
             <div class="flex items-center">
               <i class="fas fa-download mr-3 text-light-secondary dark:text-dark-secondary"></i>
               Descargar datos
             </div>
             <i class="fas fa-chevron-right text-light-secondary dark:text-dark-secondary"></i>
           </button>
-          <button class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded-md transition-all duration-300">
+          <button
+            class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover rounded-md transition-all duration-300">
             <div class="flex items-center">
               <i class="fas fa-bell mr-3 text-light-secondary dark:text-dark-secondary"></i>
               Notificaciones
             </div>
             <i class="fas fa-chevron-right text-light-secondary dark:text-dark-secondary"></i>
           </button>
-          <button (click)="deleteAccount()" class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-danger dark:text-dark-danger hover:bg-light-danger dark:hover:bg-dark-danger hover:bg-opacity-10 dark:hover:bg-opacity-10 rounded-md transition-all duration-300">
+          <button (click)="deleteAccount()"
+            class="flex w-full items-center justify-between px-4 py-2 text-sm text-light-danger dark:text-dark-danger hover:bg-light-danger dark:hover:bg-dark-danger hover:bg-opacity-10 dark:hover:bg-opacity-10 rounded-md transition-all duration-300">
             <div class="flex items-center">
               <i class="fas fa-trash-alt mr-3 text-light-danger dark:text-dark-danger"></i>
               Eliminar cuenta
