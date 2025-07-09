@@ -93,6 +93,7 @@ export const routes: Routes = [
   // Públicos
   { path: 'help', component: FaqComponent, data: { breadcrumb: 'Help' } },
   { path: 'login', component: LoginComponent, data: { breadcrumb: 'Iniciar sesión' } },
+  { path: 'alexa-login', component: AlexaLoginComponent, data: { breadcrumb: 'Iniciar sesión con Alexa' } },
   { path: 'recovery', component: RecoverComponent, data: { breadcrumb: 'Recuperar cuenta' } },
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },
   { path: 'support-inquiry', component: SupportInquiryComponent, data: { breadcrumb: 'Consulta Soporte' } },
