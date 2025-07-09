@@ -12,6 +12,22 @@
       </a>
     </div>
 
+    <!-- Breadcrumb dinámico -->
+    <nav *ngIf="breadcrumb?.length" class="text-sm text-gray-600 dark:text-gray-400 mb-4 flex flex-wrap items-center">
+      <ng-container *ngFor="let crumb of breadcrumb; let last = last">
+        <ng-container *ngIf="!last">
+          <a [routerLink]="['/authcatalog']" [queryParams]="crumb.id ? { categoryId: crumb.id } : {}"
+            class="mr-1 hover:text-light-primary dark:hover:text-dark-primary">
+            {{ crumb.name }}
+          </a>
+          <span class="mx-1 text-gray-400">›</span>
+        </ng-container>
+        <ng-container *ngIf="last">
+          <span class="font-semibold text-gray-800 dark:text-white">{{ crumb.name }}</span>
+        </ng-container>
+      </ng-container>
+    </nav>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
       <!-- Sección de imágenes -->
       <div class="relative">
@@ -63,7 +79,8 @@
         </div>
         <!-- Información de envío -->
         <div class="text-sm text-light-secondary dark:text-dark-secondary space-y-1">
-          <p><i class="fas fa-store mr-2 text-light-secondary dark:text-dark-secondary"></i> Vendido por: {{ product!.collaborator?.name || 'Tienda Oficial' }}</p>
+          <p><i class="fas fa-store mr-2 text-light-secondary dark:text-dark-secondary"></i> Vendido por: {{
+            product!.collaborator?.name || 'Tienda Oficial' }}</p>
           <p><i class="fas fa-box mr-2 text-light-secondary dark:text-dark-secondary"></i>Stock: {{
             selectedVariant!.stock || 0 }}</p>
           <p *ngIf="selectedVariant!.stock === 0"
@@ -75,7 +92,8 @@
         <!-- Precio -->
         <div class="flex items-baseline gap-3">
           <p class="text-3xl font-bold text-light-success-text dark:text-dark-success-text">
-            ${{ formatPrice((selectedVariant!.calculated_price || 0) + (isUrgent && product!.urgent_delivery_enabled ? product!.urgent_delivery_cost : 0)) }}
+            ${{ formatPrice((selectedVariant!.calculated_price || 0) + (isUrgent && product!.urgent_delivery_enabled ?
+            product!.urgent_delivery_cost : 0)) }}
           </p>
         </div>
 
@@ -96,16 +114,23 @@
           <h3 class="text-sm font-semibold text-light-text dark:text-dark-text mb-3">Opciones de entrega</h3>
           <div class="flex flex-col gap-2">
             <label class="flex items-center gap-2">
-              <input type="radio" [(ngModel)]="isUrgent" [value]="false" class="form-radio text-light-primary dark:text-dark-primary">
-              <span class="text-sm text-light-text dark:text-dark-text">Estándar: {{ product!.standard_delivery_days || 0 }} días naturales</span>
+              <input type="radio" [(ngModel)]="isUrgent" [value]="false"
+                class="form-radio text-light-primary dark:text-dark-primary">
+              <span class="text-sm text-light-text dark:text-dark-text">Estándar: {{ product!.standard_delivery_days ||
+                0
+                }} días naturales</span>
             </label>
             <label class="flex items-center gap-2" *ngIf="product!.urgent_delivery_enabled">
-              <input type="radio" [(ngModel)]="isUrgent" [value]="true" class="form-radio text-light-primary dark:text-dark-primary">
-              <span class="text-sm text-light-text dark:text-dark-text">Urgente: {{ product!.urgent_delivery_days || 0 }} días naturales, +${{ formatPrice(product!.urgent_delivery_cost || 0) }}</span>
+              <input type="radio" [(ngModel)]="isUrgent" [value]="true"
+                class="form-radio text-light-primary dark:text-dark-primary">
+              <span class="text-sm text-light-text dark:text-dark-text">Urgente: {{ product!.urgent_delivery_days || 0
+                }}
+                días naturales, +${{ formatPrice(product!.urgent_delivery_cost || 0) }}</span>
             </label>
           </div>
           <p class="text-xs text-light-secondary dark:text-dark-secondary mt-2">
-            Nota: El tiempo de entrega final se calculará en el carrito según todos los productos. En el checkout, elegirás entre entrega a domicilio, punto de entrega, o retiro en local.
+            Nota: El tiempo de entrega final se calculará en el carrito según todos los productos. En el checkout,
+            elegirás entre entrega a domicilio, punto de entrega, o retiro en local.
           </p>
         </div>
 
@@ -116,7 +141,8 @@
             [ngClass]="{'line-clamp-3': !showFullDescription}">
             {{ product!.description || 'Sin descripción disponible.' }}
           </p>
-          <button *ngIf="product!.description && product!.description.length > 150" (click)="showFullDescription = !showFullDescription"
+          <button *ngIf="product!.description && product!.description.length > 150"
+            (click)="showFullDescription = !showFullDescription"
             class="text-light-primary dark:text-dark-primary text-sm mt-2 hover:underline">
             {{ showFullDescription ? 'Ver menos' : 'Ver más' }}
           </button>

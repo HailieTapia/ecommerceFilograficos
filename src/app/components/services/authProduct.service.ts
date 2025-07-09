@@ -35,7 +35,10 @@ interface ProductVariant {
     order: number;
   }[];
 }
-
+export interface ProductBreadcrumb {
+  id: number | null;
+  name: string;
+}
 export interface ProductDetail {
   product_id: number;
   name: string;
@@ -49,6 +52,7 @@ export interface ProductDetail {
   urgent_delivery_days: number | null;
   urgent_delivery_cost: number;
   collaborator?: { id: number; name: string } | null;
+  breadcrumb: ProductBreadcrumb[];
 }
 
 export interface ProductResponse {
