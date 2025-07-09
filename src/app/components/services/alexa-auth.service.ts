@@ -14,15 +14,15 @@ export class AlexaAuthService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
-  // Iniciar sesión para Alexa Account Linking
-  login(email: string, password: string): Observable<any> {
+  login(email: string, password: string, redirectUri: string): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         const body = {
           email,
           password,
-          client_id: this.clientId
+          client_id: this.clientId,
+          redirect_uri: redirectUri
         };
         return this.http.post(this.apiUrl, body, { headers, withCredentials: true });
       }),

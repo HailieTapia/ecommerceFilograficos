@@ -17,7 +17,7 @@ import { environment } from '../../../environments/config';
 })
 export class AlexaLoginComponent implements OnInit {
   loginForm: FormGroup;
-  private alexaRedirectUrl = environment.alexaRedirectUrls[0];
+  private alexaRedirectUrl = environment.alexaRedirectUrls[0]; // Usa la primera URL de redirección
 
   constructor(
     private toastService: ToastService,
@@ -30,9 +30,7 @@ export class AlexaLoginComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    // No se limpia el estado de autenticación, ya que el flujo de Alexa no lo requiere
-  }
+  ngOnInit(): void {}
 
   onSubmit() {
     if (this.loginForm.invalid) {
@@ -41,13 +39,11 @@ export class AlexaLoginComponent implements OnInit {
     }
 
     const { email, password } = this.loginForm.value;
-    this.alexaAuthService.login(email, password).subscribe({
-      next: (response) => {
+    this.alexaAuthService.login(email, password, this.alexaRedirectUrl).subscribe({
+      next: () => {
         this.toastService.showToast('Inicio de sesión exitoso. Redirigiendo a Alexa...', 'success');
         this.loginForm.reset();
-        // Redirigir a la URL de Alexa con el access_token y token_type
-        const redirectUrl = `${this.alexaRedirectUrl}&access_token=${response.access_token}&token_type=Bearer`;
-        window.location.href = redirectUrl;
+        // La redirección la maneja el backend
       },
       error: (error) => {
         const errorMessage = error.message || 'Error al iniciar sesión para Alexa';
