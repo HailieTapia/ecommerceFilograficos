@@ -27,12 +27,13 @@ export class AlexaAuthService {
         return this.http.post(this.apiUrl, body, { headers, withCredentials: true });
       }),
       catchError(error => {
-        // Manejo de errores específicos
         let errorMessage = 'Error al iniciar sesión para Alexa';
         if (error.status === 401) {
           errorMessage = 'Credenciales incorrectas o cuenta no autorizada';
         } else if (error.status === 400) {
-          errorMessage = 'Datos proporcionados inválidos';
+          errorMessage = error.error?.message || 'Datos proporcionados inválidos';
+        } else if (error.status === 403) {
+          errorMessage = error.error?.message || 'Acceso no autorizado';
         } else if (error.status === 429) {
           errorMessage = 'Demasiados intentos, intenta de nuevo más tarde';
         }

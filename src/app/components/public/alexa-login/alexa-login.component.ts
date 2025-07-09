@@ -18,6 +18,7 @@ import { environment } from '../../../environments/config';
 export class AlexaLoginComponent implements OnInit {
   loginForm: FormGroup;
   private alexaRedirectUrl = environment.alexaRedirectUrls[0]; // Usa la primera URL de redirección
+  isSubmitting = false;
 
   constructor(
     private toastService: ToastService,
@@ -38,16 +39,35 @@ export class AlexaLoginComponent implements OnInit {
       return;
     }
 
+    if (this.isSubmitting) {
+      return; // Evitar envíos múltiples
+    }
+
+    this.isSubmitting = true;
     const { email, password } = this.loginForm.value;
+
     this.alexaAuthService.login(email, password, this.alexaRedirectUrl).subscribe({
-      next: () => {
+      next: (response) => {
+        this.isSubmitting = false;
         this.toastService.showToast('Inicio de sesión exitoso. Redirigiendo a Alexa...', 'success');
-        this.loginForm.reset();
-        // La redirección la maneja el backend
+
+        // Construir la URL de redirección con el token como fragmento
+        const { access_token, token_type, expires_in, redirect_uri } = response;
+        const redirectUrl = `${redirect_uri}#access_token=${access_token}&token_type=${token_type}&expires_in=${expires_in}`;
+
+        console.log('Respuesta del backend:', response);
+        console.log('Redirigiendo a:', redirectUrl);
+
+        // Redirigir al navegador
+        window.location.assign(redirectUrl);
+
+        // Opcional: No resetear el formulario inmediatamente, ya que la redirección debería ocurrir
       },
       error: (error) => {
+        this.isSubmitting = false;
         const errorMessage = error.message || 'Error al iniciar sesión para Alexa';
         this.toastService.showToast(errorMessage, 'error');
+        this.loginForm.reset();
       }
     });
   }
