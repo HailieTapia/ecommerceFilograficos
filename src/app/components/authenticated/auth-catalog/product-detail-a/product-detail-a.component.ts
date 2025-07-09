@@ -27,13 +27,14 @@ export class ProductDetailAComponent implements OnInit {
   showFullAttributes = false;
   showFullCustomizations = false;
   currentImageIndex: number = 0; // Para navegación de imágenes
+  breadcrumb: { id: number | null; name: string }[] = [];
 
   constructor(
     private toastService: ToastService,
     private cartService: CartService,
     private route: ActivatedRoute,
     private productService: AuthProductService
-  ) {}
+  ) { }
 
   ngOnInit() {
     const productId = this.route.snapshot.paramMap.get('productIdA');
@@ -47,6 +48,9 @@ export class ProductDetailAComponent implements OnInit {
     this.productService.getProductById(productId).subscribe({
       next: (response) => {
         this.product = response.product;
+        const baseCrumbs = [...(response.product.breadcrumb || [])];
+        baseCrumbs.push({ id: null, name: response.product.name });
+        this.breadcrumb = baseCrumbs;
         if (this.product.variants && this.product.variants.length > 0) {
           this.selectVariant(this.product.variants[0]);
         }
