@@ -65,7 +65,7 @@ export class ProfileComponent implements OnInit {
 
   // Método para obtener las iniciales del nombre
   getInitials(name: string | undefined | null): string {
-    if (!name || name.trim() === '') return '??';
+    if (!name || name.trim() === '') return 'sin foto';
     const words = name.trim().split(/\s+/);
     if (words.length === 1) {
       return words[0].substring(0, 2).toUpperCase();
