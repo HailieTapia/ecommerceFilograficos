@@ -9,36 +9,51 @@ import { CsrfService } from './csrf.service';
   providedIn: 'root'
 })
 export class AlexaAuthService {
-  private apiUrl = `${environment.baseUrl}/auth/alexa-login`;
-  private clientId = environment.clientId;
+  private apiUrl = `${environment.baseUrl}/auth`;
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
-  login(email: string, password: string, redirectUri: string): Observable<any> {
+  /**
+   * Completa la autorización de Alexa enviando los datos al backend
+   * @param userId ID del usuario autenticado
+   * @param redirectUri URI de redirección de Alexa
+   * @param state Estado recibido de Alexa
+   * @param scopes Scopes solicitados
+   * @returns Observable con la URL de redirección
+   */
+  completeAuthorization(userId: number, redirectUri: string, state: string, scopes: string[] = environment.alexaScopes): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
         const body = {
-          email,
-          password,
-          client_id: this.clientId,
-          redirect_uri: redirectUri
+          user_id: userId,
+          redirect_uri: redirectUri,
+          state,
+          scope: scopes.join(' ')
         };
-        return this.http.post(this.apiUrl, body, { headers, withCredentials: true });
+        return this.http.post(`${this.apiUrl}/alexa/complete-authorization`, body, { headers, withCredentials: true });
       }),
       catchError(error => {
-        let errorMessage = 'Error al iniciar sesión para Alexa';
-        if (error.status === 401) {
-          errorMessage = 'Credenciales incorrectas o cuenta no autorizada';
-        } else if (error.status === 400) {
-          errorMessage = error.error?.message || 'Datos proporcionados inválidos';
-        } else if (error.status === 403) {
-          errorMessage = error.error?.message || 'Acceso no autorizado';
-        } else if (error.status === 429) {
-          errorMessage = 'Demasiados intentos, intenta de nuevo más tarde';
-        }
-        return throwError(() => new Error(errorMessage));
+        return throwError(() => new Error(`Error al completar la autorización de Alexa: ${error.error?.message || error.message}`));
       })
     );
+  }
+
+  /**
+   * Valida si el redirectUri es válido
+   * @param redirectUri URI de redirección a validar
+   * @returns true si es válido, false si no
+   */
+  isValidRedirectUri(redirectUri: string): boolean {
+    return environment.alexaRedirectUrls.includes(redirectUri);
+  }
+
+  /**
+   * Valida si los scopes son soportados
+   * @param scopes Scopes a validar
+   * @returns true si todos los scopes son válidos, false si no
+   */
+  isValidScopes(scopes: string[]): boolean {
+    return scopes.every(scope => environment.alexaScopes.includes(scope));
   }
 }
