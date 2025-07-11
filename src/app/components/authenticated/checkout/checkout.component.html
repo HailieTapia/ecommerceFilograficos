@@ -52,9 +52,11 @@
         <div class="mb-4">
           <label for="deliveryOption" class="block text-sm font-medium text-light-text dark:text-dark-text mb-2">Opción
             de envío</label>
-          <select id="deliveryOption" disabled
-            class="w-full p-2 border rounded-lg bg-gray-100 dark:bg-gray-700 text-light-text dark:text-dark-text opacity-50">
-            <option value="home_delivery">Entrega a domicilio (próximamente)</option>
+          <select id="deliveryOption" [(ngModel)]="selectedShippingOption" (ngModelChange)="onShippingOptionChange()"
+            class="w-full p-2 border rounded-lg bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text">
+            <option *ngFor="let option of shippingOptions" [value]="option.id">
+              {{ option.name }} ({{ option.cost.toFixed(2) }})
+            </option>
           </select>
         </div>
 

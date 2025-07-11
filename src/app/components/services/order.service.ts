@@ -224,4 +224,14 @@ export class OrderService {
       catchError(this.handleError)
     );
   }
+
+  // Función para obtener el perfil del usuario autenticado
+  getShippingOptions(): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/shippingOptions`, { headers, withCredentials: true });
+      })
+    );
+  }
 }

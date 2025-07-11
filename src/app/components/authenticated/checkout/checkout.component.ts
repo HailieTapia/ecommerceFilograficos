@@ -30,8 +30,10 @@ export class CheckoutComponent implements OnInit {
   selectedAddressId: number | null = null;
   paymentMethod: 'bank_transfer_oxxo' | 'bank_transfer_bbva' | 'bank_transfer' = 'bank_transfer_bbva';
   isLoading: boolean = false;
-  shippingCost: number = 20.00; // Alineado con el backend
+  shippingCost: number = 0;
   primaryAddress: Address | null = null;
+  shippingOptions: { id: string; name: string; cost: number }[] = [];
+  selectedShippingOption: string | null = null;
   constructor(
     private userService: UserService,
     private cartService: CartService,
@@ -44,6 +46,25 @@ export class CheckoutComponent implements OnInit {
   ngOnInit(): void {
     this.loadCart();
     this.loadAddresses();
+    this.loadShippingOptions();
+  }
+  loadShippingOptions(): void {
+    this.isLoading = true;
+    this.orderService.getShippingOptions().subscribe({
+      next: (response) => {
+        this.shippingOptions = response.data;
+        if (this.shippingOptions.length > 0) {
+          this.selectedShippingOption = this.shippingOptions[0].id;
+          this.shippingCost = this.shippingOptions[0].cost;
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        this.toastService.showToast('Error al cargar opciones de envío.', 'error');
+        this.isLoading = false;
+      }
+    });
   }
 
   loadCart(): void {
@@ -79,35 +100,32 @@ export class CheckoutComponent implements OnInit {
       }
     });
   }
+  onShippingOptionChange(): void {
+    const selected = this.shippingOptions.find(opt => opt.id === this.selectedShippingOption);
+    this.shippingCost = selected ? selected.cost : 0;
+  }
   createOrder(): void {
-    if (!this.selectedAddressId) {
-      this.toastService.showToast('Por favor, selecciona una dirección.', 'error');
+    if (!this.selectedAddressId || !this.selectedShippingOption) {
+      this.toastService.showToast('Selecciona dirección y opción de envío.', 'error');
       return;
     }
+
 
     const orderData: OrderCreateRequest = {
       address_id: this.selectedAddressId,
       payment_method: this.paymentMethod,
-      delivery_option: null
     };
 
     this.isLoading = true;
     this.orderService.createOrder(orderData).subscribe({
-      next: (response: OrderCreateResponse) => {
+      next: (response) => {
         this.isLoading = false;
-        const { order_id, total_urgent_cost, estimated_delivery_date } = response.data;
-        this.toastService.showToast(
-          `Orden creada con éxito. ID: ${order_id}${total_urgent_cost > 0 ? ` (Costo urgente: $${total_urgent_cost.toFixed(2)})` : ''}`,
-          'success'
-        );
-        this.router.navigate(['/order-confirmation', order_id], {
-          state: { total_urgent_cost, estimated_delivery_date }
-        });
+        this.toastService.showToast(`Orden creada. ID: ${response.data.order_id}`, 'success');
+        this.router.navigate(['/order-confirmation', response.data.order_id]);
       },
-      error: (error: any) => {
+      error: () => {
         this.isLoading = false;
-        const errorMessage = error?.message || 'Error al crear la orden.';
-        this.toastService.showToast(errorMessage, 'error');
+        this.toastService.showToast('Error al crear la orden.', 'error');
       }
     });
   }
