@@ -6,6 +6,7 @@ import { CartService, CartResponse, CartItem } from '../../services/cart.service
 import { OrderService, OrderCreateRequest, OrderCreateResponse } from '../../services/order.service';
 import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
+import { UserService } from '../../services/user.service';
 
 interface Address {
   address_id: number;
@@ -30,14 +31,15 @@ export class CheckoutComponent implements OnInit {
   paymentMethod: 'bank_transfer_oxxo' | 'bank_transfer_bbva' | 'bank_transfer' = 'bank_transfer_bbva';
   isLoading: boolean = false;
   shippingCost: number = 20.00; // Alineado con el backend
-
+  primaryAddress: Address | null = null;
   constructor(
+    private userService: UserService,
     private cartService: CartService,
     private orderService: OrderService,
     private toastService: ToastService,
     private router: Router,
     private datePipe: DatePipe
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadCart();
@@ -65,14 +67,18 @@ export class CheckoutComponent implements OnInit {
   }
 
   loadAddresses(): void {
-    // TODO: Implementar AddressService para obtener direcciones reales
-    // Simulación temporal de direcciones
-    this.addresses = [
-      { address_id: 8, street: 'Calle Ejemplo 123', city: 'Ciudad', state: 'Estado', postal_code: '12345' }
-    ];
-    this.selectedAddressId = this.addresses.length > 0 ? this.addresses[0].address_id : null;
+    this.isLoading = true;
+    this.userService.getProfile().subscribe({
+      next: (response: any) => {
+        this.primaryAddress = response.address;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.toastService.showToast('Error al cargar la dirección.', 'error');
+        this.isLoading = false;
+      }
+    });
   }
-
   createOrder(): void {
     if (!this.selectedAddressId) {
       this.toastService.showToast('Por favor, selecciona una dirección.', 'error');
@@ -82,7 +88,7 @@ export class CheckoutComponent implements OnInit {
     const orderData: OrderCreateRequest = {
       address_id: this.selectedAddressId,
       payment_method: this.paymentMethod,
-      delivery_option: null // Placeholder para opciones de envío
+      delivery_option: null
     };
 
     this.isLoading = true;
@@ -107,7 +113,7 @@ export class CheckoutComponent implements OnInit {
   }
 
   calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
-    const subtotal = this.cart.total; // Total del carrito (incluye costos urgentes)
+    const subtotal = this.cart.total;
     const discount = this.cart.items.reduce((totalDiscount: number, item: CartItem) => {
       const itemDiscount = item.applicable_promotions.reduce(
         (sum: number, promo: any) => sum + item.subtotal * (promo.discount_value / 100),
