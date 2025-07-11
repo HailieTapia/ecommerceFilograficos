@@ -56,4 +56,17 @@ export class AlexaAuthService {
   isValidScopes(scopes: string[]): boolean {
     return scopes.every(scope => environment.alexaScopes.includes(scope));
   }
+
+  // alexa-auth.service.ts
+  login(data: any): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.post(`${this.apiUrl}/alexa/login`, data, { headers, withCredentials: true });
+      }),
+      catchError(error => {
+        return throwError(() => new Error(`Error al iniciar sesión para Alexa: ${error.error?.message || error.message}`));
+      })
+    );
+  }
 }

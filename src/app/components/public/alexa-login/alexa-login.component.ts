@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
 import { AlexaAuthService } from '../../services/alexa-auth.service';
 import { environment } from '../../../environments/config';
 import { noXSSValidator } from '../../administrator/shared/validators';
@@ -20,7 +19,7 @@ import { ToastService } from '../../services/toastService';
 export class AlexaLoginComponent implements OnInit, AfterViewInit {
   loginForm: FormGroup;
   @Output() closed = new EventEmitter<void>();
-  isLoading = false; // Changed from private to public
+  isLoading = false;
   private redirectUri: string = '';
   private state: string = '';
   private clientId: string = '';
@@ -30,7 +29,6 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
   constructor(
     private toastService: ToastService,
     private fb: FormBuilder,
-    private authService: AuthService,
     private alexaAuthService: AlexaAuthService,
     private route: ActivatedRoute,
     private router: Router
@@ -49,13 +47,11 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
       this.responseType = params['response_type'] || '';
       const scopeParam = params['scope'] || 'read:orders write:orders';
       this.scopes = scopeParam.split(' ').filter((s: string) => s.trim() !== '');
-      
+
       if (!this.validateParameters()) {
         this.closeModal();
       }
     });
-    
-    this.clearAuthState();
   }
 
   ngAfterViewInit() {
@@ -95,10 +91,6 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
     return true;
   }
 
-  clearAuthState(): void {
-    this.authService.resetAuthState();
-  }
-
   @HostListener('document:keydown.escape', ['$event'])
   handleEscapeKey(event: KeyboardEvent) {
     this.closeModal();
@@ -125,10 +117,14 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
     const loginData = {
       email: this.loginForm.value.email,
-      password: this.loginForm.value.password
+      password: this.loginForm.value.password,
+      client_id: this.clientId,
+      redirect_uri: this.redirectUri,
+      state: this.state,
+      scope: this.scopes.join(' ')
     };
 
-    this.authService.login(loginData).subscribe({
+    this.alexaAuthService.login(loginData).subscribe({
       next: (response) => {
         if (response.mfaRequired) {
           this.toastService.showToast('Se requiere autenticación de dos factores.', 'info');
@@ -147,44 +143,20 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
       },
       error: (error) => {
         this.isLoading = false;
-        const errorMessage = error?.error?.message || 'Error al iniciar sesión';
+        const errorMessage = error?.error?.message || 'Error al iniciar sesión para Alexa';
         this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
 
   private handleSuccessfulLogin(response: any) {
-    if (response.tipo !== 'administrador') {
-      this.toastService.showToast('Solo los administradores pueden autorizar esta skill.', 'error');
-      this.authService.logout().subscribe(() => {
-        this.isLoading = false;
-        this.closeModal();
-      });
-      return;
+    this.isLoading = false;
+    this.toastService.showToast('Inicio de sesión para Alexa exitoso.', 'success');
+    if (response.redirectUrl) {
+      window.location.href = response.redirectUrl;
+    } else {
+      this.toastService.showToast('Error: No se recibió URL de redirección.', 'error');
+      this.closeModal();
     }
-
-    this.alexaAuthService.completeAuthorization(
-      response.userId,
-      this.redirectUri,
-      this.state,
-      this.scopes
-    ).subscribe({
-      next: (authResponse) => {
-        this.isLoading = false;
-        this.toastService.showToast('Autorización de Alexa completada exitosamente.', 'success');
-        if (authResponse.redirectUrl) {
-          window.location.href = authResponse.redirectUrl;
-        } else {
-          this.toastService.showToast('Error: No se recibió URL de redirección.', 'error');
-          this.closeModal();
-        }
-      },
-      error: (error) => {
-        this.isLoading = false;
-        console.error('Error al completar autorización:', error);
-        this.toastService.showToast(error.message || 'Error al completar la autorización.', 'error');
-        this.authService.logout().subscribe(() => this.closeModal());
-      }
-    });
   }
 }
