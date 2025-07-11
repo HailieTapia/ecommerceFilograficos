@@ -22,7 +22,10 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
   @Output() closed = new EventEmitter<void>();
   private redirectUri: string = '';
   private state: string = '';
-  private scopes: string[] = environment.alexaScopes;
+  private clientId: string = '';
+  private responseType: string = '';
+  private scopes: string[] = [];
+  private isLoading = false;
 
   constructor(
     private toastService: ToastService,
@@ -39,28 +42,67 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    // Obtener parámetros de la URL
+    // Obtener y validar todos los parámetros de la URL
     this.route.queryParams.subscribe(params => {
       this.redirectUri = params['redirect_uri'] || '';
       this.state = params['state'] || '';
-      const scopeParam = params['scope'] || 'read:orders write:orders'; // Scopes mínimos requeridos
-      this.scopes = scopeParam.split(' ').filter((s: string) => environment.alexaScopes.includes(s));
-      // Validar redirectUri
-      if (!this.alexaAuthService.isValidRedirectUri(this.redirectUri)) {
-        this.toastService.showToast('URL de redirección inválida.', 'error');
+      this.clientId = params['client_id'] || '';
+      this.responseType = params['response_type'] || '';
+      
+      // Procesar scopes
+      const scopeParam = params['scope'] || 'read:orders write:orders';
+      this.scopes = scopeParam.split(' ').filter((s: string) => s.trim() !== '');
+      
+      // Validaciones
+      if (!this.validateParameters()) {
         this.closeModal();
-      }
-      // Validar scopes
-      if (!this.alexaAuthService.isValidScopes(this.scopes)) {
-        this.toastService.showToast('Scopes inválidos.', 'error');
-        this.closeModal();
+        return;
       }
     });
+    
     this.clearAuthState();
   }
 
   ngAfterViewInit() {
     // No se carga reCAPTCHA para Alexa
+  }
+
+  private validateParameters(): boolean {
+    // Validar client_id
+    if (!this.clientId || this.clientId !== environment.clientId) {
+      this.toastService.showToast('Client ID inválido.', 'error');
+      return false;
+    }
+
+    // Validar response_type
+    if (!this.responseType || this.responseType !== 'code') {
+      this.toastService.showToast('Response type inválido.', 'error');
+      return false;
+    }
+
+    // Validar state
+    if (!this.state) {
+      this.toastService.showToast('Estado requerido.', 'error');
+      return false;
+    }
+
+    // Validar redirectUri
+    if (!this.redirectUri || !this.alexaAuthService.isValidRedirectUri(this.redirectUri)) {
+      this.toastService.showToast('URL de redirección inválida.', 'error');
+      console.error('Redirect URI inválido:', this.redirectUri);
+      console.error('URLs válidas:', environment.alexaRedirectUrls);
+      return false;
+    }
+
+    // Validar scopes
+    if (!this.scopes.length || !this.alexaAuthService.isValidScopes(this.scopes)) {
+      this.toastService.showToast('Scopes inválidos.', 'error');
+      console.error('Scopes inválidos:', this.scopes);
+      console.error('Scopes válidos:', environment.alexaScopes);
+      return false;
+    }
+
+    return true;
   }
 
   clearAuthState(): void {
@@ -74,6 +116,11 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
 
   closeModal() {
     this.closed.emit();
+    // Redirigir de vuelta a Alexa con error
+    if (this.redirectUri && this.state) {
+      const errorUrl = `${this.redirectUri}?error=access_denied&state=${this.state}`;
+      window.location.href = errorUrl;
+    }
   }
 
   onSubmit() {
@@ -82,6 +129,11 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    if (this.isLoading) {
+      return;
+    }
+
+    this.isLoading = true;
     const loginData = {
       email: this.loginForm.value.email,
       password: this.loginForm.value.password
@@ -96,37 +148,57 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
               userId: response.userId,
               redirectUri: this.redirectUri,
               state: this.state,
-              scope: this.scopes.join(' ')
+              scope: this.scopes.join(' '),
+              isAlexa: 'true'
             }
           });
         } else {
-          // Verificar que el usuario es administrador
-          if (response.tipo !== 'administrador') {
-            this.toastService.showToast('Solo los administradores pueden autorizar esta skill.', 'error');
-            this.authService.logout().subscribe(() => this.closeModal());
-            return;
-          }
-          // Completar la autorización de Alexa
-          this.alexaAuthService.completeAuthorization(
-            response.userId,
-            this.redirectUri,
-            this.state,
-            this.scopes
-          ).subscribe({
-            next: (authResponse) => {
-              this.toastService.showToast('Autorización de Alexa completada.', 'success');
-              window.location.href = authResponse.redirectUrl;
-            },
-            error: (error) => {
-              this.toastService.showToast(error.message || 'Error al completar la autorización.', 'error');
-              this.authService.logout().subscribe(() => this.closeModal());
-            }
-          });
+          this.handleSuccessfulLogin(response);
         }
       },
       error: (error) => {
+        this.isLoading = false;
         const errorMessage = error?.error?.message || 'Error al iniciar sesión';
         this.toastService.showToast(errorMessage, 'error');
+      }
+    });
+  }
+
+  private handleSuccessfulLogin(response: any) {
+    // Verificar que el usuario es administrador
+    if (response.tipo !== 'administrador') {
+      this.toastService.showToast('Solo los administradores pueden autorizar esta skill.', 'error');
+      this.authService.logout().subscribe(() => {
+        this.isLoading = false;
+        this.closeModal();
+      });
+      return;
+    }
+
+    // Completar la autorización de Alexa
+    this.alexaAuthService.completeAuthorization(
+      response.userId,
+      this.redirectUri,
+      this.state,
+      this.scopes
+    ).subscribe({
+      next: (authResponse) => {
+        this.isLoading = false;
+        this.toastService.showToast('Autorización de Alexa completada exitosamente.', 'success');
+        
+        // Redirigir a Alexa con el código de autorización
+        if (authResponse.redirectUrl) {
+          window.location.href = authResponse.redirectUrl;
+        } else {
+          this.toastService.showToast('Error: No se recibió URL de redirección.', 'error');
+          this.closeModal();
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        console.error('Error al completar autorización:', error);
+        this.toastService.showToast(error.message || 'Error al completar la autorización.', 'error');
+        this.authService.logout().subscribe(() => this.closeModal());
       }
     });
   }
