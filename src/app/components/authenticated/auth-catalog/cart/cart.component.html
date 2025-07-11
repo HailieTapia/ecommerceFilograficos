@@ -6,14 +6,14 @@
     <div *ngIf="!isLoading">
       <!-- Carrito vacío -->
       <div *ngIf="cart.items.length === 0" class="flex flex-col items-center justify-center min-h-[50vh] text-center">
-        <div class="mb-6 bg-gray-100 dark:bg-gray-700 p-4 rounded-full">
-          <i class="fas fa-shopping-cart text-5xl text-gray-400 dark:text-gray-500"></i>
+        <div class="mb-4 bg-gray-100 dark:bg-gray-700 p-3 rounded-full">
+          <i class="fas fa-shopping-cart text-4xl text-gray-400 dark:text-gray-500"></i>
         </div>
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">¡Tu carrito está vacío!</h2>
-        <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">¡Tu carrito está vacío!</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-4">
           Parece que no has añadido nada todavía. ¡Explora nuestro catálogo y encuentra algo que te guste!
         </p>
-        <a routerLink="/authcatalog" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105">
+        <a routerLink="/authcatalog" class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium py-2 px-5 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow hover:shadow-md">
           <i class="fas fa-shopping-cart"></i> Volver al catálogo
         </a>
       </div>
@@ -21,62 +21,62 @@
       <!-- Lista de productos -->
       <div *ngIf="cart.items.length > 0">
         <!-- Header -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="bg-blue-600 p-3 rounded-full">
-              <i class="fas fa-shopping-cart text-white text-xl"></i>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5 mb-5">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="bg-blue-600 p-2 rounded-full">
+              <i class="fas fa-shopping-cart text-white text-lg"></i>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Carrito de Compras</h1>
-              <p class="text-gray-600 dark:text-gray-400">{{ cart.items.length }} productos en tu carrito</p>
+              <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">Carrito de Compras</h1>
+              <p class="text-sm text-gray-600 dark:text-gray-400">{{ cart.items.length }} productos en tu carrito</p>
             </div>
           </div>
 
           <!-- Mensaje de promoción de conteo de pedidos -->
-          <div *ngIf="orderCountPromotion" class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900 dark:to-orange-900 border border-amber-200 dark:border-amber-700 rounded-xl p-4 flex items-center gap-3">
-            <i class="fas fa-gift text-amber-600 dark:text-amber-400"></i>
+          <div *ngIf="orderCountPromotion" class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900 dark:to-orange-900 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-center gap-2 text-sm">
+            <i class="fas fa-gift text-amber-600 dark:text-amber-400 text-sm"></i>
             <p class="text-amber-800 dark:text-amber-200 flex-1" [ngClass]="{'text-green-600 dark:text-green-400': orderCountPromotion.is_applicable}">
               {{ orderCountPromotion.progress_message }}
             </p>
-            <i class="fas fa-tag text-amber-600 dark:text-amber-400"></i>
+            <i class="fas fa-tag text-amber-600 dark:text-amber-400 text-sm"></i>
           </div>
         </div>
 
         <!-- Ítems del carrito -->
-        <div class="space-y-4 mb-6">
-          <div *ngFor="let item of cart.items; trackBy: trackByCartDetailId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="space-y-3 mb-5">
+          <div *ngFor="let item of cart.items; trackBy: trackByCartDetailId" class="bg-white dark:bg-gray-800 rounded-xl shadow p-5 hover:shadow-md transition-shadow duration-300">
             <div class="flex items-start gap-4">
               <!-- Imagen -->
-              <img [src]="getImageUrl(item)" class="w-16 h-16 object-cover rounded-xl shadow-md" alt="{{ item.product_name }}">
+              <img [src]="getImageUrl(item)" class="w-14 h-14 object-cover rounded-lg shadow" alt="{{ item.product_name }}">
 
               <!-- Detalles -->
               <div class="flex-1">
-                <h3 class="font-semibold text-gray-800 dark:text-gray-100 text-lg mb-1">{{ item.product_name }}</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mb-1">Modelo: {{ item.variant_sku }}</p>
-                <p class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                <h3 class="font-medium text-gray-800 dark:text-gray-100 mb-1">{{ item.product_name }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Modelo: {{ item.variant_sku }}</p>
+                <p class="font-medium text-gray-900 dark:text-gray-100">
                   ${{ item.unit_price.toFixed(2) }}
-                  <span *ngIf="item.urgent_delivery_fee > 0" class="text-sm text-blue-600 dark:text-blue-400">
+                  <span *ngIf="item.urgent_delivery_fee > 0" class="text-xs text-blue-600 dark:text-blue-400">
                     + ${{ item.urgent_delivery_fee.toFixed(2) }} (Envío urgente)
                   </span>
                 </p>
                 
                 <!-- Opción de envío urgente -->
-                <div *ngIf="canBeUrgent(item)" class="mt-2 flex items-center gap-2">
+                <div *ngIf="canBeUrgent(item)" class="mt-1 flex items-center gap-2">
                   <input
                     type="checkbox"
                     [checked]="item.is_urgent"
                     (change)="toggleUrgent(item, $event)"
-                    class="form-checkbox h-4 w-4 text-blue-600 dark:text-blue-400"
+                    class="form-checkbox h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
                   >
-                  <label class="text-sm text-gray-600 dark:text-gray-400">
+                  <label class="text-xs text-gray-600 dark:text-gray-400">
                     Envío urgente ({{ item.urgent_delivery_days || item.standard_delivery_days }} días, +${{ item.urgent_delivery_cost.toFixed(2) }})
                   </label>
                 </div>
 
                 <!-- Promociones aplicables -->
-                <div *ngIf="item.applicable_promotions.length > 0" class="mt-2">
-                  <p class="text-sm font-semibold text-green-600 dark:text-green-400">Promociones aplicadas:</p>
-                  <ul class="list-disc list-inside text-sm text-green-600 dark:text-green-400">
+                <div *ngIf="item.applicable_promotions.length > 0" class="mt-1">
+                  <p class="text-xs font-medium text-green-600 dark:text-green-400">Promociones aplicadas:</p>
+                  <ul class="list-disc list-inside text-xs text-green-600 dark:text-green-400">
                     <li *ngFor="let promo of item.applicable_promotions">
                       {{ promo.name }} ({{ promo.discount_value }}% descuento)
                     </li>
@@ -85,18 +85,18 @@
               </div>
 
               <!-- Control de cantidad y eliminar -->
-              <div class="flex flex-col items-end gap-3">
-                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full p-1">
-                  <button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1" class="w-10 h-10 rounded-full bg-white dark:bg-gray-600 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors disabled:bg-gray-300 disabled:text-gray-500" aria-label="Reducir cantidad">
-                    <i class="fas fa-minus text-gray-600 dark:text-gray-300 text-sm"></i>
+              <div class="flex flex-col items-end gap-2">
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full p-0.5">
+                  <button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors disabled:bg-gray-300 disabled:text-gray-500" aria-label="Reducir cantidad">
+                    <i class="fas fa-minus text-gray-600 dark:text-gray-300 text-xs"></i>
                   </button>
-                  <span class="w-12 text-center font-semibold text-gray-800 dark:text-gray-100">{{ item.quantity }}</span>
-                  <button (click)="updateQuantity(item, item.quantity + 1)" class="w-10 h-10 rounded-full bg-white dark:bg-gray-600 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors" aria-label="Aumentar cantidad">
-                    <i class="fas fa-plus text-gray-600 dark:text-gray-300 text-sm"></i>
+                  <span class="w-10 text-center font-medium text-gray-800 dark:text-gray-100 text-sm">{{ item.quantity }}</span>
+                  <button (click)="updateQuantity(item, item.quantity + 1)" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors" aria-label="Aumentar cantidad">
+                    <i class="fas fa-plus text-gray-600 dark:text-gray-300 text-xs"></i>
                   </button>
                 </div>
-                <button (click)="removeItem(item.cart_detail_id)" class="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 flex items-center justify-center transition-colors" aria-label="Eliminar producto">
-                  <i class="fas fa-trash-alt text-red-500 dark:text-red-400 text-sm"></i>
+                <button (click)="removeItem(item.cart_detail_id)" class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 flex items-center justify-center transition-colors" aria-label="Eliminar producto">
+                  <i class="fas fa-trash-alt text-red-500 dark:text-red-400 text-xs"></i>
                 </button>
               </div>
             </div>
@@ -104,33 +104,33 @@
         </div>
 
         <!-- Resumen del carrito -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-          <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Resumen del pedido</h2>
-          <div class="space-y-3 mb-6">
-            <div class="flex justify-between text-gray-600 dark:text-gray-400">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+          <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">Resumen del pedido</h2>
+          <div class="space-y-2 mb-4">
+            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>Subtotal:</span>
-              <span class="font-semibold">${{ subtotal.toFixed(2) }}</span>
+              <span class="font-medium">${{ subtotal.toFixed(2) }}</span>
             </div>
-            <div *ngIf="totalUrgentDeliveryFee > 0" class="flex justify-between text-blue-600 dark:text-blue-400">
+            <div *ngIf="totalUrgentDeliveryFee > 0" class="flex justify-between text-xs text-blue-600 dark:text-blue-400">
               <span>Costos de envío urgente:</span>
-              <span class="font-semibold">${{ totalUrgentDeliveryFee.toFixed(2) }}</span>
+              <span class="font-medium">${{ totalUrgentDeliveryFee.toFixed(2) }}</span>
             </div>
-            <div *ngIf="discount > 0" class="flex justify-between text-green-600 dark:text-green-400">
+            <div *ngIf="discount > 0" class="flex justify-between text-xs text-green-600 dark:text-green-400">
               <span>Descuento:</span>
-              <span class="font-semibold">-${{ discount.toFixed(2) }}</span>
+              <span class="font-medium">-${{ discount.toFixed(2) }}</span>
             </div>
-            <div class="border-t pt-3 dark:border-gray-600">
-              <div class="flex justify-between text-xl font-bold text-gray-900 dark:text-gray-100">
+            <div class="border-t pt-2 dark:border-gray-600">
+              <div class="flex justify-between font-bold text-gray-900 dark:text-gray-100">
                 <span>Total:</span>
                 <span>${{ total.toFixed(2) }}</span>
               </div>
             </div>
           </div>
-          <div class="flex flex-col sm:flex-row gap-4">
-            <a href="/authcatalog" class="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-100 font-semibold py-4 px-6 rounded-xl text-center transition-colors">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <a href="/authcatalog" class="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-100 font-medium py-3 px-5 rounded-lg text-center transition-colors text-sm">
               Seguir comprando
             </a>
-            <button (click)="proceedToCheckout()" [disabled]="cart.items.length === 0" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-6 rounded-xl transition-all transform hover:scale-105 shadow-lg disabled:bg-gray-300 disabled:text-gray-500" aria-label="Proceder al checkout">
+            <button (click)="proceedToCheckout()" [disabled]="cart.items.length === 0" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-5 rounded-lg transition-all shadow hover:shadow-md disabled:bg-gray-300 disabled:text-gray-500 text-sm" aria-label="Proceder al checkout">
               Proceder al checkout
             </button>
           </div>
