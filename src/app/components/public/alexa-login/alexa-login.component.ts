@@ -43,10 +43,8 @@ export class AlexaLoginComponent implements OnInit, AfterViewInit {
     this.route.queryParams.subscribe(params => {
       this.redirectUri = params['redirect_uri'] || '';
       this.state = params['state'] || '';
-      const scopeParam = params['scope'] || '';
-      if (scopeParam) {
-        this.scopes = scopeParam.split(' ').filter((s: string) => environment.alexaScopes.includes(s));
-      }
+      const scopeParam = params['scope'] || 'read:orders write:orders'; // Scopes mínimos requeridos
+      this.scopes = scopeParam.split(' ').filter((s: string) => environment.alexaScopes.includes(s));
       // Validar redirectUri
       if (!this.alexaAuthService.isValidRedirectUri(this.redirectUri)) {
         this.toastService.showToast('URL de redirección inválida.', 'error');
