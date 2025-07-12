@@ -1,76 +1,71 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService, CartResponse, CartItem } from '../../services/cart.service';
-import { OrderService, OrderCreateRequest, OrderCreateResponse } from '../../services/order.service';
+import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { UserService } from '../../services/user.service';
-
-interface Address {
-  address_id: number;
-  street: string;
-  city: string;
-  state: string;
-  postal_code: string;
-}
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, SpinnerComponent],
+  imports: [CommonModule, FormsModule, SpinnerComponent, ReactiveFormsModule],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.css'],
   providers: [DatePipe]
 })
 export class CheckoutComponent implements OnInit {
   cart: CartResponse = { items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] };
-  addresses: Address[] = [];
-  selectedAddressId: number | null = null;
-  paymentMethod: 'bank_transfer_oxxo' | 'bank_transfer_bbva' | 'bank_transfer' = 'bank_transfer_bbva';
   isLoading: boolean = false;
   shippingCost: number = 0;
-  primaryAddress: Address | null = null;
-  shippingOptions: { id: string; name: string; cost: number }[] = [];
-  selectedShippingOption: string | null = null;
+  orderForm: FormGroup;
+  address: any;
+  shippingOptions: any[] = [];
+
   constructor(
     private userService: UserService,
     private cartService: CartService,
     private orderService: OrderService,
     private toastService: ToastService,
     private router: Router,
-    private datePipe: DatePipe
-  ) { }
+    private datePipe: DatePipe,
+    private fb: FormBuilder
+  ) {
+    this.orderForm = this.fb.group({
+      payment_method: ['mercado_pago', Validators.required],
+      address_id: [null, Validators.required],
+      coupon_code: [''],
+      delivery_option: ['Recoger en Tienda', Validators.required]
+    });
+  }
 
   ngOnInit(): void {
     this.loadCart();
     this.loadAddresses();
     this.loadShippingOptions();
   }
+  //opciones de envío de carga
   loadShippingOptions(): void {
     this.isLoading = true;
     this.orderService.getShippingOptions().subscribe({
       next: (response) => {
         this.shippingOptions = response.data;
-        if (this.shippingOptions.length > 0) {
-          this.selectedShippingOption = this.shippingOptions[0].id;
-          this.shippingCost = this.shippingOptions[0].cost;
-        }
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error('Error:', err);
-        this.toastService.showToast('Error al cargar opciones de envío.', 'error');
+      error: (error) => {
+        const errorMessage = error?.error?.message || 'Error al cargar opciones de envío.';
+        this.toastService.showToast(errorMessage, 'error');
         this.isLoading = false;
       }
     });
   }
-
+  //carga carrito
   loadCart(): void {
     this.isLoading = true;
     this.cartService.loadCart().subscribe({
-      next: (response: CartResponse) => {
+      next: (response) => {
         this.cart = response;
         this.isLoading = false;
         if (this.cart.items.length === 0) {
@@ -78,7 +73,7 @@ export class CheckoutComponent implements OnInit {
           this.router.navigate(['/cart']);
         }
       },
-      error: (error: any) => {
+      error: (error) => {
         const errorMessage = error?.error?.message || 'No se pudo cargar el carrito.';
         this.toastService.showToast(errorMessage, 'error');
         this.isLoading = false;
@@ -86,46 +81,41 @@ export class CheckoutComponent implements OnInit {
       }
     });
   }
-
+  //carga info de user
   loadAddresses(): void {
     this.isLoading = true;
     this.userService.getProfile().subscribe({
       next: (response: any) => {
-        this.primaryAddress = response.address;
+        this.address = response.address;
+        this.orderForm.patchValue({
+          address_id: this.address.address_id
+        });
         this.isLoading = false;
       },
       error: (error) => {
-        this.toastService.showToast('Error al cargar la dirección.', 'error');
+        const errorMessage = error?.error?.message || 'Error al cargar la dirección.';
+        this.toastService.showToast(errorMessage, 'error');
         this.isLoading = false;
       }
     });
   }
-  onShippingOptionChange(): void {
-    const selected = this.shippingOptions.find(opt => opt.id === this.selectedShippingOption);
-    this.shippingCost = selected ? selected.cost : 0;
-  }
-  createOrder(): void {
-    if (!this.selectedAddressId || !this.selectedShippingOption) {
-      this.toastService.showToast('Selecciona dirección y opción de envío.', 'error');
+
+  createOrder() {
+    if (this.orderForm.invalid) {
       return;
     }
-
-
-    const orderData: OrderCreateRequest = {
-      address_id: this.selectedAddressId,
-      payment_method: this.paymentMethod,
-    };
-
     this.isLoading = true;
-    this.orderService.createOrder(orderData).subscribe({
+    this.orderService.createOrder(this.orderForm.value).subscribe({
       next: (response) => {
+        console.log('Orden enviando.', response);
+        this.toastService.showToast('Orden exitosa.', 'success');
         this.isLoading = false;
-        this.toastService.showToast(`Orden creada. ID: ${response.data.order_id}`, 'success');
         this.router.navigate(['/order-confirmation', response.data.order_id]);
       },
-      error: () => {
+      error: (error) => {
+        const errorMessage = error?.error?.message || 'Error al crear la orden';
+        this.toastService.showToast(errorMessage, 'error');
         this.isLoading = false;
-        this.toastService.showToast('Error al crear la orden.', 'error');
       }
     });
   }

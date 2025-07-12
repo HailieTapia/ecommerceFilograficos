@@ -140,58 +140,41 @@ export interface OrdersResponse {
 @Injectable({
   providedIn: 'root'
 })
+
 export class OrderService {
   private apiUrl = `${environment.baseUrl}/order`;
 
-  constructor(private csrfService: CsrfService, private http: HttpClient) {}
-
-  // Manejo de errores
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    let message = 'Error en la comunicación con el servidor';
-    if (error.status === 400) {
-      message = error.error?.message || 'Solicitud inválida';
-    } else if (error.status === 404) {
-      message = error.error?.message || 'Orden no encontrada';
-    } else if (error.status === 500) {
-      message = error.error?.message || 'Error interno del servidor';
-    }
-    console.error('Error en la solicitud:', error);
-    return throwError(() => new Error(message));
-  }
+  constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
   // Crear una nueva orden
-  createOrder(orderData: OrderCreateRequest): Observable<OrderCreateResponse> {
+  createOrder(data: any): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        const payload: OrderCreateRequest = {
-          address_id: orderData.address_id,
-          payment_method: orderData.payment_method,
-          coupon_code: orderData.coupon_code,
-          delivery_option: null
-        };
-        return this.http.post<OrderCreateResponse>(
-          `${this.apiUrl}/create`,
-          payload,
-          { headers, withCredentials: true }
-        );
-      }),
-      catchError(this.handleError)
+        return this.http.post(`${this.apiUrl}/create`, data, { headers, withCredentials: true });
+      })
     );
   }
 
   // Obtener los detalles de una orden específica por ID
-  getOrderById(orderId: number): Observable<OrderResponse> {
+  getOrderById2(id: number): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<OrderResponse>(
+        return this.http.get(`${this.apiUrl}/${id}`, { headers, withCredentials: true });
+      })
+    );
+  }
+  getOrderById(orderId: number): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<any>(
           `${this.apiUrl}/${orderId}`,
           { headers, withCredentials: true }
         );
       }),
-      catchError(this.handleError)
-    );
+    )
   }
 
   // Obtener la lista paginada de órdenes con filtros opcionales
@@ -200,7 +183,7 @@ export class OrderService {
     pageSize: number = 10,
     searchTerm: string = '',
     dateFilter: string = ''
-  ): Observable<OrdersResponse> {
+  ): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
@@ -216,12 +199,11 @@ export class OrderService {
           params = params.set('dateFilter', dateFilter.trim());
         }
 
-        return this.http.get<OrdersResponse>(
+        return this.http.get<any>(
           this.apiUrl,
           { headers, params, withCredentials: true }
         );
-      }),
-      catchError(this.handleError)
+      })
     );
   }
 
