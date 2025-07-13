@@ -113,67 +113,17 @@ export class CheckoutComponent implements OnInit {
     console.log('Enviando datos al backend:', this.orderForm.value); // Depuración
     this.orderService.createOrder(this.orderForm.value).subscribe({
       next: (response) => {
-        this.preferenceId = response.data.preference_id;
-        console.log('Preference ID recibido:', this.preferenceId); // Depuración
-        this.toastService.showToast('Orden creada. Redirigiendo a Mercado Pago...', 'success');
-        this.isLoading = false;
-        this.loadMercadoPagoSDK(); // Inicializar el SDK
+        const initPoint = response.data.init_point;
+        console.log('init_point recibido:', initPoint);
+        this.toastService.showToast('Redirigiendo a Mercado Pago...', 'success');
+        window.location.href = initPoint; // Redirigir al checkout directamente
       },
       error: (error) => {
         const errorMessage = error?.error?.message || 'Error al crear la orden';
-        console.log('Error al crear la orden:', error); // Depuración
         this.toastService.showToast(errorMessage, 'error');
         this.isLoading = false;
       }
     });
-  }
-  loadMercadoPagoSDK(): void {
-    if (document.getElementById('mp-sdk')) {
-      const mp = new MercadoPago(environment.mercadoPagoPublicKey);
-      this.initializeMercadoPago(mp);
-      return;
-    }
-
-    console.log('Cargando SDK de Mercado Pago...');
-    const script = document.createElement('script');
-    script.id = 'mp-sdk';
-    script.src = 'https://sdk.mercadopago.com/js/v2';
-    script.async = true;
-    document.body.appendChild(script);
-
-    script.onload = () => {
-      console.log('SDK cargado exitosamente. Inicializando Mercado Pago...');
-      const mp = new MercadoPago(environment.mercadoPagoPublicKey);
-      this.initializeMercadoPago(mp);
-    };
-
-    script.onerror = () => {
-      console.error('Error al cargar el SDK de Mercado Pago');
-    };
-  }
-
-
-  initializeMercadoPago(mp: any): void {
-    console.log('Inicializando checkout con preferenceId:', this.preferenceId);
-    if (this.preferenceId) {
-      try {
-        mp.checkout({
-          preference: {
-            id: this.preferenceId
-          },
-          autoOpen: true,
-          render: {
-            container: '.cho-container', // Puedes usar esto si quieres un botón de pago embebido
-            label: 'Pagar ahora'
-          }
-        });
-      } catch (err) {
-        console.error('Error al abrir el checkout:', err);
-        window.location.href = `https://www.mercadopago.com.mx/checkout/v1/redirect?pref_id=${this.preferenceId}`;
-      }
-    } else {
-      console.error('preferenceId es nulo o undefined');
-    }
   }
 
   calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
