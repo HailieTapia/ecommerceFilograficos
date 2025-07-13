@@ -7,6 +7,9 @@ import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { UserService } from '../../services/user.service';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { environment } from '../../../environments/config';
+
+declare const MercadoPago: any;
 
 @Component({
   selector: 'app-checkout',
@@ -23,6 +26,7 @@ export class CheckoutComponent implements OnInit {
   orderForm: FormGroup;
   address: any;
   shippingOptions: any[] = [];
+  preferenceId: string | null = null;
 
   constructor(
     private userService: UserService,
@@ -46,7 +50,7 @@ export class CheckoutComponent implements OnInit {
     this.loadAddresses();
     this.loadShippingOptions();
   }
-  //opciones de envío de carga
+
   loadShippingOptions(): void {
     this.isLoading = true;
     this.orderService.getShippingOptions().subscribe({
@@ -61,7 +65,7 @@ export class CheckoutComponent implements OnInit {
       }
     });
   }
-  //carga carrito
+
   loadCart(): void {
     this.isLoading = true;
     this.cartService.loadCart().subscribe({
@@ -81,7 +85,7 @@ export class CheckoutComponent implements OnInit {
       }
     });
   }
-  //carga info de user
+
   loadAddresses(): void {
     this.isLoading = true;
     this.userService.getProfile().subscribe({
@@ -102,22 +106,74 @@ export class CheckoutComponent implements OnInit {
 
   createOrder() {
     if (this.orderForm.invalid) {
+      this.toastService.showToast('Por favor, completa todos los campos requeridos.', 'error');
       return;
     }
     this.isLoading = true;
+    console.log('Enviando datos al backend:', this.orderForm.value); // Depuración
     this.orderService.createOrder(this.orderForm.value).subscribe({
       next: (response) => {
-        console.log('Orden enviando.', response);
-        this.toastService.showToast('Orden exitosa.', 'success');
+        this.preferenceId = response.data.preference_id;
+        console.log('Preference ID recibido:', this.preferenceId); // Depuración
+        this.toastService.showToast('Orden creada. Redirigiendo a Mercado Pago...', 'success');
         this.isLoading = false;
-        this.router.navigate(['/order-confirmation', response.data.order_id]);
+        this.loadMercadoPagoSDK(); // Inicializar el SDK
       },
       error: (error) => {
         const errorMessage = error?.error?.message || 'Error al crear la orden';
+        console.log('Error al crear la orden:', error); // Depuración
         this.toastService.showToast(errorMessage, 'error');
         this.isLoading = false;
       }
     });
+  }
+  loadMercadoPagoSDK(): void {
+    if (document.getElementById('mp-sdk')) {
+      const mp = new MercadoPago(environment.mercadoPagoPublicKey);
+      this.initializeMercadoPago(mp);
+      return;
+    }
+
+    console.log('Cargando SDK de Mercado Pago...');
+    const script = document.createElement('script');
+    script.id = 'mp-sdk';
+    script.src = 'https://sdk.mercadopago.com/js/v2';
+    script.async = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      console.log('SDK cargado exitosamente. Inicializando Mercado Pago...');
+      const mp = new MercadoPago(environment.mercadoPagoPublicKey);
+      this.initializeMercadoPago(mp);
+    };
+
+    script.onerror = () => {
+      console.error('Error al cargar el SDK de Mercado Pago');
+    };
+  }
+
+
+  initializeMercadoPago(mp: any): void {
+    console.log('Inicializando checkout con preferenceId:', this.preferenceId);
+    if (this.preferenceId) {
+      try {
+        mp.checkout({
+          preference: {
+            id: this.preferenceId
+          },
+          autoOpen: true,
+          render: {
+            container: '.cho-container', // Puedes usar esto si quieres un botón de pago embebido
+            label: 'Pagar ahora'
+          }
+        });
+      } catch (err) {
+        console.error('Error al abrir el checkout:', err);
+        window.location.href = `https://www.mercadopago.com.mx/checkout/v1/redirect?pref_id=${this.preferenceId}`;
+      }
+    } else {
+      console.error('preferenceId es nulo o undefined');
+    }
   }
 
   calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
@@ -130,7 +186,8 @@ export class CheckoutComponent implements OnInit {
       return totalDiscount + itemDiscount;
     }, 0);
     const total_urgent_cost = this.cart.total_urgent_delivery_fee || 0;
-    const shipping_cost = this.shippingCost;
+    const shipping_cost = this.shippingOptions.find(option => option.name === this.orderForm.get('delivery_option')?.value)?.cost || 0;
+    this.shippingCost = shipping_cost;
     const total = Math.max(0, subtotal + shipping_cost - discount);
     return { subtotal, discount, total_urgent_cost, shipping_cost, total };
   }
