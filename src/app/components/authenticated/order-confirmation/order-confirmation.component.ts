@@ -1,10 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService, OrderResponse, OrderDetail, Address, OrderHistory } from '../../services/order.service';
 import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
-import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-order-confirmation',
@@ -13,26 +12,21 @@ import { interval, Subscription } from 'rxjs';
   templateUrl: './order-confirmation.component.html',
   styleUrls: ['./order-confirmation.component.css']
 })
-export class OrderConfirmationComponent implements OnInit, OnDestroy {
+export class OrderConfirmationComponent implements OnInit {
   order: OrderResponse['data'] | null = null;
   isLoading: boolean = false;
-  private pollingSubscription: Subscription | null = null;
 
   constructor(
     private orderService: OrderService,
     private toastService: ToastService,
     private route: ActivatedRoute,
-    private router: Router,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     const orderId = this.route.snapshot.paramMap.get('id');
     if (orderId && !isNaN(+orderId)) {
       this.loadOrderDetails(+orderId);
-      // Iniciar polling cada 5 segundos
-      this.pollingSubscription = interval(5000).subscribe(() => {
-        this.loadOrderDetails(+orderId);
-      });
     } else {
       this.toastService.showToast('ID de orden no válido.', 'error');
       this.router.navigate(['/orders']);
@@ -45,25 +39,6 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
       next: (response: OrderResponse) => {
         this.isLoading = false;
         if (response.success) {
-          if (this.order && this.order.payment?.status !== response.data.payment?.status) {
-            // Mostrar notificación si el estado del pago cambió
-            const newStatus = response.data.payment?.status;
-            let message = '';
-            switch (newStatus) {
-              case 'validated':
-                message = '¡Pago confirmado! Tu orden está en proceso.';
-                break;
-              case 'failed':
-                message = 'El pago fue rechazado. Por favor, intenta de nuevo.';
-                break;
-              case 'pending':
-                message = 'El pago está en proceso. Te notificaremos cuando se confirme.';
-                break;
-            }
-            if (message) {
-              console.error(message);
-            }
-          }
           this.order = response.data;
           this.toastService.showToast('Detalles de la orden cargados exitosamente.', 'success');
         } else {
@@ -78,12 +53,6 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
         this.router.navigate(['/orders']);
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    if (this.pollingSubscription) {
-      this.pollingSubscription.unsubscribe();
-    }
   }
 
   getFormattedAddress(address: Address | null): string {
@@ -106,7 +75,7 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
   }
 
   trackByOrderDetailId(index: number, item: OrderDetail): number {
-    return item.detail_id;
+    return item.detail_id; // Actualizado para usar detail_id
   }
 
   trackByHistoryId(index: number, history: OrderHistory): number {
