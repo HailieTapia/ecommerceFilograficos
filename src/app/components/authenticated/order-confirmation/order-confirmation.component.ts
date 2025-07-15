@@ -21,10 +21,10 @@ export class OrderConfirmationComponent implements OnInit {
     private toastService: ToastService,
     private route: ActivatedRoute,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    const orderId = +this.route.snapshot.queryParamMap.get('id')!;
+    const orderId = this.route.snapshot.paramMap.get('id');
     if (orderId && !isNaN(+orderId)) {
       this.loadOrderDetails(+orderId);
     } else {
