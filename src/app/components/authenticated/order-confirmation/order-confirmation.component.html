@@ -1,4 +1,3 @@
-<!-- order-confirmation.component.html -->
 <div class="max-w-5xl mx-auto py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans">
   <app-spinner [isLoading]="isLoading"></app-spinner>
 
@@ -7,19 +6,6 @@
     <h1 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6">
       Confirmación de Orden #{{ order.order.order_id }}
     </h1>
-
-    <!-- Estado del pago -->
-    <div class="mb-6 p-4 bg-light-background dark:bg-dark-background rounded-lg" *ngIf="order.order.payment_status">
-      <p class="text-sm text-light-secondary dark:text-dark-secondary">
-        Estado del Pago: {{ order.order.payment_status | titlecase }}
-      </p>
-      <p *ngIf="order.order.payment_status === 'validated'" class="text-success dark:text-green-400 font-medium">
-        ¡Pago confirmado! Tu orden está siendo procesada.
-      </p>
-      <p *ngIf="order.order.payment_status !== 'validated'" class="text-warning dark:text-yellow-400 font-medium">
-        Verificando pago, por favor espera...
-      </p>
-    </div>
 
     <!-- Información general de la orden -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -33,6 +19,9 @@
         </p>
         <p class="text-sm text-light-secondary dark:text-dark-secondary">
           <span class="font-medium">Método de Pago:</span> {{ order.payment.method | titlecase }}
+        </p>
+        <p class="text-sm text-light-secondary dark:text-dark-secondary">
+          <span class="font-medium">Estado del Pago:</span> {{ order.payment.status | titlecase }}
         </p>
         <p class="text-sm text-light-secondary dark:text-dark-secondary">
           <span class="font-medium">Fecha Estimada de Entrega:</span> {{ getFormattedDate(order.order.estimated_delivery_date) }}

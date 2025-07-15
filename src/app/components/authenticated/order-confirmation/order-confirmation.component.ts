@@ -21,10 +21,10 @@ export class OrderConfirmationComponent implements OnInit {
     private toastService: ToastService,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    const orderId = this.route.snapshot.paramMap.get('id');
+    const orderId = +this.route.snapshot.queryParamMap.get('id')!;
     if (orderId && !isNaN(+orderId)) {
       this.loadOrderDetails(+orderId);
     } else {
@@ -33,7 +33,7 @@ export class OrderConfirmationComponent implements OnInit {
     }
   }
 
-loadOrderDetails(orderId: number): void {
+  loadOrderDetails(orderId: number): void {
     this.isLoading = true;
     this.orderService.getOrderById(orderId).subscribe({
       next: (response: OrderResponse) => {
@@ -41,11 +41,6 @@ loadOrderDetails(orderId: number): void {
         if (response.success) {
           this.order = response.data;
           this.toastService.showToast('Detalles de la orden cargados exitosamente.', 'success');
-          if (this.order.order.payment_status !== 'validated') {
-            this.checkPaymentStatus(orderId);
-          } else {
-            this.toastService.showToast('Pago confirmado. Orden procesada.', 'success');
-          }
         } else {
           this.toastService.showToast(response.message, 'error');
           this.router.navigate(['/orders']);
@@ -58,36 +53,6 @@ loadOrderDetails(orderId: number): void {
         this.router.navigate(['/orders']);
       }
     });
-  }
-
-  checkPaymentStatus(orderId: number): void {
-    const maxAttempts = 10;
-    let attempts = 0;
-
-    const poll = setInterval(() => {
-      this.orderService.getOrderById(orderId).subscribe({
-        next: (response: OrderResponse) => {
-          if (response.success) {
-            this.order = response.data;
-            if (this.order.order.payment_status === 'validated') {
-              clearInterval(poll);
-              this.toastService.showToast('Pago confirmado. Orden procesada.', 'success');
-            } else if (attempts >= maxAttempts) {
-              clearInterval(poll);
-              this.toastService.showToast('No se pudo confirmar el pago. Intenta de nuevo.', 'error');
-            }
-            attempts++;
-          }
-        },
-        error: () => {
-          if (attempts >= maxAttempts) {
-            clearInterval(poll);
-            this.toastService.showToast('Error al verificar el pago.', 'error');
-          }
-          attempts++;
-        }
-      });
-    }, 5000); // Consulta cada 5 segundos
   }
 
   getFormattedAddress(address: Address | null): string {
@@ -110,7 +75,7 @@ loadOrderDetails(orderId: number): void {
   }
 
   trackByOrderDetailId(index: number, item: OrderDetail): number {
-    return item.detail_id;
+    return item.detail_id; // Actualizado para usar detail_id
   }
 
   trackByHistoryId(index: number, history: OrderHistory): number {
