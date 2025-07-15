@@ -94,20 +94,21 @@ export interface OrderResponse {
   data: {
     order: {
       order_id: number;
-      status: 'pending' | 'processing' | 'shipped' | 'delivered';
+      status: string;
+      payment_status: string; // Asegúrate de que esté definido
       created_at: string;
       estimated_delivery_date: string;
       delivery_days: number;
-      delivery_option: 'home_delivery' | 'pickup_point' | 'store_pickup' | null;
+      delivery_option: string | null;
       total: number;
       subtotal: number;
       discount: number;
       shipping_cost: number;
     };
-    items: OrderDetail[];
-    address: Address | null;
-    payment: Payment;
-    history: OrderHistory[];
+    items: any[]; // Ajusta según tu estructura
+    address: any | null; // Ajusta según tu estructura
+    payment: any; // Ajusta según tu estructura
+    history: any[]; // Ajusta según tu estructura
   };
 }
 
