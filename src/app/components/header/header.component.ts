@@ -109,14 +109,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (!this.searchTerm.trim() || this.userRole === 'administrador') {
       return;
     }
-    this.authService.getUser().pipe(
-      take(1),
-      catchError(() => of(null))
-    ).subscribe(user => {
-      const route = user && user.tipo === 'cliente' ? '/authcatalog' : '/publiccatalog';
-      this.router.navigate([route], { queryParams: { search: this.searchTerm.trim() }, queryParamsHandling: 'merge' });
-      this.searchTerm = '';
-    });
+    this.router.navigate(['/collection'], { queryParams: { search: this.searchTerm.trim() }, queryParamsHandling: 'merge' });
+    this.searchTerm = '';
   }
 
   private formatUserName(fullName: string): string {

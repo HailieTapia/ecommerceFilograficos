@@ -2,7 +2,7 @@
   <!-- Navigation Links or Admin Button -->
   <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
     <ng-container *ngIf="!isLoggedIn || userRole === 'cliente'">
-      <a *ngFor="let item of navItems" [href]="item.path" class="text-white hover:text-white transition-all duration-300 group relative flex justify-center items-center after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-white after:transition-all after:duration-300">
+      <a *ngFor="let item of navItems" [routerLink]="item.path" class="text-white hover:text-white transition-all duration-300 group relative flex justify-center items-center after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-white after:transition-all after:duration-300">
         {{ item.label }}
         <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200" role="tooltip" [attr.aria-label]="item.label">{{ item.label }}</span>
       </a>

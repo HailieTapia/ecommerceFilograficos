@@ -91,12 +91,6 @@ export const routes: Routes = [
     ]
   },
 
-  // Redirecciones para rutas antiguas
-  { path: 'publiccatalog', redirectTo: 'collection', pathMatch: 'full' },
-  { path: 'publiccatalog/:productId', redirectTo: 'collection/:productId', pathMatch: 'full' },
-  { path: 'authcatalog', redirectTo: 'collection', pathMatch: 'full' },
-  { path: 'authcatalog/:productIdA', redirectTo: 'collection/:productIdA', pathMatch: 'full' },
-
   // Públicos
   { path: 'help', component: FaqComponent, data: { breadcrumb: 'Help' } },
   { path: 'login', component: LoginComponent, data: { breadcrumb: 'Iniciar sesión' } },

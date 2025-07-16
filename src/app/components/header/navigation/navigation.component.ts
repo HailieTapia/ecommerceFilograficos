@@ -14,8 +14,7 @@ export class NavigationComponent {
     { path: '/', label: 'Inicio' },
     { path: '/product-categories', label: 'Categorías' },
     { path: '/offers', label: 'Ofertas' },
-    { path: '/publiccatalog', label: 'CatalogoP' },
-    { path: '/authcatalog', label: 'CatalogoA' },
+    { path: '/collection', label: 'Catálogo' },
     { path: '/help', label: 'Ayuda' }
   ];
 
