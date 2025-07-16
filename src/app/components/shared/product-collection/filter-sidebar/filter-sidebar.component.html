@@ -1,0 +1,47 @@
+<div class="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-lg font-bold text-light-text dark:text-dark-text">Filtros</h2>
+    <button (click)="resetFilters()" 
+            class="text-sm text-light-primary dark:text-dark-primary hover:underline">
+      Limpiar
+    </button>
+  </div>
+
+  <!-- Búsqueda -->
+  <div class="mb-4">
+    <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Buscar</label>
+    <input [(ngModel)]="search" (ngModelChange)="applyFilters()" type="text" 
+           class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-light-text dark:text-dark-text">
+  </div>
+
+  <!-- Categorías -->
+  <div class="mb-4">
+    <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Categoría</label>
+    <select [(ngModel)]="selectedCategory" (ngModelChange)="applyFilters()" 
+            class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-light-text dark:text-dark-text">
+      <option [value]="null">Todas</option>
+      <option *ngFor="let category of categories" [value]="category.category_id">{{ category.name }}</option>
+    </select>
+  </div>
+
+  <!-- Rango de Precio -->
+  <div class="mb-4">
+    <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Rango de Precio</label>
+    <div class="flex gap-2">
+      <input [(ngModel)]="minPrice" (ngModelChange)="applyFilters()" type="number" placeholder="Mínimo" 
+             class="w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-light-text dark:text-dark-text">
+      <input [(ngModel)]="maxPrice" (ngModelChange)="applyFilters()" type="number" placeholder="Máximo" 
+             class="w-1/2 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-light-text dark:text-dark-text">
+    </div>
+  </div>
+
+  <!-- Colaboradores (solo para autenticados) -->
+  <div *ngIf="showCollaboratorFilter" class="mb-4">
+    <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Vendedor</label>
+    <select [(ngModel)]="selectedCollaborator" (ngModelChange)="applyFilters()" 
+            class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-light-text dark:text-dark-text">
+      <option [value]="null">Todos</option>
+      <option *ngFor="let collaborator of collaborators" [value]="collaborator.id">{{ collaborator.name }}</option>
+    </select>
+  </div>
+</div>

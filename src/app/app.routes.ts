@@ -10,13 +10,14 @@ import { MfaVerificationComponent } from './components/public/mfa-verification/m
 import { SupportInquiryComponent } from './components/public/support-inquiry/support-inquiry.component';
 import { HomeComponent } from './components/public/home/home.component';
 import { LegalComponent } from './components/public/legal/legal.component';
-import { PublicCatalogComponent } from './components/public/public-catalog/public-catalog.component';
-import { ProductDetailComponent } from './components/public/public-catalog/product-detail/product-detail.component';
+import { ProductCategoriesComponent } from './components/public/product-categories/product-categories.component';
+
+// Componentes unificados
+import { ProductCollectionComponent } from './components/shared/product-collection/product-collection.component';
+import { ProductDetailComponent } from './components/shared/product-collection/product-detail/product-detail.component';
 
 // Autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
-import { AuthCatalogComponent } from './components/authenticated/auth-catalog/auth-catalog.component';
-import { ProductDetailAComponent } from './components/authenticated/auth-catalog/product-detail-a/product-detail-a.component';
 import { CartComponent } from './components/authenticated/auth-catalog/cart/cart.component';
 import { CheckoutComponent } from './components/authenticated/checkout/checkout.component';
 import { OrderConfirmationComponent } from './components/authenticated/order-confirmation/order-confirmation.component';
@@ -41,7 +42,6 @@ import { AdministratorDashboardComponent } from './components/administrator/admi
 import { PriceManagementComponent } from './components/administrator/price-management/price-management.component';
 import { PromotionManagementComponent } from './components/administrator/promotion-management/promotion-management.component';
 import { BackupManagementComponent } from './components/administrator/backup-management/backup-management.component';
-import { ProductCategoriesComponent } from './components/public/product-categories/product-categories.component';
 import { AdminOrderComponent } from './components/administrator/admin-order/admin-order.component';
 
 // Errores
@@ -79,16 +79,23 @@ export const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Checkout' } },
   { path: 'order-confirmation/:id', component: OrderConfirmationComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'order-confirmation' } },
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'orders' } },
-  // Rutas del catálogo autenticado (anidadas)
+
+  // Catálogo unificado (público y clientes autenticados)
   {
-    path: 'authcatalog',
+    path: 'collection',
     canActivate: [AuthGuard],
-    data: { role: 'cliente', breadcrumb: 'Catálogo' },
+    data: { allowPublic: true, breadcrumb: 'Catálogo' },
     children: [
-      { path: '', component: AuthCatalogComponent },
-      { path: ':productIdA', component: ProductDetailAComponent, data: { breadcrumb: 'Detalles del producto' } }
+      { path: '', component: ProductCollectionComponent },
+      { path: ':productId', component: ProductDetailComponent, data: { breadcrumb: 'Detalles del producto' } }
     ]
   },
+
+  // Redirecciones para rutas antiguas
+  { path: 'publiccatalog', redirectTo: 'collection', pathMatch: 'full' },
+  { path: 'publiccatalog/:productId', redirectTo: 'collection/:productId', pathMatch: 'full' },
+  { path: 'authcatalog', redirectTo: 'collection', pathMatch: 'full' },
+  { path: 'authcatalog/:productIdA', redirectTo: 'collection/:productIdA', pathMatch: 'full' },
 
   // Públicos
   { path: 'help', component: FaqComponent, data: { breadcrumb: 'Help' } },
@@ -99,17 +106,6 @@ export const routes: Routes = [
   { path: 'support-inquiry', component: SupportInquiryComponent, data: { breadcrumb: 'Consulta Soporte' } },
   { path: 'legal', component: LegalComponent, data: { breadcrumb: 'Legal' } },
   { path: 'product-categories', component: ProductCategoriesComponent, data: { breadcrumb: 'Categorias' } },
-
-  // Rutas del catálogo público (anidadas)
-  {
-    path: 'publiccatalog',
-    canActivate: [AuthGuard],
-    data: { allowPublic: true, breadcrumb: 'Catálogo' },
-    children: [
-      { path: '', component: PublicCatalogComponent },
-      { path: ':productId', component: ProductDetailComponent, data: { breadcrumb: 'Detalles del producto' } }
-    ]
-  },
 
   // Rutas de error
   { path: '400', component: BadRequestComponent, data: { breadcrumb: 'Solicitud incorrecta' } },

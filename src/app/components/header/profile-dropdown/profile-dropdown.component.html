@@ -16,7 +16,6 @@
   <div *ngIf="isProfileDropdownOpen" class="absolute right-0 mt-2 w-48 bg-light-encabezado dark:bg-dark-background rounded-md shadow-lg transition-opacity duration-300 z-10">
     <ng-container *ngIf="userRole === 'cliente'">
       <a href="/profile" class="block px-4 py-2 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi cuenta</a>
-      <a href="/authcatalog" class="block px-4 py-2 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi catálogo</a>
       <a href="/orders" class="block px-4 py-2 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Pedidos</a>
     </ng-container>
     <ng-container *ngIf="userRole === 'administrador'">

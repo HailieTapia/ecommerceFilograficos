@@ -17,9 +17,10 @@ export class AuthGuard implements CanActivate {
     const allowPublic = route.data['allowPublic'] || false;
     const expectedRole = route.data['role'];
     const isRootPath = state.url === '/' || state.url === '';
+    const isCollectionPath = state.url.startsWith('/collection');
 
     return this.authService.getUser().pipe(
-      take(1), // Tomar solo el primer valor para evitar suscripciones infinitas
+      take(1),
       map(user => {
         // Permitir acceso a rutas públicas si no hay usuario
         if (allowPublic && !user) {
@@ -36,6 +37,10 @@ export class AuthGuard implements CanActivate {
         if (user.tipo === 'administrador') {
           if (isRootPath) {
             this.router.navigate(['/admin-dashboard']);
+            return false;
+          }
+          if (isCollectionPath) {
+            this.router.navigate(['/product-catalog']);
             return false;
           }
           if (expectedRole && expectedRole !== 'administrador') {
