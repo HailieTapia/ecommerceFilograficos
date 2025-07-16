@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';
 import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
+import { NavigationComponent } from './navigation/navigation.component';
 import { take, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { LoginComponent } from '../../components/public/login/login.component';
@@ -26,7 +27,8 @@ import { RegisterComponent } from '../../components/public/register/register.com
     FormsModule,
     SidebarComponent,
     ProfileDropdownComponent,
-    NotificationDropdownComponent
+    NotificationDropdownComponent,
+    NavigationComponent
   ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
@@ -64,7 +66,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       this.isLoggedIn = !!user;
       this.userRole = user?.tipo || null;
       this.userName = user?.nombre ? this.formatUserName(user.nombre) : null;
-      this.profilePictureUrl = user?.profilePictureUrl || null; // Obtener la URL de la imagen
+      this.profilePictureUrl = user?.profilePictureUrl || null;
     });
   }
 
@@ -88,7 +90,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.authService.logout().subscribe({
       next: () => {
         this.userName = null;
-        this.profilePictureUrl = null; // Limpiar la URL de la imagen
+        this.profilePictureUrl = null;
         this.router.navigate(['login']);
       },
       error: (err) => console.error(err)

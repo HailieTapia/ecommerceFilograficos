@@ -1,55 +1,73 @@
-<div *ngIf="!loading && !error && banners.length > 0" class="w-full bg-light-background dark:bg-dark-background transition-colors duration-300">
-    <div class="relative w-full mx-auto overflow-hidden rounded-lg shadow-lg">
-      <!-- Controles de navegación (solo si hay más de un banner) -->
+<section class="relative w-full">
+  <div class="relative w-full h-[500px] overflow-hidden">
+    <!-- Banners -->
+    <ng-container *ngIf="banners.length > 0 && !loading && !error">
+      <div class="absolute inset-0 flex transition-transform duration-700 ease-in-out"
+           [style.transform]="'translateX(-' + (currentIndex * 100) + '%)'">
+        <div *ngFor="let banner of banners"
+             class="flex-shrink-0 w-full h-full">
+          <img [src]="banner.image_url"
+               [alt]="banner.title"
+               class="w-full h-full object-cover">
+        </div>
+      </div>
+
+      <!-- Botones navegación -->
       <ng-container *ngIf="hasMultipleBanners">
-        <button 
-          (click)="prevBanner()" 
-          class="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/70 dark:bg-gray-800/70 hover:bg-white/90 dark:hover:bg-gray-700/90 rounded-full p-2 sm:p-3 z-10 transition"
-          aria-label="Banner anterior">
-          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-800 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button (click)="prevBanner()"
+                class="absolute z-10 left-4 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <button 
-          (click)="nextBanner()" 
-          class="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/70 dark:bg-gray-800/70 hover:bg-white/90 dark:hover:bg-gray-700/90 rounded-full p-2 sm:p-3 z-10 transition"
-          aria-label="Banner siguiente">
-          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-800 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button (click)="nextBanner()"
+                class="absolute z-10 right-4 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </ng-container>
-  
-      <!-- Contenedor del banner -->
-      <div class="relative">
-        <img 
-          [src]="banners[currentIndex].image_url" 
-          [alt]="banners[currentIndex].title || 'Banner promocional'" 
-          class="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
-        />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 dark:from-black/70 to-transparent flex flex-col justify-end items-center p-4 sm:p-6 text-center">
-          <h2 *ngIf="banners[currentIndex].title" class="text-lg sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-4 max-w-xs sm:max-w-md md:max-w-2xl">
+
+      <!-- Contenido del banner -->
+      <div class="absolute inset-0 flex items-center justify-center text-center bg-black bg-opacity-30">
+        <div class="text-white px-4">
+          <h2 class="text-3xl sm:text-4xl font-bold mb-4">
             {{ banners[currentIndex].title }}
           </h2>
-          <a 
-            *ngIf="banners[currentIndex].cta_text && banners[currentIndex].cta_link" 
-            [href]="banners[currentIndex].cta_link" 
-            class="bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-800 text-white font-medium px-4 py-2 sm:px-6 sm:py-2 rounded-md inline-block transition w-fit text-sm sm:text-base"
-          >
+          <a [routerLink]="banners[currentIndex].cta_link"
+             class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
             {{ banners[currentIndex].cta_text }}
           </a>
         </div>
       </div>
-  
-      <!-- Indicadores (solo si hay más de un banner) -->
-      <div *ngIf="hasMultipleBanners" class="flex justify-center space-x-2 mt-2 mb-2 sm:mt-4">
-        <button 
-          *ngFor="let banner of banners; let i = index" 
-          (click)="goToBanner(i)" 
-          [class]="i === currentIndex ? 'w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-600 dark:bg-blue-500' : 'w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-gray-400 dark:bg-gray-500'" 
-          [attr.aria-label]="'Ir al banner ' + (i + 1)"
-          class="transition-colors"
-        ></button>
+    </ng-container>
+
+    <!-- Cargando -->
+    <ng-container *ngIf="loading">
+      <div class="flex items-center justify-center h-full">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
-    </div>
+    </ng-container>
+
+    <!-- Error -->
+    <ng-container *ngIf="error">
+      <div class="flex items-center justify-center h-full text-red-600">
+        <p>{{ error }}</p>
+      </div>
+    </ng-container>
   </div>
+
+  <!-- Puntos de navegación -->
+  <ng-container *ngIf="hasMultipleBanners">
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
+      <button *ngFor="let banner of banners; let i = index"
+              (click)="goToBanner(i)"
+              class="rounded-full transition-all"
+              [ngClass]="{
+                'bg-blue-600 w-4 h-4': i === currentIndex,
+                'bg-gray-400 w-3 h-3 hover:bg-gray-500': i !== currentIndex
+              }">
+      </button>
+    </div>
+  </ng-container>
+</section>

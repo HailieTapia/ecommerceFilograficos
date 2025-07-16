@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Observable, interval, of } from 'rxjs';
+import { switchMap, retry, catchError, map } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 import { environment } from '../../environments/config';
 
@@ -253,8 +253,75 @@ export interface BatchUpdatePriceIndividualResponse {
 })
 export class ProductService {
   private apiUrl = `${environment.baseUrl}/products`;
+  private readonly CACHE_KEY = 'home-data-cache';
+  private readonly CACHE_DURATION = 3600 * 1000; // 1 hora en milisegundos
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
+
+  private getCachedData(): any | null {
+    const cached = localStorage.getItem(this.CACHE_KEY);
+    if (!cached) return null;
+
+    const parsed = JSON.parse(cached);
+    const timestamp = parsed.timestamp;
+    if (!timestamp || Date.now() - timestamp > this.CACHE_DURATION) {
+      localStorage.removeItem(this.CACHE_KEY);
+      return null;
+    }
+    return parsed.data;
+  }
+
+  private setCachedData(data: any): void {
+    const cacheEntry = {
+      timestamp: Date.now(),
+      data
+    };
+    localStorage.setItem(this.CACHE_KEY, JSON.stringify(cacheEntry));
+  }
+
+  getHomeData(poll: boolean = false): Observable<any> {
+    // Si no es polling y hay datos válidos en caché, devolverlos
+    if (!poll) {
+      const cachedData = this.getCachedData();
+      if (cachedData) {
+        return of(cachedData);
+      }
+    }
+
+    // Solicitud al servidor con reintentos
+    const request$ = this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<any>(`${this.apiUrl}/home-data`, {
+          headers,
+          withCredentials: true
+        });
+      }),
+      retry({ count: 3, delay: 1000 }), // Reintentar 3 veces con 1 segundo de retraso
+      map(response => {
+        this.setCachedData(response); // Almacenar en caché
+        return response;
+      }),
+      catchError(error => {
+        console.error('Error fetching home data:', error);
+        const cachedData = this.getCachedData();
+        if (cachedData) {
+          console.log('Returning cached data as fallback');
+          return of(cachedData);
+        }
+        throw error; // Si no hay datos en caché, propagar el error
+      })
+    );
+
+    // Si poll es true, configurar polling cada hora
+    if (poll) {
+      return interval(this.CACHE_DURATION).pipe(
+        switchMap(() => request$)
+      );
+    }
+
+    return request$;
+  }
 
   getAllProductsCatalog(
     page: number = 1,

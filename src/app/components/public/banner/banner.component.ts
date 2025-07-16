@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BannerService, Banner } from '../../services/banner.service';
 import { interval, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-banner',
@@ -26,9 +25,7 @@ export class BannerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.autoSlideSubscription) {
-      this.autoSlideSubscription.unsubscribe();
-    }
+    this.autoSlideSubscription?.unsubscribe();
   }
 
   loadBanners() {
@@ -48,11 +45,11 @@ export class BannerComponent implements OnInit, OnDestroy {
   }
 
   nextBanner() {
-    this.currentIndex = (this.currentIndex === this.banners.length - 1) ? 0 : this.currentIndex + 1;
+    this.currentIndex = (this.currentIndex + 1) % this.banners.length;
   }
 
   prevBanner() {
-    this.currentIndex = (this.currentIndex === 0) ? this.banners.length - 1 : this.currentIndex - 1;
+    this.currentIndex = (this.currentIndex - 1 + this.banners.length) % this.banners.length;
   }
 
   goToBanner(index: number) {

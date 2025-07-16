@@ -92,6 +92,11 @@
             (click)="performSearch()"></i>
         </div>
       </div>
+
+      <!-- Navigation Component -->
+      <div class="max-w-7xl mx-auto">
+        <app-navigation [isLoggedIn]="isLoggedIn" [userRole]="userRole"></app-navigation>
+      </div>
     </header>
 
     <div>
