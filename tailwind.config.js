@@ -17,14 +17,14 @@ module.exports = {
           azulclaro: '#2558eb',
           gris: '#4b5563',
           verde: '#22c55a',
-
+          'verde-fuerte': '#225028ff',
           background: '#f3f7fb',
           text: '#1F2937',
           primary: '#1E3A8A',
           'primary-hover': '#0034b0',
           secondary: '#4B5563',
           'secondary-hover': '#6B7280',
-          'table-header': '#E0E7FF',
+          'table-header': '#dee8f0ff',
           'row-hover': '#EFF6FF',
           success: '#DCFCE7',          // Activo
           'success-text': '#166534',
@@ -68,6 +68,9 @@ module.exports = {
           'disabled-text': '#6B7280',
         },
       },
+      fontWeight: {
+        550: '550'
+      }
     },
   },
   plugins: [],

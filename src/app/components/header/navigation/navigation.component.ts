@@ -11,6 +11,7 @@ import { RouterModule } from '@angular/router';
 })
 export class NavigationComponent {
   navItems = [
+    { path: '/', label: 'Inicio' },
     { path: '/product-categories', label: 'Categorías' },
     { path: '/offers', label: 'Ofertas' },
     { path: '/publiccatalog', label: 'CatalogoP' },

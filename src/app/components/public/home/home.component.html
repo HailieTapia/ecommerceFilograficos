@@ -1,72 +1,117 @@
-<section class="relative">
+<section class="relative bg-light-background dark:bg-dark-background">
   <!-- Banner Component -->
   <app-banner class="block w-full"></app-banner>
 
   <!-- Main Content -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <!-- Mensaje de error -->
-    <div *ngIf="errorMessage" class="error-message">
+    <div *ngIf="errorMessage" class="bg-light-danger dark:bg-dark-danger text-light-danger-text dark:text-dark-danger-text p-4 rounded-lg mb-4">
       {{ errorMessage }}
     </div>
 
     <!-- Productos Destacados -->
-    <div class="section">
-      <h2>Productos Destacados</h2>
-      <div class="product-grid">
-        <div *ngFor="let product of featuredProducts" class="product-card">
-          <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name">
-          <h3>{{ product.name }}</h3>
-          <p><strong>Descripción:</strong> {{ product.description || 'Sin descripción' }}</p>
-          <p><strong>Categoría:</strong> {{ product.category || 'Sin categoría' }}</p>
-          <p><strong>Tipo:</strong> {{ product.product_type }}</p>
-          <p><strong>Precio:</strong> ${{ product.min_price }} - ${{ product.max_price }}</p>
-          <p><strong>Stock:</strong> {{ product.total_stock }}</p>
-          <p><strong>Variantes:</strong> {{ product.variant_count }}</p>
-          <p><strong>Calificación:</strong> {{ product.average_rating }} ({{ product.total_reviews }} reseñas)</p>
-          <p><strong>Creado:</strong> {{ product.created_at | date:'short' }}</p>
+    <div class="mb-8">
+      <h2 class="text-3xl sm:text-4xl font-bold text-center py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
+        Productos <span class="text-light-verde-fuerte dark:text-dark-success">Destacados</span>
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div *ngFor="let product of featuredProducts" class="shadow-sm hover:shadow-md transition-shadow duration-300 p-4 rounded-lg bg-light-background dark:bg-dark-background">
+          <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-auto mb-2 rounded-md">
+          <h3 class="text-lg font-medium mb-2 text-light-text dark:text-dark-text">{{ product.name }}</h3>
+          <p class="text-light-text dark:text-dark-text"><strong>Descripción:</strong> {{ product.description || 'Sin descripción' }}</p>
+          <p class="text-light-text dark:text-dark-text"><strong>Categoría:</strong> {{ product.category || 'Sin categoría' }}</p>
+          <p class="text-light-text dark:text-dark-text"><strong>Tipo:</strong> {{ product.product_type }}</p>
+          <p class="text-light-text dark:text-dark-text"><strong>Precio:</strong> {{ formatPrice(product) }}</p>
+          <p class="text-light-text dark:text-dark-text"><strong>Stock:</strong> {{ product.total_stock }}</p>
+          <p class="text-light-text dark:text-dark-text"><strong>Variantes:</strong> {{ product.variant_count }}</p>
+          <p class="text-light-text dark:text-dark-text"><strong>Calificación:</strong> {{ product.average_rating }} ({{ product.total_reviews }} reseñas)</p>
+          <p class="text-light-text dark:text-dark-text"><strong>Creado:</strong> {{ product.created_at | date:'short' }}</p>
         </div>
       </div>
-      <p *ngIf="!featuredProducts.length && !errorMessage">No hay productos destacados disponibles.</p>
+      <p *ngIf="!featuredProducts.length && !errorMessage" class="mt-4 text-light-text dark:text-dark-text">No hay productos destacados disponibles.</p>
     </div>
 
     <!-- Productos Recientes -->
-    <div class="section">
-      <h2>Productos Recientes</h2>
-      <div class="product-grid">
-        <div *ngFor="let product of recentProducts" class="product-card">
-          <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name">
-          <h3>{{ product.name }}</h3>
-          <p><strong>Descripción:</strong> {{ product.description || 'Sin descripción' }}</p>
-          <p><strong>Categoría:</strong> {{ product.category || 'Sin categoría' }}</p>
-          <p><strong>Tipo:</strong> {{ product.product_type }}</p>
-          <p><strong>Precio:</strong> ${{ product.min_price }} - ${{ product.max_price }}</p>
-          <p><strong>Stock:</strong> {{ product.total_stock }}</p>
-          <p><strong>Variantes:</strong> {{ product.variant_count }}</p>
-          <p><strong>Calificación:</strong> {{ product.average_rating }} ({{ product.total_reviews }} reseñas)</p>
-          <p><strong>Creado:</strong> {{ product.created_at | date:'short' }}</p>
+    <div class="mb-8">
+      <h2 class="text-3xl sm:text-4xl font-bold text-center py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
+        Productos <span class="text-light-verde-fuerte dark:text-dark-success">Recientes</span>
+      </h2> 
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+        <div *ngFor="let product of recentProducts" class="relative bg-light-background dark:bg-dark-background rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
+          <!-- Product Type Badge with New Icon -->
+          <div class="absolute top-3 left-3 z-10 flex items-center space-x-1">
+            <span class="bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text text-xs font-medium px-2 py-1 rounded-full">
+              {{ product.product_type }}
+            </span>
+            <i class="fas fa-bolt text-yellow-400 dark:text-dark-resolved text-xs"></i>
+          </div>
+
+          <!-- Cart Icon -->
+          <div class="absolute top-3 right-3 z-10">
+            <button class="w-8 h-8 bg-light-background dark:bg-dark-background rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+              <i class="fas fa-shopping-cart text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover"></i>
+            </button>
+          </div>
+
+          <!-- Product Image Area -->
+          <div class="bg-light-background dark:bg-dark-table-header h-48 flex items-center justify-center relative">
+            <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-full object-cover">
+          </div>
+
+          <!-- Product Info -->
+          <div class="p-4 bg-light-table-header dark:bg-dark-row-hover rounded-b-2xl">
+            <h3 class="font-medium text-light-text dark:text-dark-text mb-1 line-clamp-1">{{ product.name }}</h3>
+            <p class="text-xs text-light-secondary dark:text-dark-secondary mb-3">{{ product.category || 'Sin categoría' }}</p>
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-bold text-light-text dark:text-dark-text">{{ formatPrice(product) }}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <p *ngIf="!recentProducts.length && !errorMessage">No hay productos recientes disponibles.</p>
+      <p *ngIf="!recentProducts.length && !errorMessage" class="mt-4 text-light-text dark:text-dark-text">No hay productos recientes disponibles.</p>
     </div>
 
     <!-- Productos Más Vendidos -->
-    <div class="section">
-      <h2>Productos Más Vendidos</h2>
-      <div class="product-grid">
-        <div *ngFor="let product of topSellingProducts" class="product-card">
-          <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name">
-          <h3>{{ product.name }}</h3>
-          <p><strong>Descripción:</strong> {{ product.description || 'Sin descripción' }}</p>
-          <p><strong>Categoría:</strong> {{ product.category || 'Sin categoría' }}</p>
-          <p><strong>Tipo:</strong> {{ product.product_type }}</p>
-          <p><strong>Precio:</strong> ${{ product.min_price }} - ${{ product.max_price }}</p>
-          <p><strong>Stock:</strong> {{ product.total_stock }}</p>
-          <p><strong>Variantes:</strong> {{ product.variant_count }}</p>
-          <p><strong>Calificación:</strong> {{ product.average_rating }} ({{ product.total_reviews }} reseñas)</p>
-          <p><strong>Creado:</strong> {{ product.created_at | date:'short' }}</p>
+    <div class="mb-8">
+      <h2 class="text-3xl sm:text-4xl font-bold text-center py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
+        Productos <span class="text-light-verde-fuerte dark:text-dark-success">Más Vendidos</span>
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div *ngFor="let product of topSellingProducts" class="relative bg-light-background dark:bg-dark-background rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
+          <!-- Product Type Badge -->
+          <div class="absolute top-3 left-3 z-10">
+            <span class="bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text text-xs font-medium px-2 py-1 rounded-full">
+              {{ product.product_type }}
+            </span>
+          </div>
+
+          <!-- Cart Icon -->
+          <div class="absolute top-3 right-3 z-10">
+            <button class="w-8 h-8 bg-light-background dark:bg-dark-background rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+              <i class="fas fa-shopping-cart text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover"></i>
+            </button>
+          </div>
+
+          <!-- Product Image Area -->
+          <div class="bg-light-background dark:bg-dark-table-header h-48 flex items-center justify-center relative">
+            <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-full object-cover">
+          </div>
+
+          <!-- Product Info -->
+          <div class="p-4 bg-light-table-header dark:bg-dark-row-hover rounded-b-2xl">
+            <div class="flex items-center gap-1 mb-2">
+              <i class="fas fa-star text-yellow-400 dark:text-dark-resolved"></i>
+              <span class="text-sm font-medium text-light-text dark:text-dark-text">{{ product.average_rating || '0.0' }}</span>
+            </div>
+            <h3 class="font-medium text-light-text dark:text-dark-text mb-1 line-clamp-1">{{ product.name }}</h3>
+            <p class="text-xs text-light-secondary dark:text-dark-secondary mb-3">{{ product.category || 'Sin categoría' }}</p>
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-bold text-light-text dark:text-dark-text">{{ formatPrice(product) }}</span>
+            </div>
+          </div>
         </div>
       </div>
-      <p *ngIf="!topSellingProducts.length && !errorMessage">No hay productos más vendidos disponibles.</p>
+      <p *ngIf="!topSellingProducts.length && !errorMessage" class="mt-4 text-light-text dark:text-dark-text">No hay productos más vendidos disponibles.</p>
     </div>
   </div>
 </section>

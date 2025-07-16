@@ -104,4 +104,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   get isClient(): boolean {
     return this.user && this.user.tipo === 'cliente';
   }
+
+  // Helper method to format price
+  formatPrice(product: any): string {
+    // Convert min_price and max_price to numbers, handling strings or undefined
+    const minPrice = parseFloat(product.min_price) || 0;
+    const maxPrice = parseFloat(product.max_price) || 0;
+
+    // Check if prices are equal (or both are invalid/zero)
+    if (minPrice === maxPrice) {
+      return `$${minPrice.toFixed(2)}`;
+    }
+    return `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+  }
 }
