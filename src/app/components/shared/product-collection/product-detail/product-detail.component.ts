@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ProductCollectionService, ProductDetail, ProductVariant } from '../../../services/product-collection.service';
+import { ProductCollectionService, ProductDetail, ProductVariant, Product } from '../../../services/product-collection.service';
 import { AuthService } from '../../../services/auth.service';
 import { CartService, AddToCartRequest } from '../../../services/cart.service';
 import { ToastService } from '../../../services/toastService';
@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 import { takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-product-detail',
@@ -20,6 +20,7 @@ import { Subject } from 'rxjs';
 export class ProductDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   product: ProductDetail | null = null;
+  relatedProducts: Product[] = [];
   selectedVariant: ProductVariant | null = null;
   selectedImage: string | null = null;
   selectedCustomization: ProductDetail['customizations'][0] | null = null;
@@ -27,9 +28,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   isUrgent: boolean = false;
   isLoading = true;
   isAddingToCart = false;
-  showFullDescription = false;
-  showFullAttributes = false;
-  showFullCustomizations = false;
+  activeTab: 'description' | 'additional' = 'description';
   currentImageIndex = 0;
   isAuthenticated = false;
   userRole: string | null = null;
@@ -71,10 +70,14 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   loadProductDetails(productId: number): void {
     this.isLoading = true;
-    this.productService.getProductById(productId, this.isAuthenticated).subscribe({
-      next: (response) => {
-        this.product = response.product;
-        this.breadcrumb = response.product.breadcrumb || [];
+    forkJoin([
+      this.productService.getProductById(productId, this.isAuthenticated),
+      this.productService.getAllProducts({ page: 1, pageSize: 4, categoryId: null }, this.isAuthenticated)
+    ]).subscribe({
+      next: ([productResponse, relatedResponse]) => {
+        this.product = productResponse.product;
+        this.breadcrumb = productResponse.product.breadcrumb || [];
+        this.relatedProducts = relatedResponse.products.filter(p => p.product_id !== productId).slice(0, 4);
         if (this.product.variants && this.product.variants.length > 0) {
           this.selectVariant(this.product.variants[0]);
         }
@@ -94,7 +97,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.selectedImage = variant.images && variant.images.length > 0 ? variant.images[0].image_url : null;
     this.quantity = 1;
     this.selectedCustomization = null;
-    this.applyFilters();
   }
 
   changeImage(imageUrl: string): void {
@@ -116,9 +118,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  selectCustomization(customization: ProductDetail['customizations'][0]): void {
+  selectCustomization(customization: ProductDetail['customizations'][0] | null): void {
     this.selectedCustomization = customization;
-    this.applyFilters();
+  }
+
+  setActiveTab(tab: 'description' | 'additional'): void {
+    this.activeTab = tab;
   }
 
   formatPrice(price: number | string): string {
@@ -127,7 +132,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   incrementQuantity(): void {
-    if (this.selectedVariant && this.quantity < (this.selectedVariant.stock ?? 0)) {
+    if (this.selectedVariant && this.quantity < this.selectedVariant.stock) {
       this.quantity++;
     }
   }
@@ -135,13 +140,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   decrementQuantity(): void {
     if (this.quantity > 1) {
       this.quantity--;
-    }
-  }
-
-  applyFilters(): void {
-    // Trigger UI update when isUrgent or other selections change
-    if (this.product && this.selectedVariant) {
-      // Price is already handled in the template; this ensures reactivity
     }
   }
 
@@ -156,7 +154,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       this.toastService.showToast('Por favor, selecciona una variante.', 'info');
       return;
     }
-    if (this.quantity <= 0 || this.quantity > (this.selectedVariant.stock ?? 0)) {
+    if (this.quantity <= 0 || this.quantity > this.selectedVariant.stock) {
       this.toastService.showToast('Cantidad inválida o excede el stock disponible.', 'error');
       return;
     }
