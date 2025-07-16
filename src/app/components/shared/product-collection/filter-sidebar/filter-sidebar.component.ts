@@ -12,7 +12,7 @@ interface Category {
 }
 
 interface Collaborator {
-  id: number;
+  collaborator_id: number;
   name: string;
 }
 
@@ -29,14 +29,14 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
     minPrice: number | null;
     maxPrice: number | null;
     collaboratorId: number | null;
-    search: string | null;
+    onlyOffers: boolean;
     sort: string | null;
   } = {
     categoryId: null,
     minPrice: null,
     maxPrice: null,
     collaboratorId: null,
-    search: null,
+    onlyOffers: false,
     sort: null
   };
   @Input() showCollaboratorFilter: boolean = false;
@@ -44,11 +44,19 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
 
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
-  search: string = '';
-  selectedCategory: number | null = null;
-  minPrice: number | null = null;
-  maxPrice: number | null = null;
-  selectedCollaborator: number | null = null;
+  filters: {
+    categoryId: number | null;
+    minPrice: number | null;
+    maxPrice: number | null;
+    collaboratorId: number | null;
+    onlyOffers: boolean;
+  } = {
+    categoryId: null,
+    minPrice: null,
+    maxPrice: null,
+    collaboratorId: null,
+    onlyOffers: false
+  };
 
   constructor(
     private categorieService: CategorieService,
@@ -68,17 +76,19 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
       this.updateFiltersFromInput();
     }
     if (changes['showCollaboratorFilter'] && !changes['showCollaboratorFilter'].currentValue) {
-      this.selectedCollaborator = null;
+      this.filters.collaboratorId = null;
       this.collaborators = [];
     }
   }
 
   private updateFiltersFromInput(): void {
-    this.search = this.initialFilters.search || '';
-    this.selectedCategory = this.initialFilters.categoryId || null;
-    this.minPrice = this.initialFilters.minPrice || null;
-    this.maxPrice = this.initialFilters.maxPrice || null;
-    this.selectedCollaborator = this.showCollaboratorFilter ? this.initialFilters.collaboratorId || null : null;
+    this.filters = {
+      categoryId: this.initialFilters.categoryId || null,
+      minPrice: this.initialFilters.minPrice || null,
+      maxPrice: this.initialFilters.maxPrice || null,
+      collaboratorId: this.showCollaboratorFilter ? this.initialFilters.collaboratorId || null : null,
+      onlyOffers: this.initialFilters.onlyOffers || false
+    };
   }
 
   loadCategories(): void {
@@ -107,20 +117,32 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
 
   applyFilters(): void {
     const cleanedFilters: any = {};
-    if (this.selectedCategory !== null) cleanedFilters.categoryId = this.selectedCategory;
-    if (this.minPrice !== null) cleanedFilters.minPrice = this.minPrice;
-    if (this.maxPrice !== null) cleanedFilters.maxPrice = this.maxPrice;
-    if (this.showCollaboratorFilter && this.selectedCollaborator !== null) cleanedFilters.collaboratorId = this.selectedCollaborator;
-    if (this.search.trim()) cleanedFilters.search = this.search.trim();
+    if (this.filters.categoryId !== null) cleanedFilters.categoryId = this.filters.categoryId;
+    if (this.filters.minPrice !== null) cleanedFilters.minPrice = this.filters.minPrice;
+    if (this.filters.maxPrice !== null) cleanedFilters.maxPrice = this.filters.maxPrice;
+    if (this.showCollaboratorFilter && this.filters.collaboratorId !== null) cleanedFilters.collaboratorId = this.filters.collaboratorId;
+    if (this.filters.onlyOffers) cleanedFilters.onlyOffers = this.filters.onlyOffers;
     this.filtersChange.emit(cleanedFilters);
   }
 
   resetFilters(): void {
-    this.search = '';
-    this.selectedCategory = null;
-    this.minPrice = null;
-    this.maxPrice = null;
-    this.selectedCollaborator = null;
+    this.filters = {
+      categoryId: null,
+      minPrice: null,
+      maxPrice: null,
+      collaboratorId: null,
+      onlyOffers: false
+    };
     this.applyFilters();
+  }
+
+  applyPriceFilters(): void {
+    this.applyFilters();
+  }
+
+  onPriceKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.applyPriceFilters();
+    }
   }
 }

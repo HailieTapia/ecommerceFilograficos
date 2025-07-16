@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { CartService, CartResponse, CartItem, Promotion } from '../../../services/cart.service';
-import { ToastService } from '../../../services/toastService';
+import { CartService, CartResponse, CartItem, Promotion } from '../../services/cart.service';
+import { ToastService } from '../../services/toastService';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
+import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 
 @Component({
   selector: 'app-cart',

@@ -18,7 +18,7 @@ import { ProductDetailComponent } from './components/shared/product-collection/p
 
 // Autenticados
 import { ProfileComponent } from './components/authenticated/profile/profile.component';
-import { CartComponent } from './components/authenticated/auth-catalog/cart/cart.component';
+import { CartComponent } from './components/authenticated/cart/cart.component';
 import { CheckoutComponent } from './components/authenticated/checkout/checkout.component';
 import { OrderConfirmationComponent } from './components/authenticated/order-confirmation/order-confirmation.component';
 import { OrdersComponent } from './components/authenticated/orders/orders.component';

@@ -24,7 +24,7 @@ interface Collaborator {
 }
 
 // Tipo para las claves de filtros
-type FilterKey = 'categoryId' | 'minPrice' | 'maxPrice' | 'collaboratorId' | 'search' | 'sort';
+type FilterKey = 'categoryId' | 'minPrice' | 'maxPrice' | 'collaboratorId' | 'onlyOffers' | 'sort';
 
 @Component({
   selector: 'app-product-collection',
@@ -45,14 +45,14 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     minPrice: number | null;
     maxPrice: number | null;
     collaboratorId: number | null;
-    search: string | null;
+    onlyOffers: boolean;
     sort: string | null;
   } = {
     categoryId: null,
     minPrice: null,
     maxPrice: null,
     collaboratorId: null,
-    search: null,
+    onlyOffers: false,
     sort: null
   };
   isLoadingSearch = false;
@@ -98,7 +98,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
             minPrice: params['minPrice'] ? +params['minPrice'] : null,
             maxPrice: params['maxPrice'] ? +params['maxPrice'] : null,
             collaboratorId: params['collaboratorId'] && this.isAuthenticated && this.userRole === 'cliente' ? +params['collaboratorId'] : null,
-            search: params['search'] || null,
+            onlyOffers: params['onlyOffers'] === 'true',
             sort: params['sort'] || this.selectedSortOrder || null
           };
           this.page = params['page'] ? +params['page'] : 1;
@@ -207,7 +207,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         minPrice: this.filters.minPrice ?? null,
         maxPrice: this.filters.maxPrice ?? null,
         collaboratorId: this.filters.collaboratorId ?? null,
-        search: this.filters.search ?? null,
+        onlyOffers: this.filters.onlyOffers ?? null,
         sort: this.filters.sort ?? null
       },
       queryParamsHandling: 'merge'
@@ -225,7 +225,14 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
   }
 
   removeFilter(key: FilterKey): void {
-    this.filters[key] = null;
+    if (key === 'minPrice' || key === 'maxPrice') {
+      this.filters.minPrice = null;
+      this.filters.maxPrice = null;
+    } else if (key === 'onlyOffers') {
+      this.filters.onlyOffers = false;
+    } else {
+      this.filters[key] = null;
+    }
     this.page = 1;
     this.updateActiveFilters();
     this.router.navigate([], {
@@ -236,7 +243,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         minPrice: this.filters.minPrice ?? null,
         maxPrice: this.filters.maxPrice ?? null,
         collaboratorId: this.filters.collaboratorId ?? null,
-        search: this.filters.search ?? null,
+        onlyOffers: this.filters.onlyOffers ?? null,
         sort: this.filters.sort ?? null
       },
       queryParamsHandling: 'merge'
@@ -245,9 +252,6 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
 
   private updateActiveFilters(): void {
     this.activeFilters = [];
-    if (this.filters.search !== null && this.filters.search.trim()) {
-      this.activeFilters.push({ key: 'search', value: `Búsqueda: ${this.filters.search}`, rawValue: this.filters.search });
-    }
     if (this.filters.categoryId !== null) {
       const categoryName = this.categoriesMap.get(this.filters.categoryId) || `Categoría ${this.filters.categoryId}`;
       this.activeFilters.push({ key: 'categoryId', value: `Categoría: ${categoryName}`, rawValue: this.filters.categoryId });
@@ -260,6 +264,9 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     if (this.filters.collaboratorId !== null && this.isAuthenticated && this.userRole === 'cliente') {
       const collaboratorName = this.collaboratorsMap.get(this.filters.collaboratorId) || `Vendedor ${this.filters.collaboratorId}`;
       this.activeFilters.push({ key: 'collaboratorId', value: `Vendedor: ${collaboratorName}`, rawValue: this.filters.collaboratorId });
+    }
+    if (this.filters.onlyOffers) {
+      this.activeFilters.push({ key: 'onlyOffers', value: 'Solo Ofertas', rawValue: this.filters.onlyOffers });
     }
   }
 
