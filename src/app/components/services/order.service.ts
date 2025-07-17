@@ -150,17 +150,16 @@ export class OrderService {
   }
 
   // Obtener los detalles de una orden específica por ID
-  getOrderById(orderId: number): Observable<OrderResponse> {
+  getOrderById(orderId: number): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<OrderResponse>(
+        return this.http.get<any>(
           `${this.apiUrl}/${orderId}`,
           { headers, withCredentials: true }
         );
       }),
-      catchError(this.handleError)
-    );
+    )
   }
 
   // Obtener la lista paginada de órdenes con filtros opcionales

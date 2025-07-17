@@ -60,8 +60,20 @@ export class PaymentCallbackComponent implements OnInit {
     this.orderService.getOrderById(this.orderId).subscribe({
       next: (response) => {
         this.isLoading = false;
-        const paymentStatus = response.data.payment.status;
-        this.paymentStatus = status === 'approved' ? 'success' : paymentStatus === 'pending' ? 'pending' : 'failure';
+        const orderPaymentStatus = response.data.payment_status; // Usar payment_status de la tabla orders
+        const paymentStatus = response.data.payment?.status; // Estado del pago desde la tabla payments (opcional)
+
+        // Priorizar payment_status de orders, con fallback a payment.status
+        this.paymentStatus = orderPaymentStatus === 'approved' ? 'success' : 
+                           orderPaymentStatus === 'pending' || orderPaymentStatus === 'in_process' ? 'pending' : 
+                           orderPaymentStatus === 'rejected' || orderPaymentStatus === 'failed' ? 'failure' : null;
+
+        // Si paymentStatus no está definido, usar el status del query param como fallback
+        if (!this.paymentStatus && status === 'approved') {
+          this.paymentStatus = 'success';
+        } else if (!this.paymentStatus) {
+          this.paymentStatus = 'pending'; // Default si no hay coincidencia
+        }
 
         if (this.paymentStatus === 'success') {
           this.router.navigate(['/order-confirmation', this.orderId]);
