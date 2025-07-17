@@ -79,7 +79,7 @@ export const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Checkout' } },
   { path: 'order-confirmation/:id', component: OrderConfirmationComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'order-confirmation' } },
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'orders' } },
-  { path: 'payment-callback', component: PaymentCallbackComponent, canActivate: [AuthGuard], data: { role: 'cliente' } },
+  { path: 'payment-callback', component: PaymentCallbackComponent },
 
   // Catálogo unificado (público y clientes autenticados)
   {
