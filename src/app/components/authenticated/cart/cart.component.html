@@ -44,7 +44,7 @@
 
         <!-- Ítems del carrito -->
         <div class="space-y-3 mb-5">
-          <div *ngFor="let item of cart.items; trackBy: trackByCartDetailId" class="bg-white dark:bg-gray-800 rounded-xl shadow p-5 hover:shadow-md transition-shadow duration-300">
+          <div *ngFor="let item of cart.items; trackBy: trackByCartDetailId" class="bg-white dark:bg-gray-800 rounded-xl shadow p-5 hover:shadow-md transition-shadow duration-300 cursor-pointer" (click)="navigateToProduct(item.product_id, item.variant_sku)">
             <div class="flex items-start gap-4">
               <!-- Imagen -->
               <img [src]="getImageUrl(item)" class="w-14 h-14 object-cover rounded-lg shadow" alt="{{ item.product_name }}">
@@ -66,6 +66,7 @@
                     type="checkbox"
                     [checked]="item.is_urgent"
                     (change)="toggleUrgent(item, $event)"
+                    (click)="$event.stopPropagation()"
                     class="form-checkbox h-3.5 w-3.5 text-blue-600 dark:text-blue-400"
                   >
                   <label class="text-xs text-gray-600 dark:text-gray-400">
@@ -87,15 +88,15 @@
               <!-- Control de cantidad y eliminar -->
               <div class="flex flex-col items-end gap-2">
                 <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full p-0.5">
-                  <button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors disabled:bg-gray-300 disabled:text-gray-500" aria-label="Reducir cantidad">
+                  <button (click)="updateQuantity(item, item.quantity - 1); $event.stopPropagation()" [disabled]="item.quantity <= 1" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors disabled:bg-gray-300 disabled:text-gray-500" aria-label="Reducir cantidad">
                     <i class="fas fa-minus text-gray-600 dark:text-gray-300 text-xs"></i>
                   </button>
                   <span class="w-10 text-center font-medium text-gray-800 dark:text-gray-100 text-sm">{{ item.quantity }}</span>
-                  <button (click)="updateQuantity(item, item.quantity + 1)" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors" aria-label="Aumentar cantidad">
+                  <button (click)="updateQuantity(item, item.quantity + 1); $event.stopPropagation()" class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors" aria-label="Aumentar cantidad">
                     <i class="fas fa-plus text-gray-600 dark:text-gray-300 text-xs"></i>
                   </button>
                 </div>
-                <button (click)="removeItem(item.cart_detail_id)" class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 flex items-center justify-center transition-colors" aria-label="Eliminar producto">
+                <button (click)="removeItem(item.cart_detail_id); $event.stopPropagation()" class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 flex items-center justify-center transition-colors" aria-label="Eliminar producto">
                   <i class="fas fa-trash-alt text-red-500 dark:text-red-400 text-xs"></i>
                 </button>
               </div>

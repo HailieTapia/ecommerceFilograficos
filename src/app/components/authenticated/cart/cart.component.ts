@@ -65,7 +65,7 @@ export class CartComponent implements OnInit {
   }
 
   canBeUrgent(item: CartItem): boolean {
-    return item.urgent_delivery_enabled; // Usar urgent_delivery_enabled en lugar de urgent_delivery_cost
+    return item.urgent_delivery_enabled;
   }
 
   updateQuantity(item: CartItem, newQuantity: number, isUrgent?: boolean): void {
@@ -78,7 +78,7 @@ export class CartComponent implements OnInit {
     const oldIsUrgent = item.is_urgent;
     const newIsUrgent = isUrgent !== undefined ? isUrgent : item.is_urgent;
 
-    console.log('Antes de enviar - item.is_urgent:', item.is_urgent, 'newIsUrgent:', newIsUrgent); // Depuración
+    console.log('Antes de enviar - item.is_urgent:', item.is_urgent, 'newIsUrgent:', newIsUrgent);
 
     const data = {
       cart_detail_id: item.cart_detail_id,
@@ -86,7 +86,6 @@ export class CartComponent implements OnInit {
       is_urgent: newIsUrgent
     };
 
-    // Actualización optimista
     item.quantity = newQuantity;
     item.is_urgent = newIsUrgent;
     item.urgent_delivery_fee = newIsUrgent ? item.urgent_delivery_cost : 0;
@@ -95,11 +94,10 @@ export class CartComponent implements OnInit {
 
     this.cartService.updateQuantity(data, oldQuantity).subscribe({
       next: () => {
-        this.loadCart(); // Recargar para sincronizar con el backend
+        this.loadCart();
         this.toastService.showToast('Carrito actualizado', 'success');
       },
       error: (error) => {
-        // Revertir cambios optimistas
         item.quantity = oldQuantity;
         item.is_urgent = oldIsUrgent;
         item.urgent_delivery_fee = oldIsUrgent ? item.urgent_delivery_cost : 0;
@@ -107,14 +105,14 @@ export class CartComponent implements OnInit {
         this.calculateTotals();
         const errorMessage = error?.error?.message || 'No se pudo actualizar el carrito.';
         this.toastService.showToast(errorMessage, 'error');
-        console.error('Error al actualizar:', error); // Depuración adicional
+        console.error('Error al actualizar:', error);
       }
     });
   }
 
   toggleUrgent(item: CartItem, event?: Event): void {
     const newIsUrgent = event ? (event.target as HTMLInputElement).checked : !item.is_urgent;
-    console.log('toggleUrgent - Nuevo valor de is_urgent:', newIsUrgent); // Depuración
+    console.log('toggleUrgent - Nuevo valor de is_urgent:', newIsUrgent);
     this.updateQuantity(item, item.quantity, newIsUrgent);
   }
 
@@ -136,6 +134,10 @@ export class CartComponent implements OnInit {
 
   proceedToCheckout(): void {
     this.router.navigate(['/checkout']);
+  }
+
+  navigateToProduct(productId: number, variantSku: string): void {
+    this.router.navigate(['/collection', productId], { queryParams: { variant_sku: variantSku } });
   }
 
   trackByCartDetailId(index: number, item: CartItem): number {

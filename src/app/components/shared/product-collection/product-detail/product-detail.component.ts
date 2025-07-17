@@ -33,6 +33,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   isAuthenticated = false;
   userRole: string | null = null;
   breadcrumb: { id: number | null; name: string }[] = [];
+  variantSku: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -54,6 +55,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       }
 
       const productId = this.route.snapshot.paramMap.get('productId');
+      this.variantSku = this.route.snapshot.queryParamMap.get('variant_sku');
+      
       if (productId && !isNaN(+productId)) {
         this.loadProductDetails(+productId);
       } else {
@@ -78,8 +81,13 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.product = productResponse.product;
         this.breadcrumb = productResponse.product.breadcrumb || [];
         this.relatedProducts = relatedResponse.products.filter(p => p.product_id !== productId).slice(0, 4);
+        
         if (this.product.variants && this.product.variants.length > 0) {
-          this.selectVariant(this.product.variants[0]);
+          // Try to find variant matching variantSku, otherwise default to first variant
+          const matchingVariant = this.variantSku 
+            ? this.product.variants.find(v => v.sku === this.variantSku) || this.product.variants[0]
+            : this.product.variants[0];
+          this.selectVariant(matchingVariant);
         }
         this.isLoading = false;
       },
@@ -146,7 +154,9 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   addToCart(): void {
     if (!this.isAuthenticated || this.userRole !== 'cliente') {
       this.toastService.showToast('Necesitas iniciar sesión para añadir al carrito', 'warning');
-      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      setTimeout(() => {
+        this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      }, 2000);
       return;
     }
 
@@ -191,7 +201,9 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   buyNow(): void {
     if (!this.isAuthenticated || this.userRole !== 'cliente') {
       this.toastService.showToast('Necesitas iniciar sesión para comprar', 'warning');
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      setTimeout(() => {
+        this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+      }, 2000);
       return;
     }
     this.addToCart();

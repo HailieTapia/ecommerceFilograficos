@@ -14,7 +14,8 @@ module.exports = {
           texto: '#0390b7', 
           blanco: '#ffffff', 
           negro: '#000000',
-          azulclaro: '#2558eb',
+          azulclaro: '#204fdbff',
+          azulmasclaro: '#3462ecff',
           gris: '#4b5563',
           verde: '#22c55a',
           'verde-fuerte': '#225028ff',
@@ -24,7 +25,7 @@ module.exports = {
           'primary-hover': '#0034b0',
           secondary: '#4B5563',
           'secondary-hover': '#6B7280',
-          'table-header': '#dee8f0ff',
+          'table-header': '#9ac7ecff',
           'row-hover': '#EFF6FF',
           success: '#DCFCE7',          // Activo
           'success-text': '#166534',

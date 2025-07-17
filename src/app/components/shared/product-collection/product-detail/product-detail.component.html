@@ -1,11 +1,11 @@
-<div class="max-w-7xl mx-auto p-4 bg-gray-50 dark:bg-dark-background min-h-screen font-sans">
+<div class="w-full bg-gray-50 dark:bg-dark-background min-h-screen font-sans">
   <div *ngIf="isLoading" class="flex justify-center items-center min-h-[50vh]">
     <app-spinner [isLoading]="isLoading"></app-spinner>
   </div>
 
   <div *ngIf="!isLoading && product" class="space-y-8">
     <!-- Breadcrumb -->
-    <nav class="text-sm text-gray-600 dark:text-dark-secondary mb-8 text-center">
+    <nav class="text-sm text-gray-600 dark:text-dark-secondary mb-8 px-4 pt-4">
       <a routerLink="/collection" class="hover:underline">Catálogo</a>
       <span *ngFor="let crumb of breadcrumb; let last = last" class="mx-2">
         <span *ngIf="!last">/</span>
@@ -15,28 +15,24 @@
     </nav>
 
     <!-- Product Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mx-4">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <!-- Left Column - Product Images -->
         <div class="space-y-4">
           <!-- Main Product Image -->
-          <div class="relative bg-gradient-to-br from-green-50 to-amber-50 dark:from-green-900 dark:to-amber-900 rounded-lg p-8 aspect-square">
+          <div class="relative bg-gradient-to-br from-green-50 to-amber-50 dark:from-green-900 dark:to-amber-900 rounded-lg p-4 aspect-square">
             <div class="absolute inset-0 flex items-center justify-center">
               <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'"
-                   alt="{{ product.name }}" class="w-64 h-64 object-contain">
+                   alt="{{ product.name }}" class="w-full h-full object-contain opt-contain">
             </div>
             <!-- Navigation arrows -->
             <button (click)="prevImage()" [disabled]="currentImageIndex === 0"
                     class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-600">
-              <svg class="w-6 h-6 text-gray-600 dark:text-dark-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-              </svg>
+              <i class="fas fa-chevron-left text-gray-600 dark:text-dark-text"></i>
             </button>
             <button (click)="nextImage()" [disabled]="!selectedVariant || !selectedVariant.images || currentImageIndex >= selectedVariant.images.length - 1"
                     class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-600">
-              <svg class="w-6 h-6 text-gray-600 dark:text-dark-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
+              <i class="fas fa-chevron-right text-gray-600 dark:text-dark-text"></i>
             </button>
           </div>
           <!-- Thumbnail images -->
@@ -54,15 +50,19 @@
             <p class="text-sm text-gray-600 dark:text-dark-secondary mb-2">{{ product.category?.name || 'Sin categoría' }}</p>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text mb-2">
               {{ product.name || 'Producto sin nombre' }}
-              <span class="ml-2 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs px-2 py-1 rounded">
-                {{ selectedVariant?.stock ? 'En Stock' : 'Agotado' }}
+              <span *ngIf="selectedVariant" class="ml-2 bg-green-100 dark:bg-green-900 text-xs px-2 py-1 rounded"
+                    [class.text-green-800]="selectedVariant.stock > 0"
+                    [class.dark:text-green-200]="selectedVariant.stock > 0"
+                    [class.text-red-600]="selectedVariant.stock === 0"
+                    [class.dark:text-red-400]="selectedVariant.stock === 0">
+                {{ selectedVariant.stock > 0 ? + selectedVariant.stock + ' disponibles' : 'Agotado' }}
               </span>
             </h1>
           </div>
 
           <!-- Price -->
           <div class="flex items-center gap-4">
-            <span class="text-3xl font-bold text-orange-600 dark:text-orange-500">
+            <span class="text-3xl font-bold text-light-success-text dark:text-dark-success">
               ${{ formatPrice((selectedVariant?.calculated_price || 0) + (isUrgent && product.urgent_delivery_enabled ? product.urgent_delivery_cost : 0)) }}
             </span>
           </div>
@@ -79,46 +79,41 @@
               <button *ngFor="let variant of product.variants"
                       (click)="selectVariant(variant)"
                       class="px-4 py-2 rounded-md border transition-colors"
-                      [class.bg-green-700]="selectedVariant?.variant_id === variant.variant_id"
+                      [class.bg-light-azulclaro]="selectedVariant?.variant_id === variant.variant_id"
                       [class.text-white]="selectedVariant?.variant_id === variant.variant_id"
-                      [class.border-green-700]="selectedVariant?.variant_id === variant.variant_id"
+                      [class.border-light-azulclaro]="selectedVariant?.variant_id === variant.variant_id"
                       [class.bg-white]="selectedVariant?.variant_id !== variant.variant_id"
                       [class.text-gray-700]="selectedVariant?.variant_id !== variant.variant_id"
                       [class.border-gray-300]="selectedVariant?.variant_id !== variant.variant_id"
-                      [class.hover:border-green-500]="selectedVariant?.variant_id !== variant.variant_id">
+                      [class.hover:border-light-azulclaro]="selectedVariant?.variant_id !== variant.variant_id"
+                      [class.dark:bg-dark-primary]="selectedVariant?.variant_id === variant.variant_id"
+                      [class.dark:border-dark-primary]="selectedVariant?.variant_id === variant.variant_id"
+                      [class.dark:hover:border-dark-primary]="selectedVariant?.variant_id !== variant.variant_id">
                 {{ variant.sku || 'Variante ' + variant.variant_id }}
               </button>
             </div>
           </div>
 
           <!-- Quantity and Actions -->
-          <div class="flex items-center gap-4 flex-wrap" *ngIf="isAuthenticated && userRole === 'cliente' && selectedVariant">
-            <div class="flex items-center border rounded-md border-gray-300 dark:border-gray-600">
+          <div class="flex items-center gap-4 flex-wrap" *ngIf="selectedVariant">
+            <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full p-0.5">
               <button (click)="decrementQuantity()" [disabled]="quantity <= 1"
-                      class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-dark-text">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6"/>
-                </svg>
+                      class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors disabled:bg-gray-300 disabled:text-gray-500">
+                <i class="fas fa-minus text-gray-600 dark:text-gray-300 text-xs"></i>
               </button>
-              <span class="px-4 py-2 border-l border-r border-gray-300 dark:border-gray-600 text-gray-700 dark:text-dark-text">
-                {{ quantity }}
-              </span>
+              <span class="w-10 text-center font-medium text-gray-800 dark:text-gray-100 text-sm">{{ quantity }}</span>
               <button (click)="incrementQuantity()" [disabled]="selectedVariant && quantity >= selectedVariant.stock"
-                      class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-dark-text">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
+                      class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors">
+                <i class="fas fa-plus text-gray-600 dark:text-gray-300 text-xs"></i>
               </button>
             </div>
             <button (click)="addToCart()" [disabled]="isAddingToCart || !selectedVariant || selectedVariant.stock === 0"
-                    class="bg-green-700 dark:bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-800 dark:hover:bg-green-700 transition-colors flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-              </svg>
+                    class="bg-light-table-header dark:bg-dark-table-header text-blue-600 font-semibold px-6 py-2 rounded-md hover:bg-light-primary-hover hover:text-white dark:hover:bg-dark-primary-hover transition-colors flex items-center gap-2 group">
+              <i class="fas fa-shopping-cart text-blue-700 group-hover:text-white transition-colors"></i>
               Añadir al Carrito
             </button>
             <button (click)="buyNow()" [disabled]="isAddingToCart || !selectedVariant || selectedVariant.stock === 0"
-                    class="bg-orange-600 dark:bg-orange-500 text-white px-6 py-2 rounded-md hover:bg-orange-700 dark:hover:bg-orange-600 transition-colors">
+                    class="bg-light-azulclaro dark:bg-dark-primary text-white font-semibold px-6 py-2 rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
               Comprar Ahora
             </button>
           </div>
@@ -180,10 +175,10 @@
               <strong>Compartir:</strong>
               <div class="flex gap-1">
                 <button (click)="shareOnWhatsApp()" class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer">
-                  W
+                  <i class="fab fa-whatsapp text-gray-600 dark:text-gray-300"></i>
                 </button>
                 <button (click)="copyLink()" class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer">
-                  L
+                  <i class="fas fa-link text-gray-600 dark:text-gray-300"></i>
                 </button>
               </div>
             </div>
@@ -193,29 +188,31 @@
     </div>
 
     <!-- Tabs Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mx-4">
       <!-- Tab Navigation -->
       <div class="flex border-b border-gray-200 dark:border-gray-600">
         <button (click)="setActiveTab('description')"
                 class="px-6 py-4 font-medium transition-colors"
                 [class.border-b-2]="activeTab === 'description'"
-                [class.border-green-600]="activeTab === 'description'"
-                [class.text-green-600]="activeTab === 'description'"
+                [class.border-light-primary]="activeTab === 'description'"
+                [class.text-light-primary]="activeTab === 'description'"
                 [class.text-gray-600]="activeTab !== 'description'"
                 [class.dark:text-dark-text]="activeTab !== 'description'"
-                [class.hover:text-gray-900]="activeTab !== 'description'"
-                [class.dark:hover:text-dark-text]="activeTab !== 'description'">
+                [class.hover:text-light-primary-hover]="activeTab !== 'description'"
+                [class.dark:hover:text-dark-in-progress]="activeTab !== 'description'"
+                [class.dark:border-dark-in-progress]="activeTab === 'description'">
           Descripción
         </button>
         <button (click)="setActiveTab('additional')"
                 class="px-6 py-4 font-medium transition-colors"
                 [class.border-b-2]="activeTab === 'additional'"
-                [class.border-green-600]="activeTab === 'additional'"
-                [class.text-green-600]="activeTab === 'additional'"
+                [class.border-light-primary]="activeTab === 'additional'"
+                [class.text-light-primary]="activeTab === 'additional'"
                 [class.text-gray-600]="activeTab !== 'additional'"
                 [class.dark:text-dark-text]="activeTab !== 'description'"
-                [class.hover:text-gray-900]="activeTab !== 'additional'"
-                [class.dark:hover:text-dark-text]="activeTab !== 'additional'">
+                [class.hover:text-light-primary-hover]="activeTab !== 'additional'"
+                [class.dark:hover:text-dark-in-progress]="activeTab !== 'additional'"
+                [class.dark:border-dark-in-progress]="activeTab === 'additional'">
           Información Adicional
         </button>
       </div>
@@ -231,80 +228,16 @@
         <div *ngIf="activeTab === 'additional' && selectedVariant">
           <div class="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden">
             <div class="grid grid-cols-2 gap-0">
-              <div class="bg-green-700 dark:bg-green-600 text-white p-3 font-semibold">Atributo</div>
-              <div class="bg-green-700 dark:bg-green-600 text-white p-3 font-semibold">Detalles</div>
+              <div class="bg-light-table-header dark:bg-dark-table-header text-light-text dark:text-dark-text p-3 font-semibold">Atributo</div>
+              <div class="bg-light-table-header dark:bg-dark-table-header text-light-text dark:text-dark-text p-3 font-semibold">Detalles</div>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-600">
               <div class="grid grid-cols-2 gap-0" *ngFor="let attr of selectedVariant.attributes">
-                <div class="p-3 bg-gray-100 dark:bg-gray-600 font-medium">{{ attr.attribute_name }}</div>
-                <div class="p-3 text-gray-700 dark:text-dark-text">{{ attr.value }}</div>
+                <div class="p-3 bg-gray-100 dark:bg-gray-600 font-medium text-light-text dark:text-dark-text">{{ attr.attribute_name }}</div>
+                <div class="p-3 text-light-text dark:text-dark-text">{{ attr.value }}</div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Related Products -->
-    <div *ngIf="relatedProducts.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-      <div class="text-center mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-dark-text mb-2">Productos Relacionados</h2>
-        <p class="text-xl text-gray-600 dark:text-dark-secondary">
-          Explora <span class="text-orange-600 dark:text-orange-500">Productos Relacionados</span>
-        </p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div *ngFor="let product of relatedProducts" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-          <div class="relative">
-            <div class="aspect-square bg-gradient-to-br from-amber-100 to-green-100 dark:from-amber-900 dark:to-green-900 rounded-t-lg flex items-center justify-center">
-              <img [src]="product.image_url || 'https://via.placeholder.com/200x200?text=Sin+Imagen'" alt="{{ product.name }}" class="w-32 h-32 object-contain">
-            </div>
-          </div>
-          <div class="p-4">
-            <p class="text-sm text-gray-600 dark:text-dark-secondary mb-1">{{ product.category || 'Sin categoría' }}</p>
-            <h3 class="font-semibold text-gray-900 dark:text-dark-text mb-2">{{ product.name }}</h3>
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-orange-600 dark:text-orange-500">${{ product.min_price.toFixed(2) }}</span>
-              <span *ngIf="product.min_price !== product.max_price" class="text-sm text-gray-400 dark:text-dark-secondary line-through">${{ product.max_price.toFixed(2) }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Features -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-          <svg class="w-6 h-6 text-green-700 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-          </svg>
-        </div>
-        <div>
-          <h4 class="font-semibold text-gray-900 dark:text-dark-text">Envío Gratis</h4>
-          <p class="text-sm text-gray-600 dark:text-dark-secondary">Envío gratuito para pedidos superiores a $50</p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
-          <svg class="w-6 h-6 text-orange-700 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-          </svg>
-        </div>
-        <div>
-          <h4 class="font-semibold text-gray-900 dark:text-dark-text">Pago Flexible</h4>
-          <p class="text-sm text-gray-600 dark:text-dark-secondary">Múltiples opciones de pago seguras</p>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-          <svg class="w-6 h-6 text-blue-700 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-        </div>
-        <div>
-          <h4 class="font-semibold text-gray-900 dark:text-dark-text">Soporte 24/7</h4>
-          <p class="text-sm text-gray-600 dark:text-dark-secondary">Soporte en línea todos los días</p>
         </div>
       </div>
     </div>
