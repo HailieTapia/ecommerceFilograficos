@@ -22,7 +22,7 @@ import { CartComponent } from './components/authenticated/cart/cart.component';
 import { CheckoutComponent } from './components/authenticated/checkout/checkout.component';
 import { OrderConfirmationComponent } from './components/authenticated/order-confirmation/order-confirmation.component';
 import { OrdersComponent } from './components/authenticated/orders/orders.component';
-
+import { PaymentCallbackComponent } from './components/authenticated/payment-callback/payment-callback.component';
 // Administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
 import { BannerAdminComponent } from './components/administrator/banner-admin/banner-admin.component';
@@ -79,6 +79,7 @@ export const routes: Routes = [
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Checkout' } },
   { path: 'order-confirmation/:id', component: OrderConfirmationComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'order-confirmation' } },
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'orders' } },
+  { path: 'payment-callback', component: PaymentCallbackComponent },
 
   // Catálogo unificado (público y clientes autenticados)
   {

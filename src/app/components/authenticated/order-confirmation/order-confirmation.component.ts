@@ -21,7 +21,7 @@ export class OrderConfirmationComponent implements OnInit {
     private toastService: ToastService,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const orderId = this.route.snapshot.paramMap.get('id');
@@ -55,7 +55,8 @@ export class OrderConfirmationComponent implements OnInit {
     });
   }
 
-  getFormattedAddress(address: Address | null): string {
+  getFormattedAddress(address: Address | null, deliveryOption: string | null): string {
+    if (!address && deliveryOption !== 'Entrega a Domicilio') return deliveryOption || 'Sin dirección especificada';
     if (!address) return 'Sin dirección especificada';
     return `${address.street}, ${address.city}, ${address.state} ${address.postal_code}`;
   }
@@ -75,7 +76,7 @@ export class OrderConfirmationComponent implements OnInit {
   }
 
   trackByOrderDetailId(index: number, item: OrderDetail): number {
-    return item.detail_id; // Actualizado para usar detail_id
+    return item.detail_id;
   }
 
   trackByHistoryId(index: number, history: OrderHistory): number {
