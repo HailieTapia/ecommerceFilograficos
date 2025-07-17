@@ -44,7 +44,7 @@ export class PaymentCallbackComponent implements OnInit {
     private orderService: OrderService,
     private toastService: ToastService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const status = this.route.snapshot.queryParams['status'];
@@ -60,19 +60,17 @@ export class PaymentCallbackComponent implements OnInit {
     this.orderService.getOrderById(this.orderId).subscribe({
       next: (response) => {
         this.isLoading = false;
-        const orderPaymentStatus = response.data.payment_status; // Usar payment_status de la tabla orders
-        const paymentStatus = response.data.payment?.status; // Estado del pago desde la tabla payments (opcional)
+        const orderPaymentStatus = response.data.order?.payment_status;
+        const paymentStatus = response.data.payment?.status;
 
-        // Priorizar payment_status de orders, con fallback a payment.status
-        this.paymentStatus = orderPaymentStatus === 'approved' ? 'success' : 
-                           orderPaymentStatus === 'pending' || orderPaymentStatus === 'in_process' ? 'pending' : 
-                           orderPaymentStatus === 'rejected' || orderPaymentStatus === 'failed' ? 'failure' : null;
+        this.paymentStatus = orderPaymentStatus === 'approved' ? 'success' :
+          ['pending', 'in_process'].includes(orderPaymentStatus) ? 'pending' :
+            ['rejected', 'failed'].includes(orderPaymentStatus) ? 'failure' : null;
 
-        // Si paymentStatus no está definido, usar el status del query param como fallback
         if (!this.paymentStatus && status === 'approved') {
           this.paymentStatus = 'success';
         } else if (!this.paymentStatus) {
-          this.paymentStatus = 'pending'; // Default si no hay coincidencia
+          this.paymentStatus = 'pending';
         }
 
         if (this.paymentStatus === 'success') {
