@@ -100,31 +100,35 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-  createOrder(): void {
-    if (this.orderForm.invalid) {
-      this.orderForm.markAllAsTouched();
-      this.toastService.showToast('Por favor, completa todos los campos requeridos.', 'error');
-      return;
-    }
-    this.isLoading = true;
-    const orderData = {
-      ...this.orderForm.value,
-      address_id: this.orderForm.value.delivery_option === 'Entrega a Domicilio' ? this.orderForm.value.address_id : null
-    };
-
-    this.orderService.createOrder(orderData).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.toastService.showToast('Orden creada exitosamente', 'success');
-        this.router.navigate(['/order-confirmation', response.data.order_id]);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        const errorMessage = error?.error?.message || 'Error al crear la orden';
-        this.toastService.showToast(errorMessage, 'error');
-      }
-    });
+createOrder(): void {
+  if (this.orderForm.invalid) {
+    this.orderForm.markAllAsTouched();
+    this.toastService.showToast('Por favor, completa todos los campos requeridos.', 'error');
+    return;
   }
+  this.isLoading = true;
+  const orderData = {
+    ...this.orderForm.value,
+    address_id: this.orderForm.value.delivery_option === 'Entrega a Domicilio' ? this.orderForm.value.address_id : null
+  };
+
+  this.orderService.createOrder(orderData).subscribe({
+    next: (response) => {
+      this.isLoading = false;
+      if (response.success && response.data.payment_instructions?.payment_url) {
+        this.toastService.showToast('Redirigiendo a Mercado Pago...', 'success');
+        window.location.href = response.data.payment_instructions.payment_url; // Redirige a Mercado Pago
+      } else {
+        this.toastService.showToast('No se pudo obtener la URL de pago.', 'error');
+      }
+    },
+    error: (error) => {
+      this.isLoading = false;
+      const errorMessage = error?.error?.message || 'Error al crear la orden';
+      this.toastService.showToast(errorMessage, 'error');
+    }
+  });
+}
 
   calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
     const subtotal = this.cart.total;
