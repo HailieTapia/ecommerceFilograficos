@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 font-sans">
-  <app-spinner [isLoading]="isLoading"></app-spinner>
+  <app-spinner [isLoading]="isLoadingPending || isLoadingCompleted"></app-spinner>
 
-  <div *ngIf="!isLoading" class="max-w-6xl mx-auto">
+  <div *ngIf="!(isLoadingPending && isLoadingCompleted)" class="max-w-6xl mx-auto">
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
       <div class="flex items-center gap-3 mb-6">
@@ -11,7 +11,7 @@
         <div>
           <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mis Opiniones</h1>
           <p class="text-gray-600 dark:text-gray-400">
-            {{ activeTab === 'pending' ? pendingReviews.pendingReviews.length : completedReviews.reviews.length }} {{ activeTab === 'pending' ? 'pendientes' : 'realizadas' }}
+            {{ activeTab === 'pending' ? pendingReviews.total : completedReviews.total }} {{ activeTab === 'pending' ? 'pendientes' : 'realizadas' }}
           </p>
         </div>
       </div>
@@ -22,6 +22,7 @@
           (click)="switchTab('pending')"
           class="flex-1 py-3 px-4 text-center text-sm font-semibold transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
           [ngClass]="{'text-purple-600 border-b-2 border-purple-600 dark:text-purple-400 dark:border-purple-400': activeTab === 'pending'}"
+          [attr.aria-label]="'Ver reseñas pendientes'"
         >
           Pendientes ({{ pendingReviews.total }})
         </button>
@@ -29,6 +30,7 @@
           (click)="switchTab('completed')"
           class="flex-1 py-3 px-4 text-center text-sm font-semibold transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
           [ngClass]="{'text-purple-600 border-b-2 border-purple-600 dark:text-purple-400 dark:border-purple-400': activeTab === 'completed'}"
+          [attr.aria-label]="'Ver reseñas realizadas'"
         >
           Realizadas ({{ completedReviews.total }})
         </button>
@@ -36,7 +38,7 @@
     </div>
 
     <!-- Sin reseñas -->
-    <div *ngIf="activeTab === 'pending' && pendingReviews.pendingReviews.length === 0 || activeTab === 'completed' && completedReviews.reviews.length === 0"
+    <div *ngIf="activeTab === 'pending' && pendingReviews.pendingReviews.length === 0 && !isLoadingPending || activeTab === 'completed' && completedReviews.reviews.length === 0 && !isLoadingCompleted"
          class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
       <i class="fas fa-star-half-alt text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
       <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
@@ -45,13 +47,14 @@
       <p class="text-gray-500 dark:text-gray-400 mb-6">
         {{ activeTab === 'pending' ? 'Explora tus pedidos para dejar una reseña.' : 'Comparte tu experiencia con los productos que has comprado.' }}
       </p>
-      <a *ngIf="activeTab === 'pending'" routerLink="/orders" class="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+      <a *ngIf="activeTab === 'pending'" routerLink="/orders" class="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105" [attr.aria-label]="'Ver pedidos'">
         Ver Pedidos
       </a>
     </div>
 
     <!-- Lista de reseñas pendientes -->
     <div *ngIf="activeTab === 'pending' && pendingReviews.pendingReviews.length > 0" class="space-y-4">
+      <app-spinner [isLoading]="isLoadingPending"></app-spinner>
       <div *ngFor="let review of pendingReviews.pendingReviews; trackBy: trackByReviewId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
         <div class="p-6">
           <div class="flex items-center gap-4">
@@ -64,6 +67,7 @@
             <button
               (click)="navigateToReviewCreation(review.order_id, review.product_id)"
               class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+              [attr.aria-label]="'Dejar reseña para ' + review.product_name"
             >
               <div class="flex items-center gap-2">
                 <i class="fas fa-star w-4 h-4"></i>
@@ -77,6 +81,7 @@
 
     <!-- Lista de reseñas realizadas -->
     <div *ngIf="activeTab === 'completed' && completedReviews.reviews.length > 0" class="space-y-4">
+      <app-spinner [isLoading]="isLoadingCompleted"></app-spinner>
       <div *ngFor="let review of completedReviews.reviews; trackBy: trackByReviewId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
         <div class="p-6">
           <div class="flex items-center gap-4">
@@ -90,6 +95,7 @@
             <a
               [routerLink]="['/review', review.review_id]"
               class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+              [attr.aria-label]="'Ver detalles de la reseña para ' + review.product_name"
             >
               <div class="flex items-center gap-2">
                 <i class="fas fa-eye w-4 h-4"></i>
@@ -112,6 +118,7 @@
           (click)="changePage((activeTab === 'pending' ? pendingReviews.page : completedReviews.page) - 1)"
           [disabled]="(activeTab === 'pending' ? pendingReviews.page : completedReviews.page) === 1"
           class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          [attr.aria-label]="'Página anterior'"
         >
           Anterior
         </button>
@@ -119,6 +126,7 @@
           (click)="changePage((activeTab === 'pending' ? pendingReviews.page : completedReviews.page) + 1)"
           [disabled]="(activeTab === 'pending' ? pendingReviews.page : completedReviews.page) === getTotalPages()"
           class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          [attr.aria-label]="'Página siguiente'"
         >
           Siguiente
         </button>
