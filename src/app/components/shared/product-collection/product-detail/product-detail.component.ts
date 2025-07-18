@@ -42,7 +42,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private cartService: CartService,
     private toastService: ToastService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
@@ -56,7 +56,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
       const productId = this.route.snapshot.paramMap.get('productId');
       this.variantSku = this.route.snapshot.queryParamMap.get('variant_sku');
-      
+
       if (productId && !isNaN(+productId)) {
         this.loadProductDetails(+productId);
       } else {
@@ -81,10 +81,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.product = productResponse.product;
         this.breadcrumb = productResponse.product.breadcrumb || [];
         this.relatedProducts = relatedResponse.products.filter(p => p.product_id !== productId).slice(0, 4);
-        
+
         if (this.product.variants && this.product.variants.length > 0) {
           // Try to find variant matching variantSku, otherwise default to first variant
-          const matchingVariant = this.variantSku 
+          const matchingVariant = this.variantSku
             ? this.product.variants.find(v => v.sku === this.variantSku) || this.product.variants[0]
             : this.product.variants[0];
           this.selectVariant(matchingVariant);
@@ -202,14 +202,46 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     if (!this.isAuthenticated || this.userRole !== 'cliente') {
       this.toastService.showToast('Necesitas iniciar sesión para comprar', 'warning');
       setTimeout(() => {
-        this.router.navigate(['/login'], { queryParams: { returnUrl: '/cart' } });
+        this.router.navigate(['/login'], { queryParams: { returnUrl: '/checkout' } });
       }, 2000);
       return;
     }
-    this.addToCart();
-    if (this.isAuthenticated && this.userRole === 'cliente' && !this.isAddingToCart) {
-      this.router.navigate(['/cart']);
+    if (!this.selectedVariant || this.selectedVariant.stock === 0) {
+      this.toastService.showToast('Producto no disponible o sin stock', 'error');
+      return;
     }
+    if (this.quantity <= 0 || this.quantity > this.selectedVariant.stock) {
+      this.toastService.showToast('Cantidad inválida o excede el stock disponible.', 'error');
+      return;
+    }
+    if (this.isUrgent && !this.product?.urgent_delivery_enabled) {
+      this.toastService.showToast('Este producto no permite entrega urgente.', 'error');
+      return;
+    }
+
+    this.isAddingToCart = true;
+    const cartItem: AddToCartRequest = {
+      product_id: this.product!.product_id,
+      variant_id: this.selectedVariant.variant_id,
+      quantity: this.quantity,
+      option_id: this.selectedCustomization?.option_id || undefined,
+      is_urgent: this.isUrgent
+    };
+
+    this.cartService.addToCart(cartItem).subscribe({
+      next: (response) => {
+        this.isAddingToCart = false;
+        if (response.error) {
+          this.toastService.showToast(response.error, 'error');
+        } else {
+          this.router.navigate(['/checkout']);
+        }
+      },
+      error: (error) => {
+        this.isAddingToCart = false;
+        this.toastService.showToast(error.message || 'No se pudo añadir al carrito', 'error');
+      }
+    });
   }
 
   shareOnWhatsApp(): void {
