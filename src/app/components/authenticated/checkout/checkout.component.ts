@@ -72,7 +72,6 @@ export class CheckoutComponent implements OnInit {
           this.toastService.showToast('El carrito está vacío. Por favor, añade productos.', 'error');
           this.router.navigate(['/cart']);
         }
-        console.log(this.cart);
       },
       error: (error) => {
         const errorMessage = error?.error?.message || 'No se pudo cargar el carrito.';
@@ -108,9 +107,12 @@ export class CheckoutComponent implements OnInit {
       return;
     }
     this.isLoading = true;
+    const totals = this.calculateTotals();
     const orderData = {
       ...this.orderForm.value,
-      address_id: this.orderForm.value.delivery_option === 'Entrega a Domicilio' ? this.orderForm.value.address_id : null
+      address_id: this.orderForm.value.delivery_option === 'Entrega a Domicilio' ? this.orderForm.value.address_id : null,
+      shipping_cost: totals.shipping_cost, 
+      total: totals.total 
     };
 
     this.orderService.createOrder(orderData).subscribe({

@@ -59,7 +59,7 @@ export interface OrderHistory {
 export interface Payment {
   payment_id: number | null;
   method: string;
-  status: 'pending' | 'validated' | 'failed';
+  status: 'pending' | 'validated' | 'failed'| 'approved' | 'rejected'| 'in_process';
   amount: number;
   created_at: string | null;
   updated_at: string | null;
