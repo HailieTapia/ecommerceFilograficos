@@ -91,30 +91,6 @@
         </ul>
       </div>
     </div>
-
-    <!-- Instrucciones de pago -->
-    <div class="mb-6">
-      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Instrucciones de Pago</h2>
-      <div class="bg-light-background dark:bg-dark-background p-4 rounded-lg">
-        <p class="text-sm font-medium text-light-text dark:text-dark-text">Método: {{ order.payment.instructions.method
-          }}</p>
-        <p *ngIf="order.payment.instructions.reference" class="text-sm text-light-secondary dark:text-dark-secondary">
-          Referencia: {{ order.payment.instructions.reference }}
-        </p>
-        <p *ngIf="order.payment.instructions.account" class="text-sm text-light-secondary dark:text-dark-secondary">
-          Cuenta: {{ order.payment.instructions.account }}
-        </p>
-        <p *ngIf="order.payment.instructions.clabe" class="text-sm text-light-secondary dark:text-dark-secondary">
-          CLABE: {{ order.payment.instructions.clabe }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          Monto: ${{ order.payment.instructions.amount.toFixed(2) }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary mt-2">
-          {{ order.payment.instructions.instructions }}
-        </p>
-      </div>
-    </div>
     <div class="border-t border-gray-200 dark:border-gray-600 pt-4 mb-6">
       <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Resumen Financiero</h2>
       <p class="text-sm text-light-secondary dark:text-dark-secondary">Subtotal: ${{ order.order.subtotal.toFixed(2) }}

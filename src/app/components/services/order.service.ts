@@ -5,17 +5,6 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 import { environment } from '../../environments/config';
 
-
-// Interfaz para las instrucciones de pago
-export interface PaymentInstructions {
-  method: string;
-  reference?: string;
-  account?: string;
-  clabe?: string;
-  amount: number;
-  instructions: string;
-}
-
 // Interfaz para los detalles de personalización
 export interface CustomizationDetail {
   customization_id: number;
@@ -63,7 +52,6 @@ export interface Payment {
   amount: number;
   created_at: string | null;
   updated_at: string | null;
-  instructions: PaymentInstructions;
 }
 
 // Interfaz para la respuesta de los detalles de una orden (getOrderById)
