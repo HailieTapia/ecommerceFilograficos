@@ -18,6 +18,8 @@ export interface Review {
   user_name: string;
   rating: number;
   comment?: string;
+  product_id: number;
+  order_id: number;
   media: ReviewMedia[];
   created_at: string;
   product_name?: string;
@@ -149,15 +151,20 @@ export class ReviewService {
 
   // Obtener reseña por ID (pública)
   getReviewById(reviewId: number): Observable<ApiResponse<Review>> {
-    return this.http.get<Review>(`${this.apiUrl}/${reviewId}`).pipe(
+    return this.http.get<ApiResponse<Review>>(`${this.apiUrl}/${reviewId}`).pipe(
       retry(2),
-      map(data => ({ success: true, data })),
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error(response.message || 'Error al obtener la reseña');
+        }
+        return response;
+      }),
       catchError(error => {
         const errorMessage = error.status === 404
           ? 'Reseña no encontrada'
           : error.status === 500
           ? 'Error del servidor al obtener la reseña'
-          : error.error?.message || 'Error desconocido al obtener la reseña';
+          : error.message || 'Error desconocido al obtener la reseña';
         console.error('Error al obtener la reseña:', error);
         return of({ success: false, message: errorMessage });
       })

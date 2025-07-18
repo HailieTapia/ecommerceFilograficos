@@ -24,6 +24,7 @@ import { OrderConfirmationComponent } from './components/authenticated/order-con
 import { OrdersComponent } from './components/authenticated/orders/orders.component';
 import { PaymentCallbackComponent } from './components/authenticated/payment-callback/payment-callback.component';
 import { MyReviewsComponent } from './components/authenticated/my-reviews/my-reviews.component';
+import { ReviewComponent } from './components/authenticated/review/review.component';
 // Administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
 import { BannerAdminComponent } from './components/administrator/banner-admin/banner-admin.component';
@@ -82,6 +83,8 @@ export const routes: Routes = [
   { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'orders' } },
   { path: 'payment-callback', component: PaymentCallbackComponent },
   { path: 'my-reviews', component: MyReviewsComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Mis opiniones' } },
+  { path: 'review', component: ReviewComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Reseña' } },
+  { path: 'review/:reviewId', component: ReviewComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Editar reseña' } },
 
   // Catálogo unificado (público y clientes autenticados)
   {

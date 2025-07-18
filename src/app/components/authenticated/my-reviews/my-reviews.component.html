@@ -30,7 +30,7 @@
         </button>
         <button
           (click)="switchTab('completed')"
-          class="flex-1 py-3 px-4 text-center text-sm font-semibold transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          class="flex-1 py-3 px-4 text-center text-sm font-semibold transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-800 dark: hover:text-gray-200"
           [ngClass]="{'text-purple-600 border-b-2 border-purple-600 dark:text-purple-400 dark:border-purple-400': activeTab === 'completed'}"
           [attr.aria-label]="'Ver reseñas realizadas'"
         >
@@ -67,7 +67,7 @@
               <p class="text-sm text-gray-600 dark:text-gray-400">Comprado el {{ getFormattedDate(review.order_date) }}</p>
             </div>
             <button
-              (click)="navigateToReviewCreation(review.order_id, review.product_id)"
+              (click)="navigateToReviewCreation(review.order_id, review.product_id, review.product_name)"
               class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
               [attr.aria-label]="'Dejar reseña para ' + review.product_name"
             >
@@ -92,9 +92,9 @@
               <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate">{{ review.product_name }}</h4>
               <div class="flex items-center gap-2 mb-2">
                 <div class="flex items-center">
-                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).fullStars)" class="fas fa-star text-yellow-400 dark:text-yellow-400"></i>
-                  <i *ngIf="getStarRating(review.rating).halfStar" class="fas fa-star-half-alt text-yellow-400 dark:text-yellow-400"></i>
-                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).emptyStars)" class="far fa-star text-yellow-400 dark:text-yellow-400"></i>
+                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).fullStars)" class="fas fa-star text-yellow-400 dark:text-yellow-400 text-xl"></i>
+                  <i *ngIf="getStarRating(review.rating).halfStar" class="fas fa-star-half-alt text-yellow-400 dark:text-yellow-400 text-xl"></i>
+                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).emptyStars)" class="far fa-star text-yellow-400 dark:text-yellow-400 text-xl"></i>
                 </div>
               </div>
               <p class="text-sm text-gray-600 dark:text-gray-400">Realizada el {{ getFormattedDate(review.created_at) }}</p>
