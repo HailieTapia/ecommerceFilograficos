@@ -35,7 +35,7 @@ export class ReviewComponent implements OnInit {
   mediaToDelete: number[] = [];
   isLoading: boolean = false;
   productName: string = '';
-  productImageUrl: string | null = null;
+  productImageUrl: string = 'https://via.placeholder.com/150?text=No+Image';
   hoverRating: number = 0;
 
   constructor(
@@ -59,7 +59,7 @@ export class ReviewComponent implements OnInit {
           this.orderId = queryParams['orderId'] ? +queryParams['orderId'] : undefined;
           this.productId = queryParams['productId'] ? +queryParams['productId'] : undefined;
           this.productName = queryParams['productName'] || 'Producto';
-          this.productImageUrl = typeof queryParams['imageUrl'] === 'string' ? queryParams['imageUrl'] : null;
+          this.productImageUrl = queryParams['imageUrl'] || 'https://via.placeholder.com/150?text=No+Image';
           if (!this.orderId || !this.productId) {
             this.toastService.showToast('Parámetros inválidos para crear reseña.', 'error');
             this.router.navigate(['/my-reviews']);
@@ -81,7 +81,7 @@ export class ReviewComponent implements OnInit {
           this.productName = response.data.product_name || 'Producto';
           this.orderId = response.data.order_id;
           this.productId = response.data.product_id;
-          this.productImageUrl = response.data.image_url ?? null; // Handle undefined by converting to null
+          this.productImageUrl = response.data.image_url || 'https://via.placeholder.com/150?text=No+Image';
         } else {
           this.toastService.showToast(response.message || 'Error al cargar la reseña.', 'error');
           this.router.navigate(['/my-reviews']);
@@ -199,6 +199,36 @@ export class ReviewComponent implements OnInit {
         }
       });
     }
+  }
+
+  deleteReview(): void {
+    if (!this.reviewId) {
+      this.toastService.showToast('ID de reseña inválido.', 'error');
+      return;
+    }
+    this.toastService.showToast(
+      '¿Estás seguro de que deseas eliminar esta reseña? Esta acción no se puede deshacer.',
+      'warning',
+      'Confirmar',
+      () => {
+        this.isLoading = true;
+        this.reviewService.deleteReviewByOwner(this.reviewId!).subscribe({
+          next: (response) => {
+            if (response.success) {
+              this.toastService.showToast('Reseña eliminada exitosamente.', 'success');
+              this.router.navigate(['/my-reviews'], { queryParams: { tab: 'completed' } });
+            } else {
+              this.toastService.showToast(response.message || 'Error al eliminar la reseña.', 'error');
+            }
+            this.isLoading = false;
+          },
+          error: (error) => {
+            this.toastService.showToast(error.message || 'Error al eliminar la reseña.', 'error');
+            this.isLoading = false;
+          }
+        });
+      }
+    );
   }
 
   cancel(): void {

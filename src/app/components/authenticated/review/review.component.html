@@ -27,7 +27,7 @@
           <!-- Imagen del producto -->
           <div class="flex justify-center mb-4">
             <img
-              [src]="productImageUrl || 'https://via.placeholder.com/150?text=No+Image'"
+              [src]="productImageUrl"
               alt="Imagen del producto"
               class="w-24 h-24 rounded-full object-cover shadow-md"
             />
@@ -127,23 +127,39 @@
         </div>
 
         <!-- Botones -->
-        <div class="flex justify-end gap-4">
-          <button
-            type="button"
-            (click)="cancel()"
-            class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 shadow-md hover:shadow-lg"
-            aria-label="Cancelar"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="isLoading"
-            class="bg-purple-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
-            [attr.aria-label]="mode === 'create' ? 'Crear reseña' : 'Actualizar reseña'"
-          >
-            {{ mode === 'create' ? 'Crear Reseña' : 'Actualizar Reseña' }}
-          </button>
+        <div class="button-section pt-5 border-t border-gray-100 dark:border-gray-700">
+          <!-- Acciones principales -->
+          <div class="primary-actions flex justify-center gap-3 mb-4">
+            <button
+              type="button"
+              (click)="cancel()"
+              class="btn btn-secondary bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-300 shadow-md hover:shadow-lg flex-1 max-w-[200px]"
+              aria-label="Cancelar"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              [disabled]="isLoading"
+              class="btn btn-primary bg-gradient-to-r from-purple-600 to-purple-500 text-white font-semibold py-2 px-4 rounded-xl hover:from-purple-700 hover:to-purple-600 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex-1 max-w-[200px]"
+              [attr.aria-label]="mode === 'create' ? 'Crear reseña' : 'Actualizar reseña'"
+            >
+              {{ mode === 'create' ? 'Crear Reseña' : 'Actualizar Reseña' }}
+            </button>
+          </div>
+          <!-- Acción destructiva -->
+          <div *ngIf="mode === 'edit'" class="secondary-actions flex justify-center py-4">
+            <button
+              type="button"
+              (click)="deleteReview()"
+              class="btn btn-destructive text-red-600 dark:text-red-500 font-semibold py-2 px-4 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 shadow-md hover:shadow-lg flex items-center"
+              [disabled]="isLoading"
+              aria-label="Eliminar reseña"
+            >
+              <i class="fas fa-trash text-red-600 dark:text-red-500 mr-2"></i>
+              Eliminar Reseña
+            </button>
+          </div>
         </div>
       </form>
     </div>

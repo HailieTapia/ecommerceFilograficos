@@ -202,9 +202,9 @@ export class MyReviewsComponent implements OnInit {
     return date ? this.datePipe.transform(date, "d 'de' MMMM 'de' yyyy", undefined, 'es') || 'Fecha no disponible' : 'Fecha no disponible';
   }
 
-  navigateToReviewCreation(orderId: number, productId: number, productName: string): void {
-    console.log('Navigating to review creation:', { orderId, productId, productName });
-    this.router.navigate(['/review'], { queryParams: { orderId, productId, productName } });
+  navigateToReviewCreation(orderId: number, productId: number, productName: string, imageUrl: string | null): void {
+    console.log('Navigating to review creation:', { orderId, productId, productName, imageUrl });
+    this.router.navigate(['/review'], { queryParams: { orderId, productId, productName, imageUrl } });
   }
 
   navigateToReviewDetails(reviewId: number): void {

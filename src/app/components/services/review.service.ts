@@ -107,7 +107,12 @@ export class ReviewService {
       formData.append('comment', data.comment);
     }
     if ('media_to_delete' in data && data.media_to_delete?.length) {
-      formData.append('media_to_delete', JSON.stringify(data.media_to_delete));
+      data.media_to_delete.forEach(id => {
+        if (!Number.isInteger(id) || id <= 0) {
+          throw new Error('Cada ID de medio a eliminar debe ser un número entero positivo');
+        }
+        formData.append('media_to_delete[]', id.toString());
+      });
     }
 
     // Validar y agregar archivos
@@ -116,13 +121,13 @@ export class ReviewService {
         throw new Error('No se pueden subir más de 5 archivos');
       }
       files.forEach(file => {
-        if (!['image/jpeg', 'image/png', 'video/mp4'].includes(file.type)) {
+        if (!['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime'].includes(file.type)) {
           throw new Error(`Tipo de archivo no permitido: ${file.name}`);
         }
         if (file.size > 5 * 1024 * 1024) {
           throw new Error(`El archivo ${file.name} excede el tamaño máximo de 5MB`);
         }
-        formData.append('files', file);
+        formData.append('reviewMedia', file);
       });
     }
 
