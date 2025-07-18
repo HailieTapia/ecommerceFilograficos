@@ -43,13 +43,11 @@ export class MyReviewsComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('MyReviewsComponent initialized');
-    // Set initial tab from query params without subscribing to changes
     this.route.queryParams.subscribe(params => {
       const tab = params['tab'];
       this.activeTab = (tab === 'completed' || tab === 'pending') ? tab : 'pending';
       console.log('Active tab set to:', this.activeTab);
     });
-    // Load all reviews once on init
     this.loadAllReviews();
   }
 
@@ -61,7 +59,6 @@ export class MyReviewsComponent implements OnInit {
       queryParams: { tab },
       queryParamsHandling: 'merge'
     });
-    // No data reload needed; data is already cached
   }
 
   loadAllReviews(): void {
@@ -85,7 +82,6 @@ export class MyReviewsComponent implements OnInit {
       )
     }).subscribe({
       next: ({ pending, completed }) => {
-        // Handle pending reviews
         this.pendingReviews = {
           pendingReviews: Array.isArray(pending.pendingReviews) ? pending.pendingReviews : [],
           total: pending.total ?? 0,
@@ -97,7 +93,6 @@ export class MyReviewsComponent implements OnInit {
           this.toastService.showToast('No tienes reseñas pendientes.', 'info');
         }
 
-        // Handle completed reviews
         this.completedReviews = {
           reviews: Array.isArray(completed.reviews) ? completed.reviews : [],
           total: completed.total ?? 0,
@@ -191,7 +186,6 @@ export class MyReviewsComponent implements OnInit {
     });
   }
 
-  // Optional: Add a method to refresh data manually
   refreshReviews(): void {
     this.loadAllReviews();
   }
@@ -226,7 +220,11 @@ export class MyReviewsComponent implements OnInit {
     return item.image_url || 'https://via.placeholder.com/100?text=No+Image';
   }
 
-  getStarRating(rating: number): string {
-    return '★'.repeat(Math.min(Math.max(rating, 0), 5)) + '☆'.repeat(5 - Math.min(Math.max(rating, 0), 5));
+  getStarRating(rating: number): { fullStars: number; halfStar: boolean; emptyStars: number } {
+    const numericRating = rating || 0;
+    const fullStars = Math.floor(numericRating);
+    const halfStar = numericRating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    return { fullStars, halfStar, emptyStars };
   }
 }

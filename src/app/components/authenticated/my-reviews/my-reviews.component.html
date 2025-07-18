@@ -4,15 +4,17 @@
   <div *ngIf="!(isLoadingPending && isLoadingCompleted)" class="max-w-6xl mx-auto">
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="bg-purple-600 p-3 rounded-full">
-          <i class="fas fa-star text-white text-xl"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mis Opiniones</h1>
-          <p class="text-gray-600 dark:text-gray-400">
-            {{ activeTab === 'pending' ? pendingReviews.total : completedReviews.total }} {{ activeTab === 'pending' ? 'pendientes' : 'realizadas' }}
-          </p>
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="bg-purple-600 p-3 rounded-full">
+            <i class="fas fa-star text-white text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mis Opiniones</h1>
+            <p class="text-gray-600 dark:text-gray-400">
+              {{ activeTab === 'pending' ? pendingReviews.total : completedReviews.total }} {{ activeTab === 'pending' ? 'pendientes' : 'realizadas' }}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -58,11 +60,11 @@
       <div *ngFor="let review of pendingReviews.pendingReviews; trackBy: trackByReviewId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
         <div class="p-6">
           <div class="flex items-center gap-4">
-            <img [src]="getImageUrl(review)" [alt]="review.product_name" class="w-12 h-12 object-cover rounded-lg shadow-sm">
+            <img [src]="getImageUrl(review)" [alt]="review.product_name" class="w-20 h-20 object-cover rounded-lg shadow-sm">
             <div class="flex-1">
               <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate">{{ review.product_name }}</h4>
               <p class="text-sm text-gray-600 dark:text-gray-400">Pedido: #PED-{{ review.order_id }}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Fecha: {{ getFormattedDate(review.order_date) }}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Comprado el {{ getFormattedDate(review.order_date) }}</p>
             </div>
             <button
               (click)="navigateToReviewCreation(review.order_id, review.product_id)"
@@ -70,7 +72,7 @@
               [attr.aria-label]="'Dejar reseña para ' + review.product_name"
             >
               <div class="flex items-center gap-2">
-                <i class="fas fa-star w-4 h-4"></i>
+                <i class="fas fa-star text-yellow-400"></i>
                 Dejar Reseña
               </div>
             </button>
@@ -85,12 +87,17 @@
       <div *ngFor="let review of completedReviews.reviews; trackBy: trackByReviewId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
         <div class="p-6">
           <div class="flex items-center gap-4">
-            <img [src]="getImageUrl(review)" [alt]="review.product_name" class="w-12 h-12 object-cover rounded-lg shadow-sm">
+            <img [src]="getImageUrl(review)" [alt]="review.product_name" class="w-20 h-20 object-cover rounded-lg shadow-sm">
             <div class="flex-1">
               <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate">{{ review.product_name }}</h4>
-              <p class="text-sm text-yellow-600 dark:text-yellow-400">{{ getStarRating(review.rating) }}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 truncate">{{ review.comment || 'Sin comentario' }}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Fecha: {{ getFormattedDate(review.created_at) }}</p>
+              <div class="flex items-center gap-2 mb-2">
+                <div class="flex items-center">
+                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).fullStars)" class="fas fa-star text-yellow-400 dark:text-yellow-400"></i>
+                  <i *ngIf="getStarRating(review.rating).halfStar" class="fas fa-star-half-alt text-yellow-400 dark:text-yellow-400"></i>
+                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).emptyStars)" class="far fa-star text-yellow-400 dark:text-yellow-400"></i>
+                </div>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Realizada el {{ getFormattedDate(review.created_at) }}</p>
             </div>
             <a
               [routerLink]="['/review', review.review_id]"
