@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
@@ -27,11 +27,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private userService: UserService,
-    private productService: ProductService
+    private productService: ProductService,
+    private router: Router
   ) {}
 
   ngOnInit() {
-    // Cargar datos de usuario y perfil (lógica existente)
     this.authService.getUser().subscribe(user => {
       this.user = user;
       if (user) {
@@ -48,9 +48,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Carga inicial de datos del home (usando caché si está disponible)
     this.loadHomeData();
-    // Iniciar polling cada hora
     this.startPolling();
   }
 
@@ -61,6 +59,10 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.recentProducts = response.data.recentProducts || [];
         this.topSellingProducts = response.data.topSellingProducts || [];
         this.errorMessage = null;
+
+        console.log(this.featuredProducts);
+        console.log(this.recentProducts);
+        console.log(this.topSellingProducts);
       },
       error: (error) => {
         this.errorMessage = 'Error al cargar los datos del home. Por favor, intenta de nuevo más tarde.';
@@ -82,13 +84,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error en polling:', error);
-        // No actualizamos errorMessage para no interrumpir la UX si falla el polling
       }
     });
   }
 
   ngOnDestroy() {
-    // Cancelar suscripciones para evitar fugas de memoria
     if (this.dataSubscription) {
       this.dataSubscription.unsubscribe();
     }
@@ -105,16 +105,35 @@ export class HomeComponent implements OnInit, OnDestroy {
     return this.user && this.user.tipo === 'cliente';
   }
 
-  // Helper method to format price
   formatPrice(product: any): string {
-    // Convert min_price and max_price to numbers, handling strings or undefined
     const minPrice = parseFloat(product.min_price) || 0;
     const maxPrice = parseFloat(product.max_price) || 0;
 
-    // Check if prices are equal (or both are invalid/zero)
     if (minPrice === maxPrice) {
       return `$${minPrice.toFixed(2)}`;
     }
     return `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+  }
+
+  goToProductDetail(productId: number): void {
+    this.router.navigate([`/collection/${productId}`]);
+  }
+
+  getStarRating(rating: string | number): { fullStars: number; halfStar: boolean; emptyStars: number } {
+    const numericRating = parseFloat(rating as string) || 0;
+    const fullStars = Math.floor(numericRating);
+    const halfStar = numericRating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    return { fullStars, halfStar, emptyStars };
+  }
+
+  getFormattedRating(rating: string | number): string {
+    const numericRating = parseFloat(rating as string) || 0;
+    return numericRating.toFixed(1);
+  }
+
+  shouldShowRating(product: any): boolean {
+    const numericRating = parseFloat(product.average_rating as string) || 0;
+    return product.average_rating && numericRating > 0 && product.total_reviews > 0;
   }
 }

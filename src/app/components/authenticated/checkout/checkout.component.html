@@ -44,7 +44,7 @@
             </select>
           </div>
 
-          <!-- Opción de envío (placeholder) -->
+          <!-- Opción de envío -->
           <div class="mb-4">
             <label class="block text-light-text dark:text-dark-text mb-2">Método de envío</label>
             <select formControlName="delivery_option" class="w-full p-2 border rounded">
@@ -70,7 +70,7 @@
         <!-- Resumen del carrito -->
         <div class="lg:col-span-1 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <h2 class="text-xl font-semibold text-light-text dark:text-dark-text mb-4">Resumen del Carrito</h2>
-          <div *ngFor="let item of cart.items; trackBy: trackByCartDetailId" class="flex items-center gap-4 mb-4">
+          <div *ngFor="let item of cart.items; trackBy: trackByCartDetailId" class="flex items-center gap-4 mb-4 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg p-2 transition-colors" (click)="goToProductDetail(item)">
             <img [src]="getImageUrl(item)" class="w-16 h-16 object-cover rounded-lg" alt="{{ item.product_name }}">
             <div class="flex-1">
               <h3 class="text-sm font-medium text-light-text dark:text-dark-text">
@@ -86,27 +86,24 @@
             </div>
           </div>
           <div class="border-t border-gray-200 dark:border-gray-600 pt-4">
-            <p class="text-sm text-light-text dark:text-dark-text">Subtotal: ${{ calculateTotals().subtotal.toFixed(2)
-              }}
-            </p>
+            <p class="text-sm text-light-text dark:text-dark-text">Subtotal: ${{ calculateTotals().subtotal.toFixed(2) }}</p>
             <p *ngIf="calculateTotals().discount > 0" class="text-sm text-green-500 dark:text-green-400">
               Descuento: -${{ calculateTotals().discount.toFixed(2) }}
             </p>
             <p *ngIf="calculateTotals().total_urgent_cost > 0" class="text-sm text-red-500">
               Costo urgente (incluido): ${{ calculateTotals().total_urgent_cost.toFixed(2) }}
             </p>
-            <p class="text-sm text-light-text dark:text-dark-text">Envío: ${{ calculateTotals().shipping_cost.toFixed(2)
-              }}</p>
+            <p class="text-sm text-light-text dark:text-dark-text">Envío: ${{ calculateTotals().shipping_cost.toFixed(2) }}</p>
             <p class="text-base font-semibold text-light-text dark:text-dark-text">
               Total: ${{ calculateTotals().total.toFixed(2) }}
             </p>
             <p *ngIf="cart.estimated_delivery_days > 0"
               class="text-sm text-light-secondary dark:text-dark-secondary mt-2">
-              Entrega estimada en {{ cart.estimated_delivery_days }} día{{ cart.estimated_delivery_days > 1 ? 's' : ''
-              }}
+              Entrega estimada en {{ cart.estimated_delivery_days }} día{{ cart.estimated_delivery_days > 1 ? 's' : '' }}
             </p>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
