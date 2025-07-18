@@ -111,16 +111,16 @@ export class CheckoutComponent implements OnInit {
     const orderData = {
       ...this.orderForm.value,
       address_id: this.orderForm.value.delivery_option === 'Entrega a Domicilio' ? this.orderForm.value.address_id : null,
-      shipping_cost: totals.shipping_cost,
-      total: totals.total
+      shipping_cost: totals.shipping_cost, 
+      total: totals.total 
     };
 
     this.orderService.createOrder(orderData).subscribe({
       next: (response) => {
         this.isLoading = false;
-        if (response.success && response.data.payment_url) { 
+        if (response.success && response.data.payment_instructions?.payment_url) {
           this.toastService.showToast('Redirigiendo a Mercado Pago...', 'success');
-          window.location.href = response.data.payment_url;
+          window.location.href = response.data.payment_instructions.payment_url;
         } else {
           this.toastService.showToast('No se pudo obtener la URL de pago.', 'error');
         }
