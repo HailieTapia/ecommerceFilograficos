@@ -1,115 +1,264 @@
-<div class="max-w-5xl mx-auto py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans">
+<div
+  class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 font-sans w-full">
   <app-spinner [isLoading]="isLoading"></app-spinner>
 
-  <div *ngIf="!isLoading && order" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-    <!-- Título -->
-    <h1 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6">
-      Confirmación de Orden #{{ order.order.order_id }}
-    </h1>
-
-    <!-- Información general de la orden -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-      <div>
-        <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-2">Detalles de la Orden</h2>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Fecha:</span> {{ getFormattedDate(order.order.created_at) }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Estado:</span> {{ order.order.status | titlecase }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Método de Pago:</span> {{ order.payment.method | titlecase }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Estado del Pago:</span> {{ order.payment.status | titlecase }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Fecha Estimada de Entrega:</span> {{
-          getFormattedDate(order.order.estimated_delivery_date) }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary" *ngIf="order.order.delivery_days">
-          <span class="font-medium">Días de Entrega:</span> {{ order.order.delivery_days }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          <span class="font-medium">Opción de Envío:</span> {{ order.order.delivery_option || 'No especificada' }}
-        </p>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary" *ngIf="order.order.total_urgent_cost > 0">
-          Costo Entrega Urgente: ${{ order.order.total_urgent_cost.toFixed(2) }}
-        </p>
-      </div>
-      <div>
-        <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-2">Dirección de Envío</h2>
-        <p class="text-sm text-light-secondary dark:text-dark-secondary">
-          {{ getFormattedAddress(order.address, order.order.delivery_option) }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Ítems de la orden -->
-    <div class="mb-6">
-      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Productos</h2>
-      <div *ngFor="let item of order.items; trackBy: trackByOrderDetailId"
-        class="flex items-center gap-4 mb-4 border-b border-gray-200 dark:border-gray-600 pb-4">
-        <div class="w-16 h-16 rounded-lg overflow-hidden">
-          <img [src]="item.product_image" [alt]="item.product_name" class="w-full h-full object-cover" />
-        </div>
-        <div class="flex-1">
-          <h3 class="text-sm font-medium text-light-text dark:text-dark-text">{{ item.product_name }}</h3>
-          <p class="text-sm text-light-secondary dark:text-dark-secondary">Cantidad: {{ item.quantity }}</p>
-          <p class="text-sm text-light-secondary dark:text-dark-secondary">Precio Unitario: ${{
-            item.unit_price.toFixed(2) }}</p>
-          <p class="text-sm text-success dark:text-green-400" *ngIf="item.discount_applied > 0">
-            Descuento: -${{ item.discount_applied.toFixed(2) }}
-          </p>
-          <p class="text-sm font-semibold text-light-text dark:text-dark-text">Subtotal: ${{ item.subtotal.toFixed(2) }}
-          </p>
-          <p class="text-sm text-light-secondary dark:text-dark-secondary" *ngIf="item.is_urgent">
-            Entrega Urgente: +${{ item.additional_cost.toFixed(2) }}
-          </p>
-          <div *ngIf="item.customization" class="mt-2 text-sm text-light-secondary dark:text-dark-secondary">
-            <p><span class="font-medium">Personalización:</span></p>
-            <p *ngIf="item.customization.content">Contenido: {{ item.customization.content }}</p>
-            <p *ngIf="item.customization.file_url">
-              Archivo: <a [href]="item.customization.file_url" target="_blank"
-                class="text-light-primary dark:text-dark-primary hover:underline">Ver archivo</a>
+  <div *ngIf="!isLoading && order" class=" sm:px-6 lg:px-8">
+    <!-- Header con branding corporativo -->
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 mb-8 overflow-hidden">
+      <div class="bg-gradient-to-r from-[#0f172a] to-[#203e92ff] px-4 py-5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-white mb-2">
+              Confirmación de Orden
+            </h1>
+            <p class="text-blue-100 text-lg">
+              Orden #{{ order.order.order_id }}
             </p>
-            <p *ngIf="item.customization.comments">Comentarios: {{ item.customization.comments }}</p>
+          </div>
+          <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
+            <span class="text-white font-semibold text-sm uppercase tracking-wide">
+              {{ order.order.status | titlecase }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Historial de la orden -->
-    <div class="mb-6" *ngIf="order.history.length > 0">
-      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Historial de la Orden</h2>
-      <div class="bg-light-background dark:bg-dark-background p-4 rounded-lg">
-        <ul class="list-disc pl-5">
-          <li *ngFor="let history of order.history; trackBy: trackByHistoryId"
-            class="text-sm text-light-secondary dark:text-dark-secondary mb-2">
-            <span class="font-medium">{{ history.status | titlecase }}</span> - {{ getFormattedDate(history.date) }}
-          </li>
-        </ul>
+    <!-- Grid principal con información -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Columna izquierda - Información principal -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Detalles de la orden -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-200">
+              Detalles de la Orden
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+              <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Fecha</span>
+                <span class="text-sm text-slate-800 dark:text-slate-200">{{ getFormattedDate(order.order.created_at)
+                  }}</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Método de Pago</span>
+                <span class="text-sm text-slate-800 dark:text-slate-200">  {{ order.payment.method === 'mercado_pago' ? 'Mercado Pago' : (order.payment.method | titlecase) }}</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Estado del Pago</span>
+                <span class="text-sm px-2 py-1 rounded-full text-xs font-medium"
+                  [class.bg-green-100]="order.payment.status === 'approved'"
+                  [class.text-green-800]="order.payment.status === 'approved'"
+                  [class.bg-yellow-100]="order.payment.status === 'pending' || order.payment.status === 'validated' || order.payment.status === 'in_process'"
+                  [class.text-yellow-800]="order.payment.status === 'pending' || order.payment.status === 'validated' || order.payment.status === 'in_process'"
+                  [class.bg-red-100]="order.payment.status === 'failed' || order.payment.status === 'rejected'"
+                  [class.text-red-800]="order.payment.status === 'failed' || order.payment.status === 'rejected'">
+                  {{ order.payment.status | titlecase }}
+                </span>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Entrega Estimada</span>
+                <span class="text-sm text-slate-800 dark:text-slate-200">{{
+                  getFormattedDate(order.order.estimated_delivery_date) }}</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700"
+                *ngIf="order.order.delivery_days">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Días de Entrega</span>
+                <span class="text-sm text-slate-800 dark:text-slate-200">{{ order.order.delivery_days }}</span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Opción de Envío</span>
+                <span class="text-sm text-slate-800 dark:text-slate-200">{{ order.order.delivery_option || 'No
+                  especificada' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Productos -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
+          <div class="flex items-center mb-6">
+            <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-200">
+              Productos Solicitados
+            </h2>
+          </div>
+
+          <div class="space-y-4">
+            <div *ngFor="let item of order.items; trackBy: trackByOrderDetailId"
+              class="border border-slate-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div class="flex items-start gap-4">
+                <div class="w-20 h-20 rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-600">
+                  <img [src]="item.product_image" [alt]="item.product_name" class="w-full h-full object-cover" />
+                </div>
+
+                <div class="flex-1">
+                  <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2">
+                    {{ item.product_name }}
+                  </h3>
+
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span class="text-slate-600 dark:text-slate-400">Cantidad</span>
+                      <p class="font-medium text-slate-800 dark:text-slate-200">{{ item.quantity }}</p>
+                    </div>
+                    <div>
+                      <span class="text-slate-600 dark:text-slate-400">Precio Unitario</span>
+                      <p class="font-medium text-slate-800 dark:text-slate-200">${{ item.unit_price.toFixed(2) }}</p>
+                    </div>
+                    <div *ngIf="item.discount_applied > 0">
+                      <span class="text-slate-600 dark:text-slate-400">Descuento</span>
+                      <p class="font-medium text-green-600 dark:text-green-400">-${{ item.discount_applied.toFixed(2) }}
+                      </p>
+                    </div>
+                    <div>
+                      <span class="text-slate-600 dark:text-slate-400">Subtotal</span>
+                      <p class="font-bold text-slate-800 dark:text-slate-200">${{ item.subtotal.toFixed(2) }}</p>
+                    </div>
+                  </div>
+
+                  <div *ngIf="item.is_urgent"
+                    class="mt-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-700">
+                    <div class="flex items-center">
+                      <span class="text-orange-600 dark:text-orange-400 text-sm font-medium">
+                        🚀 Entrega Urgente: +${{ item.additional_cost.toFixed(2) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div *ngIf="item.customization"
+                    class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <h4 class="font-medium text-blue-800 dark:text-blue-200 mb-2">Personalización</h4>
+                    <div class="space-y-1 text-sm">
+                      <p *ngIf="item.customization.content" class="text-blue-700 dark:text-blue-300">
+                        <span class="font-medium">Contenido:</span> {{ item.customization.content }}
+                      </p>
+                      <p *ngIf="item.customization.file_url" class="text-blue-700 dark:text-blue-300">
+                        <span class="font-medium">Archivo:</span>
+                        <a [href]="item.customization.file_url" target="_blank"
+                          class="text-blue-600 dark:text-blue-400 hover:underline ml-1">Ver archivo</a>
+                      </p>
+                      <p *ngIf="item.customization.comments" class="text-blue-700 dark:text-blue-300">
+                        <span class="font-medium">Comentarios:</span> {{ item.customization.comments }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-6"
+          *ngIf="order.history.length > 0">
+          <div class="flex items-center mb-4">
+            <div class="w-3 h-3 bg-purple-500 rounded-full mr-3"></div>
+            <h2 class="text-xl font-semibold text-slate-800 dark:text-slate-200">
+              Historial de la Orden
+            </h2>
+          </div>
+
+          <div class="space-y-3">
+            <div *ngFor="let history of order.history; trackBy: trackByHistoryId"
+              class="flex items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+              <div class="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+              <div class="flex-1">
+                <span class="font-medium text-slate-800 dark:text-slate-200">
+                  {{ history.status | titlecase }}
+                </span>
+                <span class="text-slate-600 dark:text-slate-400 text-sm ml-2">
+                  {{ getFormattedDate(history.date) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="border-t border-gray-200 dark:border-gray-600 pt-4 mb-6">
-      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">Resumen Financiero</h2>
-      <p class="text-sm text-light-secondary dark:text-dark-secondary">Subtotal: ${{ order.order.subtotal.toFixed(2) }}
-      </p>
-      <p class="text-sm text-success dark:text-green-400" *ngIf="order.order.discount > 0">
-        Descuento: -${{ order.order.discount.toFixed(2) }}
-      </p>
-      <p class="text-sm text-light-secondary dark:text-dark-secondary">
-        Costo de Envío: ${{ order.order.shipping_cost.toFixed(2) }}
-      </p>
-      <p class="text-lg font-bold text-light-text dark:text-dark-text">
-        Total: ${{ order.order.total.toFixed(2) }}
-      </p>
-    </div>
-    <div class="flex justify-end">
-      <button (click)="goToOrders()"
-        class="bg-light-primary dark:bg-dark-primary text-white py-2 px-4 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
-        Ver Mis Órdenes
-      </button>
+
+      <!-- Columna derecha - Resumen y dirección -->
+      <div class="space-y-6">
+        <!-- Dirección de envío -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-3 h-3 bg-indigo-500 rounded-full mr-3"></div>
+            <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-200">
+              Dirección de Envío
+            </h2>
+          </div>
+
+          <div class="p-4 bg-slate-50 dark:bg-slate-700 rounded-lg">
+            <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              {{ getFormattedAddress(order.address, order.order.delivery_option) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Resumen financiero -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
+          <div class="flex items-center mb-4">
+            <div class="w-3 h-3 bg-emerald-500 rounded-full mr-3"></div>
+            <h2 class="text-lg font-semibold text-slate-800 dark:text-slate-200">
+              Resumen Financiero
+            </h2>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-sm text-slate-600 dark:text-slate-400">Subtotal</span>
+              <span class="text-sm font-medium text-slate-800 dark:text-slate-200">
+                ${{ order.order.subtotal.toFixed(2) }}
+              </span>
+            </div>
+
+            <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700"
+              *ngIf="order.order.discount > 0">
+              <span class="text-sm text-slate-600 dark:text-slate-400">Descuento</span>
+              <span class="text-sm font-medium text-green-600 dark:text-green-400">
+                -${{ order.order.discount.toFixed(2) }}
+              </span>
+            </div>
+
+            <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-sm text-slate-600 dark:text-slate-400">Costo de Envío</span>
+              <span class="text-sm font-medium text-slate-800 dark:text-slate-200">
+                ${{ order.order.shipping_cost.toFixed(2) }}
+              </span>
+            </div>
+
+            <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-700"
+              *ngIf="order.order.total_urgent_cost > 0">
+              <span class="text-sm text-slate-600 dark:text-slate-400">Entrega Urgente</span>
+              <span class="text-sm font-medium text-orange-600 dark:text-orange-400">
+                +${{ order.order.total_urgent_cost.toFixed(2) }}
+              </span>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t-2 border-slate-200 dark:border-slate-600">
+              <span class="text-lg font-bold text-slate-800 dark:text-slate-200">Total</span>
+              <span class="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                ${{ order.order.total.toFixed(2) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de acción -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
+          <button (click)="goToOrders()"
+            class="w-full bg-light-primary dark:bg-dark-primary text-white font-ligth py-2 px-4 rounded-full transition-all">
+            Mis Pedidos
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
