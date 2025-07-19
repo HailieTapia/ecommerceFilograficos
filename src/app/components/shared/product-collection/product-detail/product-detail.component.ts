@@ -3,23 +3,26 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductCollectionService, ProductDetail, ProductVariant, Product } from '../../../services/product-collection.service';
 import { AuthService } from '../../../services/auth.service';
 import { CartService, AddToCartRequest } from '../../../services/cart.service';
+import { ReviewService, ReviewSummary } from '../../../services/review.service';
 import { ToastService } from '../../../services/toastService';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
+import { ProductReviewsComponent } from './product-reviews/product-reviews.component';
 import { takeUntil } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent],
+  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent, ProductReviewsComponent],
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css']
 })
 export class ProductDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   product: ProductDetail | null = null;
+  reviewSummary: ReviewSummary | null = null;
   relatedProducts: Product[] = [];
   selectedVariant: ProductVariant | null = null;
   selectedImage: string | null = null;
@@ -41,6 +44,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private productService: ProductCollectionService,
     private authService: AuthService,
     private cartService: CartService,
+    private reviewService: ReviewService,
     private toastService: ToastService
   ) { }
 
@@ -75,15 +79,16 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     forkJoin([
       this.productService.getProductById(productId, this.isAuthenticated),
-      this.productService.getAllProducts({ page: 1, pageSize: 4, categoryId: null }, this.isAuthenticated)
+      this.productService.getAllProducts({ page: 1, pageSize: 4, categoryId: null }, this.isAuthenticated),
+      this.reviewService.getReviewsSummaryByProduct(productId)
     ]).subscribe({
-      next: ([productResponse, relatedResponse]) => {
+      next: ([productResponse, relatedResponse, reviewSummary]) => {
         this.product = productResponse.product;
         this.breadcrumb = productResponse.product.breadcrumb || [];
         this.relatedProducts = relatedResponse.products.filter(p => p.product_id !== productId).slice(0, 4);
-
+        this.reviewSummary = reviewSummary;
+        console.log('Review summary loaded:', this.reviewSummary);
         if (this.product.variants && this.product.variants.length > 0) {
-          // Try to find variant matching variantSku, otherwise default to first variant
           const matchingVariant = this.variantSku
             ? this.product.variants.find(v => v.sku === this.variantSku) || this.product.variants[0]
             : this.product.variants[0];
@@ -92,11 +97,24 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error) => {
+        console.error('Error loading product details:', error);
         this.toastService.showToast(error.message, 'error');
         this.isLoading = false;
         this.router.navigate(['/collection']);
       }
     });
+  }
+
+  getRoundedAverageRating(): number {
+    return this.reviewSummary ? Math.round(this.reviewSummary.averageRating) : 0;
+  }
+
+  getRatingDistributionWidths(): number[] {
+    if (!this.reviewSummary || !this.reviewSummary.ratingDistribution) return [0, 0, 0, 0, 0];
+    const totalReviews = this.reviewSummary.totalReviews || 1; // Avoid division by zero
+    return [5, 4, 3, 2, 1].map(rating =>
+      Math.round((this.reviewSummary!.ratingDistribution[rating.toString()] || 0) / totalReviews * 100)
+    );
   }
 
   selectVariant(variant: ProductVariant): void {

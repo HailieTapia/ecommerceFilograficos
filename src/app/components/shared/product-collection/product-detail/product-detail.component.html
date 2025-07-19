@@ -45,7 +45,7 @@
 
         <!-- Right Column - Product Information -->
         <div class="space-y-6">
-          <!-- Product Title and Stock -->
+          <!-- Product Title, Stock, and Review Summary -->
           <div>
             <p class="text-sm text-gray-600 dark:text-dark-secondary mb-2">{{ product.category?.name || 'Sin categoría' }}</p>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text mb-2">
@@ -58,6 +58,16 @@
                 {{ selectedVariant.stock > 0 ? + selectedVariant.stock + ' disponibles' : 'Agotado' }}
               </span>
             </h1>
+            <!-- Review Summary -->
+            <div *ngIf="reviewSummary" class="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-secondary">
+              <div class="flex">
+                <i *ngFor="let i of [1,2,3,4,5]"
+                   class="fas fa-star"
+                   [class.text-yellow-400]="i <= getRoundedAverageRating()"
+                   [class.text-gray-300]="i > getRoundedAverageRating()"></i>
+              </div>
+              <span>{{ reviewSummary.averageRating.toFixed(1) }} ({{ reviewSummary.totalReviews }} reseñas)</span>
+            </div>
           </div>
 
           <!-- Price -->
@@ -128,7 +138,7 @@
                 Estándar: {{ product.standard_delivery_days || 0 }} días naturales
               </label>
               <label class="flex items-center gap-2" *ngIf="product.urgent_delivery_enabled">
-                <input type="radio" [(ngModel)]="isUrgent" [value]="true" (change)="selectVariant(selectedVariant!)"
+                <input type="checkbox" [(ngModel)]="isUrgent" [value]="true" (change)="selectVariant(selectedVariant!)"
                        class="text-green-700 dark:text-green-600 focus:ring-green-500 dark:focus:ring-green-400">
                 Urgente: {{ product.urgent_delivery_days || 0 }} días naturales, +${{ formatPrice(product.urgent_delivery_cost || 0) }}
               </label>
@@ -238,6 +248,43 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mx-4 p-6" *ngIf="reviewSummary">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-dark-text mb-4">Opiniones del producto</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Rating Summary (1/4 width on md and up) -->
+        <div class="md:col-span-1">
+          <div class="flex items-center gap-6 mb-6">
+            <div class="text-5xl font-bold text-light-primary dark:text-dark-primary">
+              {{ reviewSummary.averageRating.toFixed(1) }}
+            </div>
+            <div>
+              <div class="flex items-center gap-1">
+                <i *ngFor="let i of [1,2,3,4,5]" class="fas fa-star text-yellow-400"></i>
+              </div>
+              <p class="text-sm text-gray-600 dark:text-dark-secondary">{{ reviewSummary.totalReviews }} calificaciones</p>
+            </div>
+          </div>
+          <!-- Rating Distribution -->
+          <div class="mb-6">
+            <div *ngFor="let rating of [5, 4, 3, 2, 1]; let i = index" class="flex items-center gap-2 mb-2">
+              <span class="text-sm text-gray-600 dark:text-dark-secondary">{{ rating }} ★</span>
+              <div class="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                <div class="bg-light-primary dark:bg-dark-primary h-2.5 rounded-full" [style.width]="getRatingDistributionWidths()[i] + '%'"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Recent Reviews (3/4 width on md and up) -->
+        <div class="md:col-span-3">
+          <app-product-reviews [productId]="product.product_id"></app-product-reviews>
+          <a [routerLink]="['/product', product.product_id, 'reviews']" class="text-light-primary dark:text-dark-primary hover:underline mt-4 inline-block">
+            Ver todas las opiniones
+          </a>
         </div>
       </div>
     </div>

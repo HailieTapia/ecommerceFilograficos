@@ -1,0 +1,13 @@
+/* Add basic styling for consistency with product-detail.component */
+:host {
+  display: block;
+}
+
+select, input[type="checkbox"] {
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

@@ -49,6 +49,12 @@ export interface PendingReviewsResponse {
   pageSize: number;
 }
 
+export interface ReviewSummary {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: { [key: string]: number };
+}
+
 export interface CreateReviewRequest {
   product_id: number;
   order_id: number;
@@ -134,20 +140,66 @@ export class ReviewService {
     return formData;
   }
 
+  // Obtener resumen de reseñas por producto (pública)
+  getReviewsSummaryByProduct(productId: number): Observable<ReviewSummary> {
+    return this.http.get<ApiResponse<ReviewSummary>>(`${this.apiUrl}/product/${productId}/summary`).pipe(
+      retry(2),
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error(response.message || 'Error al obtener el resumen de reseñas');
+        }
+        return response.data;
+      }),
+      catchError(error => {
+        const errorMessage = error.status === 404
+          ? 'Producto no encontrado'
+          : error.status === 500
+          ? 'Error del servidor al obtener el resumen de reseñas'
+          : error.message || 'Error desconocido al obtener el resumen de reseñas';
+        console.error('Error al obtener el resumen de reseñas:', error);
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
   // Obtener reseñas por producto (pública)
-  getReviewsByProduct(productId: number, page: number = 1, pageSize: number = 20): Observable<ReviewsResponse> {
-    const params = new HttpParams()
+  getReviewsByProduct(
+    productId: number,
+    page: number = 1,
+    pageSize: number = 20,
+    filters: { withPhotos?: boolean; withComments?: boolean; sort?: 'created_at' | 'rating'; order?: 'ASC' | 'DESC' } = {}
+  ): Observable<ReviewsResponse> {
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
 
-    return this.http.get<ReviewsResponse>(`${this.apiUrl}/product/${productId}`, { params }).pipe(
+    if (filters.withPhotos !== undefined) {
+      params = params.set('withPhotos', filters.withPhotos.toString());
+    }
+    if (filters.withComments !== undefined) {
+      params = params.set('withComments', filters.withComments.toString());
+    }
+    if (filters.sort) {
+      params = params.set('sort', filters.sort);
+    }
+    if (filters.order) {
+      params = params.set('order', filters.order);
+    }
+
+    return this.http.get<ApiResponse<ReviewsResponse>>(`${this.apiUrl}/product/${productId}`, { params }).pipe(
       retry(2),
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error(response.message || 'Error al obtener reseñas');
+        }
+        return response.data;
+      }),
       catchError(error => {
         const errorMessage = error.status === 404
           ? 'No se encontraron reseñas para el producto'
           : error.status === 500
           ? 'Error del servidor al obtener reseñas'
-          : error.error?.message || 'Error desconocido al obtener reseñas';
+          : error.message || 'Error desconocido al obtener reseñas';
         console.error('Error al obtener reseñas del producto:', error);
         return throwError(() => new Error(errorMessage));
       })
