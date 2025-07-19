@@ -238,8 +238,8 @@ export class ReviewComponent implements OnInit {
   getStarClass(index: number): string {
     const starValue = index + 1;
     return this.rating >= starValue || this.hoverRating >= starValue
-      ? 'fas fa-star text-yellow-400 text-lg'
-      : 'far fa-star text-yellow-400 text-lg';
+      ? 'fas fa-star text-yellow-400 text-xl'
+      : 'far fa-star text-yellow-400 text-xl';
   }
 
   getMediaPreviewUrl(media: Review['media'][0] | File): string {
