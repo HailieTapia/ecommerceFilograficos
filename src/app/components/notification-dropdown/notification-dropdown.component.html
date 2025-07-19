@@ -1,5 +1,5 @@
 <div class="relative p-2" (mouseenter)="openDropdown()" (mouseleave)="closeDropdown()">
-  <a href="/notifications" class="relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300" (click)="toggleDropdown(); $event.preventDefault()">
+  <a [routerLink]="'/notifications'" class="relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300" (click)="toggleDropdown(); $event.preventDefault()">
     <i class="fas fa-bell text-xl"></i>
     <span class="absolute -top-2 -right-2 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ getUnreadCount() }}</span>
   </a>

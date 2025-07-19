@@ -50,7 +50,7 @@
               class="px-6 py-2 bg-white text-blue-600 hover:bg-gray-100 rounded-full transition-all duration-300 font-medium">
               Iniciar sesión
             </button>
-            <a href="/cart"
+            <a routerLink="/cart"
               class="flex items-center space-x-2 px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-lg transition-all duration-300">
               <i class="fas fa-shopping-cart"></i>
               <span class="text-sm">Carrito</span>
@@ -60,7 +60,7 @@
           <!-- Authenticated (client or admin) -->
           <div *ngIf="isLoggedIn" class="hidden md:flex items-center space-x-4">
             <app-notification-dropdown></app-notification-dropdown>
-            <a *ngIf="userRole === 'cliente'" href="/cart"
+            <a *ngIf="userRole === 'cliente'" routerLink="/cart"
               class="relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
               <i class="fas fa-shopping-cart text-xl"></i>
               <span
@@ -70,7 +70,7 @@
                 class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 role="tooltip" aria-label="Carrito">Carrito</span>
             </a>
-            <a *ngIf="userRole === 'administrador'" href="/dashboard-orders"
+            <a *ngIf="userRole === 'administrador'" routerLink="/dashboard-orders"
               class="text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
               <i class="fas fa-calendar-alt text-xl"></i>
             </a>
@@ -91,12 +91,12 @@
             </button>
             <div *ngIf="showMobileProfileMenu" class="absolute right-0 mt-2 w-48 bg-light-encabezado dark:bg-dark-background rounded-md shadow-lg z-20">
               <ng-container *ngIf="userRole === 'cliente'">
-                <a href="/profile" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi Cuenta</a>
-                <a href="/orders" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Pedidos</a>
-                <a href="/my-reviews" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Opiniones</a>
+                <a routerLink="/profile" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi Cuenta</a>
+                <a routerLink="/orders" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Pedidos</a>
+                <a routerLink="/my-reviews" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Opiniones</a>
               </ng-container>
               <ng-container *ngIf="userRole === 'administrador'">
-                <a href="/company" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi Cuenta</a>
+                <a routerLink="/company" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi Cuenta</a>
               </ng-container>
               <button (click)="logout()" class="block w-full text-left px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">
                 Cerrar sesión
@@ -105,7 +105,7 @@
           </div>
 
           <!-- Mobile cart button (hidden on desktop) -->
-          <a *ngIf="isLoggedIn && userRole === 'cliente'" href="/cart" class="md:hidden relative p-3" aria-label="Carrito">
+          <a *ngIf="isLoggedIn && userRole === 'cliente'" routerLink="/cart" class="md:hidden relative p-3" aria-label="Carrito">
             <i class="fas fa-shopping-cart text-xl text-light-blanco dark:text-dark-primary"></i>
             <span class="absolute top-1 right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemCount }}</span>
           </a>
