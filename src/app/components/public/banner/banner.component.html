@@ -1,5 +1,5 @@
 <section class="relative w-full">
-  <div class="relative w-full h-[500px] overflow-hidden">
+  <div class="relative w-full h-[300px] sm:h-[400px] lg:h-[500px] overflow-hidden">
     <!-- Banners -->
     <ng-container *ngIf="banners.length > 0 && !loading && !error">
       <div class="absolute inset-0 flex transition-transform duration-700 ease-in-out"
@@ -8,44 +8,44 @@
              class="flex-shrink-0 w-full h-full">
           <img [src]="banner.image_url"
                [alt]="banner.title"
-               class="w-full h-full object-cover">
+               class="w-full h-full object-cover object-center">
         </div>
       </div>
 
       <!-- Botones navegación -->
       <ng-container *ngIf="hasMultipleBanners">
         <button (click)="prevBanner()"
-                class="absolute z-10 left-4 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="absolute z-10 left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 sm:p-3 rounded-full hover:bg-opacity-75 transition">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <button (click)="nextBanner()"
-                class="absolute z-10 right-4 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-75 transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="absolute z-10 right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-gray-800 bg-opacity-50 text-white p-2 sm:p-3 rounded-full hover:bg-opacity-75 transition">
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </ng-container>
 
-      <!-- Contenido del banner -->
-      <div class="absolute inset-0 flex items-center justify-center text-center bg-black bg-opacity-30">
-        <div class="text-white px-4">
-          <h2 class="text-3xl sm:text-4xl font-bold mb-4">
-            {{ banners[currentIndex].title }}
-          </h2>
-          <a [routerLink]="banners[currentIndex].cta_link"
-             class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-            {{ banners[currentIndex].cta_text }}
-          </a>
+      <!-- Contenido del banner (solo si hay CTA) -->
+      <ng-container *ngIf="hasCtaContent(banners[currentIndex])">
+        <div class="absolute inset-0 flex flex-col items-center justify-end pb-6 sm:pb-12 text-center bg-black bg-opacity-30">
+          <div class="text-white px-4">
+            <a *ngIf="banners[currentIndex].cta_link && banners[currentIndex].cta_text"
+              [routerLink]="banners[currentIndex].cta_link"
+              class="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-semibold text-white bg-red-600 rounded-2xl shadow-lg hover:bg-red-700 hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 ease-in-out min-h-[48px] sm:min-h-[52px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              {{ banners[currentIndex].cta_text }}
+            </a>
+          </div>
         </div>
-      </div>
+      </ng-container>
     </ng-container>
 
     <!-- Cargando -->
     <ng-container *ngIf="loading">
       <div class="flex items-center justify-center h-full">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     </ng-container>
 
@@ -59,13 +59,13 @@
 
   <!-- Puntos de navegación -->
   <ng-container *ngIf="hasMultipleBanners">
-    <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
+    <div class="absolute bottom-2 sm:bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
       <button *ngFor="let banner of banners; let i = index"
               (click)="goToBanner(i)"
               class="rounded-full transition-all"
               [ngClass]="{
-                'bg-blue-600 w-4 h-4': i === currentIndex,
-                'bg-gray-400 w-3 h-3 hover:bg-gray-500': i !== currentIndex
+                'bg-red-600 w-3 h-3 sm:w-4 sm:h-4': i === currentIndex,
+                'bg-gray-400 w-2 h-2 sm:w-3 sm:h-3 hover:bg-gray-500': i !== currentIndex
               }">
       </button>
     </div>

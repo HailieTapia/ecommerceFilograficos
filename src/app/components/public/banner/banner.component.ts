@@ -63,4 +63,8 @@ export class BannerComponent implements OnInit, OnDestroy {
   get hasMultipleBanners(): boolean {
     return this.banners.length > 1;
   }
+
+  hasCtaContent(banner: Banner): boolean {
+    return !!banner.cta_link && !!banner.cta_text;
+  }
 }

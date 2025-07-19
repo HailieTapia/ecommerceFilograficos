@@ -3,7 +3,7 @@
   <app-banner class="block w-full"></app-banner>
 
   <!-- Main Content -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <!-- Mensaje de error -->
     <div *ngIf="errorMessage" class="bg-light-danger dark:bg-dark-danger text-light-danger-text dark:text-dark-danger-text p-4 rounded-lg mb-4">
       {{ errorMessage }}
@@ -11,13 +11,13 @@
 
     <!-- Productos Destacados -->
     <div class="mb-8">
-      <h2 class="text-3xl sm:text-4xl font-bold text-center py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center py-8 sm:py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
         Productos <span class="text-light-verde-fuerte dark:text-dark-success">Destacados</span>
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div *ngFor="let product of featuredProducts" class="shadow-sm hover:shadow-md transition-shadow duration-300 p-4 rounded-lg bg-light-background dark:bg-dark-background cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" (click)="goToProductDetail(product.product_id)">
-          <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-auto mb-2 rounded-md">
-          <h3 class="text-lg font-medium mb-2 text-light-text dark:text-dark-text">{{ product.name }}</h3>
+          <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-auto aspect-[4/3] object-cover mb-2 rounded-md">
+          <h3 class="text-base sm:text-lg font-medium mb-2 text-light-text dark:text-dark-text">{{ product.name }}</h3>
           <div *ngIf="shouldShowRating(product)" class="flex items-center gap-2 mb-2">
             <span class="text-sm font-medium text-light-text dark:text-dark-text">{{ getFormattedRating(product.average_rating) }}</span>
             <div class="flex items-center">
@@ -41,7 +41,7 @@
 
     <!-- Productos Recientes -->
     <div class="mb-8">
-      <h2 class="text-3xl sm:text-4xl font-bold text-center py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center py-8 sm:py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
         Productos <span class="text-light-verde-fuerte dark:text-dark-success">Recientes</span>
       </h2> 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
@@ -62,7 +62,7 @@
           </div>
 
           <!-- Product Image Area -->
-          <div class="bg-light-background dark:bg-dark-blanco h-48 flex items-center justify-center relative">
+          <div class="bg-light-background dark:bg-dark-blanco h-40 sm:h-48 flex items-center justify-center relative">
             <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-full object-cover">
           </div>
 
@@ -90,7 +90,7 @@
 
     <!-- Productos Más Vendidos -->
     <div class="mb-8">
-      <h2 class="text-3xl sm:text-4xl font-bold text-center py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
+      <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-center py-8 sm:py-14 tracking-wide text-light-negro dark:text-dark-text mb-4">
         Productos <span class="text-light-verde-fuerte dark:text-dark-success">Más Vendidos</span>
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -110,7 +110,7 @@
           </div>
 
           <!-- Product Image Area -->
-          <div class="bg-light-background dark:bg-dark-blanco h-48 flex items-center justify-center relative">
+          <div class="bg-light-background dark:bg-dark-blanco h-40 sm:h-48 flex items-center justify-center relative">
             <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-full object-cover">
           </div>
 
