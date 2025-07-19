@@ -1,0 +1,63 @@
+<div *ngIf="isOpen" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+  <div class="bg-white dark:bg-gray-900 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+      <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Opinión con foto</h3>
+      <button (click)="onClose()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6">
+      <div *ngIf="review && review.media && review.media.length > 0" class="flex gap-6">
+        <!-- Left Column: Image and Navigation -->
+        <div class="flex-1 min-w-0">
+          <div class="relative">
+            <ng-container *ngIf="review.media[selectedMediaIndex] as media">
+              <img *ngIf="media.media_type === 'image'" [src]="media.url" alt="Review image" class="w-full h-auto object-contain rounded-lg">
+              <video *ngIf="media.media_type === 'video'" [src]="media.url" controls class="w-full h-auto object-contain rounded-lg"></video>
+            </ng-container>
+            <!-- Navigation Buttons -->
+            <button *ngIf="review?.media && review.media.length > 1" (click)="prevMedia()" [disabled]="selectedMediaIndex === 0"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+              <i class="fas fa-chevron-left text-gray-600 dark:text-dark-text"></i>
+            </button>
+            <button *ngIf="review?.media && review.media.length > 1" (click)="nextMedia()" [disabled]="selectedMediaIndex === review.media.length - 1"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+              <i class="fas fa-chevron-right text-gray-600 dark:text-dark-text"></i>
+            </button>
+          </div>
+          <!-- Image Index -->
+          <div class="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
+            {{ selectedMediaIndex + 1 }} / {{ review.media.length }}
+          </div>
+        </div>
+
+        <!-- Right Column: Stars, Comment, Date -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="flex">
+              <i *ngFor="let i of [1,2,3,4,5]" 
+                 class="fas fa-star" 
+                 [class.text-yellow-400]="review && i <= review.rating"
+                 [class.text-gray-300]="!review || i > review.rating"></i>
+            </div>
+          </div>
+          <p class="text-gray-700 dark:text-gray-200 text-lg mb-4">{{ review.comment || 'Sin comentario' }}</p>
+          <span class="text-sm text-gray-600 dark:text-gray-300">{{ review.created_at | date:'MMM d, y' }}</span>
+        </div>
+      </div>
+      <div *ngIf="!review || !review.media || review.media.length === 0" class="text-center text-gray-500 dark:text-gray-400">
+        No hay medios disponibles para esta reseña.
+      </div>
+      <div class="mt-4 flex justify-end">
+        <button (click)="onClose()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

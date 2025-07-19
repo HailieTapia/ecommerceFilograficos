@@ -1,4 +1,37 @@
 <div class="space-y-6">
+  <!-- Carousel for Reviews with Photos -->
+  <div *ngIf="reviewsWithPhotos.length > 0" class="relative">
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-dark-text mb-4">Opiniones con fotos</h3>
+    <div class="relative overflow-hidden">
+      <div class="flex gap-4" [style.transform]="'translateX(-' + (currentCarouselIndex * (100 / visibleItems)) + '%)'" [style.transition]="'transform 0.3s ease'">
+        <div *ngFor="let review of reviewsWithPhotos" class="flex-shrink-0 w-28 h-28 relative" (click)="openModal(review, 0)">
+          <div *ngIf="review.media && review.media[0]?.media_type === 'image'"
+               class="w-full h-full rounded-lg overflow-hidden cursor-pointer">
+            <img [src]="review.media[0].url" alt="Review photo" class="w-full h-full object-cover">
+          </div>
+          <div *ngIf="review.media && review.media[0]?.media_type === 'video'"
+               class="w-full h-full rounded-lg overflow-hidden cursor-pointer">
+            <video [src]="review.media[0].url" controls class="w-full h-full object-cover"></video>
+          </div>
+          <!-- Rating Overlay -->
+          <div class="absolute top-2 left-2 flex items-center gap-1 bg-black bg-opacity-60 text-white px-2 py-1 rounded-md">
+            <span class="text-sm font-semibold">{{ review.rating }}</span>
+            <i class="fas fa-star text-yellow-400 text-xs"></i>
+          </div>
+        </div>
+      </div>
+      <!-- Navigation Buttons -->
+      <button *ngIf="reviewsWithPhotos.length > visibleItems" (click)="prevPhoto()" [disabled]="currentCarouselIndex === 0"
+              class="absolute left-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+        <i class="fas fa-chevron-left text-gray-600 dark:text-dark-text"></i>
+      </button>
+      <button *ngIf="reviewsWithPhotos.length > visibleItems" (click)="nextPhoto()" [disabled]="currentCarouselIndex >= reviewsWithPhotos.length - visibleItems"
+              class="absolute right-0 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">
+        <i class="fas fa-chevron-right text-gray-600 dark:text-dark-text"></i>
+      </button>
+    </div>
+  </div>
+
   <!-- Filters -->
   <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
     <label class="flex items-center gap-2">
@@ -47,11 +80,11 @@
         <span class="text-sm text-gray-600 dark:text-dark-secondary">{{ formatDate(review.created_at) }}</span>
       </div>
       <div *ngIf="review.media && review.media.length > 0" class="flex gap-2 overflow-x-auto mb-2">
-        <div *ngFor="let media of review.media" class="flex-shrink-0">
+        <div *ngFor="let media of review.media; let i = index" class="flex-shrink-0 relative" (click)="openModal(review, i)">
           <img *ngIf="media.media_type === 'image'" [src]="media.url" alt="Review image"
-               class="w-20 h-20 object-cover rounded-lg">
+               class="w-20 h-20 object-cover rounded-lg cursor-pointer">
           <video *ngIf="media.media_type === 'video'" [src]="media.url" controls
-                 class="w-20 h-20 object-cover rounded-lg"></video>
+                 class="w-20 h-20 object-cover rounded-lg cursor-pointer"></video>
         </div>
       </div>
       <p *ngIf="review.comment" class="text-gray-600 dark:text-dark-secondary">{{ review.comment }}</p>
@@ -65,4 +98,7 @@
       Cargar más reseñas
     </button>
   </div>
+
+  <!-- Modal -->
+  <app-review-image-modal [isOpen]="showModal" [review]="selectedReview" [selectedMediaIndex]="selectedMediaIndex" (close)="closeModal()"></app-review-image-modal>
 </div>
