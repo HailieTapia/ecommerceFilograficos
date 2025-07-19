@@ -44,6 +44,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   showModal = false;
   showModal2 = false;
+  showMobileMenu = false;
+  showMobileSearch = false;
+  showMobileProfileMenu = false;
+
+  // Copiar las navItems del NavigationComponent para usarlas en el menú móvil
+  navItems = [
+    { path: '/', label: 'Inicio' },
+    { path: '/product-categories', label: 'Categorías' },
+    { path: '/offers', label: 'Ofertas' },
+    { path: '/collection', label: 'Catálogo' },
+    { path: '/help', label: 'Ayuda' }
+  ];
 
   private cartCountSubscription!: Subscription;
 
@@ -91,6 +103,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       next: () => {
         this.userName = null;
         this.profilePictureUrl = null;
+        this.showMobileProfileMenu = false;
         this.router.navigate(['login']);
       },
       error: (err) => console.error(err)
@@ -111,6 +124,34 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
     this.router.navigate(['/collection'], { queryParams: { search: this.searchTerm.trim() }, queryParamsHandling: 'merge' });
     this.searchTerm = '';
+    this.showMobileSearch = false;
+  }
+
+  toggleMobileMenu(): void {
+    this.showMobileMenu = !this.showMobileMenu;
+    // Cerrar otros menús cuando se abre este
+    if (this.showMobileMenu) {
+      this.showMobileSearch = false;
+      this.showMobileProfileMenu = false;
+    }
+  }
+
+  toggleSearch(): void {
+    this.showMobileSearch = !this.showMobileSearch;
+    // Cerrar otros menús cuando se abre este
+    if (this.showMobileSearch) {
+      this.showMobileMenu = false;
+      this.showMobileProfileMenu = false;
+    }
+  }
+
+  toggleProfileMenu(): void {
+    this.showMobileProfileMenu = !this.showMobileProfileMenu;
+    // Cerrar otros menús cuando se abre este
+    if (this.showMobileProfileMenu) {
+      this.showMobileMenu = false;
+      this.showMobileSearch = false;
+    }
   }
 
   private formatUserName(fullName: string): string {
