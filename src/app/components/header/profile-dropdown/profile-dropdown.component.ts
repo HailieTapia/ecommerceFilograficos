@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-profile-dropdown',
@@ -16,6 +17,8 @@ export class ProfileDropdownComponent {
   @Output() logout = new EventEmitter<void>();
   isProfileDropdownOpen = false;
 
+  constructor(public themeService: ThemeService, private elementRef: ElementRef) {}
+
   toggleProfileDropdown() {
     this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
   }
@@ -26,5 +29,12 @@ export class ProfileDropdownComponent {
 
   closeProfileDropdown() {
     this.isProfileDropdownOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.closeProfileDropdown();
+    }
   }
 }

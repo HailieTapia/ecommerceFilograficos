@@ -6,13 +6,12 @@ import { AuthService } from '../services/auth.service';
 import { CompanyService } from '../services/company.service';
 import { ThemeService } from '../services/theme.service';
 import { CartService } from '../services/cart.service';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';
 import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 import { NavigationComponent } from './navigation/navigation.component';
-import { take, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { LoginComponent } from '../../components/public/login/login.component';
 import { RegisterComponent } from '../../components/public/register/register.component';
 
@@ -48,7 +47,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   showMobileSearch = false;
   showMobileProfileMenu = false;
 
-  // Copiar las navItems del NavigationComponent para usarlas en el menú móvil
   navItems = [
     { path: '/', label: 'Inicio' },
     { path: '/product-categories', label: 'Categorías' },
@@ -58,6 +56,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ];
 
   private cartCountSubscription!: Subscription;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private cartService: CartService,
@@ -68,34 +67,38 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this.cartCountSubscription = this.cartService.cartItemCount$.subscribe(
-      (count) => {
-        this.cartItemCount = count;
-      }
-    );
+    this.cartCountSubscription = this.cartService.cartItemCount$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(count => this.cartItemCount = count);
     this.getCompanyInfo();
-    this.authService.getUser().subscribe(user => {
-      this.isLoggedIn = !!user;
-      this.userRole = user?.tipo || null;
-      this.userName = user?.nombre ? this.formatUserName(user.nombre) : null;
-      this.profilePictureUrl = user?.profilePictureUrl || null;
-    });
+    this.authService.getUser()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.isLoggedIn = !!user;
+        this.userRole = user?.tipo || null;
+        this.userName = user?.nombre ? this.formatUserName(user.nombre) : null;
+        this.profilePictureUrl = user?.profilePictureUrl || null;
+      });
   }
 
   ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
     if (this.cartCountSubscription) {
       this.cartCountSubscription.unsubscribe();
     }
   }
 
   getCompanyInfo(): void {
-    this.companyService.getCompanyInfo().subscribe(
-      (response) => {
-        this.company = response.company;
-        this.logoPreview = this.company.logo || null;
-      },
-      (error) => console.error('Error al obtener:', error)
-    );
+    this.companyService.getCompanyInfo()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(
+        response => {
+          this.company = response.company;
+          this.logoPreview = this.company.logo || null;
+        },
+        error => console.error('Error al obtener:', error)
+      );
   }
 
   logout(): void {
@@ -129,7 +132,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   toggleMobileMenu(): void {
     this.showMobileMenu = !this.showMobileMenu;
-    // Cerrar otros menús cuando se abre este
     if (this.showMobileMenu) {
       this.showMobileSearch = false;
       this.showMobileProfileMenu = false;
@@ -138,7 +140,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   toggleSearch(): void {
     this.showMobileSearch = !this.showMobileSearch;
-    // Cerrar otros menús cuando se abre este
     if (this.showMobileSearch) {
       this.showMobileMenu = false;
       this.showMobileProfileMenu = false;
@@ -147,10 +148,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   toggleProfileMenu(): void {
     this.showMobileProfileMenu = !this.showMobileProfileMenu;
-    // Cerrar otros menús cuando se abre este
     if (this.showMobileProfileMenu) {
       this.showMobileMenu = false;
       this.showMobileSearch = false;
+    }
+  }
+
+  goToCart(): void {
+    if (!this.isLoggedIn) {
+      this.router.navigate(['login']);
+    } else {
+      this.router.navigate(['cart']);
     }
   }
 
