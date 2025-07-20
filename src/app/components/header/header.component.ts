@@ -8,7 +8,6 @@ import { ThemeService } from '../services/theme.service';
 import { CartService } from '../services/cart.service';
 import { Subscription, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { SidebarComponent } from './sidebar/sidebar.component';
 import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';
 import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 import { NavigationComponent } from './navigation/navigation.component';
@@ -24,13 +23,12 @@ import { RegisterComponent } from '../../components/public/register/register.com
     CommonModule,
     RouterModule,
     FormsModule,
-    SidebarComponent,
     ProfileDropdownComponent,
     NotificationDropdownComponent,
-    NavigationComponent
+    NavigationComponent,
   ],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   userRole: string | null = null;
@@ -46,13 +44,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   showMobileMenu = false;
   showMobileSearch = false;
   showMobileProfileMenu = false;
+  showMobileAdminMenu = false;
 
   navItems = [
     { path: '/', label: 'Inicio' },
     { path: '/product-categories', label: 'Categorías' },
     { path: '/offers', label: 'Ofertas' },
     { path: '/collection', label: 'Catálogo' },
-    { path: '/help', label: 'Ayuda' }
+    { path: '/help', label: 'Ayuda' },
   ];
 
   private cartCountSubscription!: Subscription;
@@ -64,12 +63,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private companyService: CompanyService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.cartCountSubscription = this.cartService.cartItemCount$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(count => this.cartItemCount = count);
+      .subscribe(count => (this.cartItemCount = count));
     this.getCompanyInfo();
     this.authService.getUser()
       .pipe(takeUntil(this.destroy$))
@@ -125,7 +124,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (!this.searchTerm.trim() || this.userRole === 'administrador') {
       return;
     }
-    this.router.navigate(['/collection'], { queryParams: { search: this.searchTerm.trim() }, queryParamsHandling: 'merge' });
+    this.router.navigate(['/collection'], {
+      queryParams: { search: this.searchTerm.trim() },
+      queryParamsHandling: 'merge',
+    });
     this.searchTerm = '';
     this.showMobileSearch = false;
   }
@@ -133,6 +135,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
   toggleMobileMenu(): void {
     this.showMobileMenu = !this.showMobileMenu;
     if (this.showMobileMenu) {
+      this.showMobileSearch = false;
+      this.showMobileProfileMenu = false;
+      this.showMobileAdminMenu = false;
+    }
+  }
+
+  toggleMobileAdminMenu(): void {
+    this.showMobileAdminMenu = !this.showMobileAdminMenu;
+    if (this.showMobileAdminMenu) {
+      this.showMobileMenu = false;
       this.showMobileSearch = false;
       this.showMobileProfileMenu = false;
     }
@@ -143,6 +155,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (this.showMobileSearch) {
       this.showMobileMenu = false;
       this.showMobileProfileMenu = false;
+      this.showMobileAdminMenu = false;
     }
   }
 
@@ -151,6 +164,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (this.showMobileProfileMenu) {
       this.showMobileMenu = false;
       this.showMobileSearch = false;
+      this.showMobileAdminMenu = false;
     }
   }
 

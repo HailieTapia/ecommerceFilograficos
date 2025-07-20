@@ -1,181 +1,172 @@
-<div class="flex min-h-screen flex-col md:flex-row">
-  <!-- Sidebar for admins -->
-  <app-sidebar 
-    *ngIf="isLoggedIn && userRole === 'administrador'"
-    [logoPreview]="logoPreview"
-    [companyName]="company?.name"
-    (logout)="logout()"
-  ></app-sidebar>
+<header class="bg-light-encabezado dark:bg-dark-background shadow-md sticky top-0 z-50">
+  <!-- Non-Admin Header -->
+  <div *ngIf="userRole !== 'administrador'" class="flex items-center justify-between px-4 py-3 md:px-20 max-w-full">
+    <!-- Logo and Company Name -->
+    <div class="flex items-center space-x-3">
+      <a routerLink="/" class="flex items-center space-x-3">
+        <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo"
+          class="h-10 w-12 md:h-12 md:w-16 rounded-md border border-gray-200 dark:border-gray-600">
+        <span
+          class="hidden md:inline text-xl font-bold text-light-blanco dark:text-dark-primary font-sans hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 hover:scale-105">
+          {{ company?.name || 'Filográficos' }}
+        </span>
+      </a>
+    </div>
 
-  <!-- Main content -->
-  <div class="flex-1 flex flex-col">
-    <header class="bg-light-encabezado dark:bg-dark-background shadow-md sticky top-0 z-50">
-      <!-- Non-Admin Header -->
-      <div *ngIf="userRole !== 'administrador'" class="flex items-center justify-between px-4 py-3 md:px-20 max-w-full">
-        <!-- Logo and Company Name -->
-        <div class="flex items-center space-x-3">
-          <a routerLink="/" class="flex items-center space-x-3">
-            <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo"
-              class="h-10 w-12 md:h-12 md:w-16 rounded-md border border-gray-200 dark:border-gray-600">
-            <span
-              class="hidden md:inline text-xl font-bold text-light-blanco dark:text-dark-primary font-sans hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
-              {{ company?.name || 'Filográficos' }}
-            </span>
-          </a>
-        </div>
+    <!-- Search Bar (Hidden on mobile, shown on md+ for non-admins) -->
+    <div class="hidden md:flex flex-1 mx-4 max-w-2xl">
+      <div class="relative w-full">
+        <input type="text" placeholder="Buscar productos, marcas y más..." [(ngModel)]="searchTerm"
+          (keydown.enter)="performSearch()"
+          class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 hover:scale-105" />
+        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer"
+          (click)="performSearch()"></i>
+      </div>
+    </div>
 
-        <!-- Search Bar (Hidden on mobile, shown on md+ for non-admins) -->
-        <div class="hidden md:flex flex-1 mx-4 max-w-2xl">
-          <div class="relative w-full">
-            <input type="text" placeholder="Buscar productos, marcas y más..." [(ngModel)]="searchTerm"
-              (keydown.enter)="performSearch()"
-              class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer"
-              (click)="performSearch()"></i>
-          </div>
-        </div>
+    <div class="flex items-center space-x-4">
+      <!-- Mobile menu button (hidden on desktop) -->
+      <button class="md:hidden p-3 hover:scale-105 transition-all duration-300" aria-label="Menú" (click)="toggleMobileMenu()">
+        <i class="fas fa-bars text-xl text-light-blanco dark:text-dark-primary"></i>
+        <span class="sr-only">Abrir menú</span>
+      </button>
 
-        <div class="flex items-center space-x-4">
-          <!-- Mobile menu button (hidden on desktop) -->
-          <button class="md:hidden p-3" aria-label="Menú" (click)="toggleMobileMenu()">
-            <i class="fas fa-bars text-xl text-light-blanco dark:text-dark-primary"></i>
-          </button>
+      <div *ngIf="!isLoggedIn" class="hidden md:flex items-center space-x-4">
+        <button (click)="showModal2 = true"
+          class="text-white/80 hover:text-white transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-white after:transition-all after:duration-300 hover:scale-105">
+          Regístrate
+        </button>
+        <button (click)="showModal = true"
+          class="px-6 py-2 bg-white text-blue-600 hover:bg-gray-100 rounded-full transition-all duration-300 font-medium hover:scale-105">
+          Iniciar sesión
+        </button>
+        <button (click)="goToCart()"
+          class="flex items-center space-x-2 px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-lg transition-all duration-300 hover:scale-105">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="text-sm">Carrito</span>
+        </button>
+      </div>
 
-          <div *ngIf="!isLoggedIn" class="hidden md:flex items-center space-x-4">
-            <button (click)="showModal2 = true"
-              class="text-white/80 hover:text-white transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-white after:transition-all after:duration-300">
-              Regístrate
-            </button>
-            <button (click)="showModal = true"
-              class="px-6 py-2 bg-white text-blue-600 hover:bg-gray-100 rounded-full transition-all duration-300 font-medium">
-              Iniciar sesión
-            </button>
-            <button (click)="goToCart()"
-              class="flex items-center space-x-2 px-4 py-2 bg-white/10 text-white hover:bg-white/20 rounded-lg transition-all duration-300">
-              <i class="fas fa-shopping-cart"></i>
-              <span class="text-sm">Carrito</span>
-            </button>
-          </div>
+      <!-- Authenticated (client) -->
+      <div *ngIf="isLoggedIn && userRole === 'cliente'" class="hidden md:flex items-center space-x-4">
+        <app-notification-dropdown></app-notification-dropdown>
+        <a routerLink="/cart"
+          class="relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group hover:scale-105">
+          <i class="fas fa-shopping-cart text-xl"></i>
+          <span
+            class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemCount }}</span>
+          <span
+            class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            role="tooltip" aria-label="Carrito">Carrito</span>
+        </a>
+        <app-profile-dropdown [userRole]="userRole" [userName]="userName" [profilePictureUrl]="profilePictureUrl"
+          (logout)="logout()"></app-profile-dropdown>
+      </div>
 
-          <!-- Authenticated (client) -->
-          <div *ngIf="isLoggedIn && userRole === 'cliente'" class="hidden md:flex items-center space-x-4">
-            <app-notification-dropdown></app-notification-dropdown>
-            <a routerLink="/cart"
-              class="relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 group">
-              <i class="fas fa-shopping-cart text-xl"></i>
-              <span
-                class="absolute -top-1 -right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{
-                cartItemCount }}</span>
-              <span
-                class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                role="tooltip" aria-label="Carrito">Carrito</span>
-            </a>
-            <app-profile-dropdown [userRole]="userRole" [userName]="userName" [profilePictureUrl]="profilePictureUrl"
-              (logout)="logout()"></app-profile-dropdown>
-          </div>
+      <!-- Mobile search button (hidden on desktop) -->
+      <button *ngIf="userRole !== 'administrador'" class="md:hidden p-3 hover:scale-105 transition-all duration-300" aria-label="Buscar" (click)="toggleSearch()">
+        <i class="fas fa-search text-xl text-light-blanco dark:text-dark-primary"></i>
+        <span class="sr-only">Buscar</span>
+      </button>
 
-          <!-- Mobile search button (hidden on desktop) -->
-          <button *ngIf="userRole !== 'administrador'" class="md:hidden p-3" aria-label="Buscar" (click)="toggleSearch()">
-            <i class="fas fa-search text-xl text-light-blanco dark:text-dark-primary"></i>
-          </button>
-
-          <!-- Mobile profile button (hidden on desktop) -->
-          <div *ngIf="isLoggedIn" class="md:hidden relative">
-            <button class="p-3" aria-label="Perfil" (click)="toggleProfileMenu()">
-              <i class="fas fa-user text-xl text-light-blanco dark:text-dark-primary"></i>
-            </button>
-            <div *ngIf="showMobileProfileMenu" class="absolute right-0 mt-2 w-48 bg-light-encabezado dark:bg-dark-background rounded-md shadow-lg z-20">
-              <ng-container *ngIf="userRole === 'cliente'">
-                <a routerLink="/profile" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi Cuenta</a>
-                <a routerLink="/orders" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Pedidos</a>
-                <a routerLink="/my-reviews" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mis Opiniones</a>
-              </ng-container>
-              <ng-container *ngIf="userRole === 'administrador'">
-                <a routerLink="/company" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">Mi Cuenta</a>
-              </ng-container>
-              <button (click)="logout()" class="block w-full text-left px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300">
-                Cerrar sesión
-              </button>
-            </div>
-          </div>
-
-          <!-- Mobile cart button (hidden on desktop) -->
-          <a *ngIf="isLoggedIn && userRole === 'cliente'" routerLink="/cart" class="md:hidden relative p-3" aria-label="Carrito">
-            <i class="fas fa-shopping-cart text-xl text-light-blanco dark:text-dark-primary"></i>
-            <span class="absolute top-1 right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemCount }}</span>
-          </a>
-
-          <!-- Theme Toggle (always visible) -->
-          <button (click)="toggleTheme()"
-            class="p-3 relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
-            <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
+      <!-- Mobile profile button (hidden on desktop) -->
+      <div *ngIf="isLoggedIn" class="md:hidden relative">
+        <button class="p-3 hover:scale-105 transition-all duration-300" aria-label="Perfil" (click)="toggleProfileMenu()">
+          <i class="fas fa-user text-xl text-white dark:text-dark-primary"></i>
+          <span class="sr-only">Perfil</span>
+        </button>
+        <div *ngIf="showMobileProfileMenu" class="absolute right-0 mt-2 w-48 bg-light-encabezado dark:bg-dark-background rounded-md shadow-lg z-20">
+          <ng-container *ngIf="userRole === 'cliente'">
+            <a routerLink="/profile" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300 hover:scale-105">Mi Cuenta</a>
+            <a routerLink="/orders" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300 hover:scale-105">Mis Pedidos</a>
+            <a routerLink="/my-reviews" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300 hover:scale-105">Mis Opiniones</a>
+          </ng-container>
+          <ng-container *ngIf="userRole === 'administrador'">
+            <a routerLink="/company" class="block px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300 hover:scale-105">Mi Cuenta</a>
+          </ng-container>
+          <button (click)="logout()" class="block w-full text-left px-4 py-3 text-light-blanco dark:text-dark-text hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-300 hover:scale-105">
+            Cerrar sesión
           </button>
         </div>
       </div>
 
-      <!-- Admin Header -->
-      <div *ngIf="userRole === 'administrador'" class="flex items-center justify-between px-4 py-3 md:px-20 max-w-full">
-        <div>
-          <h1 class="text-2xl font-semibold text-light-blanco dark:text-dark-primary">¡Bienvenido de nuevo, {{ userName || 'Admin' }}! 👋</h1>
-        </div>
-        <div class="flex items-center space-x-4">
-          <app-notification-dropdown></app-notification-dropdown>
-          <a routerLink="/dashboard-orders"
-            class="text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
-            <i class="fas fa-calendar-alt text-xl"></i>
-          </a>
-          <app-profile-dropdown [userRole]="userRole" [userName]="userName" [profilePictureUrl]="profilePictureUrl"
-            (logout)="logout()"></app-profile-dropdown>
-          <!-- Theme Toggle for Admin -->
-          <button (click)="toggleTheme()"
-            class="p-3 relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300">
-            <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
-          </button>
-        </div>
-      </div>
+      <!-- Mobile cart button (hidden on desktop) -->
+      <a *ngIf="isLoggedIn && userRole === 'cliente'" routerLink="/cart" class="md:hidden relative p-3 hover:scale-105 transition-all duration-300" aria-label="Carrito">
+        <i class="fas fa-shopping-cart text-xl text-light-blanco dark:text-dark-primary"></i>
+        <span class="absolute top-1 right-1 bg-light-danger dark:bg-dark-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">{{ cartItemCount }}</span>
+        <span class="sr-only">Carrito</span>
+      </a>
 
-      <!-- Mobile Search Bar (Visible only when toggled, non-admins) -->
-      <div *ngIf="showMobileSearch && userRole !== 'administrador'" class="md:hidden px-4 py-2">
-        <div class="relative">
-          <input type="text" placeholder="Buscar productos, marcas y más..." [(ngModel)]="searchTerm"
-            (keydown.enter)="performSearch()"
-            class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300" />
-          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer"
-            (click)="performSearch()"></i>
-        </div>
-      </div>
-
-      <!-- Mobile Menu (Visible only when toggled) -->
-      <div *ngIf="showMobileMenu" class="md:hidden bg-light-encabezado dark:bg-dark-background px-4 py-2">
-        <div class="flex flex-col space-y-3">
-          <a *ngFor="let item of navItems" [routerLink]="item.path" class="text-light-blanco dark:text-dark-primary py-2 px-3 rounded hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300">
-            {{ item.label }}
-          </a>
-          <button *ngIf="isLoggedIn && userRole === 'administrador'" class="text-left text-light-blanco dark:text-dark-primary py-2 px-3 rounded hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300" routerLink="/reports">
-            <i class="fas fa-chart-bar mr-2"></i>
-            Ver Reportes
-          </button>
-          <div *ngIf="!isLoggedIn" class="flex flex-col space-y-2 pt-2 border-t border-gray-600">
-            <button (click)="showModal = true; showMobileMenu = false" class="w-full text-center px-4 py-2 bg-white text-blue-600 rounded-full transition-all duration-300 font-medium">
-              Iniciar sesión
-            </button>
-            <button (click)="showModal2 = true; showMobileMenu = false" class="w-full text-center px-4 py-2 text-white border border-white rounded-full transition-all duration-300">
-              Regístrate
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Navigation Component (hidden on mobile) -->
-      <div class="max-w-7xl mx-auto hidden md:block">
-        <app-navigation [isLoggedIn]="isLoggedIn" [userRole]="userRole"></app-navigation>
-      </div>
-    </header>
-
-    <div>
-      <app-login *ngIf="showModal" (closed)="showModal = false"></app-login>
-      <app-register *ngIf="showModal2" (closed)="showModal2 = false"></app-register>
-      <router-outlet></router-outlet>
+      <!-- Theme Toggle (always visible) -->
+      <button (click)="toggleTheme()"
+        class="p-3 relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 hover:scale-105"
+        aria-label="Cambiar tema">
+        <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
+        <span class="sr-only">Cambiar tema</span>
+      </button>
     </div>
   </div>
-</div>
+
+  <!-- Admin Header -->
+  <div *ngIf="userRole === 'administrador'" class="flex items-center justify-between px-4 py-3 md:px-20 max-w-full">
+    <div class="flex items-center space-x-3">
+      <!-- Responsive font size for admin greeting -->
+      <h1 class="text-md md:text-2xl font-semibold text-light-blanco dark:text-dark-primary">¡Bienvenido de nuevo, {{ userName || 'Admin' }}! 👋</h1>
+    </div>
+    <div class="flex items-center space-x-4">
+      <app-notification-dropdown></app-notification-dropdown>
+      <a routerLink="/dashboard-orders"
+        class="text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 hover:scale-105"
+        aria-label="Órdenes">
+        <i class="fas fa-calendar-alt text-xl"></i>
+        <span class="sr-only">Órdenes</span>
+      </a>
+      <app-profile-dropdown [userRole]="userRole" [userName]="userName" [profilePictureUrl]="profilePictureUrl"
+        (logout)="logout()"></app-profile-dropdown>
+      <!-- Theme Toggle for Admin -->
+      <button (click)="toggleTheme()"
+        class="p-3 relative text-light-blanco dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 hover:scale-105"
+        aria-label="Cambiar tema">
+        <i class="fas" [ngClass]="{'fa-sun': !isDarkMode, 'fa-moon': isDarkMode}"></i>
+        <span class="sr-only">Cambiar tema</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Search Bar (Visible only when toggled, non-admins) -->
+  <div *ngIf="showMobileSearch && userRole !== 'administrador'" class="md:hidden px-4 py-2">
+    <div class="relative">
+      <input type="text" placeholder="Buscar productos, marcas y más..." [(ngModel)]="searchTerm"
+        (keydown.enter)="performSearch()"
+        class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 hover:scale-105" />
+      <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary cursor-pointer"
+        (click)="performSearch()"></i>
+    </div>
+  </div>
+
+  <!-- Mobile Menu (Visible only when toggled, non-admins) -->
+  <div *ngIf="showMobileMenu && userRole !== 'administrador'" class="md:hidden bg-light-encabezado dark:bg-dark-background px-4 py-2">
+    <div class="flex flex-col space-y-3">
+      <a *ngFor="let item of navItems" [routerLink]="item.path" class="text-light-blanco dark:text-dark-primary py-2 px-3 rounded hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 hover:scale-105">
+        {{ item.label }}
+      </a>
+      <div *ngIf="!isLoggedIn" class="flex flex-col space-y-2 pt-2 border-t border-gray-600">
+        <button (click)="showModal = true; showMobileMenu = false" class="w-full text-center px-4 py-2 bg-white text-blue-600 rounded-full transition-all duration-300 font-medium hover:scale-105">
+          Iniciar sesión
+        </button>
+        <button (click)="showModal2 = true; showMobileMenu = false" class="w-full text-center px-4 py-2 text-white border border-white rounded-full transition-all duration-300 hover:scale-105">
+          Regístrate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Component (hidden on mobile) -->
+  <div class="max-w-7xl mx-auto hidden md:block">
+    <app-navigation [isLoggedIn]="isLoggedIn" [userRole]="userRole"></app-navigation>
+  </div>
+</header>
+
+<!-- Modals -->
+<app-login *ngIf="showModal" (closed)="showModal = false"></app-login>
+<app-register *ngIf="showModal2" (closed)="showModal2 = false"></app-register>

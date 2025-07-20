@@ -3,6 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 
+// Definir una interfaz para las traducciones
+interface Translations {
+  [key: string]: string;
+}
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
@@ -19,32 +24,87 @@ export class SidebarComponent implements OnInit {
 
   isMobile: boolean = false;
 
-  sidebarItems = [
-    { path: '/dashboard', icon: 'fa-home', label: 'Home', active: false },
-    { path: '/company', icon: 'fa-building', label: 'Empresa', active: true },
-    { path: '/dashboard-orders', icon: 'fa-shopping-cart', label: 'Gestión de ordenes', active: false, badge: '4' },
-    { path: '/banners', icon: 'fa-image', label: 'Banners', active: false },
-    { path: '/support-panel', icon: 'fa-headset', label: 'Soporte', active: false },
-    { path: '/faq-categories', icon: 'fa-list-ul', label: 'Categorías FAQ', active: false },
-    { path: '/faqs', icon: 'fa-question-circle', label: 'FAQs', active: false },
-    { path: '/security', icon: 'fa-shield-alt', label: 'Seguridad', active: false },
-    { path: '/type', icon: 'fa-tags', label: 'Tipos', active: false },
-    { path: '/template', icon: 'fa-file-alt', label: 'Plantillas', active: false },
-    { path: '/regulatory', icon: 'fa-balance-scale', label: 'Regulaciones', active: false },
-    { path: '/collaborators', icon: 'fa-users', label: 'Colaboradores', active: false },
-    { path: '/category', icon: 'fa-folder', label: 'Categorías', active: false },
-    { path: '/product-attributes', icon: 'fa-cogs', label: 'Atributos de productos', active: false },
-    { path: '/product-catalog', icon: 'fa-box', label: 'Catálogo de productos', active: false },
-    { path: '/product-stock', icon: 'fa-warehouse', label: 'Inventario de productos', active: false },
-    { path: '/price-management', icon: 'fa-dollar-sign', label: 'Gestión de precios de productos', active: false },
-    { path: '/promotion-management', icon: 'fa-tag', label: 'Gestión de promociones', active: false },
-    { path: '/backup-management', icon: 'fa-database', label: 'Gestión de respaldos', active: false }
+  // Agrupación de ítems en categorías colapsables
+  sidebarCategories = [
+    {
+      label: 'General',
+      collapsed: false,
+      items: [
+        { path: '/admin-dashboard', icon: 'fa-home', label: 'Home', badge: null },
+        { path: '/company', icon: 'fa-building', label: 'Empresa', badge: null },
+        { path: '/dashboard-orders', icon: 'fa-shopping-cart', label: 'Gestión de órdenes', badge: '4' }
+      ]
+    },
+    {
+      label: 'Contenido',
+      collapsed: true,
+      items: [
+        { path: '/banners', icon: 'fa-image', label: 'Banners', badge: null },
+        { path: '/faq-categories', icon: 'fa-list-ul', label: 'Categorías FAQ', badge: null },
+        { path: '/faqs', icon: 'fa-question-circle', label: 'FAQs', badge: null }
+      ]
+    },
+    {
+      label: 'Productos',
+      collapsed: true,
+      items: [
+        { path: '/category', icon: 'fa-folder', label: 'Categorías', badge: null },
+        { path: '/product-attributes', icon: 'fa-cogs', label: 'Atributos de productos', badge: null },
+        { path: '/product-catalog', icon: 'fa-box', label: 'Catálogo de productos', badge: null },
+        { path: '/product-stock', icon: 'fa-warehouse', label: 'Inventario de productos', badge: null },
+        { path: '/price-management', icon: 'fa-dollar-sign', label: 'Gestión de precios de productos', badge: null },
+        { path: '/promotion-management', icon: 'fa-tag', label: 'Gestión de promociones', badge: null }
+      ]
+    },
+    {
+      label: 'Configuración',
+      collapsed: true,
+      items: [
+        { path: '/security', icon: 'fa-shield-alt', label: 'Seguridad', badge: null },
+        { path: '/type', icon: 'fa-tags', label: 'Tipos', badge: null },
+        { path: '/template', icon: 'fa-file-alt', label: 'Plantillas', badge: null },
+        { path: '/regulatory', icon: 'fa-balance-scale', label: 'Regulaciones', badge: null },
+        { path: '/collaborators', icon: 'fa-users', label: 'Colaboradores', badge: null },
+        { path: '/backup-management', icon: 'fa-database', label: 'Gestión de respaldos', badge: null }
+      ]
+    }
   ];
 
   supportItems = [
     { icon: 'fa-question-circle', label: 'Help & Center', path: '/admin/help' },
-    { icon: 'fa-cog', label: 'Settings', path: '/admin/settings' },
+    { icon: 'fa-cog', label: 'Settings', path: '/admin/settings' }
   ];
+
+  // Traducciones con tipificación explícita
+  translations: Translations = {
+    'Home': 'Inicio',
+    'Empresa': 'Empresa',
+    'Gestión de órdenes': 'Gestión de órdenes',
+    'Banners': 'Banners',
+    'Categorías FAQ': 'Categorías FAQ',
+    'FAQs': 'FAQs',
+    'Seguridad': 'Seguridad',
+    'Tipos': 'Tipos',
+    'Plantillas': 'Plantillas',
+    'Regulaciones': 'Regulaciones',
+    'Colaboradores': 'Colaboradores',
+    'Categorías': 'Categorías',
+    'Atributos de productos': 'Atributos de productos',
+    'Catálogo de productos': 'Catálogo de productos',
+    'Inventario de productos': 'Inventario de productos',
+    'Gestión de precios de productos': 'Gestión de precios',
+    'Gestión de promociones': 'Gestión de promociones',
+    'Gestión de respaldos': 'Gestión de respaldos',
+    'Help & Center': 'Ayuda y Soporte',
+    'Settings': 'Configuraciones',
+    'Cerrar Sesión': 'Cerrar Sesión',
+    'Panel Administrativo': 'Panel Administrativo',
+    'Filográficos': 'Filográficos',
+    'General': 'General',
+    'Contenido': 'Contenido',
+    'Productos': 'Productos',
+    'Configuración': 'Configuración'
+  };
 
   constructor(public themeService: ThemeService) {}
 
@@ -61,7 +121,15 @@ export class SidebarComponent implements OnInit {
     this.toggleSidebarEvent.emit();
   }
 
+  toggleCategory(category: any): void {
+    category.collapsed = !category.collapsed;
+  }
+
   onLogout(): void {
     this.logout.emit();
+  }
+
+  getTranslatedLabel(label: string): string {
+    return this.translations[label] || label;
   }
 }
