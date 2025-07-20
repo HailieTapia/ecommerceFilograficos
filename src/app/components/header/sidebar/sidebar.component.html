@@ -1,58 +1,134 @@
-<div class="flex flex-col h-screen transition-all duration-300 relative"
-     [ngClass]="{'w-64': sidebarOpen, 'w-16': !sidebarOpen, 'bg-light-encabezado': !themeService.isDarkMode(), 'bg-dark-background': themeService.isDarkMode()}">
-  <!-- Logo -->
-  <div class="p-6 border-b" [ngClass]="{'border-gray-200': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
-    <div class="flex items-center space-x-2">
-      <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="w-8 h-8 rounded border border-gray-200 dark:border-gray-600">
-      <span *ngIf="sidebarOpen" class="text-lg font-semibold text-light-blanco dark:text-dark-primary">{{ companyName || 'Filográficos' }}</span>
-    </div>
-    <p *ngIf="sidebarOpen" class="text-sm mt-1 text-light-secondary dark:text-dark-secondary">Panel Administrativo</p>
-  </div>
-
-  <!-- Toggle Button -->
-  <button (click)="toggleSidebar()" class="absolute -right-3 top-6 w-6 h-6 bg-light-encabezado dark:bg-dark-background border border-gray-600 rounded-full flex items-center justify-center text-light-blanco dark:text-dark-primary hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
-    <i class="fas" [ngClass]="sidebarOpen ? 'fa-times' : 'fa-bars'"></i>
+<div class="flex flex-col h-full transition-all duration-300"
+     [ngClass]="{
+       'fixed left-0 top-0 z-50 h-full': isMobile,
+       'translate-x-0': isMobile && sidebarOpen,
+       '-translate-x-full': isMobile && !sidebarOpen,
+       'relative': !isMobile,
+       'w-64': sidebarOpen && !isMobile,
+       'w-16': !sidebarOpen && !isMobile,
+       'bg-slate-800': !themeService.isDarkMode(),
+       'bg-dark-background': themeService.isDarkMode()
+     }">
+  <!-- Floating Expand Button (Desktop, Collapsed) -->
+  <button
+    *ngIf="!isMobile && !sidebarOpen"
+    (click)="toggleSidebar()"
+    class="fixed left-4 top-24 z-50 p-3 bg-slate-800 dark:bg-dark-background text-white dark:text-dark-primary rounded-lg shadow-lg hover:bg-slate-700 dark:hover:bg-dark-primary-hover transition-all duration-200 hover:scale-105"
+    aria-label="Expandir sidebar"
+  >
+    <i class="fas fa-chevron-right w-5 h-5"></i>
   </button>
 
-  <!-- Navigation -->
-  <nav class="flex-1 px-4 py-6 space-y-1">
-    <div *ngFor="let item of sidebarItems" class="relative group">
-      <a [routerLink]="item.path" routerLinkActive="bg-light-primary-hover dark:bg-dark-primary-hover text-white" class="flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors"
-         [ngClass]="{'text-light-blanco dark:text-dark-primary hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white': true}">
-        <div class="flex items-center space-x-3">
-          <i class="fas {{ item.icon }} w-5 h-5"></i>
-          <span *ngIf="sidebarOpen">{{ item.label }}</span>
+  <!-- Sidebar Header -->
+  <div class="p-4 border-b flex-shrink-0"
+       [ngClass]="{'border-slate-700': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 bg-white dark:bg-dark-background rounded flex items-center justify-center flex-shrink-0">
+          <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="w-8 h-8 rounded border border-gray-200 dark:border-gray-600">
         </div>
+
+
+
+        <div class="min-w-0 transition-all duration-300 overflow-hidden"
+             [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
+          <div class="flex items-center space-x-2">
+            <span *ngIf="sidebarOpen" class="text-lg font-semibold text-light-blanco dark:text-dark-primary">{{ companyName || 'Filográficos' }}</span>
+          </div>
+          <p class="text-xs text-slate-400 dark:text-dark-secondary truncate">Panel Administrativo</p>
+        </div>
+      </div>
+      <!-- Collapse Button (Desktop) -->
+      <button
+        *ngIf="!isMobile && sidebarOpen"
+        (click)="toggleSidebar()"
+        class="p-1 rounded-lg hover:bg-slate-700 dark:hover:bg-dark-primary-hover transition-colors flex-shrink-0"
+        aria-label="Colapsar sidebar"
+      >
+        <i class="fas fa-chevron-left w-4 h-4 text-white dark:text-dark-primary"></i>
+      </button>
+      <!-- Close Button (Mobile) -->
+      <button
+        *ngIf="isMobile"
+        (click)="toggleSidebar()"
+        class="p-1 rounded-lg hover:bg-slate-700 dark:hover:bg-dark-primary-hover transition-colors"
+        aria-label="Cerrar sidebar"
+      >
+        <i class="fas fa-times w-5 h-5 text-white dark:text-dark-primary"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-700">
+    <div *ngFor="let item of sidebarItems" class="relative group">
+      <a [routerLink]="item.path"
+         routerLinkActive="bg-slate-700 dark:bg-dark-primary-hover text-white shadow-lg"
+         class="flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200"
+         [ngClass]="{
+           'text-slate-300 dark:text-dark-primary hover:bg-slate-700 dark:hover:bg-dark-primary-hover hover:text-white': !item.active,
+           'bg-slate-700 dark:bg-dark-primary-hover text-white shadow-lg': item.active
+         }"
+         (click)="isMobile && toggleSidebar()">
+        <i class="fas {{ item.icon }} w-5 h-5 flex-shrink-0"></i>
+        <span class="ml-3 truncate transition-all duration-300 overflow-hidden"
+              [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
+          {{ item.label }}
+        </span>
+        <span *ngIf="item.badge" class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full flex-shrink-0 transition-all duration-300"
+              [ngClass]="{'w-0 opacity-0 overflow-hidden': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
+          {{ item.badge }}
+        </span>
       </a>
-      <!-- Tooltip for collapsed state -->
-      <div *ngIf="!sidebarOpen" class="absolute left-full ml-2 px-2 py-1 bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+      <!-- Tooltip (Collapsed, Desktop) -->
+      <div *ngIf="!isMobile && !sidebarOpen"
+           class="absolute left-full ml-2 px-3 py-2 bg-slate-900 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2">
         {{ item.label }}
+        <span *ngIf="item.badge" class="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ item.badge }}</span>
+        <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-slate-900 dark:border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
       </div>
     </div>
   </nav>
 
   <!-- Support Section -->
-  <div class="px-4 py-4 border-t" [ngClass]="{'border-gray-200': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
-    <p *ngIf="sidebarOpen" class="text-xs font-semibold mb-3 uppercase text-light-secondary dark:text-dark-secondary">Help & Support</p>
+  <div class="px-2 py-4 border-t flex-shrink-0"
+       [ngClass]="{'border-slate-700': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
+    <p *ngIf="sidebarOpen" class="text-xs text-slate-500 dark:text-dark-secondary uppercase font-semibold mb-3 px-3 transition-all duration-300"
+       [ngClass]="{'opacity-0 h-0 mb-0': !sidebarOpen && !isMobile, 'opacity-100 h-auto mb-3': sidebarOpen || isMobile}">
+      Help & Support
+    </p>
     <div class="space-y-1">
-      <div *ngFor="let item of supportItems" class="relative group agresive-hover">
-        <a [routerLink]="item.path" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors text-light-blanco dark:text-dark-primary hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white">
-          <i class="fas {{ item.icon }} w-5 h-5"></i>
-          <span *ngIf="sidebarOpen">{{ item.label }}</span>
+      <div *ngFor="let item of supportItems" class="relative group">
+        <a [routerLink]="item.path"
+           class="flex items-center px-3 py-2 rounded-lg text-sm text-slate-300 dark:text-dark-primary hover:bg-slate-700 dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-200"
+           (click)="isMobile && toggleSidebar()">
+          <i class="fas {{ item.icon }} w-5 h-5 flex-shrink-0"></i>
+          <span class="ml-3 truncate transition-all duration-300 overflow-hidden"
+                [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
+            {{ item.label }}
+          </span>
         </a>
-        <!-- Tooltip for collapsed state -->
-        <div *ngIf="!sidebarOpen" class="absolute left-full ml-2 px-2 py-1 bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+        <!-- Tooltip (Collapsed, Desktop) -->
+        <div *ngIf="!isMobile && !sidebarOpen"
+             class="absolute left-full ml-2 px-3 py-2 bg-slate-900 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2">
           {{ item.label }}
+          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-slate-900 dark:border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
         </div>
       </div>
       <div class="relative group">
-        <button (click)="onLogout()" class="flex items-center space-x-3 px-3 py-2 mt-4 rounded-lg text-sm cursor-pointer transition-colors text-light-blanco dark:text-dark-primary hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover hover:text-white">
-          <i class="fas fa-sign-out-alt w-5 h-5"></i>
-          <span *ngIf="sidebarOpen">Cerrar Sesión</span>
+        <button (click)="onLogout()"
+                class="flex items-center px-3 py-2 mt-4 rounded-lg text-sm text-slate-300 dark:text-dark-primary hover:bg-slate-700 dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-200">
+          <i class="fas fa-sign-out-alt w-5 h-5 flex-shrink-0"></i>
+          <span class="ml-3 truncate transition-all duration-300 overflow-hidden"
+                [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
+            Cerrar Sesión
+          </span>
         </button>
-        <!-- Tooltip for collapsed state -->
-        <div *ngIf="!sidebarOpen" class="absolute left-full ml-2 px-2 py-1 bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+        <!-- Tooltip (Collapsed, Desktop) -->
+        <div *ngIf="!isMobile && !sidebarOpen"
+             class="absolute left-full ml-2 px-3 py-2 bg-slate-900 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2">
           Cerrar Sesión
+          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-slate-900 dark:border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
         </div>
       </div>
     </div>
