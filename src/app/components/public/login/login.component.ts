@@ -72,7 +72,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   closeModal() {
     console.log("salir")
-    this.router.navigate(['/'])
+    this.closed.emit();
+    this.router.navigate(['/']);
   }
 
   onSubmit() {
