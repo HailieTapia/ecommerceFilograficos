@@ -53,6 +53,9 @@
                 <span class="text-gray-600 dark:text-gray-400">Cargando dirección...</span>
               </div>
             </div>
+            <div *ngIf="orderForm.get('address_id')?.touched && orderForm.get('address_id')?.invalid" class="text-red-500 text-xs mt-1">
+              La dirección es requerida para entrega a domicilio.
+            </div>
           </div>
 
           <!-- Método de pago -->
@@ -62,9 +65,13 @@
             </label>
             <div class="p-3 border border-gray-300 dark:border-[#3d3d3d] rounded-lg bg-gray-50 dark:bg-[#3d3d3d]">
               <div class="flex items-center">
+                <input type="radio" formControlName="payment_method" value="mercado_pago" class="mr-2 text-blue-600 focus:ring-blue-500" checked aria-label="Método de pago Mercado Pago">
                 <i class="fab fa-cc-mastercard mr-2 text-blue-600"></i>
-                <span value="mercado_pago" class="text-gray-800 dark:text-gray-200">Mercado Pago</span>
+                <span class="text-gray-800 dark:text-gray-200">Mercado Pago</span>
               </div>
+            </div>
+            <div *ngIf="orderForm.get('payment_method')?.touched && orderForm.get('payment_method')?.invalid" class="text-red-500 text-xs mt-1">
+              Selecciona un método de pago.
             </div>
           </div>
 
@@ -74,22 +81,28 @@
               Método de envío
             </label>
             <select formControlName="delivery_option" 
-                    class="w-full p-3 border border-gray-300 dark:border-[#3d3d3d] rounded-lg bg-white dark:bg-[#3d3d3d] text-gray-800 dark:text-gray-200">
-              <option *ngFor="let option of shippingOptions" [value]="option.id">
+                    class="w-full p-3 border border-gray-300 dark:border-[#3d3d3d] rounded-lg bg-white dark:bg-[#3d3d3d] text-gray-800 dark:text-gray-200"
+                    aria-label="Método de envío">
+              <option *ngFor="let option of shippingOptions" [value]="option.name">
                 {{option.name}} ({{option.cost | currency:'MXN'}})
               </option>
             </select>
+            <div *ngIf="orderForm.get('delivery_option')?.touched && orderForm.get('delivery_option')?.invalid" class="text-red-500 text-xs mt-1">
+              Selecciona un método de envío.
+            </div>
           </div>
 
           <!-- Botones -->
           <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-[#3d3d3d]">
             <button (click)="goBackToCart()"
-              class="flex-1 bg-gray-100 dark:bg-[#3d3d3d] text-gray-700 dark:text-gray-300 py-3 px-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 font-ligth">
+              class="flex-1 bg-gray-100 dark:bg-[#3d3d3d] text-gray-700 dark:text-gray-300 py-3 px-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 font-ligth"
+              aria-label="Volver al carrito">
               Volver al carrito
             </button>
             <button type="button" (click)="createOrder()" 
-              class="flex-1 bg-light-primary dark:bg-dark-primary text-white py-3 px-6 rounded-full transition-all duration-200 font-ligth shadow-md hover:shadow-lg transform hover:scale-105">
-              Comprar
+              class="flex-1 bg-light-primary dark:bg-dark-primary text-white py-3 px-6 rounded-full transition-all duration-200 font-ligth shadow-md hover:shadow-lg transform hover:scale-105"
+              aria-label="Confirmar orden">
+              Confirmar Orden
             </button>
           </div>
         </form>
@@ -123,6 +136,9 @@
                 <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">${{ item.subtotal.toFixed(2) }}</p>
                 <p *ngIf="item.is_urgent && item.urgent_delivery_fee" class="text-xs text-red-600 dark:text-red-400">
                   Costo urgente: ${{ (item.urgent_delivery_fee * item.quantity).toFixed(2) }}
+                </p>
+                <p *ngIf="item.customization" class="text-xs text-gray-600 dark:text-gray-400">
+                  Personalización: {{ item.customization.description }}
                 </p>
               </div>
             </div>

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductCollectionService, ProductDetail, ProductVariant, Product } from '../../../services/product-collection.service';
 import { AuthService } from '../../../services/auth.service';
-import { CartService, AddToCartRequest } from '../../../services/cart.service';
+import { CartService, AddToCartRequest, CartItem } from '../../../services/cart.service';
 import { ReviewService, ReviewSummary } from '../../../services/review.service';
 import { ToastService } from '../../../services/toastService';
 import { CommonModule } from '@angular/common';
@@ -11,7 +11,6 @@ import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 import { ProductReviewsComponent } from './product-reviews/product-reviews.component';
 import { takeUntil } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
-import { OrderService } from '../../../services/order.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -46,8 +45,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private cartService: CartService,
     private reviewService: ReviewService,
-    private toastService: ToastService,
-    private orderService: OrderService
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -89,7 +87,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.breadcrumb = productResponse.product.breadcrumb || [];
         this.relatedProducts = relatedResponse.products.filter(p => p.product_id !== productId).slice(0, 4);
         this.reviewSummary = reviewSummary;
-        console.log('Review summary loaded:', this.reviewSummary);
         if (this.product.variants && this.product.variants.length > 0) {
           const matchingVariant = this.variantSku
             ? this.product.variants.find(v => v.sku === this.variantSku) || this.product.variants[0]
@@ -113,7 +110,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
 
   getRatingDistributionWidths(): number[] {
     if (!this.reviewSummary || !this.reviewSummary.ratingDistribution) return [0, 0, 0, 0, 0];
-    const totalReviews = this.reviewSummary.totalReviews || 1; // Avoid division by zero
+    const totalReviews = this.reviewSummary.totalReviews || 1;
     return [5, 4, 3, 2, 1].map(rating =>
       Math.round((this.reviewSummary!.ratingDistribution[rating.toString()] || 0) / totalReviews * 100)
     );
@@ -198,7 +195,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       product_id: this.product!.product_id,
       variant_id: this.selectedVariant.variant_id,
       quantity: this.quantity,
-      option_id: this.selectedCustomization?.option_id || undefined,
+      option_id: this.selectedCustomization?.option_id,
       is_urgent: this.isUrgent
     };
 
@@ -239,37 +236,37 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isAddingToCart = true;
-    const orderData = {
-      payment_method: 'mercado_pago',
-      address_id: null, // Se establecerá en checkout si es necesario
-      coupon_code: '',
-      delivery_option: 'Recoger en Tienda', // Valor por defecto, puede ajustarse
-      item: {
-        product_id: this.product!.product_id,
-        variant_id: this.selectedVariant.variant_id,
-        quantity: this.quantity,
-        option_id: this.selectedCustomization?.option_id || null,
-        is_urgent: this.isUrgent,
-        unit_price: this.selectedVariant.calculated_price
-      }
+    const buyNowItem: CartItem = {
+      cart_detail_id: 0,
+      product_id: this.product!.product_id,
+      product_name: this.product!.name,
+      variant_id: this.selectedVariant.variant_id,
+      variant_sku: this.selectedVariant.sku,
+      calculated_price: this.selectedVariant.calculated_price,
+      quantity: this.quantity,
+      unit_price: this.selectedVariant.calculated_price,
+      urgent_delivery_fee: this.isUrgent && this.product?.urgent_delivery_enabled ? this.product.urgent_delivery_cost : 0,
+      subtotal: this.quantity * this.selectedVariant.calculated_price,
+      unit_measure: 'unidad',
+      category_id: this.product!.category?.category_id || 0,
+      is_urgent: this.isUrgent,
+      urgent_delivery_cost: this.product?.urgent_delivery_cost || 0,
+      urgent_delivery_enabled: this.product?.urgent_delivery_enabled || false,
+      standard_delivery_days: this.product!.standard_delivery_days,
+      urgent_delivery_days: this.product!.urgent_delivery_days || null,
+      customization: this.selectedCustomization ? {
+        option_id: this.selectedCustomization.option_id!,
+        option_type: this.selectedCustomization.type,
+        description: this.selectedCustomization.description
+      } : null,
+      images: this.selectedVariant.images || [],
+      applicable_promotions: []
     };
 
-    this.orderService.createOrder(orderData, orderData.item).subscribe({
-      next: (response) => {
-        this.isAddingToCart = false;
-        if (response.success && response.data.payment_instructions?.payment_url) {
-          this.toastService.showToast('Redirigiendo a Mercado Pago...', 'success');
-          window.location.href = response.data.payment_instructions.payment_url;
-        } else {
-          this.toastService.showToast('No se pudo obtener la URL de pago.', 'error');
-        }
-      },
-      error: (error) => {
-        this.isAddingToCart = false;
-        const errorMessage = error?.error?.message || 'No se pudo crear la orden';
-        this.toastService.showToast(errorMessage, 'error');
-      }
+    console.log('Buy Now Item:', JSON.stringify(buyNowItem, null, 2)); // Log for debugging
+
+    this.router.navigate(['/checkout'], {
+      state: { buyNowItem }
     });
   }
 

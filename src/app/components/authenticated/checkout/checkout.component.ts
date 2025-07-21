@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CartService, CartResponse, CartItem } from '../../services/cart.service';
+import { CartService, CartResponse, CartItem, Promotion } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
@@ -18,6 +18,7 @@ import { UserService } from '../../services/user.service';
 })
 export class CheckoutComponent implements OnInit {
   cart: CartResponse = { items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] };
+  buyNowItem: CartItem | null = null;
   isLoading: boolean = false;
   shippingCost: number = 0;
   orderForm: FormGroup;
@@ -35,28 +36,54 @@ export class CheckoutComponent implements OnInit {
   ) {
     this.orderForm = this.fb.group({
       payment_method: ['mercado_pago', Validators.required],
-      address_id: [null, Validators.required],
+      address_id: [null],
       coupon_code: [''],
       delivery_option: ['Recoger en Tienda', Validators.required]
     });
+
+    const navigation = this.router.getCurrentNavigation();
+    this.buyNowItem = navigation?.extras?.state ? navigation.extras.state['buyNowItem'] as CartItem : null;
   }
 
   ngOnInit(): void {
-    this.loadCart();
-    this.loadAddresses();
-    this.loadShippingOptions();
+    if (this.buyNowItem) {
+      // Modo "Comprar Ahora"
+      this.cart = {
+        items: [this.buyNowItem],
+        total: this.buyNowItem.subtotal,
+        total_urgent_delivery_fee: this.buyNowItem.is_urgent ? this.buyNowItem.urgent_delivery_fee : 0,
+        estimated_delivery_days: this.buyNowItem.is_urgent ? this.buyNowItem.urgent_delivery_days || this.buyNowItem.standard_delivery_days : this.buyNowItem.standard_delivery_days,
+        promotions: []
+      };
+      this.loadAddresses();
+      this.loadShippingOptions();
+    } else {
+      // Modo carrito normal
+      this.loadCart();
+      this.loadAddresses();
+      this.loadShippingOptions();
+    }
+
+    // Actualizar validación de address_id según delivery_option
+    this.orderForm.get('delivery_option')?.valueChanges.subscribe(value => {
+      if (value === 'Entrega a Domicilio') {
+        this.orderForm.get('address_id')?.setValidators(Validators.required);
+      } else {
+        this.orderForm.get('address_id')?.clearValidators();
+      }
+      this.orderForm.get('address_id')?.updateValueAndValidity();
+    });
   }
 
   loadShippingOptions(): void {
     this.isLoading = true;
     this.orderService.getShippingOptions().subscribe({
       next: (response) => {
-        this.shippingOptions = response.data;
+        this.shippingOptions = response.data || [];
         this.isLoading = false;
       },
       error: (error) => {
-        const errorMessage = error?.error?.message || 'Error al cargar opciones de envío.';
-        this.toastService.showToast(errorMessage, 'error');
+        this.toastService.showToast(error.message || 'Error al cargar opciones de envío.', 'error');
         this.isLoading = false;
       }
     });
@@ -74,8 +101,7 @@ export class CheckoutComponent implements OnInit {
         }
       },
       error: (error) => {
-        const errorMessage = error?.error?.message || 'No se pudo cargar el carrito.';
-        this.toastService.showToast(errorMessage, 'error');
+        this.toastService.showToast(error.message || 'No se pudo cargar el carrito.', 'error');
         this.isLoading = false;
         this.router.navigate(['/cart']);
       }
@@ -88,13 +114,12 @@ export class CheckoutComponent implements OnInit {
       next: (response: any) => {
         this.address = response.address;
         this.orderForm.patchValue({
-          address_id: this.address.address_id
+          address_id: this.address?.address_id || null
         });
         this.isLoading = false;
       },
       error: (error) => {
-        const errorMessage = error?.error?.message || 'Error al cargar la dirección.';
-        this.toastService.showToast(errorMessage, 'error');
+        this.toastService.showToast(error.message || 'Error al cargar la dirección.', 'error');
         this.isLoading = false;
       }
     });
@@ -106,14 +131,29 @@ export class CheckoutComponent implements OnInit {
       this.toastService.showToast('Por favor, completa todos los campos requeridos.', 'error');
       return;
     }
+
     this.isLoading = true;
     const totals = this.calculateTotals();
     const orderData = {
-      ...this.orderForm.value,
+      payment_method: this.orderForm.value.payment_method,
       address_id: this.orderForm.value.delivery_option === 'Entrega a Domicilio' ? this.orderForm.value.address_id : null,
-      shipping_cost: totals.shipping_cost, 
-      total: totals.total 
+      coupon_code: this.orderForm.value.coupon_code || '', // Ensure empty string instead of null
+      delivery_option: this.orderForm.value.delivery_option,
+      shipping_cost: totals.shipping_cost,
+      total: totals.total,
+      item: this.buyNowItem ? {
+        product_id: this.buyNowItem.product_id,
+        variant_id: this.buyNowItem.variant_id,
+        quantity: this.buyNowItem.quantity,
+        option_id: this.buyNowItem.customization?.option_id || null,
+        is_urgent: this.buyNowItem.is_urgent,
+        unit_price: this.buyNowItem.unit_price
+      } : undefined,
+      items: this.buyNowItem ? undefined : this.cart.items
     };
+
+    // Log payload for debugging
+    console.log('Order Data Payload:', JSON.stringify(orderData, null, 2));
 
     this.orderService.createOrder(orderData).subscribe({
       next: (response) => {
@@ -128,6 +168,7 @@ export class CheckoutComponent implements OnInit {
       error: (error) => {
         this.isLoading = false;
         const errorMessage = error?.error?.message || 'Error al crear la orden';
+        console.error('Order creation error:', error);
         this.toastService.showToast(errorMessage, 'error');
       }
     });
@@ -135,17 +176,16 @@ export class CheckoutComponent implements OnInit {
 
   calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
     const subtotal = this.cart.total;
-    const discount = this.cart.items.reduce((totalDiscount: number, item: CartItem) => {
-      const itemDiscount = item.applicable_promotions.reduce(
-        (sum: number, promo: any) => sum + item.subtotal * (promo.discount_value / 100),
-        0
-      );
-      return totalDiscount + itemDiscount;
+    const discount = this.cart.promotions.reduce((totalDiscount: number, promo: Promotion) => {
+      if (promo.is_applicable) {
+        return totalDiscount + (parseFloat(promo.discount_value) * subtotal / 100);
+      }
+      return totalDiscount;
     }, 0);
     const total_urgent_cost = this.cart.total_urgent_delivery_fee || 0;
     const shipping_cost = this.shippingOptions.find(option => option.name === this.orderForm.get('delivery_option')?.value)?.cost || 0;
     this.shippingCost = shipping_cost;
-    const total = Math.max(0, subtotal + shipping_cost - discount);
+    const total = Math.max(0, subtotal + shipping_cost + total_urgent_cost - discount);
     return { subtotal, discount, total_urgent_cost, shipping_cost, total };
   }
 
@@ -171,7 +211,7 @@ export class CheckoutComponent implements OnInit {
 
   goToProductDetail(item: CartItem): void {
     this.router.navigate([`/collection/${item.product_id}`], {
-      queryParams: { variant_sku: item.variant_sku}
+      queryParams: { variant_sku: item.variant_sku }
     });
   }
 }
