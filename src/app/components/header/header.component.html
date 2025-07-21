@@ -168,5 +168,5 @@
 </header>
 
 <!-- Modals -->
-<app-login *ngIf="showModal" (closed)="showModal = false"></app-login>
+<app-login *ngIf="showModal" (closed)="onLoginModalClosed()"></app-login>
 <app-register *ngIf="showModal2" (closed)="showModal2 = false"></app-register>

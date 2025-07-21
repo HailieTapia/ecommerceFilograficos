@@ -3,7 +3,7 @@ import { AuthGuard } from './guards/auth.guard';
 
 // Públicos
 import { RecoverComponent } from './components/public/recover/recover.component';
-import { LoginComponent } from './components/public/login/login.component';
+import { LoginRedirectComponent } from './components/public/login-redirect/login-redirect.component'; // Importar el nuevo componente
 import { AlexaLoginComponent } from './components/public/alexa-login/alexa-login.component';
 import { FaqComponent } from './components/public/faq/faq.component';
 import { MfaVerificationComponent } from './components/public/mfa-verification/mfa-verification.component';
@@ -25,6 +25,7 @@ import { OrdersComponent } from './components/authenticated/orders/orders.compon
 import { PaymentCallbackComponent } from './components/authenticated/payment-callback/payment-callback.component';
 import { MyReviewsComponent } from './components/authenticated/my-reviews/my-reviews.component';
 import { ReviewComponent } from './components/authenticated/review/review.component';
+
 // Administrador
 import { CompanyComponent } from './components/administrator/company/company.component';
 import { BannerAdminComponent } from './components/administrator/banner-admin/banner-admin.component';
@@ -99,7 +100,7 @@ export const routes: Routes = [
 
   // Públicos
   { path: 'help', component: FaqComponent, data: { breadcrumb: 'Help' } },
-  { path: 'login', component: LoginComponent, data: { breadcrumb: 'Iniciar sesión' } },
+  { path: 'login', component: LoginRedirectComponent, data: { breadcrumb: 'Iniciar sesión' } }, // Usar LoginRedirectComponent
   { path: 'alexa-login', component: AlexaLoginComponent, data: { breadcrumb: 'Iniciar sesión con Alexa' } },
   { path: 'recovery', component: RecoverComponent, data: { breadcrumb: 'Recuperar cuenta' } },
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },

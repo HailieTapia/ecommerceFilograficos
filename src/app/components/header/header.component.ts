@@ -1,13 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { CompanyService } from '../services/company.service';
 import { ThemeService } from '../services/theme.service';
 import { CartService } from '../services/cart.service';
+import { ModalService } from '../services/modal.service';
 import { Subscription, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';
 import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
 import { NavigationComponent } from './navigation/navigation.component';
@@ -55,6 +56,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ];
 
   private cartCountSubscription!: Subscription;
+  private routerSubscription!: Subscription;
+  private modalSubscription!: Subscription;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -62,7 +65,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     public themeService: ThemeService,
     private router: Router,
     private authService: AuthService,
-    private companyService: CompanyService
+    private companyService: CompanyService,
+    private modalService: ModalService
   ) {}
 
   ngOnInit(): void {
@@ -78,6 +82,34 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.userName = user?.nombre ? this.formatUserName(user.nombre) : null;
         this.profilePictureUrl = user?.profilePictureUrl || null;
       });
+
+    // Subscribe to ModalService for modal visibility
+    this.modalSubscription = this.modalService.showLoginModal$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(show => {
+        console.log('ModalService showLoginModal:', show);
+        this.showModal = show;
+        if (!show && this.router.url.startsWith('/login')) {
+          // Redirect to home when modal is closed and on /login
+          this.router.navigate(['/']);
+        }
+      });
+
+    // Subscribe to router events
+    this.routerSubscription = this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event: NavigationEnd) => {
+        console.log('Navegación a:', event.urlAfterRedirects);
+        if (event.urlAfterRedirects.startsWith('/login')) {
+          this.showModal = true;
+        } else {
+          this.showModal = false;
+          this.modalService.showLoginModal(false);
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -85,6 +117,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
     if (this.cartCountSubscription) {
       this.cartCountSubscription.unsubscribe();
+    }
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+    if (this.modalSubscription) {
+      this.modalSubscription.unsubscribe();
     }
   }
 
@@ -106,6 +144,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.userName = null;
         this.profilePictureUrl = null;
         this.showMobileProfileMenu = false;
+        this.showModal = true;
         this.router.navigate(['login']);
       },
       error: (err) => console.error(err)
@@ -170,9 +209,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   goToCart(): void {
     if (!this.isLoggedIn) {
-      this.router.navigate(['login']);
+      console.log('goToCart: Mostrando modal de login');
+      this.modalService.showLoginModal(true);
+      this.router.navigate(['login'], { queryParams: { returnUrl: '/cart' } });
     } else {
       this.router.navigate(['cart']);
+    }
+  }
+
+  onLoginModalClosed() {
+    console.log('Evento de cierre del modal de login recibido');
+    this.showModal = false;
+    this.modalService.showLoginModal(false);
+    // Redirect to home if still on /login
+    if (this.router.url.startsWith('/login')) {
+      this.router.navigate(['/']);
     }
   }
 

@@ -1,6 +1,6 @@
 import { Component, AfterViewInit, OnInit, EventEmitter, Output, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -8,6 +8,7 @@ import { environment } from '../../../environments/config';
 import { noXSSValidator } from '../../administrator/shared/validators';
 import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
 import { ToastService } from '../../services/toastService';
+import { ModalService } from '../../services/modal.service'; // Add ModalService
 
 @Component({
   selector: 'app-login',
@@ -25,7 +26,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private toastService: ToastService,
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private modalService: ModalService // Inject ModalService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, noXSSValidator()]],
@@ -34,17 +37,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Limpiar el estado de autenticación al cargar el componente
   ngOnInit(): void {
     this.clearAuthState();
   }
 
-  // Inicializar reCAPTCHA cuando la vista esté lista
   ngAfterViewInit() {
     this.loadRecaptcha();
   }
 
-  // Función para cargar reCAPTCHA
   loadRecaptcha() {
     if ((window as any).grecaptcha) {
       (window as any).grecaptcha.render('recaptcha-container', {
@@ -55,25 +55,36 @@ export class LoginComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // Almacenar el token del reCAPTCHA
   onCaptchaResolved(token: string) {
     this.loginForm.patchValue({ recaptchaToken: token });
   }
 
-  // Limpiar el estado de autenticación
   clearAuthState(): void {
     this.authService.resetAuthState();
   }
-  // Cierra el modal al presionar "Escape"
+
   @HostListener('document:keydown.escape', ['$event'])
   handleEscapeKey(event: KeyboardEvent) {
     this.closeModal();
   }
 
   closeModal() {
-    console.log("salir")
+    console.log('Cerrando modal de login');
     this.closed.emit();
-    this.router.navigate(['/']);
+    this.modalService.showLoginModal(false); // Notify ModalService to hide modal
+    // Redirect to home or previous page
+    this.route.queryParams.subscribe(params => {
+      const returnUrl = params['returnUrl'] || '/';
+      // Avoid redirecting to protected routes if not authenticated
+      this.authService.getUser().subscribe(user => {
+        if (!user) {
+          // If not authenticated, redirect to home instead of returnUrl
+          this.router.navigate(['/']);
+        } else {
+          this.router.navigateByUrl(returnUrl);
+        }
+      });
+    });
   }
 
   onSubmit() {
@@ -93,13 +104,17 @@ export class LoginComponent implements OnInit, AfterViewInit {
           this.toastService.showToast('Inicio de sesión exitoso.', 'success');
           this.loginForm.reset();
           this.closeModal();
-          // Redirigir según el rol del usuario
-          this.authService.getUser().subscribe(user => {
-            if (user?.tipo === 'administrador') {
-              this.router.navigate(['/admin-dashboard']);
-            } else {
-              this.router.navigate(['/']);
-            }
+
+          // Handle redirection based on role and returnUrl
+          this.route.queryParams.subscribe(params => {
+            const returnUrl = params['returnUrl'] || '/';
+            this.authService.getUser().subscribe(user => {
+              if (user?.tipo === 'administrador') {
+                this.router.navigate(['/admin-dashboard']);
+              } else {
+                this.router.navigateByUrl(returnUrl);
+              }
+            });
           });
         }
       },
