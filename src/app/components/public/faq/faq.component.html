@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-light-background dark:bg-dark-background p-4 sm:p-6 font-sans w-full transition-colors duration-300">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 font-sans w-full transition-colors duration-300">
   <app-spinner [isLoading]="isLoading"></app-spinner>
 
   <div *ngIf="!isLoading" class="max-w-7xl mx-auto">
@@ -9,8 +9,8 @@
           <i class="fas fa-question-circle text-white text-xl"></i>
         </div>
         <div>
-          <h1 class="text-2xl font-bold text-light-text dark:text-dark-text">Preguntas Frecuentes</h1>
-          <p class="text-light-secondary dark:text-dark-secondary">{{ totalFaqs }} preguntas encontradas</p>
+          <h1 class="text-2xl font-bold text-light-text dark:text-gray-100">Preguntas Frecuentes</h1>
+          <p class="text-light-secondary dark:text-gray-400">{{ totalFaqs }} preguntas encontradas</p>
         </div>
       </div>
 
@@ -18,7 +18,7 @@
       <div class="relative">
         <button
           (click)="onSearch()"
-          class="absolute left-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover"
+          class="absolute left-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-gray-400 hover:text-light-primary-hover dark:hover:text-dark-primary-hover"
           [attr.aria-label]="'Realizar búsqueda'"
         >
           <svg
@@ -41,18 +41,18 @@
           [(ngModel)]="searchQuery"
           (keydown.enter)="onSearch()"
           placeholder="Buscar preguntas..."
-          class="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-transparent bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary transition-colors"
+          class="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-transparent bg-light-background dark:bg-dark-background text-light-text dark:text-gray-100 placeholder-light-secondary dark:placeholder-gray-400 transition-colors"
           [attr.aria-label]="'Buscar preguntas frecuentes'"
         />
         <button
           *ngIf="searchQuery"
           (click)="clearSearch()"
-          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover"
+          class="absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-gray-400 hover:text-light-primary-hover dark:hover:text-dark-primary-hover"
           [attr.aria-label]="'Borrar búsqueda'"
         >
           <i class="fas fa-times w-5 h-5"></i>
         </button>
-        <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="text-light-danger dark:text-dark-danger text-sm mt-1">
+        <p *ngIf="searchQuery.length > 0 && searchQuery.length < 3" class="text-light-danger dark:text-red-400 text-sm mt-1">
           Escribe al menos 3 caracteres para buscar.
         </p>
       </div>
@@ -78,7 +78,7 @@
           <i class="fas fa-bars"></i> Categorías
         </button>
         <button
-          class="md:hidden bg-light-button dark:bg-dark-button text-light-text dark:text-dark-text py-2 px-4 rounded-xl mb-4 flex items-center gap-2 hover:bg-light-button-hover dark:hover:bg-dark-button-hover transition-colors"
+          class="md:hidden bg-light-button dark:bg-dark-button text-light-text dark:text-gray-100 py-2 px-4 rounded-xl mb-4 flex items-center gap-2 hover:bg-light-button-hover dark:hover:bg-dark-button-hover transition-colors"
           (click)="toggleSidebar()"
           [attr.aria-label]="'Cerrar categorías'"
         >
@@ -91,7 +91,7 @@
             [class.dark:bg-dark-button]="selectedCategoryId === category.id"
             (click)="selectCategory(category.id)"
             (keydown.enter)="selectCategory(category.id)"
-            class="p-3 cursor-pointer rounded-lg text-center transition-colors duration-300 text-light-text dark:text-dark-text hover:bg-light-button-hover dark:hover:bg-dark-button-hover"
+            class="p-3 cursor-pointer rounded-lg text-center transition-colors duration-300 text-light-text dark:text-gray-100 hover:bg-light-button-hover dark:hover:bg-dark-button-hover"
             role="option"
             tabindex="0"
             [attr.aria-selected]="selectedCategoryId === category.id"
@@ -112,8 +112,8 @@
       <!-- FAQ Content -->
       <div class="flex-grow">
         <div class="bg-light-card dark:bg-dark-card rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-600">
-          <h2 class="text-xl font-bold text-light-text dark:text-dark-text mb-3">{{ getSelectedCategoryName() }}</h2>
-          <p class="text-light-secondary dark:text-dark-secondary italic mb-6">{{ getSelectedCategoryDescription() }}</p>
+          <h2 class="text-xl font-bold text-light-text dark:text-gray-100 mb-3">{{ getSelectedCategoryName() }}</h2>
+          <p class="text-light-secondary dark:text-gray-400 italic mb-6">{{ getSelectedCategoryDescription() }}</p>
 
           <!-- Error Message -->
           <div *ngIf="errorMessage" class="alert alert-danger mb-4 bg-red-50 dark:bg-red-900 text-red-800 dark:text-red-200 p-4 rounded-xl border border-red-200 dark:border-red-700" role="alert">
@@ -127,16 +127,16 @@
 
           <!-- No FAQs -->
           <div *ngIf="faqs.length === 0 && (!searchQuery || searchQuery.length < 3)" class="text-center p-12">
-            <i class="fas fa-question-circle text-6xl text-light-secondary dark:text-dark-secondary mb-4"></i>
-            <h2 class="text-xl font-semibold text-light-secondary dark:text-dark-secondary mb-2">No hay preguntas en esta categoría</h2>
-            <p class="text-light-secondary dark:text-dark-secondary">Selecciona otra categoría o realiza una búsqueda.</p>
+            <i class="fas fa-question-circle text-6xl text-light-secondary dark:text-gray-400 mb-4"></i>
+            <h2 class="text-xl font-semibold text-light-secondary dark:text-gray-400 mb-2">No hay preguntas en esta categoría</h2>
+            <p class="text-light-secondary dark:text-gray-400">Selecciona otra categoría o realiza una búsqueda.</p>
           </div>
 
           <!-- Search No Results -->
           <div *ngIf="searchQuery.length >= 3 && faqs.length === 0" class="text-center p-12">
-            <i class="fas fa-search text-6xl text-light-secondary dark:text-dark-secondary mb-4"></i>
-            <h2 class="text-xl font-semibold text-light-secondary dark:text-dark-secondary mb-2">No se encontraron resultados</h2>
-            <p class="text-light-secondary dark:text-dark-secondary">Revisa tu búsqueda o prueba con una frase más general.</p>
+            <i class="fas fa-search text-6xl text-light-secondary dark:text-gray-400 mb-4"></i>
+            <h2 class="text-xl font-semibold text-light-secondary dark:text-gray-400 mb-2">No se encontraron resultados</h2>
+            <p class="text-light-secondary dark:text-gray-400">Revisa tu búsqueda o prueba con una frase más general.</p>
           </div>
 
           <!-- FAQ List -->
@@ -149,13 +149,13 @@
               [attr.aria-controls]="'faq-content-' + faq.id"
               [attr.aria-label]="'Toggle respuesta para ' + faq.question"
             >
-              <h3 class="text-lg font-semibold text-light-text dark:text-dark-text">{{ faq.question }}</h3>
+              <h3 class="text-lg font-semibold text-light-text dark:text-gray-100">{{ faq.question }}</h3>
               <i class="fas text-light-primary dark:text-dark-primary" [ngClass]="faq.isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
             </button>
             <div
               [attr.id]="'faq-content-' + faq.id"
               *ngIf="faq.isExpanded"
-              class="mt-2 text-light-secondary dark:text-dark-secondary"
+              class="mt-2 text-light-secondary dark:text-gray-400"
               [@expandCollapse]="faq.isExpanded ? 'expanded' : 'collapsed'"
             >
               <p>{{ faq.answer }}</p>
@@ -164,7 +164,7 @@
 
           <!-- Pagination -->
           <div *ngIf="totalFaqs > itemsPerPage" class="flex justify-between items-center mt-6">
-            <p class="text-sm text-light-secondary dark:text-dark-secondary">
+            <p class="text-sm text-light-secondary dark:text-gray-400">
               Mostrando {{ faqs.length }} de {{ totalFaqs }} preguntas
             </p>
             <div class="flex gap-2">
@@ -179,7 +179,7 @@
                 [class.bg-light-button]="currentPage !== page"
                 [class.dark:bg-dark-button]="currentPage !== page"
                 [class.text-light-text]="currentPage !== page"
-                [class.dark:text-dark-text]="currentPage !== page"
+                [class.dark:text-gray-100]="currentPage !== page"
                 [class.hover:bg-light-button-hover]="currentPage !== page"
                 [class.dark:hover:bg-dark-button-hover]="currentPage !== page"
                 [attr.aria-current]="currentPage === page ? 'page' : null"
@@ -192,7 +192,7 @@
                 [class.bg-light-button]="currentPage !== 1"
                 [class.dark:bg-dark-button]="currentPage !== 1"
                 [class.text-light-text]="currentPage !== 1"
-                [class.dark:text-dark-text]="currentPage !== 1"
+                [class.dark:text-gray-100]="currentPage !== 1"
                 [class.hover:bg-light-button-hover]="currentPage !== 1"
                 [class.dark:hover:bg-dark-button-hover]="currentPage !== 1"
                 [disabled]="currentPage === 1"
@@ -206,7 +206,7 @@
                 [class.bg-light-button]="currentPage !== totalPages"
                 [class.dark:bg-dark-button]="currentPage !== totalPages"
                 [class.text-light-text]="currentPage !== totalPages"
-                [class.dark:text-dark-text]="currentPage !== totalPages"
+                [class.dark:text-gray-100]="currentPage !== totalPages"
                 [class.hover:bg-light-button-hover]="currentPage !== totalPages"
                 [class.dark:hover:bg-dark-button-hover]="currentPage !== totalPages"
                 [disabled]="currentPage === totalPages"

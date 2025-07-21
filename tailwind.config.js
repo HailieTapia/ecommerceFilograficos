@@ -44,7 +44,7 @@ module.exports = {
           'disabled-text': '#9CA3AF',
         },
         dark: {
-          background: '#1F2937',
+          background: '#111827',
           text: '#E5E7EB',
           primary: '#3B82F6',
           'primary-hover': '#60A5FA',

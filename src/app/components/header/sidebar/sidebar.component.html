@@ -6,102 +6,102 @@
        'relative': !isMobile,
        'w-64': sidebarOpen && !isMobile,
        'w-16': !sidebarOpen && !isMobile,
-       'bg-slate-800': !themeService.isDarkMode(),
+       'bg-light-encabezado': !themeService.isDarkMode(),
        'bg-dark-background': themeService.isDarkMode()
      }">
   <!-- Floating Expand Button (Desktop, Collapsed) -->
   <button
     *ngIf="!isMobile && !sidebarOpen"
     (click)="toggleSidebar()"
-    class="fixed left-4 top-24 z-50 p-3 bg-slate-800 dark:bg-dark-background text-white dark:text-dark-primary rounded-lg shadow-lg hover:bg-slate-700 dark:hover:bg-dark-primary-hover transition-all duration-200 hover:scale-105"
+    class="fixed left-4 top-24 z-50 p-3 bg-light-encabezado dark:bg-dark-background text-white dark:text-white rounded-lg shadow-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-200 hover:scale-105"
     aria-label="Expandir sidebar"
   >
-    <i class="fas fa-chevron-right w-5 h-5"></i>
+    <i class="fas fa-chevron-right w-5 h-5 text-white dark:text-white"></i>
     <span class="sr-only">Expandir sidebar</span>
   </button>
 
   <!-- Sidebar Header -->
   <div class="p-4 border-b flex-shrink-0"
-       [ngClass]="{'border-slate-700': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
+       [ngClass]="{'border-gray-200': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
     <div class="flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-8 h-8 bg-white dark:bg-dark-background rounded flex items-center justify-center flex-shrink-0">
+        <div class="w-8 h-8 bg-light-background dark:bg-dark-background rounded flex items-center justify-center flex-shrink-0">
           <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="w-8 h-8 rounded border border-gray-200 dark:border-gray-600">
         </div>
         <div class="min-w-0 transition-all duration-300 overflow-hidden"
              [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
           <div class="flex items-center space-x-2">
-            <span *ngIf="sidebarOpen" class="text-lg font-semibold text-light-blanco dark:text-dark-primary">{{ companyName || getTranslatedLabel('Filográficos') }}</span>
+            <span *ngIf="sidebarOpen" class="text-lg font-semibold text-white dark:text-white">{{ companyName || getTranslatedLabel('Filográficos') }}</span>
           </div>
-          <p class="text-xs text-slate-400 dark:text-dark-secondary truncate">{{ getTranslatedLabel('Panel Administrativo') }}</p>
+          <p class="text-xs text-light-secondary text-white dark:text-dark-secondary truncate">{{ getTranslatedLabel('Panel Administrativo') }}</p>
         </div>
       </div>
       <!-- Collapse Button (Desktop) -->
       <button
         *ngIf="!isMobile && sidebarOpen"
         (click)="toggleSidebar()"
-        class="p-1 rounded-lg hover:bg-slate-700 dark:hover:bg-dark-primary-hover transition-colors flex-shrink-0"
+        class="p-1 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors flex-shrink-0"
         aria-label="Colapsar sidebar"
       >
-        <i class="fas fa-chevron-left w-4 h-4 text-white dark:text-dark-primary"></i>
+        <i class="fas fa-chevron-left w-4 h-4 text-white dark:text-white"></i>
         <span class="sr-only">Colapsar sidebar</span>
       </button>
       <!-- Close Button (Mobile) -->
       <button
         *ngIf="isMobile"
         (click)="toggleSidebar()"
-        class="p-1 rounded-lg hover:bg-slate-700 dark:hover:bg-dark-primary-hover transition-colors"
+        class="p-1 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors"
         aria-label="Cerrar sidebar"
       >
-        <i class="fas fa-times w-5 h-5 text-white dark:text-dark-primary"></i>
+        <i class="fas fa-times w-5 h-5 text-white dark:text-white"></i>
         <span class="sr-only">Cerrar sidebar</span>
       </button>
     </div>
   </div>
 
   <!-- Navigation -->
-  <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-700">
+  <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-700">
     <div *ngFor="let category of sidebarCategories" class="space-y-1">
       <button
         *ngIf="sidebarOpen || isMobile"
         (click)="toggleCategory(category)"
-        class="flex items-center w-full px-3 py-2 text-sm font-semibold text-slate-500 dark:text-dark-secondary uppercase"
+        class="flex items-center w-full px-3 py-2 text-sm font-semibold text-white dark:text-white uppercase"
         [ngClass]="{'opacity-0 h-0': !sidebarOpen && !isMobile, 'opacity-100 h-auto': sidebarOpen || isMobile}"
         [attr.aria-expanded]="category.collapsed ? 'false' : 'true'"
         [attr.aria-label]="getTranslatedLabel(category.label)"
       >
         {{ getTranslatedLabel(category.label) }}
-        <i class="fas fa-chevron-down ml-auto transform transition-transform duration-200"
+        <i class="fas fa-chevron-down ml-auto transform transition-transform duration-200 text-white dark:text-white"
            [ngClass]="{'rotate-180': !category.collapsed}"></i>
       </button>
       <div *ngIf="!category.collapsed || isMobile" class="space-y-1">
         <div *ngFor="let item of category.items" class="relative group">
           <a [routerLink]="item.path"
-             routerLinkActive="bg-slate-700 dark:bg-dark-primary-hover text-white shadow-lg"
+             routerLinkActive="bg-light-primary-hover dark:bg-dark-primary-hover text-white shadow-lg"
              [routerLinkActiveOptions]="{ exact: false }"
-             class="flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 text-slate-300 dark:text-dark-primary hover:bg-slate-700 dark:hover:bg-dark-primary-hover hover:text-white"
+             class="flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 text-white dark:text-white hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover"
              (click)="isMobile && toggleSidebar()"
              [attr.aria-label]="getTranslatedLabel(item.label)"
           >
-            <i class="fas {{ item.icon }} w-5 h-5 flex-shrink-0"></i>
-            <span class="ml-3 truncate transition-all duration-300 overflow-hidden"
+            <i class="fas {{ item.icon }} w-5 h-5 flex-shrink-0 text-white dark:text-white"></i>
+            <span class="ml-3 truncate transition-all duration-300 overflow-hidden text-white "
                   [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
               {{ getTranslatedLabel(item.label) }}
             </span>
-            <span *ngIf="item.badge" class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full flex-shrink-0 transition-all duration-300"
+            <span *ngIf="item.badge" class="ml-auto bg-light-danger dark:bg-dark-danger text-white text-xs px-2 py-1 rounded-full flex-shrink-0 transition-all duration-300"
                   [ngClass]="{'w-0 opacity-0 overflow-hidden': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
               {{ item.badge }}
             </span>
           </a>
           <!-- Tooltip (Collapsed, Desktop) -->
           <div *ngIf="!isMobile && !sidebarOpen"
-               class="absolute left-full ml-2 px-3 py-2 bg-slate-900 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
+               class="absolute left-full ml-2 px-3 py-2 bg-light-encabezado dark:bg-dark-background text-white dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
                role="tooltip"
                [attr.aria-describedby]="item.label"
           >
             {{ getTranslatedLabel(item.label) }}
-            <span *ngIf="item.badge" class="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ item.badge }}</span>
-            <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-slate-900 dark:border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+            <span *ngIf="item.badge" class="ml-2 bg-light-danger dark:bg-dark-danger text-white text-xs px-2 py-1 rounded-full">{{ item.badge }}</span>
+            <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-encabezado dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
           </div>
         </div>
       </div>
@@ -112,19 +112,19 @@
 
   <!-- Support Section -->
   <div class="px-2 py-4 border-t flex-shrink-0"
-       [ngClass]="{'border-slate-700': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
-    <p *ngIf="sidebarOpen || isMobile" class="text-xs text-slate-500 dark:text-dark-secondary uppercase font-semibold mb-3 px-3 transition-all duration-300"
+       [ngClass]="{'border-gray-200': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
+    <p *ngIf="sidebarOpen || isMobile" class="text-xs text-white dark:text-white uppercase font-semibold mb-3 px-3 transition-all duration-300"
        [ngClass]="{'opacity-0 h-0 mb-0': !sidebarOpen && !isMobile, 'opacity-100 h-auto mb-3': sidebarOpen || isMobile}">
       {{ getTranslatedLabel('Help & Center') }}
     </p>
     <div class="space-y-1">
       <div *ngFor="let item of supportItems" class="relative group">
         <a [routerLink]="item.path"
-           class="flex items-center px-3 py-2 rounded-lg text-sm text-slate-300 dark:text-dark-primary hover:bg-slate-700 dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-200 hover:scale-105"
+           class="flex items-center px-3 py-2 rounded-lg text-sm text-white dark:text-white hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-200 hover:scale-105"
            (click)="isMobile && toggleSidebar()"
            [attr.aria-label]="getTranslatedLabel(item.label)"
         >
-          <i class="fas {{ item.icon }} w-5 h-5 flex-shrink-0"></i>
+          <i class="fas {{ item.icon }} w-5 h-5 flex-shrink-0 text-white dark:text-white"></i>
           <span class="ml-3 truncate transition-all duration-300 overflow-hidden"
                 [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
             {{ getTranslatedLabel(item.label) }}
@@ -132,20 +132,20 @@
         </a>
         <!-- Tooltip (Collapsed, Desktop) -->
         <div *ngIf="!isMobile && !sidebarOpen"
-             class="absolute left-full ml-2 px-3 py-2 bg-slate-900 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
+             class="absolute left-full ml-2 px-3 py-2 bg-light-encabezado dark:bg-dark-background text-white dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
              role="tooltip"
              [attr.aria-describedby]="item.label"
         >
           {{ getTranslatedLabel(item.label) }}
-          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-slate-900 dark:border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-encabezado dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
         </div>
       </div>
       <div class="relative group">
         <button (click)="onLogout()"
-                class="flex items-center px-3 py-2 mt-4 rounded-lg text-sm text-slate-300 dark:text-dark-primary hover:bg-slate-700 dark:hover:bg-dark-primary-hover hover:text-white transition-all duration-200 hover:scale-105"
+                class="flex items-center px-3 py-2 mt-4 rounded-lg text-sm text-white dark:text-white hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-200 hover:scale-105"
                 [attr.aria-label]="getTranslatedLabel('Cerrar Sesión')"
         >
-          <i class="fas fa-sign-out-alt w-5 h-5 flex-shrink-0"></i>
+          <i class="fas fa-sign-out-alt w-5 h-5 flex-shrink-0 text-white dark:text-white"></i>
           <span class="ml-3 truncate transition-all duration-300 overflow-hidden"
                 [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
             {{ getTranslatedLabel('Cerrar Sesión') }}
@@ -153,12 +153,12 @@
         </button>
         <!-- Tooltip (Collapsed, Desktop) -->
         <div *ngIf="!isMobile && !sidebarOpen"
-             class="absolute left-full ml-2 px-3 py-2 bg-slate-900 dark:bg-gray-900 text-white dark:text-dark-text text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
+             class="absolute left-full ml-2 px-3 py-2 bg-light-encabezado dark:bg-dark-background text-white dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
              role="tooltip"
              [attr.aria-describedby]="'Cerrar Sesión'"
         >
           {{ getTranslatedLabel('Cerrar Sesión') }}
-          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-slate-900 dark:border-r-gray-900 border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-encabezado dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
         </div>
       </div>
     </div>

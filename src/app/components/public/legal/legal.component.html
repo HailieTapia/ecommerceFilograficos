@@ -1,29 +1,50 @@
-<main class="flex-grow bg-light-background dark:bg-dark-background">
+<main class="flex-grow bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
     <div class="max-w-none mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="lg:flex lg:gap-8">
             <!-- Barra lateral con navegación -->
             <div class="lg:w-1/4">
-                <div class="bg-light-background dark:bg-dark-background shadow-lg rounded-lg p-5 sticky top-6 border border-gray-200 dark:border-gray-600">
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-900 shadow-lg rounded-lg p-5 sticky top-6 border border-gray-200 dark:border-gray-600">
                     <h2 class="text-xl font-semibold text-light-text dark:text-dark-text mb-6">Documentos Legales</h2>
                     <nav class="space-y-2" aria-label="Navigation">
                         <a (click)="loadDocument('Política de privacidad')"
-                            [ngClass]="{'bg-light-primary-hover dark:bg-dark-primary-hover text-light-text dark:text-dark-text': selectedDocument === 'Política de privacidad', 'text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover hover:text-light-text dark:hover:text-dark-text': selectedDocument !== 'Política de privacidad'}"
+                            [ngClass]="{
+                                'bg-light-primary text-white dark:bg-dark-primary-hover dark:text-dark-text': selectedDocument === 'Política de privacidad',
+                                'text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover hover:text-light-text dark:hover:text-dark-text': selectedDocument !== 'Política de privacidad'
+                            }"
                             class="cursor-pointer flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300">
-                            <i class="fas fa-shield-alt w-5 h-5 mr-3 text-light-primary dark:text-dark-primary"></i>
+                            <i class="fas fa-shield-alt w-5 h-5 mr-3"
+                               [ngClass]="{
+                                   'text-white': selectedDocument === 'Política de privacidad',
+                                   'text-light-primary dark:text-white': selectedDocument !== 'Política de privacidad'
+                               }"></i>
                             <span>Política de Privacidad</span>
                         </a>
 
                         <a (click)="loadDocument('Términos y condiciones')"
-                            [ngClass]="{'bg-light-primary-hover dark:bg-dark-primary-hover text-light-text dark:text-dark-text': selectedDocument === 'Términos y condiciones', 'text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover hover:text-light-text dark:hover:text-dark-text': selectedDocument !== 'Términos y condiciones'}"
+                            [ngClass]="{
+                                'bg-light-primary text-white dark:bg-dark-primary-hover dark:text-dark-text': selectedDocument === 'Términos y condiciones',
+                                'text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover hover:text-light-text dark:hover:text-dark-text': selectedDocument !== 'Términos y condiciones'
+                            }"
                             class="cursor-pointer flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300">
-                            <i class="fas fa-file-contract w-5 h-5 mr-3 text-light-primary dark:text-dark-primary"></i>
+                            <i class="fas fa-file-contract w-5 h-5 mr-3"
+                               [ngClass]="{
+                                   'text-white': selectedDocument === 'Términos y condiciones',
+                                   'text-light-primary dark:text-white': selectedDocument !== 'Términos y condiciones'
+                               }"></i>
                             <span>Términos y Condiciones</span>
                         </a>
 
                         <a (click)="loadDocument('Deslinde legal')"
-                            [ngClass]="{'bg-light-primary-hover dark:bg-dark-primary-hover text-light-text dark:text-dark-text': selectedDocument === 'Deslinde legal', 'text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover hover:text-light-text dark:hover:text-dark-text': selectedDocument !== 'Deslinde legal'}"
+                            [ngClass]="{
+                                'bg-light-primary text-white dark:bg-dark-primary-hover dark:text-dark-text': selectedDocument === 'Deslinde legal',
+                                'text-light-secondary dark:text-dark-secondary hover:bg-light-row-hover dark:hover:bg-dark-row-hover hover:text-light-text dark:hover:text-dark-text': selectedDocument !== 'Deslinde legal'
+                            }"
                             class="cursor-pointer flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300">
-                            <i class="fas fa-gavel w-5 h-5 mr-3 text-light-primary dark:text-dark-primary"></i>
+                            <i class="fas fa-gavel w-5 h-5 mr-3"
+                               [ngClass]="{
+                                   'text-white': selectedDocument === 'Deslinde legal',
+                                   'text-light-primary dark:text-white': selectedDocument !== 'Deslinde legal'
+                               }"></i>
                             <span>Deslinde Legal</span>
                         </a>
                     </nav>
@@ -48,7 +69,7 @@
 
             <!-- Contenido del documento legal seleccionado -->
             <div class="lg:w-3/4 mt-6 lg:mt-0">
-                <div class="bg-light-background dark:bg-dark-background shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
                     <!-- Encabezado del documento -->
                     <div class="border-b border-gray-200 dark:border-gray-600 bg-light-row-hover dark:bg-dark-row-hover px-8 py-6 flex items-center justify-between">
                         <div *ngIf="documentVersion || effectiveDate || updatedAt">
