@@ -1,24 +1,51 @@
-<div class="min-h-screen grid place-items-center relative overflow-hidden">
-  <!-- Imagen de fondo con blur -->
-  <img src="assets/images/500.png" alt="Error 404"
-    class="absolute inset-0 w-full h-full object-cover blur-sm scale-110">
+<div class="min-h-screen relative flex flex-col items-center justify-start px-4 overflow-hidden md:pt-32">
+  <!-- Fondo con imagen y gradiente de overlay -->
+  <div class="absolute inset-0 z-0">
+    <img 
+      src="assets/images/francesco-ungaro-x_WIKOyhJL4-unsplash.jpg" 
+      alt="Error 500" 
+      class="w-full h-full object-cover"
+    >
+    <div class="absolute inset-0 bg-gradient-to-b from-black/50 to-black/10"></div>
+  </div>
 
-  <div class="relative z-10 text-center bg-light-background dark:bg-dark-background bg-opacity-95 dark:bg-opacity-95 p-8 rounded-lg shadow-xl max-w-md mx-auto 
-            border border-light-border dark:border-dark-border
-            transform transition-all hover:scale-105 hover:shadow-2xl">
-
-    <p class="text-xl text-light-secondary dark:text-dark-secondary mt-2">Algo salió mal en el servidor. ¡No te
-      preocupes, nuestro personal están trabajando en ello!
+  <!-- Contenido principal (más arriba) -->
+  <div class="text-center text-white space-y-6 relative z-10">
+    <!-- Número 500 -->
+    <div class="text-6xl md:text-8xl font-light tracking-wider opacity-90">
+      500
+    </div>
+    
+    <!-- Título principal -->
+    <h1 class="text-4xl md:text-5xl font-light tracking-wide">
+      Error del servidor
+    </h1>
+    
+    <!-- Mensaje descriptivo -->
+    <p class="text-lg md:text-xl font-light opacity-90 max-w-md mx-auto leading-relaxed">
+      Algo salió mal en el servidor. ¡No te preocupes, nuestro equipo está trabajando en ello!
     </p>
-
-    <div class="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-      <a href="/"
-        class="px-2 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
+    
+    <!-- Botones -->
+    <div class="pt-6 flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="/" class="inline-flex items-center justify-center px-6 py-3 text-white border border-white/50 rounded-sm hover:bg-white/10 transition-all duration-200 font-light tracking-wide backdrop-blur-sm">
+        <svg 
+          class="w-4 h-4 mr-2" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="1.5" 
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+          />
+        </svg>
         Volver al inicio
       </a>
-      <a href="/product-categories"
-        class="px-2 py-2 border border-light-primary dark:border-dark-primary text-light-primary dark:text-dark-primary rounded-md hover:bg-light-primary dark:hover:bg-dark-primary hover:text-white transition-colors">
-        Ver productos
+      <a href="/collection" class="inline-flex items-center justify-center px-6 py-3 text-white border border-white/50 rounded-sm hover:bg-white/10 transition-all duration-200 font-light tracking-wide backdrop-blur-sm">
+        Explorar productos
       </a>
     </div>
   </div>
