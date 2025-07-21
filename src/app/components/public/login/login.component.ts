@@ -72,7 +72,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   closeModal() {
     console.log("salir")
-    this.closed.emit();
+    this.router.navigate(['/'])
   }
 
   onSubmit() {
