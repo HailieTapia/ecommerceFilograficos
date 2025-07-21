@@ -5,7 +5,6 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 import { environment } from '../../environments/config';
 
-
 // Interfaz para las instrucciones de pago
 export interface PaymentInstructions {
   method: string;
@@ -59,7 +58,7 @@ export interface OrderHistory {
 export interface Payment {
   payment_id: number | null;
   method: string;
-  status: 'pending' | 'validated' | 'failed'| 'approved' | 'rejected'| 'in_process';
+  status: 'pending' | 'validated' | 'failed' | 'approved' | 'rejected' | 'in_process';
   amount: number;
   created_at: string | null;
   updated_at: string | null;
@@ -140,11 +139,12 @@ export class OrderService {
   }
 
   // Crear una nueva orden
-  createOrder(data: any): Observable<any> {
+  createOrder(data: any, item?: any): Observable<any> {
+    const payload = item ? { ...data, item } : data;
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post(`${this.apiUrl}/create`, data, { headers, withCredentials: true });
+        return this.http.post(`${this.apiUrl}/create`, payload, { headers, withCredentials: true });
       })
     );
   }
