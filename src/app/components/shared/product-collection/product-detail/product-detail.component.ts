@@ -11,6 +11,7 @@ import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 import { ProductReviewsComponent } from './product-reviews/product-reviews.component';
 import { takeUntil } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
+import { OrderService } from '../../../services/order.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -45,7 +46,8 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private cartService: CartService,
     private reviewService: ReviewService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private orderService: OrderService
   ) { }
 
   ngOnInit(): void {
@@ -238,26 +240,35 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     }
 
     this.isAddingToCart = true;
-    const cartItem: AddToCartRequest = {
-      product_id: this.product!.product_id,
-      variant_id: this.selectedVariant.variant_id,
-      quantity: this.quantity,
-      option_id: this.selectedCustomization?.option_id || undefined,
-      is_urgent: this.isUrgent
+    const orderData = {
+      payment_method: 'mercado_pago',
+      address_id: null, // Se establecerá en checkout si es necesario
+      coupon_code: '',
+      delivery_option: 'Recoger en Tienda', // Valor por defecto, puede ajustarse
+      item: {
+        product_id: this.product!.product_id,
+        variant_id: this.selectedVariant.variant_id,
+        quantity: this.quantity,
+        option_id: this.selectedCustomization?.option_id || null,
+        is_urgent: this.isUrgent,
+        unit_price: this.selectedVariant.calculated_price
+      }
     };
 
-    this.cartService.addToCart(cartItem).subscribe({
+    this.orderService.createOrder(orderData, orderData.item).subscribe({
       next: (response) => {
         this.isAddingToCart = false;
-        if (response.error) {
-          this.toastService.showToast(response.error, 'error');
+        if (response.success && response.data.payment_instructions?.payment_url) {
+          this.toastService.showToast('Redirigiendo a Mercado Pago...', 'success');
+          window.location.href = response.data.payment_instructions.payment_url;
         } else {
-          this.router.navigate(['/checkout']);
+          this.toastService.showToast('No se pudo obtener la URL de pago.', 'error');
         }
       },
       error: (error) => {
         this.isAddingToCart = false;
-        this.toastService.showToast(error.message || 'No se pudo añadir al carrito', 'error');
+        const errorMessage = error?.error?.message || 'No se pudo crear la orden';
+        this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
