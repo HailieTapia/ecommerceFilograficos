@@ -1,11 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { RecommendationService, RecommendationResponse, Recommendation } from '../../services/recommendation.service';
-import { CartService, AddToCartRequest } from '../../services/cart.service';
 
 @Component({
   selector: 'app-recommended-products',
@@ -18,14 +17,35 @@ export class RecommendedProductsComponent implements OnInit, OnDestroy {
   recommendations: RecommendationResponse | null = null;
   errorMessage: string | null = null;
   isAuthenticated: boolean = false;
+  currentIndex: number = 0;
+  itemsPerView: number = 3;
+  isPaused: boolean = false;
   private destroy$ = new Subject<void>();
+  private autoPlayInterval: any;
 
   constructor(
     private authService: AuthService,
     private recommendationService: RecommendationService,
-    private cartService: CartService,
     private router: Router
-  ) {}
+  ) {
+    this.updateItemsPerView();
+  }
+
+  @HostListener('window:resize')
+  updateItemsPerView() {
+    const width = window.innerWidth;
+    if (width < 640) {
+      this.itemsPerView = 1; // Mobile
+    } else if (width < 1024) {
+      this.itemsPerView = 2; // Tablet
+    } else {
+      this.itemsPerView = 3; // Desktop
+    }
+    // Reset currentIndex to prevent out-of-bounds issues
+    if (this.recommendations && this.currentIndex > this.maxIndex) {
+      this.currentIndex = this.maxIndex;
+    }
+  }
 
   ngOnInit() {
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
@@ -33,6 +53,7 @@ export class RecommendedProductsComponent implements OnInit, OnDestroy {
       if (this.isAuthenticated) {
         this.loadRecommendations();
         this.startPolling();
+        this.startAutoPlay();
       } else {
         this.recommendations = {
           message: 'Usuario no autenticado',
@@ -98,8 +119,8 @@ export class RecommendedProductsComponent implements OnInit, OnDestroy {
         product_type: 'Existencia' as 'Existencia',
         average_rating: '4.5',
         total_reviews: 100,
-        min_price: 10.0,
-        max_price: 10.0,
+        min_price: 200.0,
+        max_price: 200.0,
         total_stock: 50,
         variant_count: 1,
         category: 'General',
@@ -110,7 +131,7 @@ export class RecommendedProductsComponent implements OnInit, OnDestroy {
         standard_delivery_days: 3,
         urgent_delivery_enabled: true,
         urgent_delivery_days: 1,
-        urgent_delivery_cost: 5.0,
+        urgent_delivery_cost: 100.0,
         confidence: null,
         lift: null
       },
@@ -121,8 +142,8 @@ export class RecommendedProductsComponent implements OnInit, OnDestroy {
         product_type: 'Personalizado' as 'Personalizado',
         average_rating: '4.0',
         total_reviews: 80,
-        min_price: 15.0,
-        max_price: 20.0,
+        min_price: 300.0,
+        max_price: 400.0,
         total_stock: 30,
         variant_count: 2,
         category: 'General',
@@ -149,7 +170,58 @@ export class RecommendedProductsComponent implements OnInit, OnDestroy {
     this.errorMessage = null;
   }
 
+  private startAutoPlay() {
+    this.autoPlayInterval = setInterval(() => {
+      if (!this.isPaused && this.recommendations && this.recommendations.data.recommendations.length > this.itemsPerView) {
+        this.nextSlide();
+      }
+    }, 3000);
+  }
+
+  private stopAutoPlay() {
+    if (this.autoPlayInterval) {
+      clearInterval(this.autoPlayInterval);
+    }
+  }
+
+  nextSlide() {
+    if (this.recommendations && this.recommendations.data.recommendations.length > this.itemsPerView) {
+      this.currentIndex = (this.currentIndex >= this.maxIndex) ? 0 : this.currentIndex + 1;
+    }
+  }
+
+  prevSlide() {
+    if (this.recommendations && this.recommendations.data.recommendations.length > this.itemsPerView) {
+      this.currentIndex = (this.currentIndex <= 0) ? this.maxIndex : this.currentIndex - 1;
+    }
+  }
+
+  goToSlide(index: number) {
+    if (this.recommendations && this.recommendations.data.recommendations.length > this.itemsPerView) {
+      this.currentIndex = Math.min(index, this.maxIndex);
+    }
+  }
+
+  get maxIndex(): number {
+    return this.recommendations ? Math.max(0, this.recommendations.data.recommendations.length - this.itemsPerView) : 0;
+  }
+
+  get visibleItemsCount(): number {
+    return this.recommendations && this.recommendations.data.recommendations.length > 0
+      ? Math.min(this.itemsPerView, this.recommendations.data.recommendations.length - this.currentIndex)
+      : 0;
+  }
+
+  handleMouseEnter() {
+    this.isPaused = true;
+  }
+
+  handleMouseLeave() {
+    this.isPaused = false;
+  }
+
   ngOnDestroy() {
+    this.stopAutoPlay();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -167,9 +239,9 @@ export class RecommendedProductsComponent implements OnInit, OnDestroy {
     const maxPrice = parseFloat(product.max_price) || 0;
 
     if (minPrice === maxPrice) {
-      return `$${minPrice.toFixed(2)}`;
+      return `$${minPrice.toFixed(2)} MXN`;
     }
-    return `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+    return `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)} MXN`;
   }
 
   goToProductDetail(productId: number | null): void {
@@ -177,43 +249,6 @@ export class RecommendedProductsComponent implements OnInit, OnDestroy {
       this.router.navigate([`/collection/${productId}`]);
     } else {
       console.warn('Product ID is invalid, cannot navigate:', productId);
-    }
-  }
-
-  addToCart(product: Recommendation): void {
-    if (product.product_id != null && product.product_id > 0) {
-      const cartItem: AddToCartRequest = {
-        product_id: product.product_id,
-        variant_id: 0, // Valor predeterminado, ajustar según el backend
-        quantity: 1,
-        is_urgent: product.urgent_delivery_enabled ? true : false
-      };
-      this.cartService.addToCart(cartItem).subscribe({
-        next: (response) => {
-          if (response.error) {
-            console.warn('Error al añadir al carrito:', response.error);
-            // Opcional: Mostrar notificación de error usando ToastService
-            // this.toastService.showToast(response.error, 'error');
-          } else {
-            console.log('Producto añadido al carrito:', product.name);
-            // Opcional: Mostrar notificación de éxito
-            // this.toastService.showToast(`¡${product.name} añadido al carrito!`, 'success');
-            // Recargar el carrito en CartComponent
-            this.cartService.loadCart().subscribe({
-              next: (cartResponse) => {
-                // Actualizar el carrito en CartComponent (manejo implícito vía cartItemCount$)
-              }
-            });
-          }
-        },
-        error: (error) => {
-          console.error('Error al añadir al carrito:', error);
-          // Opcional: Mostrar notificación de error
-          // this.toastService.showToast('No se pudo añadir al carrito.', 'error');
-        }
-      });
-    } else {
-      console.warn('No se puede añadir al carrito, product_id inválido:', product.product_id);
     }
   }
 
