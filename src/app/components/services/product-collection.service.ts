@@ -103,7 +103,7 @@ export class ProductCollectionService {
 
     let params = new HttpParams()
       .set('page', (filters.page || 1).toString())
-      .set('pageSize', (filters.pageSize || 10).toString());
+      .set('pageSize', (filters.pageSize || 20).toString());
 
     if (filters.sort) params = params.set('sort', filters.sort);
     if (filters.categoryId) params = params.set('categoryId', filters.categoryId.toString());

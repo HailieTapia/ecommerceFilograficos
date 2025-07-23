@@ -3,10 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { CategorieService } from '../../services/categorieService';
 import { ToastService } from '../../services/toastService';
-import { AuthService } from '../../services/auth.service';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
-import { take, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 @Component({
   selector: 'app-product-categories',
@@ -24,7 +21,6 @@ export class ProductCategoriesComponent implements OnInit {
     private categorieService: CategorieService,
     private toastService: ToastService,
     private router: Router,
-    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -52,13 +48,7 @@ export class ProductCategoriesComponent implements OnInit {
   }
 
   navigateToProducts(categoryId: number): void {
-    this.authService.getUser().pipe(
-      take(1),
-      catchError(() => of(null))
-    ).subscribe(user => {
-      const route = user && user.tipo === 'cliente' ? '/authcatalog' : '/publiccatalog';
-      this.router.navigate([route], { queryParams: { categoryId } });
-    });
+    this.router.navigate(['/collection'], { queryParams: { categoryId } });
   }
 
   trackByCategoryId(index: number, category: { category_id: number }): number {

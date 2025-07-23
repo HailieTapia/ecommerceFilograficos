@@ -12,9 +12,9 @@ import { RouterModule } from '@angular/router';
 export class NavigationComponent {
   navItems = [
     { path: '/', label: 'Inicio' },
+    { path: '/collection', label: 'Catálogo' },
     { path: '/product-categories', label: 'Categorías' },
     { path: '/offers', label: 'Ofertas' },
-    { path: '/collection', label: 'Catálogo' },
     { path: '/help', label: 'Ayuda' }
   ];
 

@@ -37,7 +37,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   products: Product[] = [];
   page = 1;
-  pageSize = 10;
+  pageSize = 20;
   totalItems = 0;
   totalPages = 0;
   filters: {
@@ -292,6 +292,29 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         queryParamsHandling: 'merge'
       });
     }
+  }
+
+  getPageNumbers(): number[] {
+    const pageNumbers: number[] = [];
+    const maxVisiblePages = 5;
+    const halfVisible = Math.floor(maxVisiblePages / 2);
+    
+    let startPage = Math.max(1, this.page - halfVisible);
+    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+    
+    return pageNumbers;
+  }
+
+  getDisplayRangeEnd(): number {
+    return Math.min(this.page * this.pageSize, this.totalItems);
   }
 
   trackByProductId(index: number, product: Product): number {

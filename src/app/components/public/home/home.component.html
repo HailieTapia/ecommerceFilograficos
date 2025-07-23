@@ -15,25 +15,36 @@
         Productos <span class="text-light-verde-fuerte dark:text-dark-success">Destacados</span>
       </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div *ngFor="let product of featuredProducts" class="shadow-sm hover:shadow-md transition-shadow duration-300 p-4 rounded-lg bg-light-background dark:bg-dark-background cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" (click)="goToProductDetail(product.product_id)">
-          <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-auto aspect-[4/3] object-cover mb-2 rounded-md">
-          <h3 class="text-base sm:text-lg font-medium mb-2 text-light-text dark:text-dark-text">{{ product.name }}</h3>
-          <div *ngIf="shouldShowRating(product)" class="flex items-center gap-2 mb-2">
-            <span class="text-sm font-medium text-light-text dark:text-dark-text">{{ getFormattedRating(product.average_rating) }}</span>
-            <div class="flex items-center">
-              <i *ngFor="let _ of [].constructor(getStarRating(product.average_rating).fullStars)" class="fas fa-star text-yellow-400 dark:text-dark-resolved"></i>
-              <i *ngIf="getStarRating(product.average_rating).halfStar" class="fas fa-star-half-alt text-yellow-400 dark:text-dark-resolved"></i>
-              <i *ngFor="let _ of [].constructor(getStarRating(product.average_rating).emptyStars)" class="far fa-star text-yellow-400 dark:text-dark-resolved"></i>
-            </div>
-            <span class="text-sm text-light-secondary dark:text-dark-secondary">({{ product.total_reviews }} reseñas)</span>
+        <div *ngFor="let product of featuredProducts" class="relative bg-light-background dark:bg-dark-background rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" (click)="goToProductDetail(product.product_id)">
+          <!-- Product Type Badge with New Icon -->
+          <div class="absolute top-3 left-3 z-10 flex items-center space-x-1">
+            <span class="bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text text-xs font-medium px-2 py-1 rounded-full">
+              {{ product.product_type }}
+            </span>
           </div>
-          <p class="text-light-text dark:text-dark-text"><strong>Descripción:</strong> {{ product.description || 'Sin descripción' }}</p>
-          <p class="text-light-text dark:text-dark-text"><strong>Categoría:</strong> {{ product.category || 'Sin categoría' }}</p>
-          <p class="text-light-text dark:text-dark-text"><strong>Tipo:</strong> {{ product.product_type }}</p>
-          <p class="text-light-text dark:text-dark-text"><strong>Precio:</strong> {{ formatPrice(product) }}</p>
-          <p class="text-light-text dark:text-dark-text"><strong>Stock:</strong> {{ product.total_stock }}</p>
-          <p class="text-light-text dark:text-dark-text"><strong>Variantes:</strong> {{ product.variant_count }}</p>
-          <p class="text-light-text dark:text-dark-text"><strong>Creado:</strong> {{ product.created_at | date:'short' }}</p>
+
+          <!-- Product Image Area -->
+          <div class="bg-light-background dark:bg-dark-blanco h-40 sm:h-48 flex items-center justify-center relative">
+            <img [src]="product.image_url || 'assets/placeholder.jpg'" [alt]="product.name" class="w-full h-full object-cover">
+          </div>
+
+          <!-- Product Info -->
+          <div class="p-4 bg-light-blanco dark:bg-dark-row-hover rounded-b-2xl">
+            <h3 class="font-medium text-light-text dark:text-dark-text mb-1 line-clamp-1">{{ product.name }}</h3>
+            <div *ngIf="shouldShowRating(product)" class="flex items-center gap-2 mb-2">
+              <span class="text-sm font-medium text-light-text dark:text-dark-text">{{ getFormattedRating(product.average_rating) }}</span>
+              <div class="flex items-center">
+                <i *ngFor="let _ of [].constructor(getStarRating(product.average_rating).fullStars)" class="fas fa-star text-yellow-400 dark:text-dark-resolved"></i>
+                <i *ngIf="getStarRating(product.average_rating).halfStar" class="fas fa-star-half-alt text-yellow-400 dark:text-dark-resolved"></i>
+                <i *ngFor="let _ of [].constructor(getStarRating(product.average_rating).emptyStars)" class="far fa-star text-yellow-400 dark:text-dark-resolved"></i>
+              </div>
+              <span class="text-sm text-light-secondary dark:text-dark-secondary">({{ product.total_reviews }} reseñas)</span>
+            </div>
+            <p class="text-xs text-light-secondary dark:text-dark-secondary mb-3">{{ product.category || 'Sin categoría' }}</p>
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-bold text-light-text dark:text-dark-text">{{ formatPrice(product) }}</span>
+            </div>
+          </div>
         </div>
       </div>
       <p *ngIf="!featuredProducts.length && !errorMessage" class="mt-4 text-light-text dark:text-dark-text">No hay productos destacados disponibles.</p>
@@ -52,13 +63,6 @@
               {{ product.product_type }}
             </span>
             <i class="fas fa-bolt text-yellow-400 dark:text-dark-resolved text-xs"></i>
-          </div>
-
-          <!-- Cart Icon -->
-          <div class="absolute top-3 right-3 z-10">
-            <button class="w-8 h-8 bg-light-background dark:bg-dark-background rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
-              <i class="fas fa-shopping-cart text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover"></i>
-            </button>
           </div>
 
           <!-- Product Image Area -->
@@ -100,13 +104,6 @@
             <span class="bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text text-xs font-medium px-2 py-1 rounded-full">
               {{ product.product_type }}
             </span>
-          </div>
-
-          <!-- Cart Icon -->
-          <div class="absolute top-3 right-3 z-10">
-            <button class="w-8 h-8 bg-light-background dark:bg-dark-background rounded-full flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
-              <i class="fas fa-shopping-cart text-light-secondary dark:text-dark-secondary hover:text-light-primary-hover dark:hover:text-dark-primary-hover"></i>
-            </button>
           </div>
 
           <!-- Product Image Area -->
