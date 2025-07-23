@@ -109,6 +109,26 @@ export class RecommendationService {
     });
   }
 
+  getRecommendations2(data: any): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/${data}`, { headers, withCredentials: true });
+      })
+    );
+  }getRecommendations3(product: string): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<any>(`${this.apiUrl}?product=${encodeURIComponent(product)}`, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+
   /**
    * Limpia los datos almacenados en caché.
    */

@@ -1,0 +1,11 @@
+<div class="recommendation-container" *ngIf="_product">
+  <h2 *ngIf="!isLoading && !errorMessage">Recomendaciones para {{ _product }}</h2>
+  <div *ngIf="isLoading" class="loading">Cargando recomendaciones...</div>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+  <ul *ngIf="recommendations.length > 0 && !isLoading" class="recommendation-list">
+    <li *ngFor="let rec of recommendations" class="recommendation-item">{{ rec.name }}</li>
+  </ul>
+  <p *ngIf="recommendations.length === 0 && !isLoading && !errorMessage" class="no-recommendations">
+    No hay recomendaciones disponibles.
+  </p>
+</div>

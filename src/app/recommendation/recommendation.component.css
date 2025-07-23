@@ -1,0 +1,38 @@
+.recommendation-container {
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid #eee;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  padding: 10px;
+}
+
+.error {
+  color: #dc3545;
+  text-align: center;
+  padding: 10px;
+}
+
+.recommendation-list {
+  list-style: none;
+  padding: 0;
+}
+
+.recommendation-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.recommendation-item:hover {
+  background-color: #f5f5f5;
+}
+
+.no-recommendations {
+  text-align: center;
+  color: #666;
+  padding: 10px;
+}

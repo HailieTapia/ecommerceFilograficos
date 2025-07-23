@@ -294,3 +294,7 @@
     </div>
   </div>
 </div>
+
+<div *ngIf="product" class="recommendations-section">
+  <app-recommendation [product]="product.name"></app-recommendation>
+</div>

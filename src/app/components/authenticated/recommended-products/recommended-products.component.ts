@@ -9,7 +9,7 @@ import { RecommendationService, RecommendationResponse, Recommendation } from '.
 @Component({
   selector: 'app-recommended-products',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './recommended-products.component.html',
   styleUrls: ['./recommended-products.component.css']
 })

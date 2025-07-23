@@ -11,11 +11,11 @@ import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 import { ProductReviewsComponent } from './product-reviews/product-reviews.component';
 import { takeUntil } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
-
+import { RecommendationComponent } from '../../../../recommendation/recommendation.component';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent, ProductReviewsComponent],
+  imports: [RecommendationComponent,CommonModule, FormsModule, RouterModule, SpinnerComponent, ProductReviewsComponent],
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css']
 })
