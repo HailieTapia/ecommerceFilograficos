@@ -105,7 +105,7 @@
         </div>
 
         <!-- Resumen del carrito -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-5 mb-5">
           <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3">Resumen del pedido</h2>
           <div class="space-y-2 mb-4">
             <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
@@ -136,11 +136,9 @@
             </button>
           </div>
         </div>
-      </div>
 
-      <!-- Productos Recomendados -->
-      <div class="mt-8">
-        <app-recommended-products></app-recommended-products>
+        <!-- Recommended Products -->
+        <app-recommended-products [cartItems]="cart.items"></app-recommended-products>
       </div>
     </div>
   </div>

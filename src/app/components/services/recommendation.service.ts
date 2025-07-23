@@ -1,18 +1,17 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, interval } from 'rxjs';
-import { switchMap, tap, catchError, retry, map, take, filter } from 'rxjs/operators';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
-import { AuthService } from './auth.service';
 import { environment } from '../../environments/config';
 
-// Interfaces para tipar las respuestas del backend
+// Interfaces for typing backend responses
 export interface Recommendation {
-  product_id: number | null;
+  product_id: number;
   name: string | null;
   description: string | null;
-  product_type: 'Existencia' | 'Personalizado' | null;
-  average_rating: number | string;
+  product_type: string | null;
+  average_rating: string;
   total_reviews: number;
   min_price: number | null;
   max_price: number | null;
@@ -27,51 +26,29 @@ export interface Recommendation {
   urgent_delivery_enabled: boolean;
   urgent_delivery_days: number | null;
   urgent_delivery_cost: number | null;
-  confidence: number | null;
-  lift: number | null;
 }
 
 export interface RecommendationResponse {
+  success: boolean;
   message: string;
   error?: string;
   data: {
-    user_id: number | null;
-    cluster: number | null;
+    product?: string;
+    cart?: string[];
     recommendations: Recommendation[];
+    count: number;
   };
 }
 
-export interface ClustersResponse {
+export interface HealthResponse {
+  success: boolean;
   message: string;
   error?: string;
   data: {
-    [clusterId: string]: {
-      average_order_quantity: number;
-      total_spent: number;
-      number_of_orders: number;
-      total_units: number;
-      number_of_users: number;
-    };
+    status: string;
+    model_loaded: boolean;
+    rules_count: number;
   };
-}
-
-export interface RecommendationsWithProductsRequest {
-  purchased_products?: string[];
-  user_data?: {
-    total_spent?: number;
-    num_orders?: number;
-    total_quantity?: number;
-    num_categories?: number;
-    avg_rating?: number;
-  };
-}
-
-// Interfaz para el usuario
-interface User {
-  userId: number;
-  tipo: string;
-  nombre: string;
-  profilePictureUrl: string | null;
 }
 
 @Injectable({
@@ -79,275 +56,91 @@ interface User {
 })
 export class RecommendationService {
   private apiUrl = `${environment.baseUrl}/recommendations`;
-  private readonly CACHE_KEY = 'recommendations-cache';
-  private readonly CACHE_DURATION = 3600 * 1000; // 1 hora en milisegundos
-  private currentUserId: number | null = null; // Almacenar el userId actual
 
   constructor(
     private csrfService: CsrfService,
-    private http: HttpClient,
-    private authService: AuthService
-  ) {
-    this.authService.getUser().pipe(
-      filter(user => !!user) // Solo procesar si hay un usuario válido
-    ).subscribe((user: User | null) => {
-      console.log('Usuario desde authService:', user); // Registro de depuración
-      this.currentUserId = user ? user.userId : null;
-    });
+    private http: HttpClient
+  ) {}
 
-    this.authService.onLogin().subscribe(() => {
-      this.clearCache();
-      this.authService.getUser().pipe(take(1)).subscribe((user: User | null) => {
-        console.log('Usuario después de login:', user); // Registro de depuración
-        this.currentUserId = user ? user.userId : null;
-      });
-    });
-
-    this.authService.onLogout().subscribe(() => {
-      this.clearCache();
-      this.currentUserId = null;
-    });
+  // Error handling
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let message = 'Error en la comunicación con el servidor';
+    if (error.error?.error) {
+      message = `Error del servidor: ${error.error.error}`;
+    } else if (error.status) {
+      message = `Error HTTP ${error.status}: ${error.message}`;
+    }
+    console.error('Error al procesar la solicitud:', error);
+    return throwError(() => new Error(message));
   }
 
-  getRecommendations2(data: any): Observable<any> {
+  /**
+   * Gets recommendations based on a single product or a cart.
+   * @param input Either a product name (string) or a cart (array of strings).
+   * @returns Observable with the recommendations.
+   */
+  getRecommendations(input: string | string[]): Observable<RecommendationResponse> {
+    // Validate input
+    if (!input) {
+      console.error('Input no proporcionado');
+      return throwError(() => new Error('Se requiere un producto o un carrito'));
+    }
+    if (typeof input === 'string' && input.trim() === '') {
+      console.error('El nombre del producto no puede estar vacío');
+      return throwError(() => new Error('El nombre del producto no puede estar vacío'));
+    }
+    if (Array.isArray(input)) {
+      if (input.length === 0) {
+        console.error('El carrito no puede estar vacío');
+        return throwError(() => new Error('El carrito no puede estar vacío'));
+      }
+      if (!input.every(item => typeof item === 'string' && item.trim() !== '')) {
+        console.error('Todos los elementos del carrito deben ser strings no vacíos');
+        return throwError(() => new Error('Todos los elementos del carrito deben ser strings no vacíos'));
+      }
+    }
+
+    // Normalize input
+    const normalizedInput = typeof input === 'string' ? input.trim() : input.map(item => item.trim());
+    const payload = typeof input === 'string' ? { product: normalizedInput } : { cart: normalizedInput };
+
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get(`${this.apiUrl}/${data}`, { headers, withCredentials: true });
-      })
-    );
-  }getRecommendations3(product: string): Observable<any> {
-    return this.csrfService.getCsrfToken().pipe(
-      switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<any>(`${this.apiUrl}?product=${encodeURIComponent(product)}`, {
-          headers,
-          withCredentials: true
+        if (!csrfToken) {
+          console.error('No se pudo obtener el CSRF token');
+          return throwError(() => new Error('Error al obtener el token CSRF'));
+        }
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken
         });
-      })
-    );
-  }
-
-
-  /**
-   * Limpia los datos almacenados en caché.
-   */
-  private clearCache(): void {
-    localStorage.removeItem(this.CACHE_KEY);
-  }
-
-  /**
-   * Obtiene datos del caché si están disponibles y no han expirado.
-   * @param userId ID del usuario para validar el caché.
-   * @returns Datos en caché o null si no están disponibles.
-   */
-  private getCachedData(userId: number): RecommendationResponse | null {
-    const cached = localStorage.getItem(this.CACHE_KEY);
-    if (!cached) {
-      console.log('No se encontró caché para la clave:', this.CACHE_KEY);
-      return null;
-    }
-
-    const parsed = JSON.parse(cached);
-    if (!parsed[userId] || Date.now() - parsed[userId].timestamp > this.CACHE_DURATION) {
-      console.log('Fallo de caché o expirado para userId:', userId);
-      return null;
-    }
-    console.log('Acierto de caché para userId:', userId, parsed[userId].data);
-    return parsed[userId].data;
-  }
-
-  /**
-   * Almacena datos en caché para un usuario específico.
-   * @param userId ID del usuario.
-   * @param data Datos a almacenar.
-   */
-  private setCachedData(userId: number, data: RecommendationResponse): void {
-    if (data.data.recommendations.length === 0 && data.error) {
-      console.log('No se almacena en caché respuesta con error:', data.error);
-      return;
-    }
-    const cached = localStorage.getItem(this.CACHE_KEY);
-    const cacheData = cached ? JSON.parse(cached) : {};
-    cacheData[userId] = {
-      timestamp: Date.now(),
-      data
-    };
-    localStorage.setItem(this.CACHE_KEY, JSON.stringify(cacheData));
-  }
-
-  /**
-   * Obtiene el ID del usuario autenticado.
-   * @returns Observable con el ID del usuario o null si no está autenticado.
-   */
-  private getUserId(): Observable<number | null> {
-    return this.authService.getUser().pipe(
-      take(1),
-      map(user => user ? user.userId : null),
-      tap(userId => console.log('getUserId devolvió:', userId)) // Registro de depuración
-    );
-  }
-
-  /**
-   * Obtiene recomendaciones para el usuario autenticado.
-   * @param poll Si es true, realiza polling periódico.
-   * @returns Observable con las recomendaciones.
-   */
-  getRecommendations(poll: boolean = false): Observable<RecommendationResponse> {
-    if (!this.authService.isLoggedIn()) {
-      console.log('Usuario no autenticado, devolviendo respuesta vacía');
-      return of({
-        message: 'Usuario no autenticado',
-        error: 'No authenticated user',
-        data: { user_id: null, cluster: null, recommendations: [] }
-      });
-    }
-
-    return this.getUserId().pipe(
-      switchMap(userId => {
-        if (!userId) {
-          console.log('No se pudo obtener el ID del usuario');
-          return of({
-            message: 'No se pudo obtener el ID del usuario',
-            error: 'Unable to retrieve user ID',
-            data: { user_id: null, cluster: null, recommendations: [] }
-          });
-        }
-
-        if (!poll) {
-          const cachedData = this.getCachedData(userId);
-          if (cachedData) {
-            return of(cachedData);
-          }
-        }
-
-        return this.csrfService.getCsrfToken().pipe(
-          switchMap(csrfToken => {
-            const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-            return this.http.get<RecommendationResponse>(`${this.apiUrl}?user_id=${userId}`, {
-              headers,
-              withCredentials: true
-            });
-          }),
-          retry({ count: 3, delay: 1000 }),
-          tap(response => {
-            if (response.data.user_id && response.data.user_id === userId) {
-              this.setCachedData(response.data.user_id, response);
-            } else {
-              console.warn('El user_id devuelto no coincide con el usuario autenticado:', response.data.user_id, userId);
-            }
-          }),
-          catchError(error => {
-            console.error('Error al obtener recomendaciones:', error);
-            const cachedData = this.getCachedData(userId);
-            if (cachedData) {
-              console.log('Devolviendo datos en caché como respaldo');
-              return of(cachedData);
-            }
-            return of({
-              message: 'No se pudieron obtener recomendaciones en este momento',
-              error: error.error?.message || 'Recomendaciones no disponibles, intenta de nuevo más tarde',
-              data: { user_id: userId, cluster: null, recommendations: [] }
-            });
-          })
+        return this.http.post<RecommendationResponse>(
+          this.apiUrl,
+          payload,
+          { headers, withCredentials: true }
         );
       }),
-      poll ? switchMap(response => interval(this.CACHE_DURATION).pipe(switchMap(() => this.getRecommendations(false)))) : map(response => response)
+      catchError(this.handleError)
     );
   }
 
   /**
-   * Obtiene recomendaciones basadas en productos comprados.
-   * @param data Datos de la solicitud (productos comprados y/o datos del usuario).
-   * @returns Observable con las recomendaciones.
+   * Checks the health status of the recommendation service.
+   * @returns Observable with the health status.
    */
-  getRecommendationsWithProducts(data: RecommendationsWithProductsRequest): Observable<RecommendationResponse> {
-    if (!this.authService.isLoggedIn()) {
-      console.log('Usuario no autenticado, devolviendo respuesta vacía');
-      return of({
-        message: 'Usuario no autenticado',
-        error: 'No authenticated user',
-        data: { user_id: null, cluster: null, recommendations: [] }
-      });
-    }
-
-    return this.getUserId().pipe(
-      switchMap(userId => {
-        if (!userId) {
-          console.log('No se pudo obtener el ID del usuario');
-          return of({
-            message: 'No se pudo obtener el ID del usuario',
-            error: 'Unable to retrieve user ID',
-            data: { user_id: null, cluster: null, recommendations: [] }
-          });
-        }
-
-        return this.csrfService.getCsrfToken().pipe(
-          switchMap(csrfToken => {
-            const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-            const payload = { ...data, user_id: userId };
-            return this.http.post<RecommendationResponse>(`${this.apiUrl}/with-products`, payload, {
-              headers,
-              withCredentials: true
-            });
-          }),
-          retry({ count: 3, delay: 1000 }),
-          tap(response => {
-            if (response.data.user_id && response.data.user_id === userId) {
-              this.setCachedData(response.data.user_id, response);
-            } else {
-              console.warn('El user_id devuelto no coincide con el usuario autenticado:', response.data.user_id, userId);
-            }
-          }),
-          catchError(error => {
-            console.error('Error al obtener recomendaciones con productos:', error);
-            const cachedData = this.getCachedData(userId);
-            if (cachedData) {
-              console.log('Devolviendo datos en caché como respaldo');
-              return of(cachedData);
-            }
-            return of({
-              message: 'No se pudieron obtener recomendaciones en este momento',
-              error: error.error?.message || 'Recomendaciones no disponibles, intenta de nuevo más tarde',
-              data: { user_id: userId, cluster: null, recommendations: [] }
-            });
-          })
-        );
-      })
-    );
-  }
-
-  /**
-   * Obtiene el resumen de clústeres.
-   * @returns Observable con el resumen de clústeres.
-   */
-  getClusters(): Observable<ClustersResponse> {
-    if (!this.authService.isLoggedIn()) {
-      console.log('Usuario no autenticado, devolviendo respuesta vacía');
-      return of({
-        message: 'Usuario no autenticado',
-        error: 'No authenticated user',
-        data: {}
-      });
-    }
-
+  checkHealth(): Observable<HealthResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<ClustersResponse>(`${this.apiUrl}/clusters`, {
-          headers,
-          withCredentials: true
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'x-csrf-token': csrfToken
         });
+        return this.http.get<HealthResponse>(
+          `${this.apiUrl}/health`,
+          { headers, withCredentials: true }
+        );
       }),
-      retry({ count: 3, delay: 1000 }),
-      catchError(error => {
-        console.error('Error al obtener el resumen de clústeres:', error);
-        return of({
-          message: 'No se pudo obtener el resumen de clústeres en este momento',
-          error: error.error?.message || 'Resumen no disponible, intenta de nuevo más tarde',
-          data: {}
-        });
-      })
+      catchError(this.handleError)
     );
   }
 }

@@ -7,7 +7,6 @@ import { ToastService } from '../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
-import { RecommendedProductsComponent } from '../recommended-products/recommended-products.component';
 
 // Registrar los datos de localización para español
 registerLocaleData(localeEs);
@@ -15,7 +14,7 @@ registerLocaleData(localeEs);
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SpinnerComponent, DatePipe,RecommendedProductsComponent],
+  imports: [CommonModule, RouterModule, FormsModule, SpinnerComponent, DatePipe],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css'],
   providers: [

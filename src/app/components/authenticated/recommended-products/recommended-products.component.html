@@ -1,52 +1,62 @@
 <section class="relative w-full bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6 sm:py-8">
-  <div class="w-full mx-auto px-2 sm:px-4 lg:px-8">
-    <!-- Header del carrusel -->
+  <div class="w-full mx-auto px-2 sm:px-4 lg:px-8 max-w-7xl">
+    <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6">
       <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-        Productos Recomendados
+        Productos recomendados para tu carrito
       </h2>
-      <div *ngIf="isAuthenticated" class="mt-2 sm:mt-0">
-        <button (click)="loadRecommendations()" class="bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text px-3 py-1 sm:px-4 sm:py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover text-xs sm:text-sm">
+      <div *ngIf="_cartItems.length > 0" class="mt-2 sm:mt-0">
+        <button 
+          (click)="getRecommendations()" 
+          class="bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text px-3 py-1 sm:px-4 sm:py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover text-xs sm:text-sm transition-transform hover:scale-105">
           Actualizar Recomendaciones
         </button>
       </div>
     </div>
 
-    <!-- Mensaje de error -->
-    <div *ngIf="errorMessage" class="bg-light-danger dark:bg-dark-danger text-light-danger-text dark:text-dark-danger-text p-3 rounded-lg mb-4 text-sm">
-      {{ errorMessage }}
-      <button (click)="loadRecommendations()" class="ml-2 bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text px-2 py-1 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover text-xs">
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="bg-light-danger dark:bg-dark-danger text-light-danger-text dark:text-dark-danger-text p-3 rounded-lg mb-4 text-sm flex items-center justify-between">
+      <span>{{ errorMessage }}</span>
+      <button *ngIf="_cartItems.length > 0" 
+              (click)="getRecommendations()" 
+              class="ml-2 bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text px-2 py-1 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover text-xs transition-transform hover:scale-105">
         Reintentar
       </button>
     </div>
 
-    <!-- Carrusel -->
-    <div *ngIf="recommendations && recommendations.data.recommendations.length > 0" class="relative" (mouseenter)="handleMouseEnter()" (mouseleave)="handleMouseLeave()">
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoading" class="text-center text-gray-600 dark:text-gray-400 py-6 text-sm sm:text-base">
+      Cargando recomendaciones...
+    </div>
+
+    <!-- Carousel -->
+    <div *ngIf="recommendations.length > 0 && !isLoading" class="relative" (mouseenter)="handleMouseEnter()" (mouseleave)="handleMouseLeave()">
       <div class="relative w-full overflow-hidden">
-        <!-- Botón anterior -->
-        <button *ngIf="recommendations.data.recommendations.length > itemsPerView" 
+        <!-- Previous Button -->
+        <button *ngIf="recommendations.length > itemsPerView" 
                 (click)="prevSlide()" 
                 [disabled]="currentIndex === 0"
-                class="absolute z-10 left-2 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 shadow-lg rounded-full p-1 sm:p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-          <i class="fas fa-chevron-left text-gray-600 dark:text-gray-300 text-xs sm:text-sm"></i>
+                class="absolute z-10 left-2 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 shadow-lg rounded-full p-2 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fas fa-chevron-left text-gray-600 dark:text-gray-300 text-sm sm:text-base"></i>
         </button>
 
-        <!-- Contenedor de productos -->
+        <!-- Product Container -->
         <div class="w-full overflow-hidden">
           <div class="flex transition-transform duration-500 ease-in-out" 
                [style.transform]="'translateX(-' + (currentIndex * (100 / itemsPerView)) + '%)'">
-            <div *ngFor="let product of recommendations.data.recommendations; let i = index" 
-                 class="flex-shrink-0 w-full sm:w-1/2 lg:w-1/3 px-2 sm:px-3 box-border">
-              <div class="relative rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all bg-white dark:bg-gray-800 h-full mx-auto" style="max-width: 320px;">
+            <div *ngFor="let product of recommendations" 
+                 class="flex-shrink-0 px-2 sm:px-3 box-border"
+                 [style.width]="'calc(' + (100 / itemsPerView) + '% - 16px)'">
+              <div class="relative rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all bg-white dark:bg-gray-800 h-full w-full mx-auto">
                 <!-- Product Type Badge -->
                 <div class="absolute top-2 left-2 z-10">
-                  <span class="bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text text-2xs sm:text-xs font-medium px-2 py-0.5 sm:py-1 rounded-full">
+                  <span class="bg-light-primary dark:bg-dark-primary text-light-blanco dark:text-dark-text text-xs sm:text-sm font-medium px-2 py-1 rounded-full">
                     {{ product.product_type || 'Sin tipo' }}
                   </span>
                 </div>
 
-                <!-- Product Image Area -->
-                <div class="h-40 sm:h-48 lg:h-56 w-full flex items-center justify-center relative cursor-pointer bg-gray-100 dark:bg-gray-700" 
+                <!-- Product Image -->
+                <div class="aspect-[4/5] w-full flex items-center justify-center relative cursor-pointer bg-gray-100 dark:bg-gray-700" 
                      (click)="goToProductDetail(product.product_id)">
                   <img [src]="product.image_url || 'assets/placeholder.jpg'" 
                        [alt]="product.name || 'Producto'" 
@@ -84,17 +94,17 @@
           </div>
         </div>
 
-        <!-- Botón siguiente -->
-        <button *ngIf="recommendations.data.recommendations.length > itemsPerView" 
+        <!-- Next Button -->
+        <button *ngIf="recommendations.length > itemsPerView" 
                 (click)="nextSlide()" 
                 [disabled]="currentIndex === maxIndex"
-                class="absolute z-10 right-2 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 shadow-lg rounded-full p-1 sm:p-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-          <i class="fas fa-chevron-right text-gray-600 dark:text-gray-300 text-xs sm:text-sm"></i>
+                class="absolute z-10 right-2 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 shadow-lg rounded-full p-2 sm:p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fas fa-chevron-right text-gray-600 dark:text-gray-300 text-sm sm:text-base"></i>
         </button>
       </div>
 
-      <!-- Indicadores de posición -->
-      <div *ngIf="recommendations.data.recommendations.length > itemsPerView" 
+      <!-- Position Indicators -->
+      <div *ngIf="recommendations.length > itemsPerView" 
            class="flex justify-center gap-2 mt-4 sm:mt-6">
         <button *ngFor="let _ of [].constructor(maxIndex + 1); let i = index" 
                 (click)="goToSlide(i)"
@@ -106,19 +116,19 @@
         </button>
       </div>
 
-      <!-- Información del carrusel -->
+      <!-- Carousel Info -->
       <div class="text-center mt-3 sm:mt-4">
         <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-          Mostrando {{ visibleItemsCount }} de {{ recommendations ? recommendations.data.recommendations.length : 0 }} productos
+          Mostrando {{ visibleItemsCount }} de {{ recommendations.length }} productos
         </p>
       </div>
     </div>
 
-    <!-- Mensaje cuando no hay recomendaciones -->
-    <div *ngIf="recommendations && recommendations.data.recommendations.length === 0 && !errorMessage" 
+    <!-- No Recommendations -->
+    <div *ngIf="recommendations.length === 0 && !isLoading && !errorMessage" 
          class="mt-6 text-center">
       <p class="text-light-text dark:text-dark-text text-sm sm:text-base">
-        {{ recommendations.message || 'No hay productos recomendados disponibles en este momento.' }}
+        No hay recomendaciones disponibles para los productos en tu carrito.
       </p>
     </div>
   </div>
