@@ -9,11 +9,12 @@ import { UserService } from '../../services/user.service';
 import { ProductService } from '../../services/product.service';
 import { BannerComponent } from '../banner/banner.component';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
+import { CarouselCategoriesComponent } from '../carousel-categories/carousel-categories.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, BannerComponent, SpinnerComponent],
+  imports: [CommonModule, RouterLink, BannerComponent, SpinnerComponent, CarouselCategoriesComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
