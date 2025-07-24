@@ -1,21 +1,21 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 font-sans w-full">
   <app-spinner [isLoading]="isLoading"></app-spinner>
 
-  <div *ngIf="!isLoading" class="max-w-6xl mx-auto">
+  <div *ngIf="!isLoading" class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
-      <div class="flex items-center gap-3 mb-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6 mb-6">
+      <div class="flex items-center gap-3 mb-4 sm:mb-6">
         <div class="bg-purple-600 p-3 rounded-full">
-          <i class="fas fa-box text-white text-xl"></i>
+          <i class="fas fa-box text-white text-lg sm:text-xl"></i>
         </div>
         <div>
-          <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mis Pedidos</h1>
-          <p class="text-gray-600 dark:text-gray-400">{{ orders.length }} pedidos encontrados</p>
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">Mis Pedidos</h1>
+          <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">{{ orders.length }} pedidos encontrados</p>
         </div>
       </div>
 
       <!-- Filtros y Búsqueda -->
-      <div class="flex flex-col sm:flex-row gap-4">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <div class="flex-1 relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -37,13 +37,13 @@
             [(ngModel)]="searchTerm"
             (keydown.enter)="performSearch()"
             placeholder="Buscar por nombre de producto o número de pedido..."
-            class="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+            class="w-full pl-10 pr-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
           />
         </div>
         <select
           [(ngModel)]="dateFilter"
           (change)="onFilterChange()"
-          class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 appearance-none cursor-pointer min-w-[140px]"
+          class="w-full sm:w-48 px-3 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 appearance-none cursor-pointer min-w-[120px] sm:min-w-[140px]"
         >
           <option *ngFor="let option of filterOptions" [value]="option.value">
             {{ option.label }}
@@ -53,11 +53,11 @@
     </div>
 
     <!-- Sin pedidos -->
-    <div *ngIf="orders.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
-      <i class="fas fa-box-open text-6xl text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
-      <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No se encontraron pedidos</h2>
-      <p class="text-gray-500 dark:text-gray-400 mb-6">Intenta ajustar tus filtros de búsqueda o explora nuestros productos.</p>
-      <a routerLink="/collection" class="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+    <div *ngIf="orders.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 sm:p-12 text-center">
+      <i class="fas fa-box-open text-4xl sm:text-6xl text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+      <h2 class="text-lg sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No se encontraron pedidos</h2>
+      <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6">Intenta ajustar tus filtros de búsqueda o explora nuestros productos.</p>
+      <a routerLink="/collection" class="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-xl hover:bg-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
         Ver Productos
       </a>
     </div>
@@ -66,12 +66,12 @@
     <div *ngIf="orders.length > 0" class="space-y-4">
       <div *ngFor="let order of orders; trackBy: trackByOrderId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
         <!-- Order Header -->
-        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div class="p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700">
+          <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto] sm:items-center gap-3 sm:gap-4">
             <div class="flex-1">
-              <div class="flex items-center gap-3 mb-2">
-                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">#PED-{{ order.order_id }}</h3>
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium"
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-2">
+                <h3 class="text-base sm:text-lg font-bold text-gray-800 dark:text-gray-100">#PED-{{ order.order_id }}</h3>
+                <span class="inline-flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
                       [ngClass]="{
                         'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': order.order_status === 'delivered',
                         'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': order.order_status === 'processing' || order.order_status === 'shipped',
@@ -88,37 +88,37 @@
               </div>
               <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                 <i class="fas fa-calendar-alt w-4 h-4"></i>
-                <span class="text-sm">{{ getFormattedDate(order.created_at) }}</span>
+                <span class="text-xs sm:text-sm">{{ getFormattedDate(order.created_at) }}</span>
               </div>
             </div>
-            <div class="text-right">
-              <p class="text-2xl font-bold text-gray-900 dark:text-gray-100">${{ order.total.toFixed(2) }} MXN</p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">{{ order.total_items }} {{ order.total_items === 1 ? 'unidad' : 'unidades' }}</p>
+            <div class="text-left sm:text-right">
+              <p class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">${{ order.total.toFixed(2) }} MXN</p>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{{ order.total_items }} {{ order.total_items === 1 ? 'unidad' : 'unidades' }}</p>
             </div>
           </div>
         </div>
 
         <!-- Products -->
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
           <div class="space-y-3">
-            <div *ngFor="let detail of order.order_details" class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
-              <div class="w-12 h-12 rounded-lg flex items-center justify-center shadow-sm">
-                <img [src]="detail.product_image" [alt]="detail.product_name" class="w-12 h-12 object-cover rounded-lg">
+            <div *ngFor="let detail of order.order_details" class="grid grid-cols-[auto_1fr] items-center gap-3 sm:gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center shadow-sm">
+                <img [src]="detail.product_image" [alt]="detail.product_name" class="w-full h-full object-cover rounded-lg">
               </div>
-              <div class="flex-1">
-                <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate">{{ detail.product_name }}</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Cantidad: {{ detail.quantity }}</p>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate" title="{{ detail.product_name }}">{{ detail.product_name }}</h4>
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Cantidad: {{ detail.quantity }}</p>
               </div>
             </div>
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex gap-3 mt-6">
-            <a [routerLink]="['/order-confirmation', order.order_id]" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2">
+          <div class="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-6">
+            <a [routerLink]="['/order-confirmation', order.order_id]" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 sm:py-3 px-3 sm:px-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
               <i class="fas fa-eye w-4 h-4"></i>
               Ver detalles
             </a>
-            <button class="flex-1 bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2">
+            <button class="flex-1 bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-semibold py-2 sm:py-3 px-3 sm:px-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm sm:text-base">
               <i class="fas fa-shopping-bag w-4 h-4"></i>
               Volver a comprar
             </button>
@@ -127,72 +127,71 @@
       </div>
 
       <!-- Paginación -->
-      <div class="flex justify-between items-center mt-6">
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+      <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-3 sm:gap-4">
+        <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           Mostrando {{ orders.length }} de {{ pagination.totalOrders }} pedidos
         </p>
         <div class="flex gap-2">
           <button (click)="changePage(pagination.currentPage - 1)"
                   [disabled]="pagination.currentPage === 1"
-                  class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">
+                  class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50 text-sm sm:text-base">
             Anterior
           </button>
           <button (click)="changePage(pagination.currentPage + 1)"
                   [disabled]="pagination.currentPage === pagination.totalPages"
-                  class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50">
+                  class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50 text-sm sm:text-base">
             Siguiente
           </button>
         </div>
       </div>
     </div>
-    
+
     <!-- Summary Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
         <div class="flex items-center gap-3">
           <div class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded-lg">
-            <i class="fas fa-clock w-5 h-5 text-yellow-600 dark:text-yellow-200"></i>
+            <i class="fas fa-clock w-4 sm:w-5 h-4 sm:h-5 text-yellow-600 dark:text-yellow-200"></i>
           </div>
           <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Pendientes</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ pendingCount }}</p>
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Pendientes</p>
+            <p class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">{{ pendingCount }}</p>
           </div>
         </div>
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
         <div class="flex items-center gap-3">
           <div class="bg-blue-100 dark:bg-blue-900 p-2 rounded-lg">
-            <i class="fas fa-truck w-5 h-5 text-blue-600 dark:text-blue-200"></i>
+            <i class="fas fa-truck w-4 sm:w-5 h-4 sm:h-5 text-blue-600 dark:text-blue-200"></i>
           </div>
           <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">En Tránsito</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ shippedCount }}</p>
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">En Tránsito</p>
+            <p class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">{{ shippedCount }}</p>
           </div>
         </div>
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
         <div class="flex items-center gap-3">
           <div class="bg-green-100 dark:bg-green-900 p-2 rounded-lg">
-            <i class="fas fa-check-circle w-5 h-5 text-green-600 dark:text-green-200"></i>
+            <i class="fas fa-check-circle w-4 sm:w-5 h-4 sm:h-5 text-green-600 dark:text-green-200"></i>
           </div>
           <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Entregados</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ deliveredCount }}</p>
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Entregados</p>
+            <p class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">{{ deliveredCount }}</p>
           </div>
         </div>
       </div>
       <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg">
         <div class="flex items-center gap-3">
           <div class="bg-purple-100 dark:bg-purple-900 p-2 rounded-lg">
-            <i class="fas fa-box w-5 h-5 text-purple-600 dark:text-purple-200"></i>
+            <i class="fas fa-box w-4 sm:w-5 h-4 sm:h-5 text-purple-600 dark:text-purple-200"></i>
           </div>
           <div>
-            <p class="text-sm text-gray-600 dark:text-gray-400">Total</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ orders.length }}</p>
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total</p>
+            <p class="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">{{ orders.length }}</p>
           </div>
         </div>
       </div>
     </div>
-    
   </div>
 </div>

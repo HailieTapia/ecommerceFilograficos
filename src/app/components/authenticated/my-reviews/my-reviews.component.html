@@ -1,16 +1,16 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 font-sans">
   <app-spinner [isLoading]="isLoadingPending || isLoadingCompleted"></app-spinner>
 
-  <div *ngIf="!(isLoadingPending && isLoadingCompleted)" class="max-w-6xl mx-auto">
+  <div *ngIf="!(isLoadingPending && isLoadingCompleted)" class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
-      <div class="flex items-center justify-between mb-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between mb-6">
         <div class="flex items-center gap-3">
           <div class="bg-purple-600 p-3 rounded-full">
             <i class="fas fa-star text-white text-xl"></i>
           </div>
           <div>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mis Opiniones</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">Mis Opiniones</h1>
             <p class="text-gray-600 dark:text-gray-400">
               {{ activeTab === 'pending' ? pendingReviews.total : completedReviews.total }} {{ activeTab === 'pending' ? 'pendientes' : 'realizadas' }}
             </p>
@@ -41,15 +41,15 @@
 
     <!-- Sin reseñas -->
     <div *ngIf="activeTab === 'pending' && pendingReviews.pendingReviews.length === 0 && !isLoadingPending || activeTab === 'completed' && completedReviews.reviews.length === 0 && !isLoadingCompleted"
-         class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center">
-      <i class="fas fa-star-half-alt text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-      <h2 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
+         class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 sm:p-12 text-center">
+      <i class="fas fa-star-half-alt text-4xl sm:text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
+      <h2 class="text-lg sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
         {{ activeTab === 'pending' ? 'No tienes reseñas pendientes' : 'No has realizado ninguna reseña' }}
       </h2>
-      <p class="text-gray-500 dark:text-gray-400 mb-6">
+      <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-6">
         {{ activeTab === 'pending' ? 'Explora tus pedidos para dejar una reseña.' : 'Comparte tu experiencia con los productos que has comprado.' }}
       </p>
-      <a *ngIf="activeTab === 'pending'" routerLink="/orders" class="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:bg-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105" [attr.aria-label]="'Ver pedidos'">
+      <a *ngIf="activeTab === 'pending'" routerLink="/orders" class="inline-flex items-center gap-2 bg-purple-600 text-white font-semibold py-2 px-4 sm:py-3 sm:px-6 rounded-xl hover:bg-purple-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105" [attr.aria-label]="'Ver pedidos'">
         Ver Pedidos
       </a>
     </div>
@@ -58,20 +58,20 @@
     <div *ngIf="activeTab === 'pending' && pendingReviews.pendingReviews.length > 0" class="space-y-4">
       <app-spinner [isLoading]="isLoadingPending"></app-spinner>
       <div *ngFor="let review of pendingReviews.pendingReviews; trackBy: trackByReviewId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-        <div class="p-6">
-          <div class="flex items-center gap-4">
-            <img [src]="getImageUrl(review)" [alt]="review.product_name" class="w-20 h-20 object-cover rounded-lg shadow-sm">
-            <div class="flex-1">
-              <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate">{{ review.product_name }}</h4>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Pedido: #PED-{{ review.order_id }}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Comprado el {{ getFormattedDate(review.order_date) }}</p>
+        <div class="p-4 sm:p-6">
+          <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] items-center gap-4">
+            <img [src]="getImageUrl(review)" [alt]="review.product_name" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg shadow-sm">
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate" title="{{ review.product_name }}">{{ review.product_name }}</h4>
+              <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Pedido: #PED-{{ review.order_id }}</p>
+              <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Comprado el {{ getFormattedDate(review.order_date) }}</p>
             </div>
             <button
               (click)="navigateToReviewCreation(review.order_id, review.product_id, review.product_name, review.image_url)"
-              class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+              class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 sm:px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg w-full sm:w-auto text-sm sm:text-base"
               [attr.aria-label]="'Dejar reseña para ' + review.product_name"
             >
-              <div class="flex items-center gap-2">
+              <div class="flex items-center justify-center gap-2">
                 <i class="fas fa-star text-yellow-400"></i>
                 Dejar Reseña
               </div>
@@ -85,26 +85,26 @@
     <div *ngIf="activeTab === 'completed' && completedReviews.reviews.length > 0" class="space-y-4">
       <app-spinner [isLoading]="isLoadingCompleted"></app-spinner>
       <div *ngFor="let review of completedReviews.reviews; trackBy: trackByReviewId" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-        <div class="p-6">
-          <div class="flex items-center gap-4">
-            <img [src]="getImageUrl(review)" [alt]="review.product_name" class="w-20 h-20 object-cover rounded-lg shadow-sm">
-            <div class="flex-1">
-              <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate">{{ review.product_name }}</h4>
+        <div class="p-4 sm:p-6">
+          <div class="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] items-center gap-4">
+            <img [src]="getImageUrl(review)" [alt]="review.product_name" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg shadow-sm">
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-gray-800 dark:text-gray-200 truncate" title="{{ review.product_name }}">{{ review.product_name }}</h4>
               <div class="flex items-center gap-2 mb-2">
                 <div class="flex items-center">
-                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).fullStars)" class="fas fa-star text-yellow-400 dark:text-yellow-400 text-xl"></i>
-                  <i *ngIf="getStarRating(review.rating).halfStar" class="fas fa-star-half-alt text-yellow-400 dark:text-yellow-400 text-xl"></i>
-                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).emptyStars)" class="far fa-star text-yellow-400 dark:text-yellow-400 text-xl"></i>
+                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).fullStars)" class="fas fa-star text-yellow-400 dark:text-yellow-400 text-base sm:text-xl"></i>
+                  <i *ngIf="getStarRating(review.rating).halfStar" class="fas fa-star-half-alt text-yellow-400 dark:text-yellow-400 text-base sm:text-xl"></i>
+                  <i *ngFor="let _ of [].constructor(getStarRating(review.rating).emptyStars)" class="far fa-star text-yellow-400 dark:text-yellow-400 text-base sm:text-xl"></i>
                 </div>
               </div>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Realizada el {{ getFormattedDate(review.created_at) }}</p>
+              <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Realizada el {{ getFormattedDate(review.created_at) }}</p>
             </div>
             <a
               [routerLink]="['/review', review.review_id]"
-              class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 sm:px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg w-full sm:w-auto text-sm sm:text-base"
               [attr.aria-label]="'Ver detalles de la reseña para ' + review.product_name"
             >
-              <div class="flex items-center gap-2">
+              <div class="flex items-center justify-center gap-2">
                 <i class="fas fa-eye w-4 h-4"></i>
                 Ver Detalles
               </div>
@@ -116,15 +116,15 @@
 
     <!-- Paginación -->
     <div *ngIf="(activeTab === 'pending' && pendingReviews.pendingReviews.length > 0) || (activeTab === 'completed' && completedReviews.reviews.length > 0)"
-         class="flex justify-between items-center mt-6">
-      <p class="text-sm text-gray-600 dark:text-gray-400">
+         class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+      <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
         Mostrando {{ activeTab === 'pending' ? pendingReviews.pendingReviews.length : completedReviews.reviews.length }} de {{ activeTab === 'pending' ? pendingReviews.total : completedReviews.total }} {{ activeTab === 'pending' ? 'pendientes' : 'reseñas' }}
       </p>
       <div class="flex gap-2">
         <button
           (click)="changePage((activeTab === 'pending' ? pendingReviews.page : completedReviews.page) - 1)"
           [disabled]="(activeTab === 'pending' ? pendingReviews.page : completedReviews.page) === 1"
-          class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           [attr.aria-label]="'Página anterior'"
         >
           Anterior
@@ -132,7 +132,7 @@
         <button
           (click)="changePage((activeTab === 'pending' ? pendingReviews.page : completedReviews.page) + 1)"
           [disabled]="(activeTab === 'pending' ? pendingReviews.page : completedReviews.page) === getTotalPages()"
-          class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           [attr.aria-label]="'Página siguiente'"
         >
           Siguiente

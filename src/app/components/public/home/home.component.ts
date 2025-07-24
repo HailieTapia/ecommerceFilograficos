@@ -2,15 +2,18 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { ProductService } from '../../services/product.service';
 import { BannerComponent } from '../banner/banner.component';
+import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, BannerComponent],
+  imports: [CommonModule, RouterLink, BannerComponent, SpinnerComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -21,14 +24,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   recentProducts: any[] = [];
   topSellingProducts: any[] = [];
   errorMessage: string | null = null;
+
   private dataSubscription: Subscription | null = null;
   private pollingSubscription: Subscription | null = null;
+  private breakpointSubscription: Subscription | null = null;
 
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private productService: ProductService,
-    private router: Router
+    private router: Router,
+    private breakpointObserver: BreakpointObserver
   ) {}
 
   ngOnInit() {
@@ -36,12 +42,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.user = user;
       if (user) {
         this.userService.getProfile().subscribe(
-          profile => {
-            this.userProfile = profile;
-          },
-          error => {
-            console.error('Error al obtener el perfil:', error);
-          }
+          profile => this.userProfile = profile,
+          error => console.error('Error al obtener el perfil:', error)
         );
       } else {
         this.userProfile = null;
@@ -59,10 +61,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.recentProducts = response.data.recentProducts || [];
         this.topSellingProducts = response.data.topSellingProducts || [];
         this.errorMessage = null;
-
-        console.log(this.featuredProducts);
-        console.log(this.recentProducts);
-        console.log(this.topSellingProducts);
       },
       error: (error) => {
         this.errorMessage = 'Error al cargar los datos del home. Por favor, intenta de nuevo más tarde.';
@@ -89,34 +87,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.dataSubscription) {
-      this.dataSubscription.unsubscribe();
-    }
-    if (this.pollingSubscription) {
-      this.pollingSubscription.unsubscribe();
-    }
+    this.dataSubscription?.unsubscribe();
+    this.pollingSubscription?.unsubscribe();
+    this.breakpointSubscription?.unsubscribe();
   }
 
-  get isAuthenticated(): boolean {
-    return !!this.user;
-  }
-
-  get isClient(): boolean {
-    return this.user && this.user.tipo === 'cliente';
+  goToProductDetail(productId: number): void {
+    this.router.navigate([`/collection/${productId}`]);
   }
 
   formatPrice(product: any): string {
     const minPrice = parseFloat(product.min_price) || 0;
     const maxPrice = parseFloat(product.max_price) || 0;
-
-    if (minPrice === maxPrice) {
-      return `$${minPrice.toFixed(2)}`;
-    }
-    return `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
-  }
-
-  goToProductDetail(productId: number): void {
-    this.router.navigate([`/collection/${productId}`]);
+    return minPrice === maxPrice
+      ? `$${minPrice.toFixed(2)}`
+      : `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
   }
 
   getStarRating(rating: string | number): { fullStars: number; halfStar: boolean; emptyStars: number } {
