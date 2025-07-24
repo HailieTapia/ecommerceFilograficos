@@ -1,11 +1,9 @@
-/* banner-admin.component.css */
-
 /* Estilo del switch */
 .switch {
   position: relative;
   display: inline-block;
-  width: 90px; /* Aumentamos el ancho para dar más espacio al texto */
-  height: 34px; /* Aumentamos la altura para que el texto se vea mejor */
+  width: 90px;
+  height: 34px;
 }
 
 .switch input {
@@ -21,7 +19,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--light-secondary, #9e9e9e); /* Color inactivo */
+  background-color: var(--light-secondary, #6b7280);
   transition: .4s;
   border-radius: 34px;
   display: flex;
@@ -32,15 +30,15 @@
 }
 
 .dark .slider {
-  background-color: var(--dark-secondary, #6b7280); /* Color inactivo en modo oscuro */
+  background-color: var(--dark-secondary, #9ca3af);
 }
 
 .slider::before {
   position: absolute;
   content: "";
-  height: 26px; /* Aumentamos el tamaño del círculo */
-  width: 26px; /* Aumentamos el tamaño del círculo */
-  left: 4px; /* Ajustamos la posición */
+  height: 26px;
+  width: 26px;
+  left: 4px;
   bottom: 4px;
   background-color: white;
   transition: .4s;
@@ -65,15 +63,15 @@
 }
 
 input:checked + .slider {
-  background-color: var(--light-primary, #3b82f6); /* Color activo (azul del tema) */
+  background-color: var(--light-primary, #2563eb);
 }
 
 .dark input:checked + .slider {
-  background-color: var(--dark-primary, #60a5fa); /* Color activo en modo oscuro */
+  background-color: var(--dark-primary, #3b82f6);
 }
 
 input:checked + .slider::before {
-  transform: translateX(56px); /* Ajustamos la posición del círculo */
+  transform: translateX(56px);
 }
 
 input:checked + .slider .status-visible {
@@ -82,4 +80,25 @@ input:checked + .slider .status-visible {
 
 input:checked + .slider .status-hidden {
   opacity: 0;
+}
+
+/* Estilo para el toggle de Angular Material */
+.custom-toggle .mat-slide-toggle-bar {
+  background-color: var(--light-secondary, #6b7280);
+}
+
+.dark .custom-toggle .mat-slide-toggle-bar {
+  background-color: var(--dark-secondary, #9ca3af);
+}
+
+.custom-toggle .mat-slide-toggle-thumb {
+  background-color: white;
+}
+
+.custom-toggle .mat-slide-toggle-ripple {
+  background-color: var(--light-primary, #2563eb);
+}
+
+.dark .custom-toggle .mat-slide-toggle-ripple {
+  background-color: var(--dark-primary, #3b82f6);
 }

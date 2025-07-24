@@ -1,146 +1,182 @@
-<div class="bg-light-background dark:bg-dark-background max-w-full mx-auto p-6 font-sans">
-  <div class="flex justify-between items-center mb-6">
+<div class="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text p-4 sm:p-6 font-sans">
+  <!-- Encabezado -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-light-table-header dark:bg-dark-table-header p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
-        <i class="fas fa-envelope text-light-primary dark:text-dark-primary"></i> Plantillas de Email
+      <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
+        <i class="fas fa-envelope text-light-primary dark:text-dark-primary"></i> Gestión de Plantillas de Correo
       </h1>
-      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Gestiona las plantillas de correos
-        electrónicos del sistema.</p>
+      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Administra las plantillas de correos electrónicos del sistema</p>
     </div>
-    <button (click)="openCreateModal()"
-      class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
-      <i class="fas fa-plus"></i> Agregar Plantilla
-    </button>
+    <div class="flex gap-2 w-full sm:w-auto">
+      <button
+        (click)="openCreateModal()"
+        class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-800 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2"
+      >
+        <i class="fas fa-plus"></i> Agregar Plantilla
+      </button>
+    </div>
   </div>
 
-  <div
-    class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
-    <h2 class="text-center font-medium text-light-text dark:text-dark-text mb-4 text-lg">Lista de Plantillas de Correo
-    </h2>
-    <div *ngIf="emailTemplate.length > 0; else noTemplates">
-      <div class="overflow-x-auto">
-        <table class="min-w-full border-collapse">
-          <thead class="bg-light-table-header dark:bg-dark-table-header">
-            <tr>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Nombre</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Asunto</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Tipo de email
-              </th>
-              <th class="px-4 py-3 text-center text-sm font-semibold text-light-text dark:text-dark-text">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let template of emailTemplate"
-              class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ template.name }}</td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ template.subject }}</td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ template.EmailType.name }}</td>
-              <td class="px-4 py-3">
-                <div class="flex justify-center items-center gap-4">
+  <!-- Tabla -->
+  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-600">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-600">
+      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text">Plantillas Activas</h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse min-w-[640px]">
+        <thead class="bg-light-table-header dark:bg-dark-table-header">
+          <tr>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Nombre</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden sm:table-cell">Asunto</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Tipo de Email</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+          <tr *ngFor="let template of emailTemplates" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
+            <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text whitespace-nowrap">{{ template.name }}</td>
+            <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-normal break-words max-w-[150px] sm:max-w-[200px] hidden sm:table-cell">{{ template.subject }}</td>
+            <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text whitespace-nowrap">{{ template.EmailType?.name || 'N/A' }}</td>
+            <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
+              <button (click)="openViewModal(template.template_id)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                <i class="fas fa-eye"></i>
+                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
+              </button>
+              <button (click)="openEditModal(template.template_id)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                <i class="fas fa-edit"></i>
+                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+              </button>
+              <button (click)="deleteEmailTemplate(template.template_id)" class="group text-gray-500 dark:text-dark-secondary hover:text-red-600 dark:hover:text-dark-danger transition-all duration-300 relative">
+                <i class="fas fa-trash"></i>
+                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="emailTemplates.length === 0">
+            <td colspan="4" class="p-2 sm:p-3 text-center text-sm text-light-secondary dark:text-dark-secondary">No hay plantillas de correo electrónico disponibles</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-                  <button (click)="openViewModal(template.template_id)"
-                    class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
-                    <i class="fas fa-eye"></i>
-                    <span
-                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
-                  </button>
+  <!-- Modal para Crear/Editar Plantilla -->
+  <app-modal #modal [title]="emailTemplateId ? 'Editar Plantilla' : 'Crear Plantilla'">
+    <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto">
+      <form [formGroup]="emailTemplateForm" (ngSubmit)="saveTemplate()" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Nombre <span class="text-red-500 dark:text-red-400">*</span></label>
+            <input
+              formControlName="name"
+              type="text"
+              placeholder="Ej. Plantilla de Bienvenida"
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            />
+            <div *ngIf="emailTemplateForm.get('name')?.touched && emailTemplateForm.get('name')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              El nombre es obligatorio.
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Tipo de Email <span class="text-red-500 dark:text-red-400">*</span></label>
+            <input
+              formControlName="email_type_id"
+              type="number"
+              placeholder="Ej. 1"
+              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            />
+            <div *ngIf="emailTemplateForm.get('email_type_id')?.touched && emailTemplateForm.get('email_type_id')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              <div *ngIf="emailTemplateForm.get('email_type_id')?.hasError('required')">El tipo de email es obligatorio.</div>
+              <div *ngIf="emailTemplateForm.get('email_type_id')?.hasError('pattern')">Debe ser un número válido.</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Asunto <span class="text-red-500 dark:text-red-400">*</span></label>
+          <input
+            formControlName="subject"
+            type="text"
+            placeholder="Ej. Bienvenido a nuestro sistema"
+            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+          />
+          <div *ngIf="emailTemplateForm.get('subject')?.touched && emailTemplateForm.get('subject')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
+            El asunto es obligatorio.
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Contenido HTML <span class="text-red-500 dark:text-red-400">*</span></label>
+          <textarea
+            formControlName="html_content"
+            placeholder="Ej. <p>Bienvenido, {USER_NAME}!</p>"
+            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            rows="6"
+          ></textarea>
+          <div *ngIf="emailTemplateForm.get('html_content')?.touched && emailTemplateForm.get('html_content')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
+            El contenido HTML es obligatorio.
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Contenido de Texto <span class="text-red-500 dark:text-red-400">*</span></label>
+          <textarea
+            formControlName="text_content"
+            placeholder="Ej. Bienvenido, {USER_NAME}!"
+            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            rows="4"
+          ></textarea>
+          <div *ngIf="emailTemplateForm.get('text_content')?.touched && emailTemplateForm.get('text_content')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
+            El contenido de texto es obligatorio.
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Variables (JSON) <span class="text-red-500 dark:text-red-400">*</span></label>
+          <textarea
+            formControlName="variables"
+            placeholder='Ej. ["USER_NAME", "EMAIL"]'
+            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            rows="3"
+          ></textarea>
+          <div *ngIf="emailTemplateForm.get('variables')?.touched && emailTemplateForm.get('variables')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
+            Las variables son obligatorias.
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row justify-end gap-4">
+          <button
+            type="button"
+            (click)="modal.close()"
+            class="w-full sm:w-auto px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="emailTemplateForm.invalid"
+            class="w-full sm:w-auto px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+          >
+            {{ emailTemplateId ? 'Actualizar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </app-modal>
 
-                  <button (click)="openEditModal(template.template_id)"
-                    class="group text-light-primary hover:text-light-primary-hover dark:text-dark-primary dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                    <i class="fas fa-edit"></i>
-                    <span
-                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
-                  </button>
-                  <button (click)="deleteEmailTemplate(template.template_id)"
-                    class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
-                    <i class="fas fa-trash"></i>
-                    <span
-                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- Modal para Ver Detalles -->
+  <app-modal #viewModal title="Detalles de la Plantilla">
+    <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text space-y-4">
+      <p><strong class="text-light-text dark:text-dark-text">Nombre:</strong> {{ selectedEmailTemplate?.name || 'N/A' }}</p>
+      <p><strong class="text-light-text dark:text-dark-text">Asunto:</strong> {{ selectedEmailTemplate?.subject || 'N/A' }}</p>
+      <p><strong class="text-light-text dark:text-dark-text">Contenido HTML:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.html_content || 'N/A' }}</span></p>
+      <p><strong class="text-light-text dark:text-dark-text">Contenido de Texto:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.text_content || 'N/A' }}</span></p>
+      <p><strong class="text-light-text dark:text-dark-text">Tipo de Email:</strong> {{ selectedEmailTemplate?.EmailType?.name || 'N/A' }}</p>
+      <p><strong class="text-light-text dark:text-dark-text">Fecha de Creación:</strong> {{ selectedEmailTemplate?.created_at | date:'medium' || 'N/A' }}</p>
+      <p><strong class="text-light-text dark:text-dark-text">Variables:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.variables?.join(', ') || 'N/A' }}</span></p>
+      <div class="flex justify-end">
+        <button
+          (click)="viewModal.close()"
+          class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300"
+        >
+          Cerrar
+        </button>
       </div>
     </div>
-    <ng-template #noTemplates>
-      <p class="text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-        <i class="fas fa-exclamation-triangle text-red-500"></i> No hay plantillas de correo
-        electrónico activas para mostrar.
-      </p>
-    </ng-template>
-  </div>
+  </app-modal>
 </div>
-<!-- Modal para Crear/Editar plantilla -->
-<app-modal #modal title="{{ emailTemplateId ? 'Editar Plantilla' : 'Nueva Plantilla' }}">
-  <form [formGroup]="emailTemplateForm" (ngSubmit)="saveTemplate()" class="p-6 space-y-6">
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Nombre</label>
-      <input formControlName="name" type="text" required
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500">
-      <span *ngIf="emailTemplateForm.get('name')?.touched && emailTemplateForm.get('name')?.hasError('required')"
-        class="text-red-500 text-sm">El nombre es obligatorio</span>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Tipo de Email</label>
-      <input formControlName="email_type_id" type="number" required
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500">
-      <span
-        *ngIf="emailTemplateForm.get('email_type_id')?.touched && emailTemplateForm.get('email_type_id')?.hasError('required')"
-        class="text-red-500 text-sm">El tipo de email es obligatorio</span>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Asunto</label>
-      <input formControlName="subject" type="text" required
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500">
-      <span *ngIf="emailTemplateForm.get('subject')?.touched && emailTemplateForm.get('subject')?.hasError('required')"
-        class="text-red-500 text-sm">El asunto es obligatorio</span>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Contenido HTML</label>
-      <textarea formControlName="html_content" required
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500"></textarea>
-      <span
-        *ngIf="emailTemplateForm.get('html_content')?.touched && emailTemplateForm.get('html_content')?.hasError('required')"
-        class="text-red-500 text-sm">El contenido HTML es obligatorio</span>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Contenido de Texto</label>
-      <textarea formControlName="text_content" required
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500"></textarea>
-      <span
-        *ngIf="emailTemplateForm.get('text_content')?.touched && emailTemplateForm.get('text_content')?.hasError('required')"
-        class="text-red-500 text-sm">El contenido de texto es obligatorio</span>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Variables (JSON)</label>
-      <input formControlName="variables" type="text" required
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500">
-      <span
-        *ngIf="emailTemplateForm.get('variables')?.touched && emailTemplateForm.get('variables')?.hasError('required')"
-        class="text-red-500 text-sm">Las variables son obligatorias</span>
-    </div>
-
-    <button type="submit" [disabled]="!emailTemplateForm.valid"
-      class="w-full bg-blue-600 text-white font-medium py-2 rounded-md hover:bg-blue-700 transition-all duration-200">
-      {{ emailTemplateId ? 'Actualizar' : 'Crear' }}
-    </button>
-  </form>
-</app-modal>
-<app-modal #viewModal title="Detalles de la Plantilla">
-  <div class="p-6 space-y-4">
-    <p><strong>Nombre:</strong> {{ selectedEmailTemplate?.name }}</p>
-    <p><strong>Asunto:</strong> {{ selectedEmailTemplate?.subject }}</p>
-    <p><strong>Contenido HTML:</strong> {{ selectedEmailTemplate?.html_content }}</p>
-    <p><strong>Contenido de Texto:</strong> {{ selectedEmailTemplate?.text_content }}</p>
-    <p><strong>Tipo de Email:</strong> {{ selectedEmailTemplate?.EmailType?.name }}</p>
-    <p><strong>Fecha de Creación:</strong> {{ selectedEmailTemplate?.created_at | date:'medium' }}</p>
-    <p><strong>Variables:</strong> {{ selectedEmailTemplate?.variables?.join(', ') }}</p>
-  </div>
-</app-modal>

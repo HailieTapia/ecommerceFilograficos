@@ -2,10 +2,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ModalComponent } from '../../../modal/modal.component';
 import { TypeService } from '../../services/type.service';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { AbstractControl } from '@angular/forms';
 import { ToastService } from '../../services/toastService';
+
 @Component({
   selector: 'app-email-type',
   imports: [ModalComponent, ReactiveFormsModule, CommonModule, FormsModule],
@@ -15,15 +15,15 @@ import { ToastService } from '../../services/toastService';
 })
 export class EmailTypeComponent implements OnInit {
   emailTypeForm: FormGroup;
-  successMessage: string = '';
-  errorMessage: string = '';
   emailTypeId: number | null = null;
   emailTypes: any[] = [];
   selectedEmailType: any = null;
   variablesList: string[] = [];
-  variableControl: FormControl = new FormControl(''); // Control para el input de variables
+  variableControl: FormControl = new FormControl('');
 
-  constructor(private toastService: ToastService,private typeService: TypeService, private fb: FormBuilder) {
+  @ViewChild('modal') modal!: ModalComponent;
+
+  constructor(private toastService: ToastService, private typeService: TypeService, private fb: FormBuilder) {
     this.emailTypeForm = this.fb.group({
       token: ['', [Validators.required, Validators.maxLength(50)]],
       name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -41,19 +41,17 @@ export class EmailTypeComponent implements OnInit {
     this.getAllEmailTypes();
   }
 
-  // Obtener todos los tipos activos
   getAllEmailTypes(): void {
     this.typeService.getAllEmailTypes().subscribe({
       next: (data) => {
         this.emailTypes = data.emailTypes;
       },
       error: (err) => {
-        console.error('Error al obtener los tipos de correo electrónico:', err);
+        this.toastService.showToast('Error al obtener los tipos de correo electrónico: ' + err.message, 'error');
       }
     });
   }
 
-  // Eliminación lógica
   deleteEmailType(id: number): void {
     this.toastService.showToast(
       '¿Estás seguro de que deseas eliminar este tipo? Esta acción no se puede deshacer.',
@@ -74,115 +72,88 @@ export class EmailTypeComponent implements OnInit {
     );
   }
 
-  // Obtener tipo por ID
   getEmailTypeById(id: number): void {
     this.typeService.getEmailTypeById(id).subscribe({
       next: (data) => {
         this.selectedEmailType = data.emailType;
-        console.log('Tipo de correo electrónico seleccionado:', this.selectedEmailType);
+        this.openModal(this.selectedEmailType);
       },
       error: (err) => {
-        console.error('Error al obtener el tipo de correo electrónico por ID:', err);
+        this.toastService.showToast('Error al obtener el tipo de correo electrónico: ' + err.message, 'error');
       }
     });
   }
 
   submitEmailType() {
-    // Actualiza required_variables con la lista actual
     this.emailTypeForm.patchValue({
       required_variables: this.variablesList
     });
 
     if (this.emailTypeForm.invalid) {
-      this.errorMessage = 'Por favor, completa todos los campos requeridos.';
+      this.emailTypeForm.markAllAsTouched();
+      this.toastService.showToast('Por favor, completa todos los campos requeridos.', 'error');
       return;
     }
 
-    console.log("Formulario válido, procediendo a enviar...");
-
-    // Actualizar el valor de required_variables en el formulario
-    this.emailTypeForm.patchValue({
-      required_variables: this.variablesList // Enviar como arreglo de strings
-    });
-
     const formData = { ...this.emailTypeForm.value };
-    console.log("Datos del formulario:", formData);
 
     if (this.emailTypeId) {
-      console.log("Actualizando tipo de correo...");
       this.updateEmailType(this.emailTypeId, formData);
     } else {
-      console.log("Creando nuevo tipo de correo...");
       this.createEmailType(formData);
     }
   }
 
-  // Crear tipo de email
   private createEmailType(data: any) {
-    console.log("Enviando datos al backend para crear:", data);
-    this.typeService.createEmailType(data).subscribe(
-      response => {
-        console.log("Respuesta del backend:", response);
-        this.successMessage = 'Tipo de correo electrónico creado exitosamente.';
+    this.typeService.createEmailType(data).subscribe({
+      next: (response) => {
+        this.toastService.showToast('Tipo de correo electrónico creado exitosamente.', 'success');
         this.modal.close();
         this.getAllEmailTypes();
       },
-      error => {
-        console.error("Error al crear el tipo de correo electrónico:", error);
-        this.errorMessage = 'Error al crear el tipo de correo electrónico: ' + error.message;
+      error: (error) => {
+        this.toastService.showToast('Error al crear el tipo de correo electrónico: ' + error.message, 'error');
       }
-    );
+    });
   }
 
-  // Actualizar tipo de email
   private updateEmailType(id: number, data: any) {
-    this.typeService.updateEmailType(id, data).subscribe(
-      response => {
-        this.successMessage = 'Tipo de correo electrónico actualizado exitosamente.';
+    this.typeService.updateEmailType(id, data).subscribe({
+      next: (response) => {
+        this.toastService.showToast('Tipo de correo electrónico actualizado exitosamente.', 'success');
         this.modal.close();
         this.getAllEmailTypes();
       },
-      error => {
-        this.errorMessage = 'Error al actualizar el tipo de correo electrónico: ' + error.message;
+      error: (error) => {
+        this.toastService.showToast('Error al actualizar el tipo de correo electrónico: ' + error.message, 'error');
       }
-    );
+    });
   }
 
-  // Agregar variable
   addVariable() {
     const variable = this.variableControl.value.trim();
     if (variable) {
       this.variablesList.push(variable);
       this.variableControl.reset();
-      // Actualizar el FormControl required_variables
       this.emailTypeForm.patchValue({
         required_variables: this.variablesList
       });
-      // Forzar validación inmediata
       this.emailTypeForm.controls['required_variables'].updateValueAndValidity();
     }
   }
-  
-  //Eliminar variable
+
   removeVariable(variable: string) {
     this.variablesList = this.variablesList.filter(v => v !== variable);
-    // Actualizar el FormControl required_variables
     this.emailTypeForm.patchValue({
       required_variables: this.variablesList
     });
-    // Forzar validación inmediata
     this.emailTypeForm.controls['required_variables'].updateValueAndValidity();
   }
 
-  // MODAL
-  @ViewChild('modal') modal!: ModalComponent;
   openModal(emailType?: any) {
-    console.log("Abriendo modal...");
     this.emailTypeForm.reset();
-    this.successMessage = '';
-    this.errorMessage = '';
     this.variablesList = [];
-    this.variableControl.reset(); // Limpiar el control del input
+    this.variableControl.reset();
 
     if (emailType) {
       this.emailTypeId = emailType.email_type_id;
@@ -191,7 +162,7 @@ export class EmailTypeComponent implements OnInit {
         token: emailType.token,
         name: emailType.name,
         description: emailType.description,
-        required_variables: this.variablesList // Asignar la lista actualizada
+        required_variables: this.variablesList
       });
     } else {
       this.emailTypeId = null;

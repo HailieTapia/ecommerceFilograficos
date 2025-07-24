@@ -25,7 +25,7 @@ module.exports = {
           'primary-hover': '#0034b0',
           secondary: '#4B5563',
           'secondary-hover': '#6B7280',
-          'table-header': '#9ac7ecff',
+          'table-header': '#d8e5f0ff',
           'row-hover': '#EFF6FF',
           success: '#DCFCE7',          // Activo
           'success-text': '#166534',

@@ -4,7 +4,6 @@ import { TemplateService } from '../../services/template.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastService } from '../../services/toastService';
-import { DataSource } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-email-template',
@@ -17,7 +16,7 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
   @ViewChild('modal') modal!: ModalComponent;
   @ViewChild('viewModal') viewModal!: ModalComponent;
   emailTemplateForm: FormGroup;
-  emailTemplate: any[] = [];
+  emailTemplates: any[] = [];
   emailTemplateId: number | null = null;
   selectedEmailTemplate: any = null;
 
@@ -31,11 +30,29 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
       variables: ['', [Validators.required]]
     });
   }
+
   ngOnInit(): void {
     this.getAllTemplates();
   }
 
-  // Mostrar detalles en el modal sin edición
+  ngAfterViewInit(): void {
+    if (!this.modal || !this.viewModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+    }
+  }
+
+  getAllTemplates(): void {
+    this.templateService.getAllTemplates().subscribe({
+      next: (data) => {
+        this.emailTemplates = data;
+      },
+      error: (err) => {
+        const errorMessage = err?.error?.message || 'Error al obtener las plantillas de correo electrónico';
+        this.toastService.showToast(errorMessage, 'error');
+      }
+    });
+  }
+
   openViewModal(templateId: number): void {
     this.templateService.getEmailTemplateById(templateId).subscribe({
       next: (data) => {
@@ -43,46 +60,12 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
         this.viewModal.open();
       },
       error: (err) => {
-        const errorMessage = err?.error?.message || 'Error al obtener los detalles';
+        const errorMessage = err?.error?.message || 'Error al obtener los detalles de la plantilla';
         this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
 
-  // Eliminación lógica
-  deleteEmailTemplate(id: number): void {
-    this.toastService.showToast(
-      '¿Estás seguro de que deseas eliminar esta plantilla? Esta acción no se puede deshacer.',
-      'warning',
-      'Confirmar',
-      () => {
-        this.templateService.deleteEmailTemplate(id).subscribe({
-          next: (response) => {
-            this.toastService.showToast(response.message || 'Plantilla eliminada exitosamente', 'success');
-            this.getAllTemplates();
-          },
-          error: (error) => {
-            const errorMessage = error?.error?.message || 'Error al eliminar plantilla de correo electrónico';
-            this.toastService.showToast(errorMessage, 'error');
-          }
-        });
-      }
-    );
-  }
-
-  // MODAL
-  ngAfterViewInit(): void {
-    if (!this.modal) {
-      this.toastService.showToast('El modal no está inicializado correctamente.', 'info');
-    }
-  }
-  // MODAL
-  openCreateModal(): void {
-    this.emailTemplateId = null;
-    this.emailTemplateForm.reset();
-    this.modal.open();
-  }
-  // MODAL
   openEditModal(templateId: number): void {
     this.emailTemplateId = templateId;
     this.templateService.getEmailTemplateById(templateId).subscribe({
@@ -100,15 +83,23 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  //crear-actualizar
+
+  openCreateModal(): void {
+    this.emailTemplateId = null;
+    this.emailTemplateForm.reset();
+    this.modal.open();
+  }
+
   saveTemplate(): void {
     if (!this.emailTemplateForm.valid) {
-      this.toastService.showToast('Por favor, completa todos los campos requeridos.', 'error');
+      this.emailTemplateForm.markAllAsTouched();
+      this.toastService.showToast('Por favor, completa todos los campos requeridos correctamente.', 'error');
       return;
     }
-    const categoryData = this.emailTemplateForm.value;
+
+    const templateData = this.emailTemplateForm.value;
     if (this.emailTemplateId) {
-      this.templateService.updateEmailTemplate(this.emailTemplateId, categoryData).subscribe({
+      this.templateService.updateEmailTemplate(this.emailTemplateId, templateData).subscribe({
         next: () => {
           this.toastService.showToast('Plantilla actualizada exitosamente', 'success');
           this.getAllTemplates();
@@ -120,7 +111,7 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
         }
       });
     } else {
-      this.templateService.createEmailTemplate(categoryData).subscribe({
+      this.templateService.createEmailTemplate(templateData).subscribe({
         next: () => {
           this.toastService.showToast('Plantilla creada exitosamente', 'success');
           this.getAllTemplates();
@@ -133,16 +124,24 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
       });
     }
   }
-  // Obtener todos los tipos activos
-  getAllTemplates(): void {
-    this.templateService.getAllTemplates().subscribe({
-      next: (data) => {
-        this.emailTemplate = data;
-      },
-      error: (err) => {
-        const errorMessage = err?.error?.message || 'Error al obtener los tipo de correo electrónico';
-        this.toastService.showToast(errorMessage, 'error');
+
+  deleteEmailTemplate(id: number): void {
+    this.toastService.showToast(
+      '¿Estás seguro de que deseas eliminar esta plantilla? Esta acción no se puede deshacer.',
+      'warning',
+      'Confirmar',
+      () => {
+        this.templateService.deleteEmailTemplate(id).subscribe({
+          next: (response) => {
+            this.toastService.showToast(response.message || 'Plantilla eliminada exitosamente', 'success');
+            this.getAllTemplates();
+          },
+          error: (error) => {
+            const errorMessage = error?.error?.message || 'Error al eliminar la plantilla de correo electrónico';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        });
       }
-    });
+    );
   }
 }
