@@ -9,6 +9,7 @@ import { environment } from '../../environments/config';
 export interface FaqCategory {
   category_id: number;
   name: string;
+  description? : string; 
 }
 
 @Injectable({

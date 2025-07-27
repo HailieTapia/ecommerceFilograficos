@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FaqService, Faq, FaqResponse } from '../../services/faq.service';
 import { FaqCategoryService, FaqCategory } from '../../services/faq-category.service';
 import { Subscription } from 'rxjs';
@@ -40,7 +40,8 @@ export class FaqComponent implements OnInit, OnDestroy {
   constructor(
     private faqService: FaqService,
     private faqCategoryService: FaqCategoryService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     window.addEventListener('resize', () => {
       this.isDesktopView = window.innerWidth >= 768;
@@ -52,9 +53,12 @@ export class FaqComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
       this.route.queryParams.subscribe(params => {
         const categoryId = params['categoryId'];
+        this.currentPage = params['page'] ? +params['page'] : 1;
         if (categoryId) {
-          this.selectedCategoryId = +categoryId; // Convertir a número
+          this.selectedCategoryId = +categoryId; // Convert to number
           this.currentPage = 1;
+        } else {
+          this.selectedCategoryId = null;
         }
         this.loadCategories();
       })
@@ -102,15 +106,20 @@ export class FaqComponent implements OnInit, OnDestroy {
           this.categories = response.map((cat: FaqCategory) => ({
             id: cat.category_id,
             name: cat.name,
-            description: '',
+            description: cat.description || '',
           }));
           this.isLoading = false;
-          // Validar selectedCategoryId
+          // Validate selectedCategoryId
           if (this.selectedCategoryId && !this.categories.some(cat => cat.id === this.selectedCategoryId)) {
             this.selectedCategoryId = null;
             this.errorMessage = 'La categoría seleccionada no existe.';
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: { page: this.currentPage },
+              queryParamsHandling: 'merge',
+            });
           }
-          this.loadFaqs(); // Cargar FAQs después de cargar categorías
+          this.loadFaqs(); // Load FAQs after categories
         },
         error: (err: any) => {
           this.errorMessage = 'Error al cargar las categorías. Por favor, intenta de nuevo.';
@@ -121,16 +130,27 @@ export class FaqComponent implements OnInit, OnDestroy {
     );
   }
 
-  selectCategory(categoryId: number): void {
+  selectCategory(categoryId: number | null): void {
     this.selectedCategoryId = categoryId;
     this.currentPage = 1;
     this.isSidebarOpen = false;
+    // Update URL query parameters
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { categoryId: categoryId || null, page: 1 },
+      queryParamsHandling: 'merge',
+    });
     this.loadFaqs();
   }
 
   changePage(page: number): void {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { page: this.currentPage },
+        queryParamsHandling: 'merge',
+      });
       this.loadFaqs();
     }
   }
@@ -174,14 +194,25 @@ export class FaqComponent implements OnInit, OnDestroy {
   }
 
   getPageNumbers(): number[] {
-    const pages = [];
-    const maxPagesToShow = 5;
-    const startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
-    const endPage = Math.min(this.totalPages, startPage + maxPagesToShow - 1);
+    const pageNumbers: number[] = [];
+    const maxVisiblePages = 5;
+    const halfVisible = Math.floor(maxVisiblePages / 2);
+
+    let startPage = Math.max(1, this.currentPage - halfVisible);
+    let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
 
     for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
+      pageNumbers.push(i);
     }
-    return pages;
+
+    return pageNumbers;
+  }
+
+  getDisplayRangeEnd(): number {
+    return Math.min(this.currentPage * this.itemsPerPage, this.totalFaqs);
   }
 }
