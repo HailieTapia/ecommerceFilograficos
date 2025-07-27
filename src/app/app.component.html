@@ -1,4 +1,4 @@
-<div class="flex min-h-screen  bg-white dark:bg-gray-900">
+<div class="flex min-h-screen bg-white dark:bg-gray-900">
   <!-- Sidebar (visible solo para administradores) -->
   <app-sidebar
     *ngIf="isLoggedIn && userRole === 'administrador'"
@@ -17,6 +17,15 @@
     </main>
     <app-footer></app-footer>
     <app-toast></app-toast>
+
+    <!-- Back to Top Button -->
+    <button
+      (click)="scrollToTop()"
+      class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 z-50"
+      title="Volver arriba"
+    >
+      <i class="fas fa-arrow-up"></i>
+    </button>
   </div>
 </div>
 

@@ -4,11 +4,11 @@ import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/public/footer/footer.component';
 import { ToastComponent } from './components/administrator/shared/toast/toast.component';
-import { SidebarComponent } from '../app/components/header/sidebar/sidebar.component'; // Importa el SidebarComponent
+import { SidebarComponent } from './components/header/sidebar/sidebar.component';
 import { ThemeService } from './components/services/theme.service';
 import { NotificationService } from './components/services/notification.service';
-import { AuthService } from './components/services/auth.service'; // Importa el AuthService
-import { CompanyService } from './components/services/company.service'; // Importa el CompanyService
+import { AuthService } from './components/services/auth.service';
+import { CompanyService } from './components/services/company.service';
 import { Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -20,7 +20,7 @@ import { Subject } from 'rxjs';
     ToastComponent,
     FooterComponent,
     HeaderComponent,
-    SidebarComponent, // Agrega el SidebarComponent
+    SidebarComponent,
     RouterOutlet,
     RouterModule,
     CommonModule,
@@ -33,7 +33,7 @@ export class AppComponent implements OnInit {
   userRole: string | null = null;
   logoPreview: string | ArrayBuffer | null = null;
   companyName: string | null = null;
-  isSidebarOpen: boolean = true; // Controla el estado del sidebar
+  isSidebarOpen: boolean = true;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -100,9 +100,13 @@ export class AppComponent implements OnInit {
       next: () => {
         this.isLoggedIn = false;
         this.userRole = null;
-        this.isSidebarOpen = true; // Restablecer el estado del sidebar
+        this.isSidebarOpen = true;
       },
       error: (err) => console.error('Error al cerrar sesión:', err)
     });
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
