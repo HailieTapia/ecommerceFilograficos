@@ -3,14 +3,14 @@ import { CartService, CartResponse, CartItem, Promotion } from '../../services/c
 import { ToastService } from '../../services/toastService';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { RecommendedProductsComponent } from '../recommended-products/recommended-products.component';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [SpinnerComponent, CommonModule, FormsModule, RecommendedProductsComponent],
+  imports: [SpinnerComponent, CommonModule, FormsModule, RouterModule, RecommendedProductsComponent],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.css']
 })
