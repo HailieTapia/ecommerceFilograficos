@@ -51,8 +51,8 @@
         <button
           (click)="selectCategory(null)"
           class="px-6 py-3 rounded-full font-medium transition-all duration-200 border-2"
-          [class]="{
-            'bg-gradient-to-r from-blue-600 to-indigo-700 text-white border-blue-600 shadow-lg ring-2 ring-blue-500 ring-opacity-50 transform scale-110': !selectedCategoryId,
+          [ngClass]="{
+            'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-500 shadow-lg transform scale-105': !selectedCategoryId,
             'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 shadow-sm hover:shadow-md': selectedCategoryId
           }"
         >
@@ -62,8 +62,8 @@
           *ngFor="let category of categories; trackBy: trackByCategoryId"
           (click)="selectCategory(category.id)"
           class="px-6 py-3 rounded-full font-medium transition-all duration-200 border-2"
-          [class]="{
-            'bg-gradient-to-r from-blue-600 to-indigo-700 text-white border-blue-600 shadow-lg ring-2 ring-blue-500 ring-opacity-50 transform scale-110': selectedCategoryId === category.id,
+          [ngClass]="{
+            'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-500 shadow-lg transform scale-105': selectedCategoryId === category.id,
             'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 shadow-sm hover:shadow-md': selectedCategoryId !== category.id
           }"
         >
@@ -224,7 +224,7 @@
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               routerLink="/support-inquiry"
-              class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+              class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               Enviar Email
             </a>
