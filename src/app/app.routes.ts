@@ -3,7 +3,7 @@ import { AuthGuard } from './guards/auth.guard';
 
 // Públicos
 import { RecoverComponent } from './components/public/recover/recover.component';
-import { LoginRedirectComponent } from './components/public/login-redirect/login-redirect.component'; // Importar el nuevo componente
+import { LoginRedirectComponent } from './components/public/login-redirect/login-redirect.component';
 import { AlexaLoginComponent } from './components/public/alexa-login/alexa-login.component';
 import { FaqComponent } from './components/public/faq/faq.component';
 import { MfaVerificationComponent } from './components/public/mfa-verification/mfa-verification.component';
@@ -100,7 +100,8 @@ export const routes: Routes = [
 
   // Públicos
   { path: 'help', component: FaqComponent, data: { breadcrumb: 'Help' } },
-  { path: 'login', component: LoginRedirectComponent, data: { breadcrumb: 'Iniciar sesión' } }, // Usar LoginRedirectComponent
+  { path: 'login', component: LoginRedirectComponent, data: { breadcrumb: 'Iniciar sesión' } },
+  { path: 'register', component: LoginRedirectComponent, data: { breadcrumb: 'Registrarse' } }, // Nueva ruta para registro
   { path: 'alexa-login', component: AlexaLoginComponent, data: { breadcrumb: 'Iniciar sesión con Alexa' } },
   { path: 'recovery', component: RecoverComponent, data: { breadcrumb: 'Recuperar cuenta' } },
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },

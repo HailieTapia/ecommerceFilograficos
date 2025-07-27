@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, HostListener } from '@angular/core';
+import { Component, EventEmitter, Output, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -6,6 +6,8 @@ import { AuthService } from '../../services/auth.service';
 import { noXSSValidator } from '../../administrator/shared/validators';
 import { ToastService } from '../../services/toastService';
 import { PasswordComponent } from '../../administrator/shared/password/password.component';
+import { ModalService } from '../../services/modal.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -14,14 +16,21 @@ import { PasswordComponent } from '../../administrator/shared/password/password.
   styleUrls: ['./register.component.css'],
   imports: [PasswordComponent, CommonModule, ReactiveFormsModule, FormsModule]
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit, OnDestroy {
   registerForm: FormGroup;
   loading = false;
   message = '';
   showModal = false;
   @Output() closed = new EventEmitter<void>();
+  private modalSubscription!: Subscription;
 
-  constructor(private toastService: ToastService, private fb: FormBuilder, private authService: AuthService, private router: Router) {
+  constructor(
+    private toastService: ToastService,
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private modalService: ModalService
+  ) {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.pattern(/^(?! )[a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+(?: [a-zA-ZáéíóúÁÉÍÓÚñÑäöüÄÖÜ]+)*$/), Validators.minLength(3), Validators.maxLength(100), noXSSValidator()]],
       email: ['', [Validators.required, Validators.email, noXSSValidator()]],
@@ -29,7 +38,22 @@ export class RegisterComponent {
       user_type: ['cliente'],
     });
   }
-  // Cierra el modal al presionar "Escape"
+
+  ngOnInit(): void {
+    this.modalSubscription = this.modalService.showRegisterModal$.subscribe(show => {
+      this.showModal = show;
+      if (!show && this.router.url.startsWith('/register')) {
+        this.router.navigate(['/']);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.modalSubscription) {
+      this.modalSubscription.unsubscribe();
+    }
+  }
+
   @HostListener('document:keydown.escape', ['$event'])
   handleEscapeKey(event: KeyboardEvent) {
     this.closeModal();
@@ -44,6 +68,7 @@ export class RegisterComponent {
       next: (response) => {
         this.toastService.showToast('Registro exitoso, revisa tu correo para verificar la cuenta.', 'success');
         this.loading = false;
+        this.closeModal();
         this.router.navigate(['/login']);
       },
       error: (error) => {
@@ -53,7 +78,12 @@ export class RegisterComponent {
       }
     });
   }
+
   closeModal() {
     this.closed.emit();
+    this.modalService.showRegisterModal(false);
+    if (this.router.url.startsWith('/register')) {
+      this.router.navigate(['/']);
+    }
   }
 }

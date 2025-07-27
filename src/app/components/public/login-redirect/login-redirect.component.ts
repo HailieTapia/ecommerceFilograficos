@@ -17,16 +17,27 @@ export class LoginRedirectComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Show the login modal
-    this.modalService.showLoginModal(true);
+    const currentUrl = this.router.url;
+    if (currentUrl.startsWith('/login')) {
+      this.modalService.showLoginModal(true);
+    } else if (currentUrl.startsWith('/register')) {
+      this.modalService.showRegisterModal(true);
+    }
 
-    // Subscribe to ModalService to detect when the modal is closed
+    // Suscribirse a los modales para detectar cuando se cierran
     this.modalSubscription = this.modalService.showLoginModal$.subscribe(show => {
-      if (!show) {
-        // When modal is closed, redirect to home
+      if (!show && currentUrl.startsWith('/login')) {
         this.router.navigate(['/']);
       }
     });
+
+    this.modalSubscription.add(
+      this.modalService.showRegisterModal$.subscribe(show => {
+        if (!show && currentUrl.startsWith('/register')) {
+          this.router.navigate(['/']);
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {

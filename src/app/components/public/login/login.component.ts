@@ -8,7 +8,7 @@ import { environment } from '../../../environments/config';
 import { noXSSValidator } from '../../administrator/shared/validators';
 import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
 import { ToastService } from '../../services/toastService';
-import { ModalService } from '../../services/modal.service'; // Add ModalService
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-login',
@@ -28,7 +28,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private modalService: ModalService // Inject ModalService
+    private modalService: ModalService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email, noXSSValidator()]],
@@ -71,20 +71,25 @@ export class LoginComponent implements OnInit, AfterViewInit {
   closeModal() {
     console.log('Cerrando modal de login');
     this.closed.emit();
-    this.modalService.showLoginModal(false); // Notify ModalService to hide modal
-    // Redirect to home or previous page
+    this.modalService.showLoginModal(false);
+    // Redirigir a la página inicial o a la página anterior
     this.route.queryParams.subscribe(params => {
       const returnUrl = params['returnUrl'] || '/';
-      // Avoid redirecting to protected routes if not authenticated
       this.authService.getUser().subscribe(user => {
         if (!user) {
-          // If not authenticated, redirect to home instead of returnUrl
           this.router.navigate(['/']);
         } else {
           this.router.navigateByUrl(returnUrl);
         }
       });
     });
+  }
+
+  openRegisterModal() {
+    console.log('Abriendo modal de registro desde login');
+    this.closeModal();
+    this.modalService.showRegisterModal(true);
+    this.router.navigate(['/register']);
   }
 
   onSubmit() {
@@ -105,7 +110,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
           this.loginForm.reset();
           this.closeModal();
 
-          // Handle redirection based on role and returnUrl
+          // Manejar redirección según el rol y returnUrl
           this.route.queryParams.subscribe(params => {
             const returnUrl = params['returnUrl'] || '/';
             this.authService.getUser().subscribe(user => {

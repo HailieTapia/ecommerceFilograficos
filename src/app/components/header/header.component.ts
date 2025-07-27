@@ -57,7 +57,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   private cartCountSubscription!: Subscription;
   private routerSubscription!: Subscription;
-  private modalSubscription!: Subscription;
+  private loginModalSubscription!: Subscription;
+  private registerModalSubscription!: Subscription;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -66,7 +67,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private companyService: CompanyService,
-    private modalService: ModalService
+    public modalService: ModalService // Cambiado de private a public
   ) {}
 
   ngOnInit(): void {
@@ -83,19 +84,29 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.profilePictureUrl = user?.profilePictureUrl || null;
       });
 
-    // Subscribe to ModalService for modal visibility
-    this.modalSubscription = this.modalService.showLoginModal$
+    // Suscripción para el modal de login
+    this.loginModalSubscription = this.modalService.showLoginModal$
       .pipe(takeUntil(this.destroy$))
       .subscribe(show => {
         console.log('ModalService showLoginModal:', show);
         this.showModal = show;
         if (!show && this.router.url.startsWith('/login')) {
-          // Redirect to home when modal is closed and on /login
           this.router.navigate(['/']);
         }
       });
 
-    // Subscribe to router events
+    // Suscripción para el modal de registro
+    this.registerModalSubscription = this.modalService.showRegisterModal$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(show => {
+        console.log('ModalService showRegisterModal:', show);
+        this.showModal2 = show;
+        if (!show && this.router.url.startsWith('/register')) {
+          this.router.navigate(['/']);
+        }
+      });
+
+    // Suscripción a eventos de navegación
     this.routerSubscription = this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -105,9 +116,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
         console.log('Navegación a:', event.urlAfterRedirects);
         if (event.urlAfterRedirects.startsWith('/login')) {
           this.showModal = true;
+          this.modalService.showLoginModal(true);
+          this.showModal2 = false;
+          this.modalService.showRegisterModal(false);
+        } else if (event.urlAfterRedirects.startsWith('/register')) {
+          this.showModal2 = true;
+          this.modalService.showRegisterModal(true);
+          this.showModal = false;
+          this.modalService.showLoginModal(false);
         } else {
           this.showModal = false;
           this.modalService.showLoginModal(false);
+          this.showModal2 = false;
+          this.modalService.showRegisterModal(false);
         }
       });
   }
@@ -121,8 +142,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (this.routerSubscription) {
       this.routerSubscription.unsubscribe();
     }
-    if (this.modalSubscription) {
-      this.modalSubscription.unsubscribe();
+    if (this.loginModalSubscription) {
+      this.loginModalSubscription.unsubscribe();
+    }
+    if (this.registerModalSubscription) {
+      this.registerModalSubscription.unsubscribe();
     }
   }
 
@@ -221,8 +245,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
     console.log('Evento de cierre del modal de login recibido');
     this.showModal = false;
     this.modalService.showLoginModal(false);
-    // Redirect to home if still on /login
     if (this.router.url.startsWith('/login')) {
+      this.router.navigate(['/']);
+    }
+  }
+
+  onRegisterModalClosed() {
+    console.log('Evento de cierre del modal de registro recibido');
+    this.showModal2 = false;
+    this.modalService.showRegisterModal(false);
+    if (this.router.url.startsWith('/register')) {
       this.router.navigate(['/']);
     }
   }

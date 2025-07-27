@@ -10,7 +10,7 @@
         <!-- Contenido del formulario -->
         <div class="text-center mb-6">
             <i class="fas fa-user-circle text-5xl text-light-primary dark:text-dark-primary mb-4"></i>
-            <h2 class="text-3xl font-bold text-light-text dark:text-dark-text">Iniciar Sesión</h2>
+            <h2 class="text-3xl font-bold text-light-text dark:text-dark-text">Bienvenido de nuevo</h2>
             <p class="text-light-secondary dark:text-dark-secondary mt-2">Ingresa tus credenciales para acceder</p>
         </div>
 
@@ -39,6 +39,14 @@
                 <!-- Campo de Contraseña -->
                 <app-password-toggle label="Contraseña" [control]="loginForm.get('password')"></app-password-toggle>
 
+                <!-- Enlace de recuperación -->
+                <div class="flex justify-end mt-2">
+                    <a href="/recovery"
+                        class="text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover hover:underline transition-all duration-300">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
                 <!-- reCAPTCHA -->
                 <div class="mb-4">
                     <label
@@ -50,14 +58,6 @@
                     </div>
                 </div>
 
-                <!-- Enlace de recuperación -->
-                <div class="flex justify-end mt-4">
-                    <a href="/recovery"
-                        class="text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover hover:underline transition-all duration-300">
-                        ¿Olvidaste tu contraseña?
-                    </a>
-                </div>
-
                 <!-- Botones y registro -->
                 <div class="mt-4 flex flex-col items-center space-y-4">
                     <button type="submit"
@@ -65,6 +65,13 @@
                         [disabled]="loginForm.invalid">
                         <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
                     </button>
+                    <div class="text-center text-sm text-light-secondary dark:text-dark-secondary">
+                        ¿No tienes una cuenta? 
+                        <a (click)="openRegisterModal()"
+                           class="text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover hover:underline transition-all duration-300 cursor-pointer">
+                            Regístrate
+                        </a>
+                    </div>
                 </div>
             </div>
         </form>

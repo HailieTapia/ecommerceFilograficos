@@ -32,11 +32,11 @@
       </button>
 
       <div *ngIf="!isLoggedIn" class="hidden md:flex items-center space-x-4">
-        <button (click)="showModal2 = true"
+        <button (click)="showModal2 = true; modalService.showRegisterModal(true)"
           class="text-white/80 hover:text-white transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-white after:transition-all after:duration-300 hover:scale-105">
           Regístrate
         </button>
-        <button (click)="showModal = true"
+        <button (click)="showModal = true; modalService.showLoginModal(true)"
           class="px-6 py-2 bg-white text-blue-600 hover:bg-gray-100 rounded-full transition-all duration-300 font-medium hover:scale-105">
           Iniciar sesión
         </button>
@@ -151,10 +151,10 @@
         {{ item.label }}
       </a>
       <div *ngIf="!isLoggedIn" class="flex flex-col space-y-2 pt-2 border-t border-gray-600">
-        <button (click)="showModal = true; showMobileMenu = false" class="w-full text-center px-4 py-2 bg-white text-blue-600 rounded-full transition-all duration-300 font-medium hover:scale-105">
+        <button (click)="showModal = true; showMobileMenu = false; modalService.showLoginModal(true)" class="w-full text-center px-4 py-2 bg-white text-blue-600 rounded-full transition-all duration-300 font-medium hover:scale-105">
           Iniciar sesión
         </button>
-        <button (click)="showModal2 = true; showMobileMenu = false" class="w-full text-center px-4 py-2 text-white border border-white rounded-full transition-all duration-300 hover:scale-105">
+        <button (click)="showModal2 = true; showMobileMenu = false; modalService.showRegisterModal(true)" class="w-full text-center px-4 py-2 text-white border border-white rounded-full transition-all duration-300 hover:scale-105">
           Regístrate
         </button>
       </div>
@@ -169,4 +169,4 @@
 
 <!-- Modals -->
 <app-login *ngIf="showModal" (closed)="onLoginModalClosed()"></app-login>
-<app-register *ngIf="showModal2" (closed)="showModal2 = false"></app-register>
+<app-register *ngIf="showModal2" (closed)="onRegisterModalClosed()"></app-register>
