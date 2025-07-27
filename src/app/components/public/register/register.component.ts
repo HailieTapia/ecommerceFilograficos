@@ -21,6 +21,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
   loading = false;
   message = '';
   showModal = false;
+  termsAccepted = false; // Nueva variable para controlar el checkbox
   @Output() closed = new EventEmitter<void>();
   private modalSubscription!: Subscription;
 
@@ -56,6 +57,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape', ['$event'])
   handleEscapeKey(event: KeyboardEvent) {
+    event.preventDefault();
     this.closeModal();
   }
 
@@ -85,5 +87,16 @@ export class RegisterComponent implements OnInit, OnDestroy {
     if (this.router.url.startsWith('/register')) {
       this.router.navigate(['/']);
     }
+  }
+
+  openLoginModal() {
+    this.closeModal();
+    this.modalService.showLoginModal(true);
+    this.router.navigate(['/login']);
+  }
+  
+  openTermsAndConditions() {
+    // Abre en nueva pestaña
+    window.open('/legal?document=T%C3%A9rminos%20y%20Condiciones', '_blank');
   }
 }
