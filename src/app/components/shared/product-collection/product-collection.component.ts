@@ -23,8 +23,8 @@ interface Collaborator {
   name: string;
 }
 
-// Tipo para las claves de filtros
-type FilterKey = 'categoryId' | 'minPrice' | 'maxPrice' | 'collaboratorId' | 'onlyOffers' | 'sort';
+// Actualizar el tipo FilterKey
+type FilterKey = 'categoryId' | 'minPrice' | 'maxPrice' | 'collaboratorId' | 'onlyOffers' | 'sort' | 'search';
 
 @Component({
   selector: 'app-product-collection',
@@ -47,13 +47,15 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     collaboratorId: number | null;
     onlyOffers: boolean;
     sort: string | null;
+    search: string | null;
   } = {
     categoryId: null,
     minPrice: null,
     maxPrice: null,
     collaboratorId: null,
     onlyOffers: false,
-    sort: null
+    sort: null,
+    search: null
   };
   isLoadingSearch = false;
   activeFilters: { key: FilterKey; value: string; rawValue: any }[] = [];
@@ -99,7 +101,8 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
             maxPrice: params['maxPrice'] ? +params['maxPrice'] : null,
             collaboratorId: params['collaboratorId'] && this.isAuthenticated && this.userRole === 'cliente' ? +params['collaboratorId'] : null,
             onlyOffers: params['onlyOffers'] === 'true',
-            sort: params['sort'] || this.selectedSortOrder || null
+            sort: params['sort'] || this.selectedSortOrder || null,
+            search: params['search'] || null // Capturar el parámetro search
           };
           this.page = params['page'] ? +params['page'] : 1;
           this.selectedSortOrder = this.filters.sort || '';
@@ -244,7 +247,8 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         maxPrice: this.filters.maxPrice ?? null,
         collaboratorId: this.filters.collaboratorId ?? null,
         onlyOffers: this.filters.onlyOffers ?? null,
-        sort: this.filters.sort ?? null
+        sort: this.filters.sort ?? null,
+        search: this.filters.search ?? null // Incluir search en queryParams
       },
       queryParamsHandling: 'merge'
     });
@@ -267,6 +271,9 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     }
     if (this.filters.onlyOffers) {
       this.activeFilters.push({ key: 'onlyOffers', value: 'Solo Ofertas', rawValue: this.filters.onlyOffers });
+    }
+    if (this.filters.search !== null) {
+      this.activeFilters.push({ key: 'search', value: `Búsqueda: ${this.filters.search}`, rawValue: this.filters.search });
     }
   }
 

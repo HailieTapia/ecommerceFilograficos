@@ -49,9 +49,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   navItems = [
     { path: '/', label: 'Inicio' },
+    { path: '/collection', label: 'Catálogo' },
     { path: '/product-categories', label: 'Categorías' },
     { path: '/offers', label: 'Ofertas' },
-    { path: '/collection', label: 'Catálogo' },
     { path: '/help', label: 'Ayuda' },
   ];
 
