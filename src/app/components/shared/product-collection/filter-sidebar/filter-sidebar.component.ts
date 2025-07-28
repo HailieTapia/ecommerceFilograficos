@@ -133,10 +133,21 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
       collaboratorId: null,
       onlyOffers: false
     };
-    this.applyFilters();
+    
+    // Emitir un objeto con todos los filtros explícitamente establecidos a null/false
+    this.filtersChange.emit({
+      categoryId: null,
+      minPrice: null,
+      maxPrice: null,
+      collaboratorId: null,
+      onlyOffers: false
+    });
   }
 
   applyPriceFilters(): void {
+    if (this.filters.minPrice !== null && this.filters.maxPrice !== null && this.filters.minPrice > this.filters.maxPrice) {
+      [this.filters.minPrice, this.filters.maxPrice] = [this.filters.maxPrice, this.filters.minPrice];
+    }
     this.applyFilters();
   }
 

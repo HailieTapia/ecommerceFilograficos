@@ -102,8 +102,16 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
             collaboratorId: params['collaboratorId'] && this.isAuthenticated && this.userRole === 'cliente' ? +params['collaboratorId'] : null,
             onlyOffers: params['onlyOffers'] === 'true',
             sort: params['sort'] || this.selectedSortOrder || null,
-            search: params['search'] || null // Capturar el parámetro search
+            search: params['search'] || null
           };
+          
+          // Forzar valores nulos si no están en los params
+          if (!params['categoryId']) this.filters.categoryId = null;
+          if (!params['minPrice']) this.filters.minPrice = null;
+          if (!params['maxPrice']) this.filters.maxPrice = null;
+          if (!params['collaboratorId']) this.filters.collaboratorId = null;
+          if (!params['onlyOffers']) this.filters.onlyOffers = false;
+          
           this.page = params['page'] ? +params['page'] : 1;
           this.selectedSortOrder = this.filters.sort || '';
           this.updateActiveFilters();
@@ -196,23 +204,43 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
   }
 
   onFiltersChange(newFilters: any): void {
-    this.filters = { ...this.filters, ...newFilters, sort: this.selectedSortOrder };
+    // Aplicar los nuevos filtros, incluyendo null para los valores limpios
+    this.filters = { 
+      ...this.filters, 
+      ...newFilters,
+      sort: this.selectedSortOrder 
+    };
+    
+    // Forzar collaboratorId a null si no es cliente autenticado
     if (!this.isAuthenticated || this.userRole !== 'cliente') {
       this.filters.collaboratorId = null;
     }
+    
     this.page = 1;
     this.updateActiveFilters();
+    
+    // Construir queryParams asegurando que los valores null se reflejen
+    const queryParams: any = {
+      page: 1,
+      categoryId: newFilters.categoryId !== undefined ? newFilters.categoryId : null,
+      minPrice: newFilters.minPrice !== undefined ? newFilters.minPrice : null,
+      maxPrice: newFilters.maxPrice !== undefined ? newFilters.maxPrice : null,
+      collaboratorId: newFilters.collaboratorId !== undefined ? newFilters.collaboratorId : null,
+      onlyOffers: newFilters.onlyOffers !== undefined ? newFilters.onlyOffers : false,
+      sort: this.filters.sort || null,
+      search: this.filters.search || null
+    };
+    
+    // Eliminar parámetros cuando son null/false
+    Object.keys(queryParams).forEach(key => {
+      if (queryParams[key] === null || queryParams[key] === false) {
+        queryParams[key] = undefined;
+      }
+    });
+    
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: {
-        page: 1,
-        categoryId: this.filters.categoryId ?? null,
-        minPrice: this.filters.minPrice ?? null,
-        maxPrice: this.filters.maxPrice ?? null,
-        collaboratorId: this.filters.collaboratorId ?? null,
-        onlyOffers: this.filters.onlyOffers ?? null,
-        sort: this.filters.sort ?? null
-      },
+      queryParams: queryParams,
       queryParamsHandling: 'merge'
     });
   }
@@ -236,20 +264,25 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     } else {
       this.filters[key] = null;
     }
+    
     this.page = 1;
     this.updateActiveFilters();
+    
+    // Construir queryParams
+    const queryParams: any = {
+      page: 1,
+      categoryId: this.filters.categoryId ?? undefined,
+      minPrice: this.filters.minPrice ?? undefined,
+      maxPrice: this.filters.maxPrice ?? undefined,
+      collaboratorId: this.filters.collaboratorId ?? undefined,
+      onlyOffers: this.filters.onlyOffers ? true : undefined,
+      sort: this.filters.sort ?? undefined,
+      search: this.filters.search ?? undefined
+    };
+    
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: {
-        page: 1,
-        categoryId: this.filters.categoryId ?? null,
-        minPrice: this.filters.minPrice ?? null,
-        maxPrice: this.filters.maxPrice ?? null,
-        collaboratorId: this.filters.collaboratorId ?? null,
-        onlyOffers: this.filters.onlyOffers ?? null,
-        sort: this.filters.sort ?? null,
-        search: this.filters.search ?? null // Incluir search en queryParams
-      },
+      queryParams: queryParams,
       queryParamsHandling: 'merge'
     });
   }
