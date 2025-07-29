@@ -5,7 +5,7 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/config';
 import { CsrfService } from './csrf.service';
 
-// Interfaces para tipar las respuestas (reutilizadas de los servicios originales)
+// Interfaces para tipar las respuestas
 export interface Product {
   product_id: number;
   name: string;
@@ -17,6 +17,8 @@ export interface Product {
   variant_count: number;
   image_url: string | null;
   collaborator?: { id: number; name: string } | null;
+  average_rating: number;
+  total_reviews: number;
 }
 
 export interface ProductVariant {
@@ -34,6 +36,8 @@ export interface ProductVariant {
     image_url: string;
     order: number;
   }[];
+  average_rating: number;
+  total_reviews: number;
 }
 
 export interface ProductBreadcrumb {
@@ -55,6 +59,8 @@ export interface ProductDetail {
   urgent_delivery_cost: number;
   collaborator?: { id: number; name: string } | null;
   breadcrumb: ProductBreadcrumb[];
+  average_rating: number;
+  total_reviews: number;
 }
 
 export interface ProductResponse {
@@ -85,13 +91,14 @@ export class ProductCollectionService {
    * Si el usuario está autenticado, incluye el token CSRF y cookies.
    * @param filters Filtros opcionales para la búsqueda y paginación.
    * @param filters.page Página actual (default: 1).
-   * @param filters.pageSize Tamaño de la página (default: 10).
+   * @param filters.pageSize Tamaño de la página (default: 20).
    * @param filters.sort Ordenamiento (ej. 'name:ASC').
    * @param filters.categoryId ID de la categoría.
    * @param filters.search Término de búsqueda (nombre, descripción, SKU, colaborador si autenticado).
    * @param filters.minPrice Precio mínimo.
    * @param filters.maxPrice Precio máximo.
    * @param filters.collaboratorId ID del colaborador.
+   * @param filters.averageRating Calificación promedio (entero 0-5).
    * @param filters.attributes Atributos del producto (JSON).
    * @param isAuthenticated Indica si el usuario está autenticado (para incluir token CSRF y cookies).
    * @returns Observable con la respuesta del servidor.
@@ -111,6 +118,9 @@ export class ProductCollectionService {
     if (filters.minPrice) params = params.set('minPrice', filters.minPrice.toString());
     if (filters.maxPrice) params = params.set('maxPrice', filters.maxPrice.toString());
     if (filters.collaboratorId) params = params.set('collaboratorId', filters.collaboratorId.toString());
+    if (filters.averageRating !== undefined && filters.averageRating !== null) {
+      params = params.set('averageRating', filters.averageRating.toString());
+    }
     if (filters.attributes) params = params.set('attributes', JSON.stringify(filters.attributes));
 
     if (isAuthenticated) {

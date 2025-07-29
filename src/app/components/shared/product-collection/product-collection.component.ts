@@ -192,6 +192,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         if (this.products.length === 0 && this.page === 1) {
           this.toastService.showToast('No hay productos disponibles para estos filtros.', 'info');
         }
+        console.log(this.products)
       },
       error: (error) => {
         this.isLoadingSearch = false;
@@ -285,6 +286,47 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
       queryParams: queryParams,
       queryParamsHandling: 'merge'
     });
+  }
+
+  clearAllFilters(): void {
+    // Resetear todos los filtros a sus valores por defecto
+    this.filters = {
+      categoryId: null,
+      minPrice: null,
+      maxPrice: null,
+      collaboratorId: null,
+      onlyOffers: false,
+      sort: null,
+      search: null
+    };
+
+    // Resetear el ordenamiento seleccionado
+    this.selectedSortOrder = '';
+
+    // Volver a la primera página
+    this.page = 1;
+
+    // Actualizar filtros activos
+    this.updateActiveFilters();
+
+    // Navegar y limpiar todos los query params relacionados con filtros
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        page: 1,
+        categoryId: undefined,
+        minPrice: undefined,
+        maxPrice: undefined,
+        collaboratorId: undefined,
+        onlyOffers: undefined,
+        sort: undefined,
+        search: undefined
+      },
+      queryParamsHandling: 'merge'
+    });
+
+    // Mostrar mensaje de confirmación
+    this.toastService.showToast('Todos los filtros han sido limpiados', 'success');
   }
 
   private updateActiveFilters(): void {

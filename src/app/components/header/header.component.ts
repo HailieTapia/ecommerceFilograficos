@@ -88,7 +88,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.loginModalSubscription = this.modalService.showLoginModal$
       .pipe(takeUntil(this.destroy$))
       .subscribe(show => {
-        console.log('ModalService showLoginModal:', show);
         this.showModal = show;
         if (!show && this.router.url.startsWith('/login')) {
           this.router.navigate(['/']);
@@ -99,7 +98,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.registerModalSubscription = this.modalService.showRegisterModal$
       .pipe(takeUntil(this.destroy$))
       .subscribe(show => {
-        console.log('ModalService showRegisterModal:', show);
         this.showModal2 = show;
         if (!show && this.router.url.startsWith('/register')) {
           this.router.navigate(['/']);
@@ -113,7 +111,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe((event: NavigationEnd) => {
-        console.log('Navegación a:', event.urlAfterRedirects);
         if (event.urlAfterRedirects.startsWith('/login')) {
           this.showModal = true;
           this.modalService.showLoginModal(true);
@@ -233,7 +230,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   goToCart(): void {
     if (!this.isLoggedIn) {
-      console.log('goToCart: Mostrando modal de login');
       this.modalService.showLoginModal(true);
       this.router.navigate(['login'], { queryParams: { returnUrl: '/cart' } });
     } else {
@@ -242,7 +238,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onLoginModalClosed() {
-    console.log('Evento de cierre del modal de login recibido');
     this.showModal = false;
     this.modalService.showLoginModal(false);
     if (this.router.url.startsWith('/login')) {
@@ -251,7 +246,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onRegisterModalClosed() {
-    console.log('Evento de cierre del modal de registro recibido');
     this.showModal2 = false;
     this.modalService.showRegisterModal(false);
     if (this.router.url.startsWith('/register')) {

@@ -46,26 +46,21 @@ export class ProductReviewsComponent implements OnInit {
       this.toastService.showToast('ID de producto inválido', 'error');
       return;
     }
-    console.log('ProductReviewsComponent initialized with productId:', this.productId);
     this.loadReviews();
   }
 
   loadReviews(): void {
     this.isLoading = true;
-    console.log('Fetching reviews with params:', { productId: this.productId, page: this.page, pageSize: this.pageSize, filters: this.filters });
     this.reviewService.getReviewsByProduct(this.productId, this.page, this.pageSize, this.filters).subscribe({
       next: (response: ReviewsResponse) => {
-        console.log('Reviews response:', response);
         this.reviews = response.reviews || [];
         this.totalReviews = response.total || 0;
         this.hasMoreReviews = this.page * this.pageSize < this.totalReviews;
         this.reviewsWithPhotos = this.reviews.filter(review => review.media && review.media.length > 0);
         this.isLoading = false;
         if (this.reviews.length === 0 && this.totalReviews > 0) {
-          console.warn('No reviews returned, but totalReviews > 0. Check filters or backend response.');
           this.toastService.showToast('No se encontraron reseñas con los filtros aplicados', 'warning');
         }
-        console.log('Reviews set:', this.reviews);
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -83,19 +78,15 @@ export class ProductReviewsComponent implements OnInit {
 
   loadMore(): void {
     this.page++;
-    console.log('Loading more reviews, page:', this.page);
     this.reviewService.getReviewsByProduct(this.productId, this.page, this.pageSize, this.filters).subscribe({
       next: (response: ReviewsResponse) => {
-        console.log('Load more reviews response:', response);
         this.reviews = [...this.reviews, ...(response.reviews || [])];
         this.totalReviews = response.total || 0;
         this.hasMoreReviews = this.page * this.pageSize < this.totalReviews;
         this.reviewsWithPhotos = this.reviews.filter(review => review.media && review.media.length > 0);
-        console.log('Reviews after load more:', this.reviews);
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error loading more reviews:', error);
         this.toastService.showToast(error.message || 'Error al cargar más reseñas', 'error');
         this.cdr.detectChanges();
       }
@@ -103,7 +94,6 @@ export class ProductReviewsComponent implements OnInit {
   }
 
   applyFilters(): void {
-    console.log('Applying filters:', this.filters);
     this.page = 1;
     this.reviews = [];
     this.loadReviews();

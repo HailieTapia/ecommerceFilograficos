@@ -1,6 +1,18 @@
 <div class="py-10 px-5 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen font-sans w-full">
   <app-spinner [isLoading]="isLoadingSearch"></app-spinner>
 
+  <!-- Título -->
+  <div class="text-center mb-12">
+    <div class="flex items-center justify-center gap-3 mb-4">
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-200">
+        Explora Nuestros Productos
+      </h1>
+    </div>
+    <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      Descubre nuestra amplia gama de productos
+    </p>
+  </div>
+
   <div *ngIf="!isLoadingSearch" class="max-w-7xl mx-auto">
     <div class="flex flex-col lg:flex-row gap-6">
       <!-- Barra lateral de filtros -->
@@ -14,11 +26,26 @@
 
       <!-- Contenido principal -->
       <div class="lg:w-3/4">
-        <!-- Título, filtros activos y enlace al carrito -->
+        <!-- Sección de ordenamiento y filtros activos -->
         <div class="mb-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <!-- Primera fila: Información de productos y ordenamiento -->
+          <div class="flex justify-between items-center mb-4">
+            <p class="text-sm text-light-secondary dark:text-dark-secondary">
+              Mostrando {{ (page - 1) * pageSize + 1 }}-{{ getDisplayRangeEnd() }} de {{ totalItems }} productos
+            </p>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-medium text-light-text dark:text-dark-text">Ordenar por:</span>
+              <select [(ngModel)]="selectedSortOrder" (ngModelChange)="onSortChange()"
+                      class="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-light-text dark:text-dark-text rounded-lg text-sm focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition">
+                <option *ngFor="let option of sortOptions" [value]="option.value">{{ option.label }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Segunda fila: Filtros activos (alineado a la izquierda) -->
+          <div class="flex items-center justify-between">
             <div class="flex items-center gap-2 flex-wrap">
-              <h1 class="text-2xl font-bold text-light-text dark:text-dark-text">Catálogo de Productos</h1>
+              <span class="text-md font-medium text-light-text dark:text-dark-text">Filtros activos:</span>
               <span *ngFor="let filter of activeFilters; trackBy: trackByFilter"
                     class="inline-flex items-center bg-light-primary dark:bg-dark-primary text-white text-sm font-medium px-3 py-1 rounded-full">
                 {{ filter.value }}
@@ -28,13 +55,12 @@
                   </svg>
                 </button>
               </span>
-            </div>
-            <div class="flex items-center gap-4">
-              <!-- Dropdown de ordenamiento -->
-              <select [(ngModel)]="selectedSortOrder" (ngModelChange)="onSortChange()"
-                      class="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-light-text dark:text-dark-text rounded-lg text-sm focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition">
-                <option *ngFor="let option of sortOptions" [value]="option.value">{{ option.label }}</option>
-              </select>
+              <!-- Botón de limpiar todos los filtros -->
+              <button *ngIf="activeFilters.length > 0" 
+                      (click)="clearAllFilters()"
+                      class="text-md text-light-verde-fuerte dark:text-dark-text hover:text-light-resolved-text dark:hover:text-dark-secondary-hovertransition-colors flex items-center space-x-1 focus:outline-none underline hover:no-underline">
+                <span>Limpiar todos</span>
+              </button>
             </div>
           </div>
         </div>
@@ -94,7 +120,7 @@
         <!-- Paginación -->
         <div *ngIf="products.length > 0" class="flex flex-col sm:flex-row justify-between items-center mt-6 text-light-text dark:text-dark-text gap-4">
           <p class="text-sm text-light-secondary dark:text-dark-secondary">
-            Mostrando {{ (page - 1) * pageSize + 1 }}-{{ getDisplayRangeEnd() }} de {{ totalItems }} productos (Página {{ page }} de {{ totalPages }})
+            Página {{ page }} de {{ totalPages }}
           </p>
           <div class="flex items-center gap-2">
             <button [disabled]="page === 1" (click)="changePage(page - 1)"
