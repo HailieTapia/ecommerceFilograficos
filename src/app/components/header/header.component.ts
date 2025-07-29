@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -32,10 +32,13 @@ import { RegisterComponent } from '../../components/public/register/register.com
   styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  userRole: string | null = null;
+  @Input() isSidebarOpen: boolean = true;
+  @Input() isLoggedIn: boolean = false;
+  @Input() userRole: string | null = null;
+  @Output() toggleSidebarEvent = new EventEmitter<void>();
+
   userName: string | null = null;
   profilePictureUrl: string | null = null;
-  isLoggedIn: boolean = false;
   company: any;
   logoPreview: string | ArrayBuffer | null = null;
   cartItemCount: number = 0;
@@ -46,6 +49,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   showMobileSearch = false;
   showMobileProfileMenu = false;
   showMobileAdminMenu = false;
+  isMobile: boolean = false;
 
   navItems = [
     { path: '/', label: 'Inicio' },
@@ -67,10 +71,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private companyService: CompanyService,
-    public modalService: ModalService // Cambiado de private a public
+    public modalService: ModalService
   ) {}
 
   ngOnInit(): void {
+    this.checkScreenSize();
+    window.addEventListener('resize', this.checkScreenSize.bind(this));
+
     this.cartCountSubscription = this.cartService.cartItemCount$
       .pipe(takeUntil(this.destroy$))
       .subscribe(count => (this.cartItemCount = count));
@@ -84,7 +91,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.profilePictureUrl = user?.profilePictureUrl || null;
       });
 
-    // Suscripción para el modal de login
     this.loginModalSubscription = this.modalService.showLoginModal$
       .pipe(takeUntil(this.destroy$))
       .subscribe(show => {
@@ -94,7 +100,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
       });
 
-    // Suscripción para el modal de registro
     this.registerModalSubscription = this.modalService.showRegisterModal$
       .pipe(takeUntil(this.destroy$))
       .subscribe(show => {
@@ -104,7 +109,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
       });
 
-    // Suscripción a eventos de navegación
     this.routerSubscription = this.router.events
       .pipe(
         filter(event => event instanceof NavigationEnd),
@@ -145,6 +149,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (this.registerModalSubscription) {
       this.registerModalSubscription.unsubscribe();
     }
+    window.removeEventListener('resize', this.checkScreenSize.bind(this));
+  }
+
+  checkScreenSize(): void {
+    this.isMobile = window.innerWidth < 768;
   }
 
   getCompanyInfo(): void {

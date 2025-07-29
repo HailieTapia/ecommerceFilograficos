@@ -1,36 +1,47 @@
-<div class="flex min-h-screen bg-light-background dark:bg-gray-900">
-  <!-- Sidebar (visible solo para administradores) -->
-  <app-sidebar
-    *ngIf="isLoggedIn && userRole === 'administrador'"
-    [sidebarOpen]="isSidebarOpen"
-    [logoPreview]="logoPreview"
-    [companyName]="companyName"
+<div class="flex flex-col min-h-screen bg-light-background dark:bg-gray-900">
+  <!-- Header -->
+  <app-header
     (toggleSidebarEvent)="toggleSidebar()"
-    (logout)="logout()"
-  ></app-sidebar>
+    [isSidebarOpen]="isSidebarOpen"
+    [isLoggedIn]="isLoggedIn"
+    [userRole]="userRole"
+  ></app-header>
 
-  <!-- Contenido principal -->
-  <div class="flex flex-col flex-1">
-    <app-header></app-header>
-    <main class="flex-grow">
-      <router-outlet></router-outlet>
-    </main>
-    <!-- Footer para no administradores (dentro del contenedor principal) -->
-    <app-footer *ngIf="!(isLoggedIn && userRole === 'administrador')"></app-footer>
-    <app-toast></app-toast>
+  <!-- Main Content and Sidebar -->
+  <div class="flex flex-1">
+    <!-- Sidebar (visible only for administrators, overlay on mobile) -->
+    <app-sidebar
+      *ngIf="isLoggedIn && userRole === 'administrador'"
+      [sidebarOpen]="isSidebarOpen"
+      [logoPreview]="logoPreview"
+      [companyName]="companyName"
+      (toggleSidebarEvent)="toggleSidebar()"
+      (logout)="logout()"
+    ></app-sidebar>
 
-    <!-- Back to Top Button -->
-    <button
-      (click)="scrollToTop()"
-      class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 z-50"
-      title="Volver arriba"
-    >
-      <i class="fas fa-arrow-up"></i>
-    </button>
+    <!-- Main Content -->
+    <div class="flex flex-col flex-1">
+      <main class="flex-grow">
+        <router-outlet></router-outlet>
+      </main>
+      <!-- Footer for non-administrators (inside main container) -->
+      <app-footer *ngIf="!(isLoggedIn && userRole === 'administrador')"></app-footer>
+    </div>
   </div>
+
+  <!-- Footer for administrators (full-width) -->
+  <app-footer *ngIf="isLoggedIn && userRole === 'administrador'" class="w-full"></app-footer>
+
+  <!-- Back to Top Button -->
+  <button
+    (click)="scrollToTop()"
+    class="fixed bottom-6 right-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 transform hover:scale-105 z-50"
+    title="Volver arriba"
+  >
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <app-toast></app-toast>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </div>
-
-<!-- Footer para administradores (fuera del contenedor principal, ocupa ancho completo) -->
-<app-footer *ngIf="isLoggedIn && userRole === 'administrador'" class="w-full"></app-footer>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

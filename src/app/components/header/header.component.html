@@ -1,4 +1,4 @@
-<header class="bg-light-encabezado dark:bg-dark-background shadow-md sticky top-0 z-50">
+<header class="bg-light-encabezado dark:bg-dark-background shadow-md sticky top-0 z-40">
   <!-- Non-Admin Header -->
   <div *ngIf="userRole !== 'administrador'" class="flex items-center justify-between px-4 py-3 md:px-20 max-w-full">
     <!-- Logo and Company Name -->
@@ -110,7 +110,11 @@
   <!-- Admin Header -->
   <div *ngIf="userRole === 'administrador'" class="flex items-center justify-between px-4 py-3 md:px-20 max-w-full">
     <div class="flex items-center space-x-3">
-      <!-- Responsive font size for admin greeting -->
+      <!-- Mobile menu button for admin (visible on mobile) -->
+      <button *ngIf="isMobile" (click)="toggleSidebarEvent.emit()" class="p-3 hover:scale-105 transition-all duration-300 menu-button" aria-label="Menú">
+        <i class="fas fa-bars text-xl text-light-blanco dark:text-dark-primary"></i>
+        <span class="sr-only">Abrir sidebar</span>
+      </button>
       <h1 class="text-md md:text-2xl font-semibold text-light-blanco dark:text-dark-primary">¡Bienvenido de nuevo, {{ userName || 'Admin' }}!</h1>
     </div>
     <div class="flex items-center space-x-4">

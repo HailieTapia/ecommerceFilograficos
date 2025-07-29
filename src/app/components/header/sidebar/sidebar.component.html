@@ -1,12 +1,11 @@
-<div class="flex flex-col min-h-screen transition-all duration-300"
+<div class="flex flex-col min-h-screen transition-all duration-300 sidebar"
      [ngClass]="{
-       'fixed left-0 top-0 z-50 h-full': isMobile,
+       'fixed left-0 top-0 z-50 h-full w-64 bg-light-blanco dark:bg-dark-background': isMobile,
        'translate-x-0': isMobile && sidebarOpen,
        '-translate-x-full': isMobile && !sidebarOpen,
-       'relative': !isMobile,
-       'w-64': sidebarOpen && !isMobile,
-       'w-16': !sidebarOpen && !isMobile,
-       'bg-light-background': !themeService.isDarkMode(),
+       'relative w-64': !isMobile && sidebarOpen,
+       'relative w-16': !isMobile && !sidebarOpen,
+       'bg-light-blanco': !themeService.isDarkMode(),
        'bg-dark-background': themeService.isDarkMode()
      }">
   <!-- Sidebar Header -->
@@ -16,19 +15,29 @@
       <!-- First Row: Logo (when open) or Toggle Icon (when collapsed) -->
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center">
-          <div *ngIf="sidebarOpen || isMobile" class="w-12 h-12 bg-light-background dark:bg-dark-background rounded flex items-center justify-center flex-shrink-0">
+          <div *ngIf="sidebarOpen || isMobile" class="w-12 h-12 bg-light-blanco dark:bg-dark-background rounded flex items-center justify-center flex-shrink-0">
             <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="w-12 h-12 rounded border border-gray-200 dark:border-gray-600">
           </div>
         </div>
-        <!-- Toggle Button (always visible, replaces floating button) -->
+        <!-- Toggle Button (desktop, larger icon, improved hover) or Close Button (mobile) -->
         <button
+          *ngIf="!isMobile"
           (click)="toggleSidebar()"
-          class="p-1 rounded-lg hover:bg-light-encabezado dark:hover:bg-dark-encabezado transition-colors flex-shrink-0"
+          class="p-2 rounded-lg hover:bg-light-encabezado/80 dark:hover:bg-dark-encabezado/80 transition-all duration-200 flex-shrink-0 hover:scale-110 hover:shadow-md"
           [attr.aria-label]="sidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar'"
         >
-          <i class="fas w-5 h-5 text-light-text dark:text-white"
-             [ngClass]="{'fa-chevron-left': sidebarOpen, 'fa-chevron-right': !sidebarOpen}"></i>
+          <i class="fas text-3xl text-light-text dark:text-white"
+            [ngClass]="{'fa-circle-chevron-left': sidebarOpen, 'fa-circle-chevron-right': !sidebarOpen}"></i>
           <span class="sr-only">{{ sidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar' }}</span>
+        </button>
+        <button
+          *ngIf="isMobile"
+          (click)="toggleSidebar()"
+          class="p-1 rounded-lg hover:bg-light-encabezado dark:hover:bg-dark-encabezado transition-colors flex-shrink-0"
+          aria-label="Cerrar sidebar"
+        >
+          <i class="fas fa-times w-5 h-5 text-light-text dark:text-white"></i>
+          <span class="sr-only">Cerrar sidebar</span>
         </button>
       </div>
       <!-- Second Row: Company Name and Panel Administrativo (only when open or mobile) -->
@@ -91,13 +100,13 @@
           </a>
           <!-- Tooltip (Collapsed, Desktop) -->
           <div *ngIf="!isMobile && !sidebarOpen"
-               class="absolute left-full ml-2 px-3 py-2 bg-light-background dark:bg-dark-background text-light-text dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
+               class="absolute left-full ml-2 px-3 py-2 bg-light-blanco dark:bg-dark-background text-light-text dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
                role="tooltip"
                [attr.aria-describedby]="item.label"
           >
             {{ getTranslatedLabel(item.label) }}
             <span *ngIf="item.badge" class="ml-2 bg-light-danger dark:bg-dark-danger text-light-text text-xs px-2 py-1 rounded-full">{{ item.badge }}</span>
-            <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-background dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+            <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-blanco dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
           </div>
         </div>
       </div>
@@ -128,12 +137,12 @@
         </a>
         <!-- Tooltip (Collapsed, Desktop) -->
         <div *ngIf="!isMobile && !sidebarOpen"
-             class="absolute left-full ml-2 px-3 py-2 bg-light-background dark:bg-dark-background text-light-text dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
+             class="absolute left-full ml-2 px-3 py-2 bg-light-blanco dark:bg-dark-background text-light-text dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
              role="tooltip"
              [attr.aria-describedby]="item.label"
         >
           {{ getTranslatedLabel(item.label) }}
-          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-background dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-blanco dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
         </div>
       </div>
       <div class="relative group">
@@ -149,14 +158,17 @@
         </button>
         <!-- Tooltip (Collapsed, Desktop) -->
         <div *ngIf="!isMobile && !sidebarOpen"
-             class="absolute left-full ml-2 px-3 py-2 bg-light-background dark:bg-dark-background text-light-text dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
+             class="absolute left-full ml-2 px-3 py-2 bg-light-blanco dark:bg-dark-background text-light-text dark:text-white text-sm rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 top-1/2 transform -translate-y-1/2"
              role="tooltip"
              [attr.aria-describedby]="'Cerrar Sesión'"
         >
           {{ getTranslatedLabel('Cerrar Sesión') }}
-          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-background dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
+          <div class="absolute right-full top-1/2 transform -translate-y-1/2 w-0 h-0 border-r-4 border-r-light-blanco dark:border-r-dark-background border-t-4 border-t-transparent border-b-4 border-b-transparent"></div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Mobile Overlay (visible when sidebar is open on mobile) -->
+<div *ngIf="isMobile && sidebarOpen" class="fixed inset-0 bg-black bg-opacity-50 z-40 backdrop-blur-sm" (click)="toggleSidebar()"></div>

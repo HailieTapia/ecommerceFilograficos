@@ -1,7 +1,5 @@
-/* Ensure the sidebar takes full height and prevents overflow issues */
 :host {
   display: flex;
-
   min-height: 100vh;
 }
 
@@ -9,14 +7,12 @@
   min-height: 100vh;
 }
 
-/* Ensure navigation grows to fill remaining space */
 nav {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Custom scrollbar styles */
 .scrollbar-thin {
   scrollbar-width: thin;
 }
@@ -25,16 +21,38 @@ nav {
   width: 6px;
 }
 
-.scrollbar-thumb-slate-600::-webkit-scrollbar-thumb {
+.scrollbar-thumb-gray-600::-webkit-scrollbar-thumb {
   background-color: #475569;
   border-radius: 6px;
 }
 
-.scrollbar-track-slate-700::-webkit-scrollbar-track {
+.scrollbar-track-gray-700::-webkit-scrollbar-track {
   background-color: #1e293b;
 }
 
-/* Ensure no extra space below the sidebar */
 .flex-1 {
   flex-grow: 1;
+}
+
+/* Ensure sidebar is above content but below header on mobile */
+.sidebar {
+  z-index: 50;
+}
+
+/* Smooth transition for sidebar visibility */
+.sidebar {
+  transition: transform 0.3s ease-out, width 0.3s ease-out;
+}
+
+/* Ensure header is above sidebar */
+header {
+  z-index: 60;
+}
+
+/* Enhanced hover effect for toggle button */
+button:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Slightly more opaque hover background */
+  transform: scale(1.1); /* Slightly larger scale for emphasis */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Subtle shadow */
+  transition: all 0.2s ease-in-out; /* Smooth transition for all properties */
 }
