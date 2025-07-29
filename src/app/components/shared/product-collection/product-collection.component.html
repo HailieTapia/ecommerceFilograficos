@@ -13,7 +13,7 @@
     </p>
   </div>
 
-  <div *ngIf="!isLoadingSearch" class="max-w-7xl mx-auto">
+  <div *ngIf="isInitialLoadComplete && !isLoadingSearch" class="max-w-7xl mx-auto">
     <!-- Mobile Filter Button -->
     <div class="lg:hidden flex justify-between items-center mb-4">
       <button 

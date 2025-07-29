@@ -48,13 +48,14 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     search: null as string | null,
     averageRating: null as number | null
   };
-  isLoadingSearch = false;
+  isLoadingSearch = true; // Initialize as true to show spinner initially
   activeFilters: { key: FilterKey; value: string; rawValue: any }[] = [];
   categoriesMap = new Map<number, string>();
   collaboratorsMap = new Map<number, string>();
   isAuthenticated = false;
   userRole: string | null = null;
   showFilterModal = false;
+  isInitialLoadComplete = false; // New flag to track initial load completion
 
   sortOptions = [
     { label: 'Orden por defecto', value: '' },
@@ -85,23 +86,41 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.loadCategoriesAndCollaborators().pipe(take(1)).subscribe(() => {
-        this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
-          this.filters = {
-            categoryId: params['categoryId'] ? +params['categoryId'] : null,
-            minPrice: params['minPrice'] ? +params['minPrice'] : null,
-            maxPrice: params['maxPrice'] ? +params['maxPrice'] : null,
-            collaboratorId: params['collaboratorId'] && this.isAuthenticated && this.userRole === 'cliente' ? +params['collaboratorId'] : null,
-            onlyOffers: params['onlyOffers'] === 'true',
-            sort: params['sort'] || this.selectedSortOrder || null,
-            search: params['search'] || null,
-            averageRating: params['averageRating'] ? +params['averageRating'] : null
-          };
-          
-          this.page = params['page'] ? +params['page'] : 1;
-          this.selectedSortOrder = this.filters.sort || '';
+      this.route.queryParams.pipe(take(1)).subscribe(params => {
+        this.filters = {
+          categoryId: params['categoryId'] ? +params['categoryId'] : null,
+          minPrice: params['minPrice'] ? +params['minPrice'] : null,
+          maxPrice: params['maxPrice'] ? +params['maxPrice'] : null,
+          collaboratorId: params['collaboratorId'] && this.isAuthenticated && this.userRole === 'cliente' ? +params['collaboratorId'] : null,
+          onlyOffers: params['onlyOffers'] === 'true',
+          sort: params['sort'] || this.selectedSortOrder || null,
+          search: params['search'] || null,
+          averageRating: params['averageRating'] ? +params['averageRating'] : null
+        };
+        
+        this.page = params['page'] ? +params['page'] : 1;
+        this.selectedSortOrder = this.filters.sort || '';
+        this.loadCategoriesAndCollaborators().pipe(take(1)).subscribe(() => {
           this.updateActiveFilters();
-          this.loadProducts();
+          this.loadProducts(true); // Pass true for initial load
+          this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+            if (this.isInitialLoadComplete) {
+              this.filters = {
+                categoryId: params['categoryId'] ? +params['categoryId'] : null,
+                minPrice: params['minPrice'] ? +params['minPrice'] : null,
+                maxPrice: params['maxPrice'] ? +params['maxPrice'] : null,
+                collaboratorId: params['collaboratorId'] && this.isAuthenticated && this.userRole === 'cliente' ? +params['collaboratorId'] : null,
+                onlyOffers: params['onlyOffers'] === 'true',
+                sort: params['sort'] || this.selectedSortOrder || null,
+                search: params['search'] || null,
+                averageRating: params['averageRating'] ? +params['averageRating'] : null
+              };
+              this.page = params['page'] ? +params['page'] : 1;
+              this.selectedSortOrder = this.filters.sort || '';
+              this.updateActiveFilters();
+              this.loadProducts();
+            }
+          });
         });
       });
     });
@@ -153,7 +172,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadProducts(): void {
+  loadProducts(isInitialLoad = false): void {
     this.isLoadingSearch = true;
     const combinedFilters = {
       ...this.filters,
@@ -169,6 +188,9 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         this.pageSize = response.pageSize;
         this.totalPages = Math.ceil(this.totalItems / this.pageSize);
         this.isLoadingSearch = false;
+        if (isInitialLoad) {
+          this.isInitialLoadComplete = true; // Mark initial load as complete
+        }
         
         if (this.products.length === 0 && this.page === 1) {
           this.toastService.showToast('No hay productos disponibles para estos filtros.', 'info');
@@ -179,6 +201,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         this.products = [];
         this.totalItems = 0;
         this.totalPages = 0;
+        this.isInitialLoadComplete = true; // Still mark as complete to allow future updates
         this.toastService.showToast(error.message, 'error');
       }
     });
