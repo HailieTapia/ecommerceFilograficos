@@ -12,7 +12,6 @@ import { CollaboratorsService } from '../../services/collaborators.service';
 import { take, takeUntil } from 'rxjs/operators';
 import { forkJoin, Observable, Subject } from 'rxjs';
 
-// Interfaces para tipar categorías y colaboradores
 interface Category {
   category_id: number;
   name: string;
@@ -23,8 +22,7 @@ interface Collaborator {
   name: string;
 }
 
-// Actualizar el tipo FilterKey
-type FilterKey = 'categoryId' | 'minPrice' | 'maxPrice' | 'collaboratorId' | 'onlyOffers' | 'sort' | 'search';
+type FilterKey = 'categoryId' | 'minPrice' | 'maxPrice' | 'collaboratorId' | 'onlyOffers' | 'sort' | 'search' | 'averageRating';
 
 @Component({
   selector: 'app-product-collection',
@@ -40,27 +38,20 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
   pageSize = 20;
   totalItems = 0;
   totalPages = 0;
-  filters: {
-    categoryId: number | null;
-    minPrice: number | null;
-    maxPrice: number | null;
-    collaboratorId: number | null;
-    onlyOffers: boolean;
-    sort: string | null;
-    search: string | null;
-  } = {
-    categoryId: null,
-    minPrice: null,
-    maxPrice: null,
-    collaboratorId: null,
+  filters = {
+    categoryId: null as number | null,
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    collaboratorId: null as number | null,
     onlyOffers: false,
-    sort: null,
-    search: null
+    sort: null as string | null,
+    search: null as string | null,
+    averageRating: null as number | null
   };
   isLoadingSearch = false;
   activeFilters: { key: FilterKey; value: string; rawValue: any }[] = [];
-  categoriesMap: Map<number, string> = new Map();
-  collaboratorsMap: Map<number, string> = new Map();
+  categoriesMap = new Map<number, string>();
+  collaboratorsMap = new Map<number, string>();
   isAuthenticated = false;
   userRole: string | null = null;
 
@@ -71,7 +62,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     { label: 'Nombre: A-Z', value: 'name:ASC' },
     { label: 'Nombre: Z-A', value: 'name:DESC' }
   ];
-  selectedSortOrder: string = '';
+  selectedSortOrder = '';
 
   constructor(
     private productService: ProductCollectionService,
@@ -102,15 +93,9 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
             collaboratorId: params['collaboratorId'] && this.isAuthenticated && this.userRole === 'cliente' ? +params['collaboratorId'] : null,
             onlyOffers: params['onlyOffers'] === 'true',
             sort: params['sort'] || this.selectedSortOrder || null,
-            search: params['search'] || null
+            search: params['search'] || null,
+            averageRating: params['averageRating'] ? +params['averageRating'] : null
           };
-          
-          // Forzar valores nulos si no están en los params
-          if (!params['categoryId']) this.filters.categoryId = null;
-          if (!params['minPrice']) this.filters.minPrice = null;
-          if (!params['maxPrice']) this.filters.maxPrice = null;
-          if (!params['collaboratorId']) this.filters.collaboratorId = null;
-          if (!params['onlyOffers']) this.filters.onlyOffers = false;
           
           this.page = params['page'] ? +params['page'] : 1;
           this.selectedSortOrder = this.filters.sort || '';
@@ -131,12 +116,11 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
       const requests: Observable<any>[] = [
         this.categorieService.publicCategories().pipe(take(1))
       ];
+      
       if (this.isAuthenticated && this.userRole === 'cliente') {
         requests.push(this.collaboratorService.getAuthCollaborators().pipe(take(1)));
       } else {
-        requests.push(this.collaboratorService.getPublicCollaborators().pipe(take(
-
-1)));
+        requests.push(this.collaboratorService.getPublicCollaborators().pipe(take(1)));
       }
 
       forkJoin(requests).subscribe({
@@ -144,22 +128,14 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
           const categories = responses[0] as Category[];
           const collaborators = responses[1] as Collaborator[];
           
-          // Validar y mapear categorías
           this.categoriesMap = new Map(
-            Array.isArray(categories) 
-              ? categories
-                  .filter(cat => cat && typeof cat === 'object' && 'category_id' in cat && 'name' in cat)
-                  .map(cat => [cat.category_id, cat.name])
-              : []
+            categories?.filter(cat => cat?.category_id && cat?.name)
+              .map(cat => [cat.category_id, cat.name]) || new Map()
           );
 
-          // Validar y mapear colaboradores
           this.collaboratorsMap = new Map(
-            Array.isArray(collaborators) 
-              ? collaborators
-                  .filter(col => col && typeof col === 'object' && 'id' in col && 'name' in col)
-                  .map(col => [col.id, col.name])
-              : []
+            collaborators?.filter(col => col?.id && col?.name)
+              .map(col => [col.id, col.name]) || new Map()
           );
 
           observer.next();
@@ -183,6 +159,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
       page: this.page,
       pageSize: this.pageSize
     };
+    
     this.productService.getAllProducts(combinedFilters, this.isAuthenticated).subscribe({
       next: (response: ProductResponse) => {
         this.products = response.products;
@@ -191,6 +168,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         this.pageSize = response.pageSize;
         this.totalPages = Math.ceil(this.totalItems / this.pageSize);
         this.isLoadingSearch = false;
+        
         if (this.products.length === 0 && this.page === 1) {
           this.toastService.showToast('No hay productos disponibles para estos filtros.', 'info');
         }
@@ -206,14 +184,12 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
   }
 
   onFiltersChange(newFilters: any): void {
-    // Aplicar los nuevos filtros, incluyendo null para los valores limpios
     this.filters = { 
       ...this.filters, 
       ...newFilters,
       sort: this.selectedSortOrder 
     };
     
-    // Forzar collaboratorId a null si no es cliente autenticado
     if (!this.isAuthenticated || this.userRole !== 'cliente') {
       this.filters.collaboratorId = null;
     }
@@ -221,24 +197,17 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     this.page = 1;
     this.updateActiveFilters();
     
-    // Construir queryParams asegurando que los valores null se reflejen
     const queryParams: any = {
       page: 1,
-      categoryId: newFilters.categoryId !== undefined ? newFilters.categoryId : null,
-      minPrice: newFilters.minPrice !== undefined ? newFilters.minPrice : null,
-      maxPrice: newFilters.maxPrice !== undefined ? newFilters.maxPrice : null,
-      collaboratorId: newFilters.collaboratorId !== undefined ? newFilters.collaboratorId : null,
-      onlyOffers: newFilters.onlyOffers !== undefined ? newFilters.onlyOffers : false,
-      sort: this.filters.sort || null,
-      search: this.filters.search || null
+      categoryId: this.filters.categoryId ?? undefined,
+      minPrice: this.filters.minPrice ?? undefined,
+      maxPrice: this.filters.maxPrice ?? undefined,
+      collaboratorId: this.filters.collaboratorId ?? undefined,
+      onlyOffers: this.filters.onlyOffers ? true : undefined,
+      averageRating: this.filters.averageRating ?? undefined,
+      sort: this.filters.sort ?? undefined,
+      search: this.filters.search ?? undefined
     };
-    
-    // Eliminar parámetros cuando son null/false
-    Object.keys(queryParams).forEach(key => {
-      if (queryParams[key] === null || queryParams[key] === false) {
-        queryParams[key] = undefined;
-      }
-    });
     
     this.router.navigate([], {
       relativeTo: this.route,
@@ -263,6 +232,8 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
       this.filters.maxPrice = null;
     } else if (key === 'onlyOffers') {
       this.filters.onlyOffers = false;
+    } else if (key === 'averageRating') {
+      this.filters.averageRating = null;
     } else {
       this.filters[key] = null;
     }
@@ -270,7 +241,6 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     this.page = 1;
     this.updateActiveFilters();
     
-    // Construir queryParams
     const queryParams: any = {
       page: 1,
       categoryId: this.filters.categoryId ?? undefined,
@@ -278,6 +248,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
       maxPrice: this.filters.maxPrice ?? undefined,
       collaboratorId: this.filters.collaboratorId ?? undefined,
       onlyOffers: this.filters.onlyOffers ? true : undefined,
+      averageRating: this.filters.averageRating ?? undefined,
       sort: this.filters.sort ?? undefined,
       search: this.filters.search ?? undefined
     };
@@ -290,7 +261,6 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
   }
 
   clearAllFilters(): void {
-    // Resetear todos los filtros a sus valores por defecto
     this.filters = {
       categoryId: null,
       minPrice: null,
@@ -298,19 +268,14 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
       collaboratorId: null,
       onlyOffers: false,
       sort: null,
-      search: null
+      search: null,
+      averageRating: null
     };
 
-    // Resetear el ordenamiento seleccionado
     this.selectedSortOrder = '';
-
-    // Volver a la primera página
     this.page = 1;
-
-    // Actualizar filtros activos
     this.updateActiveFilters();
 
-    // Navegar y limpiar todos los query params relacionados con filtros
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
@@ -321,37 +286,68 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         collaboratorId: undefined,
         onlyOffers: undefined,
         sort: undefined,
-        search: undefined
+        search: undefined,
+        averageRating: undefined
       },
       queryParamsHandling: 'merge'
     });
 
-    // Mostrar mensaje de confirmación
     this.toastService.showToast('Todos los filtros han sido limpiados', 'success');
   }
 
   private updateActiveFilters(): void {
     this.activeFilters = [];
+    
     if (this.filters.categoryId !== null) {
       const categoryName = this.categoriesMap.get(this.filters.categoryId) || `Categoría ${this.filters.categoryId}`;
-      this.activeFilters.push({ key: 'categoryId', value: `Categoría: ${categoryName}`, rawValue: this.filters.categoryId });
+      this.activeFilters.push({ 
+        key: 'categoryId', 
+        value: `Categoría: ${categoryName}`, 
+        rawValue: this.filters.categoryId 
+      });
     }
+    
     if (this.filters.minPrice !== null || this.filters.maxPrice !== null) {
-      const minPrice = this.filters
-
-.minPrice !== null ? `$${this.filters.minPrice}` : '0';
+      const minPrice = this.filters.minPrice !== null ? `$${this.filters.minPrice}` : '0';
       const maxPrice = this.filters.maxPrice !== null ? `$${this.filters.maxPrice}` : '∞';
-      this.activeFilters.push({ key: 'minPrice', value: `Precio: ${minPrice} - ${maxPrice}`, rawValue: null });
+      this.activeFilters.push({ 
+        key: 'minPrice', 
+        value: `Precio: ${minPrice} - ${maxPrice}`, 
+        rawValue: null 
+      });
     }
+    
     if (this.filters.collaboratorId !== null && this.isAuthenticated && this.userRole === 'cliente') {
       const collaboratorName = this.collaboratorsMap.get(this.filters.collaboratorId) || `Vendedor ${this.filters.collaboratorId}`;
-      this.activeFilters.push({ key: 'collaboratorId', value: `Vendedor: ${collaboratorName}`, rawValue: this.filters.collaboratorId });
+      this.activeFilters.push({ 
+        key: 'collaboratorId', 
+        value: `Vendedor: ${collaboratorName}`, 
+        rawValue: this.filters.collaboratorId 
+      });
     }
+    
     if (this.filters.onlyOffers) {
-      this.activeFilters.push({ key: 'onlyOffers', value: 'Solo Ofertas', rawValue: this.filters.onlyOffers });
+      this.activeFilters.push({ 
+        key: 'onlyOffers', 
+        value: 'Solo Ofertas', 
+        rawValue: this.filters.onlyOffers 
+      });
     }
+    
     if (this.filters.search !== null) {
-      this.activeFilters.push({ key: 'search', value: `Búsqueda: ${this.filters.search}`, rawValue: this.filters.search });
+      this.activeFilters.push({ 
+        key: 'search', 
+        value: `Búsqueda: ${this.filters.search}`, 
+        rawValue: this.filters.search 
+      });
+    }
+    
+    if (this.filters.averageRating !== null) {
+      this.activeFilters.push({ 
+        key: 'averageRating', 
+        value: `Calificación: ${this.filters.averageRating} estrella${this.filters.averageRating === 1 ? '' : 's'}`, 
+        rawValue: this.filters.averageRating 
+      });
     }
   }
 
@@ -410,7 +406,6 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
     return filter.key;
   }
 
-  // Métodos para formatear precio y calificación
   formatPrice(product: Product): string {
     const minPrice = product.min_price || 0;
     const maxPrice = product.max_price || 0;

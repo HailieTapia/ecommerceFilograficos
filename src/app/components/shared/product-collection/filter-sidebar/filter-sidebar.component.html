@@ -116,7 +116,7 @@
   </div>
   
   <!-- Filtro por Ofertas y Descuentos -->
-  <div class="mb-6">
+  <div class="mb-8">
     <h3 class="text-sm font-medium text-light-text dark:text-dark-text mb-4">Ofertas y Descuentos</h3>
     <label class="flex items-center cursor-pointer group">
       <input
@@ -129,5 +129,43 @@
         Solo productos en oferta
       </span>
     </label>
+  </div>
+  
+  <!-- Filtro por Calificaciones -->
+  <div class="mb-6">
+    <h3 class="text-sm font-medium text-light-text dark:text-dark-text mb-4">Por Calificaciones</h3>
+    <div class="space-y-3">
+      <label *ngFor="let rating of [5, 4, 3, 2, 1]" class="flex items-center cursor-pointer group">
+        <input
+          type="radio"
+          name="ratingFilter"
+          [(ngModel)]="filters.averageRating"
+          (ngModelChange)="applyFilters()"
+          [value]="rating"
+          class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2 rounded-full"
+        />
+        <div class="ml-3 flex items-center text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">
+          <div class="flex items-center mr-2">
+            <svg *ngFor="let i of [1,2,3,4,5]" class="w-4 h-4" [ngClass]="i <= rating ? 'text-yellow-400 dark:text-yellow-300' : 'text-gray-300 dark:text-gray-600'" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.97a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.375 2.45a1 1 0 00-.364 1.118l1.286 3.97c.3.921-.755 1.688-1.54 1.118l-3.375-2.45a1 1 0 00-1.175 0l-3.375 2.45c-.784.57-1.838-.197-1.54-1.118l1.286-3.97a1 1 0 00-.364-1.118L2.41 9.397c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.97z"></path>
+            </svg>
+          </div>
+          <span [ngClass]="filters.averageRating === rating ? 'font-semibold' : ''">{{ rating }}</span>
+        </div>
+      </label>
+      <label class="flex items-center cursor-pointer group">
+        <input
+          type="radio"
+          name="ratingFilter"
+          [(ngModel)]="filters.averageRating"
+          (ngModelChange)="applyFilters()"
+          [value]="null"
+          class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2 rounded-full"
+        />
+        <span class="ml-3 text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary leading-5 transition-colors" [ngClass]="filters.averageRating === null ? 'font-semibold' : ''">
+          Todas
+        </span>
+      </label>
+    </div>
   </div>
 </div>

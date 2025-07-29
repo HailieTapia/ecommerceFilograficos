@@ -5,7 +5,6 @@ import { CategorieService } from '../../../services/categorieService';
 import { CollaboratorsService } from '../../../services/collaborators.service';
 import { take } from 'rxjs/operators';
 
-// Interfaces
 interface Category {
   category_id: number;
   name: string;
@@ -24,38 +23,27 @@ interface Collaborator {
   styleUrls: ['./filter-sidebar.component.css']
 })
 export class FilterSidebarComponent implements OnInit, OnChanges {
-  @Input() initialFilters: {
-    categoryId: number | null;
-    minPrice: number | null;
-    maxPrice: number | null;
-    collaboratorId: number | null;
-    onlyOffers: boolean;
-    sort: string | null;
-  } = {
-    categoryId: null,
-    minPrice: null,
-    maxPrice: null,
-    collaboratorId: null,
+  @Input() initialFilters = {
+    categoryId: null as number | null,
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    collaboratorId: null as number | null,
     onlyOffers: false,
-    sort: null
+    averageRating: null as number | null
   };
-  @Input() showCollaboratorFilter: boolean = false;
+
+  @Input() showCollaboratorFilter = false;
   @Output() filtersChange = new EventEmitter<any>();
 
   categories: Category[] = [];
   collaborators: Collaborator[] = [];
-  filters: {
-    categoryId: number | null;
-    minPrice: number | null;
-    maxPrice: number | null;
-    collaboratorId: number | null;
-    onlyOffers: boolean;
-  } = {
-    categoryId: null,
-    minPrice: null,
-    maxPrice: null,
-    collaboratorId: null,
-    onlyOffers: false
+  filters = {
+    categoryId: null as number | null,
+    minPrice: null as number | null,
+    maxPrice: null as number | null,
+    collaboratorId: null as number | null,
+    onlyOffers: false,
+    averageRating: null as number | null
   };
 
   constructor(
@@ -72,7 +60,7 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialFilters'] && changes['initialFilters'].currentValue) {
+    if (changes['initialFilters']) {
       this.updateFiltersFromInput();
     }
     if (changes['showCollaboratorFilter'] && !changes['showCollaboratorFilter'].currentValue) {
@@ -83,11 +71,12 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
 
   private updateFiltersFromInput(): void {
     this.filters = {
-      categoryId: this.initialFilters.categoryId || null,
-      minPrice: this.initialFilters.minPrice || null,
-      maxPrice: this.initialFilters.maxPrice || null,
-      collaboratorId: this.showCollaboratorFilter ? this.initialFilters.collaboratorId || null : null,
-      onlyOffers: this.initialFilters.onlyOffers || false
+      categoryId: this.initialFilters.categoryId,
+      minPrice: this.initialFilters.minPrice,
+      maxPrice: this.initialFilters.maxPrice,
+      collaboratorId: this.showCollaboratorFilter ? this.initialFilters.collaboratorId : null,
+      onlyOffers: this.initialFilters.onlyOffers,
+      averageRating: this.initialFilters.averageRating
     };
   }
 
@@ -117,11 +106,16 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
 
   applyFilters(): void {
     const cleanedFilters: any = {};
+    
     if (this.filters.categoryId !== null) cleanedFilters.categoryId = this.filters.categoryId;
     if (this.filters.minPrice !== null) cleanedFilters.minPrice = this.filters.minPrice;
     if (this.filters.maxPrice !== null) cleanedFilters.maxPrice = this.filters.maxPrice;
-    if (this.showCollaboratorFilter && this.filters.collaboratorId !== null) cleanedFilters.collaboratorId = this.filters.collaboratorId;
+    if (this.showCollaboratorFilter && this.filters.collaboratorId !== null) {
+      cleanedFilters.collaboratorId = this.filters.collaboratorId;
+    }
     if (this.filters.onlyOffers) cleanedFilters.onlyOffers = this.filters.onlyOffers;
+    if (this.filters.averageRating !== null) cleanedFilters.averageRating = this.filters.averageRating;
+    
     this.filtersChange.emit(cleanedFilters);
   }
 
@@ -131,28 +125,22 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
       minPrice: null,
       maxPrice: null,
       collaboratorId: null,
-      onlyOffers: false
+      onlyOffers: false,
+      averageRating: null
     };
     
-    this.filtersChange.emit({
-      categoryId: null,
-      minPrice: null,
-      maxPrice: null,
-      collaboratorId: null,
-      onlyOffers: false
-    });
+    this.filtersChange.emit(this.filters);
   }
 
   applyPriceFilters(): void {
-    // Validate non-negative values
     if (this.filters.minPrice !== null && this.filters.minPrice < 0) {
       this.filters.minPrice = null;
     }
     if (this.filters.maxPrice !== null && this.filters.maxPrice < 0) {
       this.filters.maxPrice = null;
     }
-    // Swap min and max if min is greater than max
-    if (this.filters.minPrice !== null && this.filters.maxPrice !== null && this.filters.minPrice > this.filters.maxPrice) {
+    if (this.filters.minPrice !== null && this.filters.maxPrice !== null && 
+        this.filters.minPrice > this.filters.maxPrice) {
       [this.filters.minPrice, this.filters.maxPrice] = [this.filters.maxPrice, this.filters.minPrice];
     }
     this.applyFilters();
