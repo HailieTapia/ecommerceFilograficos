@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { RecommendedProductsComponent } from '../recommended-products/recommended-products.component';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cart',
@@ -22,12 +24,24 @@ export class CartComponent implements OnInit {
   totalUrgentDeliveryFee: number = 0;
   isLoading: boolean = false;
   orderCountPromotion: Promotion | null = null;
+  public quantityChanges = new Subject<{item: CartItem, newQuantity: number, isUrgent?: boolean}>();
 
   constructor(
     private cartService: CartService,
     private toastService: ToastService,
     private router: Router
-  ) {}
+  ) {
+    this.quantityChanges.pipe(
+    debounceTime(500), // Espera 500ms de inactividad
+    distinctUntilChanged((prev, curr) => 
+      prev.item.cart_detail_id === curr.item.cart_detail_id && 
+      prev.newQuantity === curr.newQuantity &&
+      prev.isUrgent === curr.isUrgent
+    )
+  ).subscribe(({item, newQuantity, isUrgent}) => {
+    this.updateQuantity(item, newQuantity, isUrgent);
+  });
+  }
 
   ngOnInit(): void {
     this.loadCart();
@@ -75,11 +89,19 @@ export class CartComponent implements OnInit {
       return;
     }
 
+    // Guardar estado anterior para posible rollback
     const oldQuantity = item.quantity;
     const oldIsUrgent = item.is_urgent;
+    const oldUrgentFee = item.urgent_delivery_fee;
+    const oldSubtotal = item.subtotal;
+    
+    // Aplicar cambios optimistas
     const newIsUrgent = isUrgent !== undefined ? isUrgent : item.is_urgent;
-
-    console.log('Antes de enviar - item.is_urgent:', item.is_urgent, 'newIsUrgent:', newIsUrgent);
+    item.quantity = newQuantity;
+    item.is_urgent = newIsUrgent;
+    item.urgent_delivery_fee = newIsUrgent ? item.urgent_delivery_cost : 0;
+    item.subtotal = (newQuantity * item.unit_price) + item.urgent_delivery_fee;
+    this.calculateTotals();
 
     const data = {
       cart_detail_id: item.cart_detail_id,
@@ -87,23 +109,19 @@ export class CartComponent implements OnInit {
       is_urgent: newIsUrgent
     };
 
-    item.quantity = newQuantity;
-    item.is_urgent = newIsUrgent;
-    item.urgent_delivery_fee = newIsUrgent ? item.urgent_delivery_cost : 0;
-    item.subtotal = (newQuantity * item.unit_price) + item.urgent_delivery_fee;
-    this.calculateTotals();
-
     this.cartService.updateQuantity(data, oldQuantity).subscribe({
       next: () => {
-        this.loadCart();
+        // No necesitamos hacer nada más porque ya aplicamos los cambios optimistas
         this.toastService.showToast('Carrito actualizado', 'success');
       },
       error: (error) => {
+        // Revertir cambios optimistas
         item.quantity = oldQuantity;
         item.is_urgent = oldIsUrgent;
-        item.urgent_delivery_fee = oldIsUrgent ? item.urgent_delivery_cost : 0;
-        item.subtotal = (oldQuantity * item.unit_price) + item.urgent_delivery_fee;
+        item.urgent_delivery_fee = oldUrgentFee;
+        item.subtotal = oldSubtotal;
         this.calculateTotals();
+        
         const errorMessage = error?.error?.message || 'No se pudo actualizar el carrito.';
         this.toastService.showToast(errorMessage, 'error');
         console.error('Error al actualizar:', error);

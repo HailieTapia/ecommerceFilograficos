@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError} from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
 import { AuthService } from './auth.service';
@@ -33,6 +33,8 @@ export interface CartItem {
     discount_value: number;
     promotion_type: string;
   }[];
+  isUpdating?: boolean;
+  updateError?: string | null;
 }
 
 export interface Promotion {
@@ -155,36 +157,35 @@ export class CartService {
   }
 
   // Actualizar cantidad de un ítem
-  updateQuantity(data: UpdateQuantityRequest, oldQuantity: number): Observable<any> {
-    console.log('Datos enviados al backend:', data); // Depuración
-    if (!this.authService.isLoggedIn()) {
-      return of({ error: 'Usuario no autenticado' });
-    }
-    if (typeof data.is_urgent !== 'boolean') {
-      console.warn('is_urgent debe ser un valor booleano, valor recibido:', data.is_urgent);
-      data.is_urgent = false; // Valor por defecto
-    }
-    return this.csrfService.getCsrfToken().pipe(
-      switchMap(csrfToken => {
-        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.put<any>(`${this.apiUrl}/update`, data, { headers, withCredentials: true }).pipe(
-          tap(() => {
-            const newQuantity = data.quantity || 0;
-            const quantityChange = newQuantity - oldQuantity;
-            const currentCount = this.cartItemCountSubject.getValue();
-            this.cartItemCountSubject.next(currentCount + quantityChange);
-          }),
-          catchError(error => {
-            console.error('Error al actualizar la cantidad:', error);
-            return of({ 
-              error: error.error?.message || error.message || 'No瘫痪 pudo actualizar la cantidad',
-              status: error.status
-            });
-          })
-        );
-      })
-    );
+updateQuantity(data: UpdateQuantityRequest, oldQuantity: number): Observable<any> {
+  if (!this.authService.isLoggedIn()) {
+    return throwError(() => new Error('Usuario no autenticado'));
   }
+  
+  return this.csrfService.getCsrfToken().pipe(
+    switchMap(csrfToken => {
+      const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+      return this.http.put<any>(`${this.apiUrl}/update`, data, { headers, withCredentials: true }).pipe(
+        tap(() => {
+          const newQuantity = data.quantity || 0;
+          const quantityChange = newQuantity - oldQuantity;
+          const currentCount = this.cartItemCountSubject.getValue();
+          this.cartItemCountSubject.next(currentCount + quantityChange);
+        }),
+        catchError(error => {
+          console.error('Error al actualizar la cantidad:', error);
+          return throwError(() => ({
+            error: error.error?.message || error.message || 'No se pudo actualizar la cantidad',
+            status: error.status
+          }));
+        })
+      );
+    }),
+    catchError(error => {
+      return throwError(() => error);
+    })
+  );
+}
 
   // Eliminar un ítem del carrito
   removeItem(cartDetailId: number, quantityToRemove: number): Observable<any> {
