@@ -54,6 +54,7 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
   collaboratorsMap = new Map<number, string>();
   isAuthenticated = false;
   userRole: string | null = null;
+  showFilterModal = false;
 
   sortOptions = [
     { label: 'Orden por defecto', value: '' },
@@ -420,5 +421,9 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
 
   shouldShowRating(product: Product): boolean {
     return product.average_rating > 0 && product.total_reviews > 0;
+  }
+
+  toggleFilterModal(): void {
+    this.showFilterModal = !this.showFilterModal;
   }
 }

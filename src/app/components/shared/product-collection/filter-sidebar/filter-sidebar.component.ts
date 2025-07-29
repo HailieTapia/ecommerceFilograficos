@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategorieService } from '../../../services/categorieService';
@@ -31,8 +31,8 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
     onlyOffers: false,
     averageRating: null as number | null
   };
-
   @Input() showCollaboratorFilter = false;
+  @Input() isModal = false;
   @Output() filtersChange = new EventEmitter<any>();
 
   categories: Category[] = [];
@@ -48,7 +48,8 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
 
   constructor(
     private categorieService: CategorieService,
-    private collaboratorService: CollaboratorsService
+    private collaboratorService: CollaboratorsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -78,16 +79,19 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
       onlyOffers: this.initialFilters.onlyOffers,
       averageRating: this.initialFilters.averageRating
     };
+    this.cdr.detectChanges(); // Force change detection after updating filters
   }
 
   loadCategories(): void {
     this.categorieService.publicCategories().pipe(take(1)).subscribe({
       next: (response) => {
         this.categories = response;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error al cargar las categorías:', error);
         this.categories = [];
+        this.cdr.detectChanges();
       }
     });
   }
@@ -96,27 +100,36 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
     this.collaboratorService.getAuthCollaborators().pipe(take(1)).subscribe({
       next: (response) => {
         this.collaborators = response;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error al cargar los colaboradores:', error);
         this.collaborators = [];
+        this.cdr.detectChanges();
       }
     });
   }
 
   applyFilters(): void {
-    const cleanedFilters: any = {};
-    
-    if (this.filters.categoryId !== null) cleanedFilters.categoryId = this.filters.categoryId;
-    if (this.filters.minPrice !== null) cleanedFilters.minPrice = this.filters.minPrice;
-    if (this.filters.maxPrice !== null) cleanedFilters.maxPrice = this.filters.maxPrice;
-    if (this.showCollaboratorFilter && this.filters.collaboratorId !== null) {
-      cleanedFilters.collaboratorId = this.filters.collaboratorId;
-    }
-    if (this.filters.onlyOffers) cleanedFilters.onlyOffers = this.filters.onlyOffers;
-    if (this.filters.averageRating !== null) cleanedFilters.averageRating = this.filters.averageRating;
-    
+    // Create a fresh object to ensure change detection
+    const cleanedFilters: any = {
+      categoryId: this.filters.categoryId,
+      minPrice: this.filters.minPrice,
+      maxPrice: this.filters.maxPrice,
+      collaboratorId: this.showCollaboratorFilter ? this.filters.collaboratorId : null,
+      onlyOffers: this.filters.onlyOffers ? true : undefined,
+      averageRating: this.filters.averageRating
+    };
+
+    // Remove undefined or null values, but explicitly include null for categoryId and averageRating
+    Object.keys(cleanedFilters).forEach(key => {
+      if (cleanedFilters[key] === undefined && key !== 'categoryId' && key !== 'averageRating') {
+        delete cleanedFilters[key];
+      }
+    });
+
     this.filtersChange.emit(cleanedFilters);
+    this.cdr.detectChanges(); // Ensure UI updates after emitting
   }
 
   resetFilters(): void {
@@ -130,6 +143,7 @@ export class FilterSidebarComponent implements OnInit, OnChanges {
     };
     
     this.filtersChange.emit(this.filters);
+    this.cdr.detectChanges();
   }
 
   applyPriceFilters(): void {

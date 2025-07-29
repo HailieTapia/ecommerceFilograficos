@@ -1,17 +1,17 @@
-<div class="w-80 border-r border-gray-200 p-6 h-full overflow-y-auto">
-  <!-- Título -->
-  <h2 class="text-xl font-semibold text-light-text dark:text-dark-text mb-4">Filtros</h2>
-  
-  <!-- Botón Limpiar -->
-  <button 
-    (click)="resetFilters()"
-    class="text-light-success-text dark:text-dark-resolved underline hover:no-underline hover:text-light-verde dark:hover:text-dark-resolved-text transition-colors mb-4 text-sm font-medium"
-  >
-    Limpiar
-  </button>
-  
-  <!-- Línea divisoria -->
-  <div class="border-b border-gray-100 dark:border-gray-700 mb-6"></div>
+<div [ngClass]="isModal ? 'p-4' : 'w-80 border-r border-gray-200 p-6 h-full overflow-y-auto'">
+  <!-- Título (omitido en modal ya que se muestra en el header del modal) -->
+  <ng-container *ngIf="!isModal">
+    <h2 class="text-xl font-semibold text-light-text dark:text-dark-text mb-4">Filtros</h2>
+    <!-- Botón Limpiar -->
+    <button 
+      (click)="resetFilters()"
+      class="text-light-success-text dark:text-dark-resolved underline hover:no-underline hover:text-light-verde dark:hover:text-dark-resolved-text transition-colors mb-4 text-sm font-medium"
+    >
+      Limpiar
+    </button>
+    <!-- Línea divisoria -->
+    <div class="border-b border-gray-100 dark:border-gray-700 mb-6"></div>
+  </ng-container>
   
   <!-- Filtro por Categoría -->
   <div class="mb-8">
@@ -25,6 +25,7 @@
           (ngModelChange)="applyFilters()"
           [value]="null"
           class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2 rounded-full"
+          [checked]="filters.categoryId === null"
         />
         <span class="ml-3 text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary leading-5 transition-colors">
           Todas
@@ -38,6 +39,7 @@
           (ngModelChange)="applyFilters()"
           [value]="category.category_id"
           class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2 rounded-full"
+          [checked]="filters.categoryId === category.category_id"
         />
         <span class="ml-3 text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary leading-5 transition-colors break-words">
           {{ category.name }}
@@ -94,6 +96,7 @@
           (ngModelChange)="applyFilters()"
           [value]="null"
           class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2 rounded-full"
+          [checked]="filters.collaboratorId === null"
         />
         <span class="ml-3 text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary leading-5 transition-colors">
           Todos
@@ -107,28 +110,13 @@
           (ngModelChange)="applyFilters()"
           [value]="collaborator.collaborator_id"
           class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2 rounded-full"
+          [checked]="filters.collaboratorId === collaborator.collaborator_id"
         />
         <span class="ml-3 text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary leading-5 transition-colors break-words">
           {{ collaborator.name }}
         </span>
       </label>
     </div>
-  </div>
-  
-  <!-- Filtro por Ofertas y Descuentos -->
-  <div class="mb-8">
-    <h3 class="text-sm font-medium text-light-text dark:text-dark-text mb-4">Ofertas y Descuentos</h3>
-    <label class="flex items-center cursor-pointer group">
-      <input
-        type="checkbox"
-        [(ngModel)]="filters.onlyOffers"
-        (ngModelChange)="applyFilters()"
-        class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 rounded focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2"
-      />
-      <span class="ml-3 text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">
-        Solo productos en oferta
-      </span>
-    </label>
   </div>
   
   <!-- Filtro por Calificaciones -->
@@ -143,6 +131,7 @@
           (ngModelChange)="applyFilters()"
           [value]="rating"
           class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2 rounded-full"
+          [checked]="filters.averageRating === rating"
         />
         <div class="ml-3 flex items-center text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary transition-colors">
           <div class="flex items-center mr-2">
@@ -161,6 +150,7 @@
           (ngModelChange)="applyFilters()"
           [value]="null"
           class="w-4 h-4 text-light-primary dark:text-dark-primary border-gray-300 dark:border-gray-600 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:ring-2 rounded-full"
+          [checked]="filters.averageRating === null"
         />
         <span class="ml-3 text-sm text-light-secondary dark:text-dark-secondary group-hover:text-light-primary dark:group-hover:text-dark-primary leading-5 transition-colors" [ngClass]="filters.averageRating === null ? 'font-semibold' : ''">
           Todas
