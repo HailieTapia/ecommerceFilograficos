@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router'; // Importar RouterModule
+import { RouterModule } from '@angular/router';
 import { CompanyService } from '../../services/company.service';
-import { FaqCategoryService, FaqCategory } from '../../services/faq-category.service'; // Importar servicio de categorías
+import { FaqCategoryService, FaqCategory } from '../../services/faq-category.service';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, RouterModule], // Añadir RouterModule
+  imports: [CommonModule, RouterModule],
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.css']
 })
@@ -17,22 +17,23 @@ export class FooterComponent implements OnInit {
     'Envíos': 0,
     'Devoluciones': 0,
     'Métodos de Pago': 0
-  }; // Mapa para almacenar IDs de categorías
+  };
 
   constructor(
     public companyService: CompanyService,
-    private faqCategoryService: FaqCategoryService // Inyectar servicio de categorías
+    private faqCategoryService: FaqCategoryService
   ) {}
 
   ngOnInit(): void {
     this.getCompanyInfo();
-    this.getCategoryIds(); // Cargar IDs de categorías
+    this.getCategoryIds();
   }
 
   getCompanyInfo(): void {
     this.companyService.getCompanyInfo().subscribe({
       next: (response) => {
         this.companyInfo = response.company;
+        console.log(this.companyInfo);
       },
       error: (error) => {
         console.error('Error al obtener la información de la empresa:', error);
