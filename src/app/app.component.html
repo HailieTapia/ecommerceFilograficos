@@ -1,4 +1,4 @@
-<div class="flex min-h-screen bg-white dark:bg-gray-900">
+<div class="flex min-h-screen bg-light-background dark:bg-gray-900">
   <!-- Sidebar (visible solo para administradores) -->
   <app-sidebar
     *ngIf="isLoggedIn && userRole === 'administrador'"
@@ -15,7 +15,8 @@
     <main class="flex-grow">
       <router-outlet></router-outlet>
     </main>
-    <app-footer></app-footer>
+    <!-- Footer para no administradores (dentro del contenedor principal) -->
+    <app-footer *ngIf="!(isLoggedIn && userRole === 'administrador')"></app-footer>
     <app-toast></app-toast>
 
     <!-- Back to Top Button -->
@@ -28,5 +29,8 @@
     </button>
   </div>
 </div>
+
+<!-- Footer para administradores (fuera del contenedor principal, ocupa ancho completo) -->
+<app-footer *ngIf="isLoggedIn && userRole === 'administrador'" class="w-full"></app-footer>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

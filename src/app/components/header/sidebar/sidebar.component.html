@@ -9,56 +9,37 @@
        'bg-light-background': !themeService.isDarkMode(),
        'bg-dark-background': themeService.isDarkMode()
      }">
-  <!-- Floating Expand Button (Desktop, Collapsed) -->
-  <button
-    *ngIf="!isMobile && !sidebarOpen"
-    (click)="toggleSidebar()"
-    class="fixed left-4 top-24 z-50 p-3 bg-light-background dark:bg-dark-background text-white dark:text-white rounded-lg shadow-lg hover:bg-light-encabezado dark:hover:bg-dark-encabezado transition-all duration-200 hover:scale-105"
-    aria-label="Expandir sidebar"
-  >
-    <i class="fas fa-chevron-right w-5 h-5 text-white dark:text-white"></i>
-    <span class="sr-only">Expandir sidebar</span>
-  </button>
-
   <!-- Sidebar Header -->
   <div class="p-4 border-b flex-shrink-0"
        [ngClass]="{'border-gray-200': !themeService.isDarkMode(), 'border-gray-600': themeService.isDarkMode()}">
     <div class="flex flex-col">
-      <!-- First Row: Logo -->
-      <div class="flex items-center mb-2">
-        <div class="w-12 h-12 bg-light-background dark:bg-dark-background rounded flex items-center justify-center flex-shrink-0">
-          <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="w-12 h-12 rounded border border-gray-200 dark:border-gray-600">
+      <!-- First Row: Logo (when open) or Toggle Icon (when collapsed) -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center">
+          <div *ngIf="sidebarOpen || isMobile" class="w-12 h-12 bg-light-background dark:bg-dark-background rounded flex items-center justify-center flex-shrink-0">
+            <img *ngIf="logoPreview" [src]="logoPreview" alt="Logo" class="w-12 h-12 rounded border border-gray-200 dark:border-gray-600">
+          </div>
         </div>
+        <!-- Toggle Button (always visible, replaces floating button) -->
+        <button
+          (click)="toggleSidebar()"
+          class="p-1 rounded-lg hover:bg-light-encabezado dark:hover:bg-dark-encabezado transition-colors flex-shrink-0"
+          [attr.aria-label]="sidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar'"
+        >
+          <i class="fas w-5 h-5 text-light-text dark:text-white"
+             [ngClass]="{'fa-chevron-left': sidebarOpen, 'fa-chevron-right': !sidebarOpen}"></i>
+          <span class="sr-only">{{ sidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar' }}</span>
+        </button>
       </div>
-      <!-- Second Row: Company Name and Panel Administrativo -->
-      <div class="flex items-center justify-between">
+      <!-- Second Row: Company Name and Panel Administrativo (only when open or mobile) -->
+      <div *ngIf="sidebarOpen || isMobile" class="flex items-center justify-between">
         <div class="min-w-0 transition-all duration-300 overflow-hidden"
              [ngClass]="{'w-0 opacity-0': !sidebarOpen && !isMobile, 'w-auto opacity-100': sidebarOpen || isMobile}">
           <div class="flex items-center space-x-2">
-            <span *ngIf="sidebarOpen" class="text-2xl font-semibold text-light-text dark:text-white">{{ companyName || getTranslatedLabel('Filográficos') }}</span>
+            <span class="text-2xl font-semibold text-light-text dark:text-white">{{ companyName || getTranslatedLabel('Filográficos') }}</span>
           </div>
           <p class="text-md text-light-secondary text-light-text dark:text-dark-secondary truncate">{{ getTranslatedLabel('Panel Administrativo') }}</p>
         </div>
-        <!-- Collapse Button (Desktop) -->
-        <button
-          *ngIf="!isMobile && sidebarOpen"
-          (click)="toggleSidebar()"
-          class="p-1 rounded-lg hover:bg-light-encabezado dark:hover:bg-dark-encabezado transition-colors flex-shrink-0"
-          aria-label="Colapsar sidebar"
-        >
-          <i class="fas fa-chevron-left w-4 h-4 text-light-text dark:text-white"></i>
-          <span class="sr-only">Colapsar sidebar</span>
-        </button>
-        <!-- Close Button (Mobile) -->
-        <button
-          *ngIf="isMobile"
-          (click)="toggleSidebar()"
-          class="p-1 rounded-lg hover:bg-light-encabezado dark:hover:bg-dark-encabezado transition-colors"
-          aria-label="Cerrar sidebar"
-        >
-          <i class="fas fa-times w-5 h-5 text-light-text dark:text-white"></i>
-          <span class="sr-only">Cerrar sidebar</span>
-        </button>
       </div>
     </div>
   </div>
