@@ -134,7 +134,9 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
       if (this.isAuthenticated && this.userRole === 'cliente') {
         requests.push(this.collaboratorService.getAuthCollaborators().pipe(take(1)));
       } else {
-        requests.push(this.collaboratorService.getPublicCollaborators().pipe(take(1)));
+        requests.push(this.collaboratorService.getPublicCollaborators().pipe(take(
+
+1)));
       }
 
       forkJoin(requests).subscribe({
@@ -192,7 +194,6 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
         if (this.products.length === 0 && this.page === 1) {
           this.toastService.showToast('No hay productos disponibles para estos filtros.', 'info');
         }
-        console.log(this.products)
       },
       error: (error) => {
         this.isLoadingSearch = false;
@@ -336,7 +337,9 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
       this.activeFilters.push({ key: 'categoryId', value: `Categoría: ${categoryName}`, rawValue: this.filters.categoryId });
     }
     if (this.filters.minPrice !== null || this.filters.maxPrice !== null) {
-      const minPrice = this.filters.minPrice !== null ? `$${this.filters.minPrice}` : '0';
+      const minPrice = this.filters
+
+.minPrice !== null ? `$${this.filters.minPrice}` : '0';
       const maxPrice = this.filters.maxPrice !== null ? `$${this.filters.maxPrice}` : '∞';
       this.activeFilters.push({ key: 'minPrice', value: `Precio: ${minPrice} - ${maxPrice}`, rawValue: null });
     }
@@ -405,5 +408,22 @@ export class ProductCollectionComponent implements OnInit, OnDestroy {
 
   trackByFilter(index: number, filter: { key: FilterKey; value: string }): string {
     return filter.key;
+  }
+
+  // Métodos para formatear precio y calificación
+  formatPrice(product: Product): string {
+    const minPrice = product.min_price || 0;
+    const maxPrice = product.max_price || 0;
+    return minPrice === maxPrice
+      ? `$${minPrice.toFixed(2)}`
+      : `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+  }
+
+  getFormattedRating(rating: number): string {
+    return rating.toFixed(1);
+  }
+
+  shouldShowRating(product: Product): boolean {
+    return product.average_rating > 0 && product.total_reviews > 0;
   }
 }

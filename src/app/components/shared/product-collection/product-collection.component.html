@@ -58,7 +58,7 @@
               <!-- Botón de limpiar todos los filtros -->
               <button *ngIf="activeFilters.length > 0" 
                       (click)="clearAllFilters()"
-                      class="text-md text-light-verde-fuerte dark:text-dark-text hover:text-light-resolved-text dark:hover:text-dark-secondary-hovertransition-colors flex items-center space-x-1 focus:outline-none underline hover:no-underline">
+                       class="text-light-success-text dark:text-dark-resolved underline hover:no-underline hover:text-light-verde dark:hover:text-dark-resolved-text transition-colors text-sm font-medium     transition-colors flex items-center focus:outline-none">
                 <span>Limpiar todos</span>
               </button>
             </div>
@@ -68,30 +68,53 @@
         <!-- Cuadrícula de productos -->
         <div *ngIf="products.length > 0; else noProducts" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
           <div *ngFor="let product of products; trackBy: trackByProductId"
-               class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+               class="relative bg-gray-100 dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:bg-white dark:hover:bg-gray-700 cursor-pointer"
+               (click)="goToDetail(product.product_id)">
+            <!-- Product Type Badge -->
+            <div class="absolute top-3 left-3 z-10">
+              <span class="bg-light-primary dark:bg-dark-primary text-white dark:text-dark-text text-xs font-medium px-2 py-1 rounded-full">
+                {{ product.product_type || 'Producto' }}
+              </span>
+            </div>
+
             <!-- Imagen del producto -->
             <img [src]="product.image_url || 'https://via.placeholder.com/300x300?text=Sin+Imagen'"
                  alt="{{ product.name }}" class="w-full h-48 object-cover bg-gray-200">
 
             <!-- Información del producto -->
-            <div class="p-4 text-center">
-              <h3 class="text-lg font-medium text-light-text dark:text-dark-text truncate">{{ product.name }}</h3>
-              <p class="text-sm text-light-secondary dark:text-dark-secondary mt-1">{{ product.category || 'Sin categoría' }}</p>
-              <p *ngIf="isAuthenticated && userRole === 'cliente' && product.collaborator" 
-                 class="text-sm text-light-secondary dark:text-dark-secondary mt-1">
-                Vendido por: {{ product.collaborator.name || 'Desconocido' }}
-              </p>
-              <p class="text-base font-semibold text-light-text dark:text-dark-text mt-2">
-                ${{ product.min_price.toFixed(2) }} - ${{ product.max_price.toFixed(2) }}
-              </p>
-              <p *ngIf="isAuthenticated && userRole === 'cliente' && product.variant_count" 
-                 class="text-sm text-light-secondary dark:text-dark-secondary mt-1">
-                Disponible en {{ product.variant_count }} modelos
-              </p>
-              <button (click)="goToDetail(product.product_id)"
-                      class="mt-3 bg-light-primary dark:bg-dark-primary text-white text-sm font-medium py-2 px-4 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors duration-300">
-                Ver detalles
-              </button>
+            <div class="p-4">
+              <!-- Primera fila: Categoría y Rating -->
+              <div class="flex justify-between items-start mb-2">
+                <p class="text-sm text-light-secondary dark:text-dark-secondary line-clamp-2 text-left flex-1">
+                  {{ product.category || 'Sin categoría' }}
+                </p>
+                <div *ngIf="shouldShowRating(product)" class="flex items-center gap-1">
+                  <i class="fas fa-star text-yellow-400 dark:text-dark-resolved text-sm"></i>
+                  <span class="text-sm font-medium text-light-text dark:text-dark-text">
+                    {{ getFormattedRating(product.average_rating) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Segunda fila: Nombre del producto -->
+              <h3 class="text-lg font-semibold text-light-text dark:text-dark-text mb-2 line-clamp-2 text-left leading-tight">
+                {{ product.name }}
+              </h3>
+
+              <!-- Precio y modelos disponibles -->
+              <div class="text-left">
+                <span class="text-base font-bold text-green-600 dark:text-dark-primary">
+                  {{ formatPrice(product) }}
+                </span>
+                <p *ngIf="isAuthenticated && userRole === 'cliente' && product.collaborator" 
+                   class="text-sm text-light-secondary dark:text-dark-secondary mt-1">
+                  Vendido por: {{ product.collaborator.name || 'Desconocido' }}
+                </p>
+                <p *ngIf="isAuthenticated && userRole === 'cliente' && product.variant_count" 
+                   class="text-sm text-light-secondary dark:text-dark-secondary mt-1">
+                  Disponible en {{ product.variant_count }} modelos
+                </p>
+              </div>
             </div>
           </div>
         </div>
