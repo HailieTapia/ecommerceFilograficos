@@ -1,0 +1,43 @@
+/* Grid responsivo */
+.product-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr); /* 2 columnas por defecto para móviles */
+}
+
+@media (min-width: 640px) {
+  .product-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas para tablets */
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 columnas para desktop */
+    gap: 2rem;
+  }
+}
+
+/* Contenedor de imagen mejorado */
+.product-image-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 1 / 1; /* Mantiene relación 1:1 de forma más eficiente */
+}
+
+/* Opcional: Si necesitas soporte para navegadores muy antiguos */
+@supports not (aspect-ratio: 1 / 1) {
+  .product-image-container {
+    padding-top: 100%; /* Fallback para navegadores que no soportan aspect-ratio */
+  }
+  
+  .product-image-container img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+}

@@ -58,7 +58,7 @@
               <!-- Botón de limpiar todos los filtros -->
               <button *ngIf="activeFilters.length > 0" 
                       (click)="clearAllFilters()"
-                       class="text-light-success-text dark:text-dark-resolved underline hover:no-underline hover:text-light-verde dark:hover:text-dark-resolved-text transition-colors text-sm font-medium     transition-colors flex items-center focus:outline-none">
+                      class="text-light-success-text dark:text-dark-resolved underline hover:no-underline hover:text-light-verde dark:hover:text-dark-resolved-text transition-colors text-sm font-medium flex items-center focus:outline-none">
                 <span>Limpiar todos</span>
               </button>
             </div>
@@ -66,11 +66,11 @@
         </div>
 
         <!-- Cuadrícula de productos -->
-        <div *ngIf="products.length > 0; else noProducts" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+        <div *ngIf="products.length > 0; else noProducts" class="product-grid mb-8">
           <div *ngFor="let product of products; trackBy: trackByProductId"
                class="relative bg-gray-100 dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:bg-white dark:hover:bg-gray-700 cursor-pointer"
                (click)="goToDetail(product.product_id)">
-            <!-- Product Type Badge -->
+            <!-- Product Type Badge (siempre visible) -->
             <div class="absolute top-3 left-3 z-10">
               <span class="bg-light-primary dark:bg-dark-primary text-white dark:text-dark-text text-xs font-medium px-2 py-1 rounded-full">
                 {{ product.product_type || 'Producto' }}
@@ -78,8 +78,12 @@
             </div>
 
             <!-- Imagen del producto -->
-            <img [src]="product.image_url || 'https://via.placeholder.com/300x300?text=Sin+Imagen'"
-                 alt="{{ product.name }}" class="w-full h-48 object-cover bg-gray-200">
+            <div class="product-image-container">
+              <img [src]="product.image_url || 'https://via.placeholder.com/300x300?text=Sin+Imagen'"
+                   alt="{{ product.name }}"
+                   class="w-full h-full object-cover bg-gray-200"
+                   loading="lazy">
+            </div>
 
             <!-- Información del producto -->
             <div class="p-4">
@@ -141,15 +145,16 @@
         </ng-template>
 
         <!-- Paginación -->
-        <div *ngIf="products.length > 0" class="flex flex-col sm:flex-row justify-between items-center mt-6 text-light-text dark:text-dark-text gap-4">
-          <p class="text-sm text-light-secondary dark:text-dark-secondary">
-            Página {{ page }} de {{ totalPages }}
-          </p>
-          <div class="flex items-center gap-2">
-            <button [disabled]="page === 1" (click)="changePage(page - 1)"
-                    class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
-              Anterior
-            </button>
+       <div *ngIf="products.length > 0" class="flex flex-col sm:flex-row justify-between items-center mt-6 text-light-text dark:text-dark-text gap-4 w-full">
+        <p class="text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">
+          Página {{ page }} de {{ totalPages }}
+        </p>
+        <div class="flex flex-wrap justify-center items-center gap-2 w-full sm:w-auto overflow-x-auto py-2 sm:py-0 px-2 sm:px-0">
+          <button [disabled]="page === 1" (click)="changePage(page - 1)"
+                  class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors whitespace-nowrap">
+            Anterior
+          </button>
+          <div class="flex flex-wrap justify-center gap-2">
             <button *ngFor="let pageNum of getPageNumbers()"
                     (click)="changePage(pageNum)"
                     [class.bg-light-primary]="page === pageNum"
@@ -157,15 +162,16 @@
                     [class.bg-gray-200]="page !== pageNum"
                     [class.dark:bg-gray-600]="page !== pageNum"
                     [class.dark:text-dark-text]="page !== pageNum"
-                    class="px-4 py-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                    class="min-w-[2.5rem] px-3 py-2 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-center">
               {{ pageNum }}
             </button>
-            <button [disabled]="page === totalPages" (click)="changePage(page + 1)"
-                    class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
-              Siguiente
-            </button>
           </div>
+          <button [disabled]="page === totalPages" (click)="changePage(page + 1)"
+                  class="bg-gray-200 dark:bg-gray-600 text-light-text dark:text-dark-text py-2 px-4 rounded-full disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors whitespace-nowrap">
+            Siguiente
+          </button>
         </div>
+      </div>
       </div>
     </div>
   </div>
