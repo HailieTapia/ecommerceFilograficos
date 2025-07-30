@@ -115,7 +115,9 @@
         <i class="fas fa-bars text-xl text-light-blanco dark:text-dark-primary"></i>
         <span class="sr-only">Abrir sidebar</span>
       </button>
-      <h1 class="text-md md:text-2xl font-semibold text-light-blanco dark:text-dark-primary">¡Bienvenido de nuevo, {{ userName || 'Admin' }}!</h1>
+      <h1 class="hidden sm:block text-sm sm:text-md md:text-lg lg:text-xl font-semibold text-light-blanco dark:text-dark-primary">
+        ¡Bienvenido de nuevo, {{ userName || 'Admin' }}!
+      </h1>
     </div>
     <div class="flex items-center space-x-4">
       <app-notification-dropdown></app-notification-dropdown>

@@ -1,71 +1,62 @@
-<div class="min-h-screen bg-light-background dark:bg-dark-background p-4 sm:p-6">
-  <h1 class="text-xl sm:text-2xl font-bold text-light-text dark:text-dark-text mb-4 sm:mb-6">Gestión de Stock</h1>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
+    <div>
+      <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-warehouse text-blue-600 dark:text-blue-400"></i> Gestión de Stock
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administra y actualiza el inventario de productos</p>
+    </div>
+  </div>
 
   <!-- Filtros y Búsqueda -->
-  <div class="bg-light-card dark:bg-dark-card bg-opacity-80 dark:bg-opacity-80 rounded-2xl shadow-xl p-4 sm:p-6 mb-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
-        <select
-          [(ngModel)]="selectedCategoryId"
-          (change)="applyFilters()"
-          class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-primary bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
-        >
-          <option value="">Todas las categorías</option>
-          <option *ngFor="let category of allCategories" [value]="category.category_id">
-            {{ category.name }}
-          </option>
-        </select>
-
-        <select
-          [(ngModel)]="selectedStockStatus"
-          (change)="applyFilters()"
-          class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-primary bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
-        >
-          <option value="">Todos los estados</option>
-          <option value="in_stock">En stock</option>
-          <option value="low_stock">Stock bajo</option>
-          <option value="out_of_stock">Agotado</option>
-          <option value="no_stock">Sin stock</option>
-        </select>
-      </div>
-
-      <div class="relative w-full sm:w-1/2">
+  <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+      <div class="relative">
+        <i class="fas fa-search absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
         <input
           type="text"
           [(ngModel)]="searchQuery"
           (input)="onSearch()"
-          placeholder="Buscar por SKU, producto, stock o umbral..."
-          class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-primary bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+          placeholder="Buscar por producto o stock..."
+          class="w-full p-2 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
         />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-dark-secondary"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
       </div>
+      <select
+        [(ngModel)]="selectedCategoryId"
+        (change)="applyFilters()"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+      >
+        <option value="">Todas las categorías</option>
+        <option *ngFor="let category of allCategories" [value]="category.category_id">
+          {{ category.name }}
+        </option>
+      </select>
+      <select
+        [(ngModel)]="selectedStockStatus"
+        (change)="applyFilters()"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+      >
+        <option value="">Todos los estados</option>
+        <option value="in_stock">En stock</option>
+        <option value="low_stock">Stock bajo</option>
+        <option value="out_of_stock">Agotado</option>
+        <option value="no_stock">Sin stock</option>
+      </select>
     </div>
   </div>
 
   <!-- Tabla -->
-  <div class="bg-light-card dark:bg-dark-card bg-opacity-80 dark:bg-opacity-80 rounded-2xl shadow-xl overflow-hidden">
-    <div class="p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text">Variantes de Productos</h2>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Variantes de Productos</h2>
       <div class="flex items-center gap-2 w-full sm:w-auto">
-        <label for="itemsPerPage" class="text-sm text-light-text dark:text-dark-text whitespace-nowrap">Elementos por página:</label>
+        <label for="itemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Por página:</label>
         <select
           id="itemsPerPage"
           [(ngModel)]="itemsPerPage"
           (change)="onItemsPerPageChange()"
-          class="w-full sm:w-24 p-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-primary bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
+          class="w-full sm:w-20 md:w-24 p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
         >
           <option value="5">5</option>
           <option value="10">10</option>
@@ -77,38 +68,38 @@
 
     <div class="overflow-x-auto">
       <table class="w-full table-auto">
-        <thead class="bg-gray-50 dark:bg-dark-table-header">
+        <thead class="bg-gray-100 dark:bg-gray-700">
           <tr>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap">Imagen</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap">SKU</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap">Producto</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden sm:table-cell">Categoría</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden sm:table-cell">Tipo</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap">Stock</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap">Umbral</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap">Estado</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden md:table-cell">Última Adición</th>
-            <th class="p-3 text-left text-xs sm:text-sm font-medium text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Imagen</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">SKU</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Producto</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden md:table-cell">Categoría</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden md:table-cell">Tipo</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Stock</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Umbral</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Estado</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden lg:table-cell">Última Adición</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-          <tr *ngFor="let variant of filteredStockVariants" class="hover:bg-gray-50 dark:hover:bg-dark-hover">
-            <td class="p-3">
-              <img *ngIf="variant.first_image" [src]="variant.first_image" alt="Imagen" class="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded border border-gray-300 dark:border-gray-600">
-              <span *ngIf="!variant.first_image" class="text-xs sm:text-sm text-gray-500 dark:text-dark-secondary">N/A</span>
+          <tr *ngFor="let variant of filteredStockVariants" class="hover:bg-gray-50 dark:hover:bg-gray-600">
+            <td class="p-1 sm:p-2 md:p-3">
+              <img *ngIf="variant.first_image" [src]="variant.first_image" alt="Imagen" class="w-6 h-6 sm:w-8 md:w-10 sm:h-8 md:h-10 object-cover rounded border border-gray-200 dark:border-gray-600">
+              <span *ngIf="!variant.first_image" class="text-xs text-gray-500 dark:text-gray-400">N/A</span>
             </td>
-            <td class="p-3 text-xs sm:text-sm text-gray-500 dark:text-dark-secondary whitespace-nowrap">{{ variant.sku }}</td>
-            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text">{{ variant.product_name }}</td>
-            <td class="p-3 text-xs sm:text-sm text-gray-500 dark:text-dark-secondary hidden sm:table-cell">{{ variant.category_name || 'N/A' }}</td>
-            <td class="p-3 text-xs sm:text-sm text-gray-500 dark:text-dark-secondary hidden sm:table-cell">{{ variant.product_type || 'N/A' }}</td>
-            <td class="p-3 text-xs sm:text-sm text-light-text dark:text-dark-text font-semibold whitespace-nowrap">{{ variant.stock }}</td>
-            <td class="p-3 text-xs sm:text-sm text-gray-500 dark:text-dark-secondary whitespace-nowrap">{{ variant.stock_threshold }}</td>
-            <td class="p-3">
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">{{ variant.sku }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100">{{ variant.product_name }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 hidden md:table-cell">{{ variant.category_name || 'N/A' }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 hidden md:table-cell">{{ variant.product_type || 'N/A' }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 font-semibold whitespace-nowrap">{{ variant.stock }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">{{ variant.stock_threshold }}</td>
+            <td class="p-1 sm:p-2 md:p-3">
               <div class="relative group">
-                <span class="px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap cursor-pointer" [ngClass]="getStatusStyle(variant.stock_status)">
+                <span class="px-1 sm:px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap cursor-pointer" [ngClass]="getStatusStyle(variant.stock_status)">
                   {{ getStatusText(variant.stock_status) }}
                 </span>
-                <div class="absolute invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 bg-gray-700 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-md py-1 px-2 w-48 -left-20 -top-10 z-10" [ngSwitch]="variant.stock_status">
+                <div class="absolute invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 bg-gray-700 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded-md py-1 px-2 w-40 sm:w-48 -left-16 sm:-left-20 -top-10 z-10" [ngSwitch]="variant.stock_status">
                   <div *ngSwitchCase="'in_stock'">Hay productos disponibles.</div>
                   <div *ngSwitchCase="'low_stock'">Se necesita reabastecimiento pronto.</div>
                   <div *ngSwitchCase="'out_of_stock'">Ya se agotó y no se mostrará al público.</div>
@@ -117,20 +108,26 @@
                 </div>
               </div>
             </td>
-            <td class="p-3 text-xs sm:text-sm text-gray-500 dark:text-dark-secondary hidden md:table-cell whitespace-nowrap">
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 hidden lg:table-cell whitespace-nowrap">
               {{ formatDate(variant.last_stock_added_at) }}
             </td>
-            <td class="p-3 text-center">
-              <button
-                (click)="openUpdateModal(variant)"
-                class="bg-blue-600 dark:bg-dark-primary text-white px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm rounded-lg hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition duration-300 whitespace-nowrap"
-              >
-                Editar
-              </button>
+            <td class="p-1 sm:p-2 md:p-3 text-center">
+              <div class="flex justify-center items-center">
+                <button
+                  (click)="openUpdateModal(variant)"
+                  class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative"
+                >
+                  <i class="fas fa-edit"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                </button>
+              </div>
             </td>
           </tr>
           <tr *ngIf="filteredStockVariants.length === 0">
-            <td colspan="10" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-dark-secondary">No hay variantes disponibles</td>
+            <td colspan="10" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              <i class="fas fa-box-open w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+              <p>No hay variantes disponibles</p>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -141,101 +138,97 @@
       [totalItems]="totalItems"
       [itemsPerPage]="itemsPerPage"
       (pageChange)="onPageChange($event)"
-      class="mt-4 p-4 border-t border-gray-200 dark:border-gray-600"
+      class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-600"
     ></app-pagination>
   </div>
 
   <!-- Modal para Actualizar Stock -->
   <app-modal #updateModal title="Actualizar Stock" modalType="info" [isConfirmModal]="false">
-    <div slot="body" class="p-4 sm:p-6 space-y-4">
-      <form [formGroup]="updateForm" class="space-y-4">
-        <div *ngIf="selectedVariant" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="flex justify-center items-center">
-            <img
-              *ngIf="selectedVariant.first_image"
-              [src]="selectedVariant.first_image"
-              alt="Imagen de la variante"
-              class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-            >
-            <span *ngIf="!selectedVariant.first_image" class="text-gray-500 dark:text-dark-secondary text-sm">Sin imagen</span>
-          </div>
-          <div class="space-y-2">
-            <div>
-              <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Producto</label>
-              <input
-                type="text"
-                [value]="selectedVariant.product_name || ''"
-                disabled
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-light-text dark:text-dark-text text-sm sm:text-base"
-              >
-            </div>
-            <div>
-              <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">SKU</label>
-              <input
-                type="text"
-                [value]="selectedVariant.sku"
-                disabled
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-light-text dark:text-dark-text text-sm sm:text-base"
-              >
-            </div>
-            <div>
-              <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Última Adición de Stock</label>
-              <input
-                type="text"
-                [value]="formatDate(selectedVariant.last_stock_added_at, true)"
-                disabled
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-light-text dark:text-dark-text text-sm sm:text-base"
-              >
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+      <div *ngIf="selectedVariant" class="space-y-4 sm:space-y-6">
+        <!-- Product Info -->
+        <div class="flex items-start gap-2 sm:gap-4 border-b border-gray-100 dark:border-gray-700 pb-4 sm:pb-6">
+          <img
+            *ngIf="selectedVariant.first_image"
+            [src]="selectedVariant.first_image"
+            alt="Imagen de la variante"
+            class="w-16 sm:w-20 h-16 sm:h-20 rounded-lg object-cover border border-gray-200 dark:border-gray-600"
+          />
+          <span *ngIf="!selectedVariant.first_image" class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm flex items-center h-16">Sin imagen</span>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-medium text-gray-900 dark:text-gray-100 truncate text-sm sm:text-base">{{ selectedVariant.product_name || 'N/A' }}</h3>
+            <div class="mt-2 space-y-1">
+              <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-hashtag w-4 h-4"></i>
+                <span class="font-medium">SKU:</span>
+                <span class="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-xs">{{ selectedVariant.sku }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-calendar w-4 h-4"></i>
+                <span class="font-medium">Última Adición:</span>
+                <span>{{ formatDate(selectedVariant.last_stock_added_at, true) }}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div>
-          <label class="block text-light-text dark:text-dark-text font-medium mb-1 text-sm sm:text-base">Cantidad de Stock <span class="text-red-500 dark:text-red-400">*</span></label>
-          <input
-            formControlName="stock"
-            type="number"
-            required
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-primary focus:border-blue-500 dark:focus:border-dark-primary transition duration-300 text-sm sm:text-base bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
-            [ngClass]="{'border-red-500 dark:border-red-400': updateForm.get('stock')?.touched && updateForm.get('stock')?.invalid}"
-          >
-          <p *ngIf="updateForm.get('stock')?.touched && updateForm.get('stock')?.hasError('required')"
-             class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">El stock es obligatorio</p>
-          <p *ngIf="updateForm.get('stock')?.touched && updateForm.get('stock')?.hasError('min')"
-             class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">El stock no puede ser negativo</p>
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold text-light-text dark:text-dark-text flex items-center gap-2 group">
-            Umbral de Stock
-            <div class="relative">
-              <i class="fas fa-info-circle text-gray-400 dark:text-dark-secondary cursor-pointer" aria-hidden="true"></i>
-              <span class="absolute invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-300 bg-gray-700 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-md py-1 px-2 w-48 -left-24 top-6 z-10">
-                Este valor se usa para enviar alertas de inventario bajo.
-              </span>
+        <!-- Editable Fields -->
+        <form [formGroup]="updateForm" class="space-y-4">
+          <div>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Cantidad de Stock <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input
+              formControlName="stock"
+              type="number"
+              required
+              min="0"
+              class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              placeholder="Ingrese la cantidad"
+              [ngClass]="{'border-red-500 dark:border-red-400': updateForm.get('stock')?.touched && updateForm.get('stock')?.invalid}"
+            />
+            <p *ngIf="updateForm.get('stock')?.touched && updateForm.get('stock')?.hasError('required')"
+               class="mt-1 text-xs text-red-500 dark:text-red-400">El stock es obligatorio</p>
+            <p *ngIf="updateForm.get('stock')?.touched && updateForm.get('stock')?.hasError('min')"
+               class="mt-1 text-xs text-red-500 dark:text-red-400">El stock no puede ser negativo</p>
+            <div *ngIf="updateForm.get('stock')?.value < updateForm.get('stock_threshold')?.value"
+                 class="mt-1 flex items-center gap-1 text-amber-600 dark:text-amber-400 text-xs sm:text-sm">
+              <i class="fas fa-exclamation-triangle w-4 h-4"></i>
+              <span>Stock por debajo del umbral</span>
             </div>
-          </label>
-          <input
-            formControlName="stock_threshold"
-            type="number"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-primary focus:border-blue-500 dark:focus:border-dark-primary transition duration-300 text-sm sm:text-base bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text"
-            [ngClass]="{'border-red-500 dark:border-red-400': updateForm.get('stock_threshold')?.touched && updateForm.get('stock_threshold')?.invalid}"
-          >
-          <p *ngIf="updateForm.get('stock_threshold')?.touched && updateForm.get('stock_threshold')?.hasError('min')"
-             class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">El umbral no puede ser negativo</p>
-        </div>
-      </form>
+          </div>
+
+          <div>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Umbral de Stock
+            </label>
+            <input
+              formControlName="stock_threshold"
+              type="number"
+              min="0"
+              class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              placeholder="Ingrese el umbral mínimo"
+              [ngClass]="{'border-red-500 dark:border-red-400': updateForm.get('stock_threshold')?.touched && updateForm.get('stock_threshold')?.invalid}"
+            />
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Se enviará una alerta cuando el stock esté por debajo de este valor
+            </p>
+            <p *ngIf="updateForm.get('stock_threshold')?.touched && updateForm.get('stock_threshold')?.hasError('min')"
+               class="mt-1 text-xs text-red-500 dark:text-red-400">El umbral no puede ser negativo</p>
+          </div>
+        </form>
+      </div>
     </div>
-    <div slot="actions" class="p-4 flex justify-end gap-4">
+    <div slot="actions" class="p-3 sm:p-4 flex justify-end gap-2 sm:gap-4">
       <button
         (click)="updateModal.close()"
-        class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-dark-text rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-sm sm:text-base"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
       >
         Cancelar
       </button>
       <button
         (click)="saveStockUpdate()"
-        class="px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-700 dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-primary transition duration-300 text-sm sm:text-base"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition duration-300 text-xs sm:text-sm"
         [disabled]="updateForm.invalid"
       >
         Actualizar
@@ -254,8 +247,8 @@
     (confirm)="confirmStockReduction()"
     (cancel)="cancelStockReduction()"
   >
-    <div slot="body" class="p-4 sm:p-6">
-      <p class="text-sm sm:text-base text-light-text dark:text-dark-text">
+    <div slot="body" class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+      <p class="text-xs sm:text-sm">
         Estás reduciendo el stock de {{ selectedVariant?.stock }} a {{ updateForm.value.stock }} para el producto {{ selectedVariant?.product_name }} (SKU: {{ selectedVariant?.sku }}). ¿Estás seguro de continuar?
       </p>
     </div>

@@ -60,6 +60,7 @@ export class SidebarComponent implements OnInit {
       label: 'Configuración',
       collapsed: true,
       items: [
+        { path: '/support-panel', icon: 'fa-shield-alt', label: 'Panel de Soporte', badge: null },
         { path: '/security', icon: 'fa-shield-alt', label: 'Seguridad', badge: null },
         { path: '/type', icon: 'fa-tags', label: 'Tipos', badge: null },
         { path: '/template', icon: 'fa-file-alt', label: 'Plantillas', badge: null },
@@ -103,7 +104,8 @@ export class SidebarComponent implements OnInit {
     'General': 'General',
     'Contenido': 'Contenido',
     'Productos': 'Productos',
-    'Configuración': 'Configuración'
+    'Configuración': 'Configuración',
+    'Panel de Soporte':'Panel de Soporte'
   };
 
   constructor(public themeService: ThemeService) {}
