@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { ProductService, StockVariant, StockVariantsResponse, UpdateStockRequest } from '../../services/product.service';
 import { CategorieService } from '../../services/categorieService';
 import { PaginationComponent } from '../pagination/pagination.component';
-import { ModalComponent } from '../../../modal/modal.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 import { ToastService } from '../../services/toastService';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';

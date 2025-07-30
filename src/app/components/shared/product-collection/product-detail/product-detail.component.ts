@@ -11,7 +11,7 @@ import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 import { ProductReviewsComponent } from './product-reviews/product-reviews.component';
 import { takeUntil } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
-import { RecommendationComponent } from '../../../../recommendation/recommendation.component';
+import { RecommendationComponent } from '../../recommendation/recommendation.component';
 @Component({
   selector: 'app-product-detail',
   standalone: true,

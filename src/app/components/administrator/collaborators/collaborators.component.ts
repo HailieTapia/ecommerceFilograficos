@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CollaboratorsService } from '../../services/collaborators.service';
-import { ModalComponent } from '../../../modal/modal.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../services/toastService';
 import { PaginationComponent } from '../pagination/pagination.component';

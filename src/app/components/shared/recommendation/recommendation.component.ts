@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RecommendationService, Recommendation, RecommendationResponse, HealthResponse } from '../components/services/recommendation.service';
+import { RecommendationService, Recommendation, RecommendationResponse, HealthResponse } from '../../services/recommendation.service';
 
 @Component({
   selector: 'app-recommendation',

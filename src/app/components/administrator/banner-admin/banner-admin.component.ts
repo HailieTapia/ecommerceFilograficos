@@ -5,7 +5,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { BannerService, Banner } from '../../services/banner.service';
-import { ModalComponent } from '../../../modal/modal.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ToastService } from '../../services/toastService';
 

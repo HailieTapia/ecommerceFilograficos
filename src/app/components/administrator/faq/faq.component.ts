@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { FaqService, Faq, GroupedFaq, FaqResponse } from '../../services/faq.service';
 import { FaqCategoryService } from '../../services/faq-category.service';
 import { PaginationComponent } from '../pagination/pagination.component';
-import { ModalComponent } from '../../../modal/modal.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 import { ToastService } from '../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';

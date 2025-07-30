@@ -6,7 +6,7 @@ import { CategorieService } from '../../services/categorieService';
 import { ToastService } from '../../services/toastService';
 import { AttributeCountCardsComponent } from './attribute-count-cards/attribute-count-cards.component';
 import { PaginationComponent } from '../pagination/pagination.component';
-import { ModalComponent } from '../../../modal/modal.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 import { Subscription } from 'rxjs';
 
 @Component({

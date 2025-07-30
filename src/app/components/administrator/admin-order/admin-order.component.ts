@@ -9,7 +9,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { AdminOrderService, AdminOrder, AdminOrdersResponse, AdminOrderResponse, AdminOrderSummaryResponse, UpdateOrderStatusRequest, AdminOrdersByDateResponse } from '../../services/admin-order.service';
 import { ToastService } from '../../services/toastService';
-import { ModalComponent } from '../../../modal/modal.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 import { format, startOfMonth, endOfMonth, isSameDay, addDays } from 'date-fns';
 import { Subscription } from 'rxjs';
 

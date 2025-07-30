@@ -3,7 +3,7 @@ import { UserService } from '../../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastService } from '../../../services/toastService';
-import { ModalComponent } from '../../../../modal/modal.component';
+import { ModalComponent } from '../../../reusable/modal/modal.component';
 import * as addressData from '../../../administrator/shared/direccion.json';
 import { Subscription } from 'rxjs';
 

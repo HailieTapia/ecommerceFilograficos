@@ -7,7 +7,7 @@ import { CollaboratorsService } from '../../services/collaborators.service';
 import { ToastService } from '../../services/toastService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ProductCatalogFormComponent } from './product-catalog-form/product-catalog-form.component';
-import { ModalComponent } from '../../../modal/modal.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
 

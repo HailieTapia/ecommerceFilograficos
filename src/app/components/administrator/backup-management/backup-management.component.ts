@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, Inject } from '@angular/core';
 import { CommonModule, DatePipe, registerLocaleData } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BackupService } from '../../services/backup.service';
-import { ModalComponent } from '../../../modal/modal.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastService } from '../../services/toastService';

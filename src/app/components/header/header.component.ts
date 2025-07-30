@@ -10,7 +10,7 @@ import { ModalService } from '../services/modal.service';
 import { Subscription, Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';
-import { NotificationDropdownComponent } from '../notification-dropdown/notification-dropdown.component';
+import { NotificationDropdownComponent } from './notification-dropdown/notification-dropdown.component';
 import { NavigationComponent } from './navigation/navigation.component';
 import { LoginComponent } from '../../components/public/login/login.component';
 import { RegisterComponent } from '../../components/public/register/register.component';
