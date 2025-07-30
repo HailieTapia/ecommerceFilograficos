@@ -76,7 +76,7 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!this.createEditModal || !this.viewDetailsModal || !this.confirmModal) {
-      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+      this.toastService.showToast('Error al inicializar los modales. Por favor, intenta de nuevo.', 'error');
     }
   }
 
@@ -272,9 +272,9 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
   }
 
   formatDate(date?: string, withTime: boolean = false): string {
-    if (!date) return 'Fecha no disponible';
+    if (!date) return 'Nunca';
     const format = withTime ? "d 'de' MMMM 'de' yyyy HH:mm" : "d 'de' MMMM 'de' yyyy";
-    return this.datePipe.transform(date, format, undefined, 'es') || 'Fecha no disponible';
+    return this.datePipe.transform(date, format, undefined, 'es') || 'Nunca';
   }
 
   isGroupedFaq(item: Faq | GroupedFaq): item is GroupedFaq {

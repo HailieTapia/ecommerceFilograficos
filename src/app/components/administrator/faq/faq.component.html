@@ -1,16 +1,16 @@
-<div class="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text p-4 sm:p-6 font-sans">
-  <!-- Encabezado -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-light-table-header dark:bg-dark-table-header p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-4">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
     <div>
-      <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
-        <i class="fas fa-question-circle text-light-primary dark:text-dark-primary"></i> Gestión de FAQs
+      <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-question-circle text-blue-600 dark:text-blue-400"></i> Gestión de FAQs
       </h1>
-      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Administra las preguntas frecuentes del sistema</p>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administra las preguntas frecuentes del sistema</p>
     </div>
     <div class="flex gap-2 w-full sm:w-auto">
       <button
         (click)="openCreateModal()"
-        class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2"
+        class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm"
       >
         <i class="fas fa-plus"></i> Crear FAQ
       </button>
@@ -18,22 +18,22 @@
   </div>
 
   <!-- Filtros y Búsqueda -->
-  <div class="bg-light-background dark:bg-dark-background p-4 sm:p-6 rounded-lg shadow-sm mb-6 border border-gray-200 dark:border-gray-700">
-    <div class="flex flex-col gap-4">
-      <div class="relative w-full">
+  <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+      <div class="relative">
+        <i class="fas fa-search absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
         <input
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearchChange()"
           placeholder="Buscar por pregunta o respuesta..."
-          class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+          class="w-full p-2 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
           [ngClass]="{'border-red-500 dark:border-red-400': searchTerm && searchTerm.length > 500}"
         />
-        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
       </div>
       <select
         [(ngModel)]="selectedCategoryId"
         (ngModelChange)="onCategoryChange()"
-        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
       >
         <option [ngValue]="null">Todas las categorías</option>
         <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
@@ -46,23 +46,24 @@
           (change)="toggleGrouping()"
           class="h-4 w-4 text-light-primary dark:text-dark-primary focus:ring-light-primary dark:focus:ring-dark-primary border-gray-300 dark:border-gray-600 rounded"
         />
-        <label for="groupByCategory" class="text-sm text-light-text dark:text-dark-text">Agrupar por categoría</label>
+        <label for="groupByCategory" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Agrupar por categoría</label>
       </div>
     </div>
   </div>
 
   <!-- Vista Agrupada o No Agrupada -->
-  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-600">
-    <div class="p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text">Preguntas Frecuentes Activas</h2>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Preguntas Frecuentes Activas</h2>
       <div class="flex items-center gap-2 w-full sm:w-auto">
-        <label for="itemsPerPage" class="text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">Elementos por página:</label>
+        <label for="itemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Por página:</label>
         <select
           id="itemsPerPage"
           [(ngModel)]="itemsPerPage"
           (change)="onItemsPerPageChange()"
-          class="w-full sm:w-24 p-1 border border-gray-200 dark:border-gray-600 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+          class="w-full sm:w-20 md:w-24 p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
         >
+          <option value="5">5</option>
           <option value="10">10</option>
           <option value="20">20</option>
           <option value="50">50</option>
@@ -71,76 +72,84 @@
     </div>
 
     <!-- Vista No Agrupada -->
-    <div *ngIf="!isGrouped" class="overflow-x-auto">
-      <table class="w-full table-auto border-collapse min-w-[640px]">
-        <thead class="bg-light-table-header dark:bg-dark-table-header">
+    <div *ngIf="!isGrouped" class="overflow-x-auto w-full">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-gray-100 dark:bg-gray-700">
           <tr>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden md:table-cell">ID</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Pregunta</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Respuesta</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden sm:table-cell">Categoría</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden lg:table-cell">Creado</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden lg:table-cell">Actualizado</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden md:table-cell">ID</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Pregunta</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Respuesta</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Categoría</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden lg:table-cell">Creado</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden lg:table-cell">Actualizado</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
           <ng-container *ngFor="let faq of faqs">
-            <tr *ngIf="!isGroupedFaq(faq)" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
-              <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text whitespace-nowrap hidden md:table-cell">{{ faq.id }}</td>
-              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-normal break-words max-w-[120px] sm:max-w-[200px]">{{ faq.question }}</td>
-              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-normal break-words max-w-[150px] sm:max-w-[300px]">{{ faq.answer }}</td>
-              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap hidden sm:table-cell">{{ faq.category.name }}</td>
-              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap hidden lg:table-cell">{{ formatDate(faq.createdAt) }}</td>
-              <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap hidden lg:table-cell">{{ formatDate(faq.updatedAt, true) }}</td>
-              <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
-                <button (click)="openViewModal(faq)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                  <i class="fas fa-eye"></i>
-                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
-                </button>
-                <button (click)="openEditModal(faq)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                  <i class="fas fa-edit"></i>
-                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
-                </button>
-                <button (click)="deleteFaq(faq)" class="group text-gray-500 dark:text-dark-secondary hover:text-red-600 dark:hover:text-dark-danger transition-all duration-300 relative">
-                  <i class="fas fa-trash"></i>
-                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-                </button>
+            <tr *ngIf="!isGroupedFaq(faq)" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+              <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden md:table-cell">{{ faq.id }}</td>
+              <td class="px-1 py-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[100px] sm:max-w-[150px] md:max-w-[200px]">{{ faq.question }}</td>
+              <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[120px] sm:max-w-[200px] md:max-w-[300px] line-clamp-2" style="width: auto;" [title]="faq.answer">{{ faq.answer }}</td>
+              <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">{{ faq.category.name }}</td>
+              <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden lg:table-cell">{{ formatDate(faq.createdAt) }}</td>
+              <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden lg:table-cell">{{ formatDate(faq.updatedAt, true) }}</td>
+              <td class="p-1 sm:p-2 md:p-3 text-center">
+                <div class="flex justify-center items-center gap-2 sm:gap-3">
+                  <button (click)="openViewModal(faq)" class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                    <i class="fas fa-eye"></i>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
+                  </button>
+                  <button (click)="openEditModal(faq)" class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                    <i class="fas fa-edit"></i>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                  </button>
+                  <button (click)="deleteFaq(faq)" class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                    <i class="fas fa-trash"></i>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                  </button>
+                </div>
               </td>
             </tr>
           </ng-container>
           <tr *ngIf="faqs.length === 0">
-            <td colspan="7" class="p-2 sm:p-3 text-center text-sm text-light-secondary dark:text-dark-secondary">No hay FAQs activas disponibles</td>
+            <td colspan="7" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              <i class="fas fa-box-open w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+              <p>No hay FAQs activas disponibles</p>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <!-- Vista Agrupada -->
-    <div *ngIf="isGrouped" class="p-4 space-y-6">
+    <div *ngIf="isGrouped" class="p-3 sm:p-4 space-y-4 sm:space-y-6">
       <ng-container *ngFor="let group of faqs">
-        <div *ngIf="isGroupedFaq(group)" class="bg-light-table-header dark:bg-dark-table-header rounded-lg p-4">
-          <h3 class="text-lg font-semibold text-light-text dark:text-dark-text mb-4">{{ group.name }}</h3>
-          <div class="space-y-4">
-            <div *ngFor="let faq of group.faqs" class="border-b border-gray-200 dark:border-gray-600 pb-4 last:border-b-0">
-              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                  <p class="text-sm font-medium text-light-text dark:text-dark-text">{{ faq.question }}</p>
-                  <p class="text-sm text-light-secondary dark:text-dark-secondary mt-1">{{ faq.answer }}</p>
-                  <p class="text-xs text-light-secondary dark:text-dark-secondary mt-1">{{ formatDate(faq.createdAt) }}</p>
+        <div *ngIf="isGroupedFaq(group)" class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600">
+          <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">{{ group.name }}</h3>
+          <div class="space-y-3 sm:space-y-4">
+            <div *ngFor="let faq of group.faqs" class="border-b border-gray-200 dark:border-gray-600 pb-3 sm:pb-4 last:border-b-0">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                <div class="flex-1">
+                  <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">{{ faq.question }}</p>
+                  <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{{ faq.answer }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ formatDate(faq.createdAt) }}</p>
                 </div>
-                <div class="flex gap-4">
+                <div class="flex gap-2 sm:gap-3">
                   <button (click)="openViewModal({ id: faq.id, question: faq.question, answer: faq.answer, category: { id: group.id, name: group.name, description: group.description }, createdAt: faq.createdAt, updatedAt: faq.updatedAt })" 
-                          class="text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover">
+                          class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                     <i class="fas fa-eye"></i>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
                   </button>
                   <button (click)="openEditModal({ id: faq.id, question: faq.question, answer: faq.answer, category: { id: group.id, name: group.name, description: group.description }, createdAt: faq.createdAt, updatedAt: faq.updatedAt })" 
-                          class="text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover">
+                          class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                     <i class="fas fa-edit"></i>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
                   </button>
                   <button (click)="deleteFaq({ id: faq.id, question: faq.question, answer: faq.answer, category: { id: group.id, name: group.name, description: group.description }, createdAt: faq.createdAt, updatedAt: faq.updatedAt })" 
-                          class="text-gray-500 dark:text-dark-secondary hover:text-red-600 dark:hover:text-dark-danger">
+                          class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
                     <i class="fas fa-trash"></i>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
                   </button>
                 </div>
               </div>
@@ -148,8 +157,9 @@
           </div>
         </div>
       </ng-container>
-      <div *ngIf="faqs.length === 0" class="text-center text-sm text-light-secondary dark:text-dark-secondary p-4">
-        No hay FAQs activas disponibles
+      <div *ngIf="faqs.length === 0" class="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 p-3 sm:p-4">
+        <i class="fas fa-box-open w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+        <p>No hay FAQs activas disponibles</p>
       </div>
     </div>
 
@@ -158,7 +168,7 @@
       [totalItems]="totalFaqs"
       [itemsPerPage]="itemsPerPage"
       (pageChange)="onPageChange($event)"
-      class="mt-4 p-4 border-t border-gray-200 dark:border-gray-600"
+      class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"
     ></app-pagination>
   </div>
 
@@ -169,99 +179,98 @@
     [modalType]="selectedFaqId ? 'info' : 'success'"
     [isConfirmModal]="false"
   >
-    <ng-container slot="body">
-      <form [formGroup]="faqForm" class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto space-y-4">
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto space-y-4 sm:space-y-6">
+      <form [formGroup]="faqForm" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Categoría <span class="text-red-500 dark:text-red-400">*</span></label>
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Categoría <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
           <select
             formControlName="category_id"
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
             [ngClass]="{'border-red-500 dark:border-red-400': faqForm.get('category_id')?.touched && faqForm.get('category_id')?.invalid}"
           >
             <option value="">Selecciona una categoría</option>
             <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
           </select>
-          <div *ngIf="faqForm.get('category_id')?.touched && faqForm.get('category_id')?.errors?.['required']" class="text-red-500 dark:text-red-400 text-sm mt-1">
-            La categoría es obligatoria.
-          </div>
+          <p *ngIf="faqForm.get('category_id')?.touched && faqForm.get('category_id')?.errors?.['required']"
+             class="mt-1 text-xs text-red-500 dark:text-red-400">La categoría es obligatoria</p>
         </div>
         <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Pregunta <span class="text-red-500 dark:text-red-400">*</span></label>
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Pregunta <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
           <input
             formControlName="question"
             type="text"
             placeholder="Ej. ¿Cómo hago esto?"
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
             [ngClass]="{'border-red-500 dark:border-red-400': faqForm.get('question')?.touched && faqForm.get('question')?.invalid}"
           />
-          <div *ngIf="faqForm.get('question')?.touched && faqForm.get('question')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
-            <div *ngIf="faqForm.get('question')?.errors?.['required']">La pregunta es obligatoria.</div>
-            <div *ngIf="faqForm.get('question')?.errors?.['minlength']">Debe tener al menos 3 caracteres.</div>
-            <div *ngIf="faqForm.get('question')?.errors?.['maxlength']">No puede exceder 500 caracteres.</div>
+          <div *ngIf="faqForm.get('question')?.touched && faqForm.get('question')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+            <p *ngIf="faqForm.get('question')?.errors?.['required']">La pregunta es obligatoria</p>
+            <p *ngIf="faqForm.get('question')?.errors?.['minlength']">Debe tener al menos 3 caracteres</p>
+            <p *ngIf="faqForm.get('question')?.errors?.['maxlength']">No puede exceder 500 caracteres</p>
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Respuesta <span class="text-red-500 dark:text-red-400">*</span></label>
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Respuesta <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
           <textarea
             formControlName="answer"
             placeholder="Ej. Haz esto para resolverlo..."
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
             rows="4"
             [ngClass]="{'border-red-500 dark:border-red-400': faqForm.get('answer')?.touched && faqForm.get('answer')?.invalid}"
           ></textarea>
-          <div *ngIf="faqForm.get('answer')?.touched && faqForm.get('answer')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
-            <div *ngIf="faqForm.get('answer')?.errors?.['required']">La respuesta es obligatoria.</div>
-            <div *ngIf="faqForm.get('answer')?.errors?.['minlength']">Debe tener al menos 3 caracteres.</div>
-            <div *ngIf="faqForm.get('answer')?.errors?.['maxlength']">No puede exceder 500 caracteres.</div>
+          <div *ngIf="faqForm.get('answer')?.touched && faqForm.get('answer')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+            <p *ngIf="faqForm.get('answer')?.errors?.['required']">La respuesta es obligatoria</p>
+            <p *ngIf="faqForm.get('answer')?.errors?.['minlength']">Debe tener al menos 3 caracteres</p>
+            <p *ngIf="faqForm.get('answer')?.errors?.['maxlength']">No puede exceder 500 caracteres</p>
           </div>
         </div>
       </form>
-    </ng-container>
-    <ng-container slot="actions">
-      <div class="flex flex-col sm:flex-row justify-end gap-4 p-4">
-        <button
-          (click)="createEditModal.close()"
-          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
-        >
-          Cancelar
-        </button>
-        <button
-          (click)="saveFaq()"
-          [disabled]="faqForm.invalid && faqForm.touched"
-          class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
-        >
-          {{ selectedFaqId ? 'Actualizar' : 'Crear' }}
-        </button>
-      </div>
-    </ng-container>
+    </div>
+    <div slot="actions" class="p-3 sm:p-4 flex justify-end gap-2 sm:gap-4">
+      <button
+        (click)="createEditModal.close()"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="saveFaq()"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition duration-300 text-xs sm:text-sm"
+        [disabled]="faqForm.invalid && faqForm.touched"
+      >
+        {{ selectedFaqId ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
   </app-modal>
 
   <!-- Modal para Ver Detalles -->
   <app-modal
     #viewDetailsModal
-    [title]="'Detalles de la FAQ'"
-    [modalType]="'default'"
+    title="Detalles de la FAQ"
+    modalType="default"
     [isConfirmModal]="false"
   >
-    <ng-container slot="body">
-      <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text space-y-4">
-        <p><strong class="text-light-text dark:text-dark-text">Pregunta:</strong> {{ selectedFaq?.question || 'N/A' }}</p>
-        <p><strong class="text-light-text dark:text-dark-text">Respuesta:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedFaq?.answer || 'N/A' }}</span></p>
-        <p><strong class="text-light-text dark:text-dark-text">Categoría:</strong> {{ selectedFaq?.category?.name || 'N/A' }}</p>
-        <p><strong class="text-light-text dark:text-dark-text">Creado:</strong> {{ formatDate(selectedFaq?.createdAt) }}</p>
-        <p><strong class="text-light-text dark:text-dark-text">Actualizado:</strong> {{ formatDate(selectedFaq?.updatedAt, true) }}</p>
-      </div>
-    </ng-container>
-    <ng-container slot="actions">
-      <div class="flex justify-end p-4">
-        <button
-          (click)="viewDetailsModal.close()"
-          class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
-        >
-          Cerrar
-        </button>
-      </div>
-    </ng-container>
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 space-y-3 sm:space-y-4">
+      <p class="text-xs sm:text-sm"><strong class="font-medium">Pregunta:</strong> {{ selectedFaq?.question || 'N/A' }}</p>
+      <p class="text-xs sm:text-sm"><strong class="font-medium">Respuesta:</strong> <span class="text-gray-500 dark:text-gray-400">{{ selectedFaq?.answer || 'N/A' }}</span></p>
+      <p class="text-xs sm:text-sm"><strong class="font-medium">Categoría:</strong> {{ selectedFaq?.category?.name || 'N/A' }}</p>
+      <p class="text-xs sm:text-sm"><strong class="font-medium">Creado:</strong> {{ formatDate(selectedFaq?.createdAt) }}</p>
+      <p class="text-xs sm:text-sm"><strong class="font-medium">Actualizado:</strong> {{ formatDate(selectedFaq?.updatedAt, true) }}</p>
+    </div>
+    <div slot="actions" class="p-3 sm:p-4 flex justify-end">
+      <button
+        (click)="viewDetailsModal.close()"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
+      >
+        Cerrar
+      </button>
+    </div>
   </app-modal>
 
   <!-- Modal para Confirmaciones -->
@@ -270,12 +279,13 @@
     [title]="confirmModalTitle"
     [modalType]="confirmModalType"
     [isConfirmModal]="true"
-    [confirmText]="'Confirmar'"
-    [cancelText]="'Cancelar'"
+    confirmText="Confirmar"
+    cancelText="Cancelar"
     (confirm)="handleConfirm()"
+    (cancel)="confirmModal.close()"
   >
-    <ng-container slot="body">
-      <p class="text-light-text dark:text-dark-text">{{ confirmModalMessage }}</p>
-    </ng-container>
+    <div slot="body" class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+      <p class="text-xs sm:text-sm">{{ confirmModalMessage }}</p>
+    </div>
   </app-modal>
 </div>

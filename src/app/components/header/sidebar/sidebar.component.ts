@@ -39,9 +39,9 @@ export class SidebarComponent implements OnInit {
       label: 'Contenido',
       collapsed: true,
       items: [
-        { path: '/banners', icon: 'fa-image', label: 'Banners', badge: null },
-        { path: '/faq-categories', icon: 'fa-list-ul', label: 'Categorías FAQ', badge: null },
-        { path: '/faqs', icon: 'fa-question-circle', label: 'FAQs', badge: null }
+        { path: '/banners', icon: 'fa-images', label: 'Banners', badge: null },
+        { path: '/faqs', icon: 'fa-question-circle', label: 'FAQs', badge: null },
+        { path: '/faq-categories', icon: 'fa-clipboard-question', label: 'Categorías FAQ', badge: null },
       ]
     },
     {
