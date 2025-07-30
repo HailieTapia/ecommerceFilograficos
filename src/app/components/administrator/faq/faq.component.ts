@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild, OnDestroy, LOCALE_ID } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FaqService, Faq, GroupedFaq, FaqResponse } from '../../services/faq.service';
-import { FaqCategoryService } from '../../services/faq-category.service';
+import { FaqService, Faq, GroupedFaq, FaqResponse } from '../../../services/faq.service';
+import { FaqCategoryService } from '../../../services/faq-category.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
 import { registerLocaleData } from '@angular/common';

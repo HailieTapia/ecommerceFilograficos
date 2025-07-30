@@ -4,9 +4,9 @@ import { RouterLink, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
-import { AuthService } from '../../services/auth.service';
-import { UserService } from '../../services/user.service';
-import { ProductService } from '../../services/product.service';
+import { AuthService } from '../../../services/auth.service';
+import { UserService } from '../../../services/user.service';
+import { ProductService } from '../../../services/product.service';
 import { BannerComponent } from '../banner/banner.component';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 

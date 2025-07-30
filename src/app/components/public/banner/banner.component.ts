@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { BannerService, Banner } from '../../services/banner.service';
+import { BannerService, Banner } from '../../../services/banner.service';
 import { interval, Subscription } from 'rxjs';
 
 @Component({

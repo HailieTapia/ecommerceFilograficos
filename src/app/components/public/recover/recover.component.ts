@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PasswordService } from '../../services/password.service';
+import { PasswordService } from '../../../services/password.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 import { PasswordComponent } from '../../administrator/shared/password/password.component';
 @Component({
   selector: 'app-recover',

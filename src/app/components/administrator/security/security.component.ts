@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SecurityService } from '../../services/security.service';
+import { SecurityService } from '../../../services/security.service';
 import { FormsModule } from '@angular/forms';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 @Component({
   selector: 'app-security',
   standalone: true,

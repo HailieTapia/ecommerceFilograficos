@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RecommendationService, Recommendation, RecommendationResponse } from '../../services/recommendation.service';
-import { CartItem } from '../../services/cart.service';
+import { RecommendationService, Recommendation, RecommendationResponse } from '../../../services/recommendation.service';
+import { CartItem } from '../../../services/cart.service';
 
 @Component({
   selector: 'app-recommended-products',

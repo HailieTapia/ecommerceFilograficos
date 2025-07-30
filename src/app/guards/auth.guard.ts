@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { AuthService } from '../components/services/auth.service';
-import { ModalService } from '../components/services/modal.service';
+import { AuthService } from '../services/auth.service';
+import { ModalService } from '../services/modal.service';
 import { Observable, of } from 'rxjs';
 import { map, take, catchError } from 'rxjs/operators';
 

@@ -1,12 +1,12 @@
 import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { ProductService, NewProduct, Variant, DeleteVariantResponse } from '../../../services/product.service';
-import { CategorieService } from '../../../services/categorieService';
-import { CollaboratorsService } from '../../../services/collaborators.service';
-import { ProductAttributeService, Attribute, CategoryWithAttributes } from '../../../services/product-attribute.service';
-import { ToastService } from '../../../services/toastService';
-import { SafeUrlPipe } from '../../../pipes/safe-url.pipe';
+import { ProductService, NewProduct, Variant, DeleteVariantResponse } from '../../../../services/product.service';
+import { CategorieService } from '../../../../services/categorieService';
+import { CollaboratorsService } from '../../../../services/collaborators.service';
+import { ProductAttributeService, Attribute, CategoryWithAttributes } from '../../../../services/product-attribute.service';
+import { ToastService } from '../../../../services/toastService';
+import { SafeUrlPipe } from '../../../../pipes/safe-url.pipe';
 import { debounceTime } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 

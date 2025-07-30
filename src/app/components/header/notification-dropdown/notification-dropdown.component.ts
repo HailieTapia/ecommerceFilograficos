@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { NotificationService } from '../services/notification.service';
-import { AuthService } from '../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
+import { AuthService } from '../../../services/auth.service';
 import { Subscription } from 'rxjs';
 
 // Definir una interfaz para las categorías del frontend

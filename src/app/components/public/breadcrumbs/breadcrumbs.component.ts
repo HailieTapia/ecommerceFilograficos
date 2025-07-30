@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BreadcrumbsService } from '../../services/breadcrumbs.service';
+import { BreadcrumbsService } from '../../../services/breadcrumbs.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 @Component({

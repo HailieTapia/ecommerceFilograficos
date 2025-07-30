@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ModalComponent } from '../../reusable/modal/modal.component';
-import { TypeService } from '../../services/type.service';
+import { TypeService } from '../../../services/type.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { AbstractControl } from '@angular/forms';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 
 @Component({
   selector: 'app-email-type',

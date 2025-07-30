@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 import { CsrfService } from './csrf.service';
 import { getMessaging, getToken, onMessage, deleteToken } from 'firebase/messaging';
-import { messaging } from '../../environments/firebase-config';
+import { messaging } from '../environments/firebase-config';
 
 // Definir la interfaz para las categorías del backend
 interface BackendCategories {

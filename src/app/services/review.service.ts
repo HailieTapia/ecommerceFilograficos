@@ -4,7 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap, retry, map } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
 import { AuthService } from './auth.service';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 
 // Interfaces para tipar las respuestas y solicitudes del backend
 export interface ReviewMedia {

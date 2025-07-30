@@ -2,11 +2,11 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angu
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../services/auth.service';
-import { CompanyService } from '../services/company.service';
-import { ThemeService } from '../services/theme.service';
-import { CartService } from '../services/cart.service';
-import { ModalService } from '../services/modal.service';
+import { AuthService } from '../../services/auth.service';
+import { CompanyService } from '../../services/company.service';
+import { ThemeService } from '../../services/theme.service';
+import { CartService } from '../../services/cart.service';
+import { ModalService } from '../../services/modal.service';
 import { Subscription, Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { ProfileDropdownComponent } from './profile-dropdown/profile-dropdown.component';

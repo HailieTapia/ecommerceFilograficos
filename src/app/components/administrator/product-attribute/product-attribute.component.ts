@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
-import { ProductAttributeService } from '../../services/product-attribute.service';
-import { CategorieService } from '../../services/categorieService';
-import { ToastService } from '../../services/toastService';
+import { ProductAttributeService } from '../../../services/product-attribute.service';
+import { CategorieService } from '../../../services/categorieService';
+import { ToastService } from '../../../services/toastService';
 import { AttributeCountCardsComponent } from './attribute-count-cards/attribute-count-cards.component';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';

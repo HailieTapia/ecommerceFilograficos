@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 
 @Injectable({
   providedIn: 'root'

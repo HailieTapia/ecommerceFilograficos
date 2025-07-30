@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { SupportInquiryService } from '../../services/support-inquiry.service';
-import { CompanyService } from '../../services/company.service';
+import { SupportInquiryService } from '../../../services/support-inquiry.service';
+import { CompanyService } from '../../../services/company.service';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../environments/config';

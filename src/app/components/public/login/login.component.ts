@@ -3,12 +3,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 import { environment } from '../../../environments/config';
 import { noXSSValidator } from '../../administrator/shared/validators';
 import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
-import { ToastService } from '../../services/toastService';
-import { ModalService } from '../../services/modal.service';
+import { ToastService } from '../../../services/toastService';
+import { ModalService } from '../../../services/modal.service';
 
 @Component({
   selector: 'app-login',

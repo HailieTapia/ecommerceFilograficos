@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 

@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductService, PriceVariant, PriceVariantsResponse, BatchUpdatePriceRequest, BatchUpdatePriceIndividualRequest, BatchUpdatePriceIndividualVariant } from '../../../services/product.service';
-import { CategorieService } from '../../../services/categorieService';
+import { ProductService, PriceVariant, PriceVariantsResponse, BatchUpdatePriceRequest, BatchUpdatePriceIndividualRequest, BatchUpdatePriceIndividualVariant } from '../../../../services/product.service';
+import { CategorieService } from '../../../../services/categorieService';
 import { PaginationComponent } from '../../pagination/pagination.component';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';

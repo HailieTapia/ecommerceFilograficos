@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, of, throwError} from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
 import { AuthService } from './auth.service';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 
 // Interfaces para tipar las respuestas del backend
 export interface CartItem {

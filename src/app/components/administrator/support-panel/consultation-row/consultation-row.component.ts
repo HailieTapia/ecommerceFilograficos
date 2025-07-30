@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SupportInquiryService } from '../../../services/support-inquiry.service';
+import { SupportInquiryService } from '../../../../services/support-inquiry.service';
 import { forkJoin } from 'rxjs';
 
 @Component({

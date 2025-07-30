@@ -3,11 +3,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AlexaAuthService } from '../../services/alexa-auth.service';
+import { AlexaAuthService } from '../../../services/alexa-auth.service';
 import { environment } from '../../../environments/config';
 import { noXSSValidator } from '../../administrator/shared/validators';
 import { PasswordToggleComponent } from '../../administrator/shared/password-toggle/password-toggle.component';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 
 @Component({
   selector: 'app-alexa-login',

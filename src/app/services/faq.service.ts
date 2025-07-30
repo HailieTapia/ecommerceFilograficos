@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
 import { AuthService } from '../services/auth.service';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 
 // Interfaces para tipado
 export interface Faq {

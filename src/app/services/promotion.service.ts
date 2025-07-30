@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 
 // Interfaz para tipar las promociones (actualizada para reflejar todos los campos del backend)
 export interface Promotion {

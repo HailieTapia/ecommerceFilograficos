@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductService, Product, ProductResponse } from '../../services/product.service';
-import { CategorieService } from '../../services/categorieService';
-import { CollaboratorsService } from '../../services/collaborators.service';
-import { ToastService } from '../../services/toastService';
+import { ProductService, Product, ProductResponse } from '../../../services/product.service';
+import { CategorieService } from '../../../services/categorieService';
+import { CollaboratorsService } from '../../../services/collaborators.service';
+import { ToastService } from '../../../services/toastService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ProductCatalogFormComponent } from './product-catalog-form/product-catalog-form.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';

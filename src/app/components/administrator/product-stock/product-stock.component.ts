@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ProductService, StockVariant, StockVariantsResponse, UpdateStockRequest } from '../../services/product.service';
-import { CategorieService } from '../../services/categorieService';
+import { ProductService, StockVariant, StockVariantsResponse, UpdateStockRequest } from '../../../services/product.service';
+import { CategorieService } from '../../../services/categorieService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { LOCALE_ID } from '@angular/core';

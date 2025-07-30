@@ -2,11 +2,11 @@ import { Component, EventEmitter, Output, HostListener, OnInit, OnDestroy } from
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
 import { noXSSValidator } from '../../administrator/shared/validators';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 import { PasswordComponent } from '../../administrator/shared/password/password.component';
-import { ModalService } from '../../services/modal.service';
+import { ModalService } from '../../../services/modal.service';
 import { Subscription } from 'rxjs';
 
 @Component({

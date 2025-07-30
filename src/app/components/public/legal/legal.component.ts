@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, LOCALE_ID } from '@angular/core';
-import { RegulatoryService } from '../../services/regulatory.service';
+import { RegulatoryService } from '../../../services/regulatory.service';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
+import { SafeHtmlPipe } from '../../../pipes/safe-html.pipe';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { Subject, takeUntil } from 'rxjs';

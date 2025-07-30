@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Review } from '../../../../services/review.service';
+import { Review } from '../../../../../services/review.service';
 
 @Component({
   selector: 'app-review-image-modal',

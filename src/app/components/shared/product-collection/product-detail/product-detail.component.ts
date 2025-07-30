@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ProductCollectionService, ProductDetail, ProductVariant, Product } from '../../../services/product-collection.service';
-import { AuthService } from '../../../services/auth.service';
-import { CartService, AddToCartRequest, CartItem } from '../../../services/cart.service';
-import { ReviewService, ReviewSummary } from '../../../services/review.service';
-import { ToastService } from '../../../services/toastService';
+import { ProductCollectionService, ProductDetail, ProductVariant, Product } from '../../../../services/product-collection.service';
+import { AuthService } from '../../../../services/auth.service';
+import { CartService, AddToCartRequest, CartItem } from '../../../../services/cart.service';
+import { ReviewService, ReviewSummary } from '../../../../services/review.service';
+import { ToastService } from '../../../../services/toastService';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';

@@ -4,10 +4,10 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { BannerService, Banner } from '../../services/banner.service';
+import { BannerService, Banner } from '../../../services/banner.service';
 import { ModalComponent } from '../../reusable/modal/modal.component';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 
 @Component({
   selector: 'app-banner-admin',

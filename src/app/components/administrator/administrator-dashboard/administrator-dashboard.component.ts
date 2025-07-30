@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth.service'; // Ajusta la ruta según tu estructura
+import { AuthService } from '../../../services/auth.service'; // Ajusta la ruta según tu estructura
 
 @Component({
   selector: 'app-administrator-dashboard',

@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, interval, of } from 'rxjs';
 import { switchMap, retry, catchError, map } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 
 // Interfaces ajustadas (sin cambios)
 export interface Product {

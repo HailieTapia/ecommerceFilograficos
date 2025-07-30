@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { switchMap, tap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 
 @Injectable({
     providedIn: 'root'

@@ -2,13 +2,13 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductCollectionService, ProductResponse, Product } from '../../services/product-collection.service';
-import { AuthService } from '../../services/auth.service';
+import { ProductCollectionService, ProductResponse, Product } from '../../../services/product-collection.service';
+import { AuthService } from '../../../services/auth.service';
 import { FilterSidebarComponent } from './filter-sidebar/filter-sidebar.component';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
-import { ToastService } from '../../services/toastService';
-import { CategorieService } from '../../services/categorieService';
-import { CollaboratorsService } from '../../services/collaborators.service';
+import { ToastService } from '../../../services/toastService';
+import { CategorieService } from '../../../services/categorieService';
+import { CollaboratorsService } from '../../../services/collaborators.service';
 import { take, takeUntil } from 'rxjs/operators';
 import { forkJoin, Observable, Subject } from 'rxjs';
 

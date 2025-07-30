@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserService } from '../../../services/user.service';
-import { ToastService } from '../../../services/toastService';
+import { UserService } from '../../../../services/user.service';
+import { ToastService } from '../../../../services/toastService';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 // Interfaz para tipar userProfile

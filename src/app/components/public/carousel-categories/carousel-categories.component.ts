@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
-import { CategorieService } from '../../services/categorieService';
-import { ToastService } from '../../services/toastService';
+import { CategorieService } from '../../../services/categorieService';
+import { ToastService } from '../../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 
 @Component({

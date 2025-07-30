@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CompanyService } from '../../services/company.service';
+import { CompanyService } from '../../../services/company.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import * as addressData from '../shared/direccion.json';
 import { CommonModule } from '@angular/common';
 import { noXSSValidator } from '../shared/validators';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 
 @Component({
   selector: 'app-company',

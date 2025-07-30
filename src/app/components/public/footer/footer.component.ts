@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { CompanyService } from '../../services/company.service';
-import { FaqCategoryService, FaqCategory } from '../../services/faq-category.service';
+import { CompanyService } from '../../../services/company.service';
+import { FaqCategoryService, FaqCategory } from '../../../services/faq-category.service';
 
 @Component({
   selector: 'app-footer',

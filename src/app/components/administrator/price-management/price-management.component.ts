@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild, OnDestroy, Inject } from '@angular/core';
 import { CommonModule, DatePipe, registerLocaleData } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductService, PriceVariant, PriceVariantsResponse, UpdatePriceRequest, PriceHistoryResponse, PriceHistoryEntry } from '../../services/product.service';
-import { CategorieService } from '../../services/categorieService';
+import { ProductService, PriceVariant, PriceVariantsResponse, UpdatePriceRequest, PriceHistoryResponse, PriceHistoryEntry } from '../../../services/product.service';
+import { CategorieService } from '../../../services/categorieService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
 import { BulkPriceUpdateComponent } from './bulk-price-update/bulk-price-update.component';

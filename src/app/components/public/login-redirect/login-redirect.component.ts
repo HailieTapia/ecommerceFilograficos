@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ModalService } from '../../services/modal.service';
+import { ModalService } from '../../../services/modal.service';
 import { Subscription } from 'rxjs';
 
 @Component({

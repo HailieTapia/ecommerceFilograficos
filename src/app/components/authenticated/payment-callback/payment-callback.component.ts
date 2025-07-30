@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { OrderService } from '../../services/order.service';
-import { ToastService } from '../../services/toastService';
+import { OrderService } from '../../../services/order.service';
+import { ToastService } from '../../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { CommonModule } from '@angular/common';
 

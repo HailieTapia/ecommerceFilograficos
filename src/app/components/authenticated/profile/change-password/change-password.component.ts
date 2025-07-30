@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { PasswordService } from '../../../services/password.service';
+import { PasswordService } from '../../../../services/password.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { PasswordComponent } from '../../../administrator/shared/password/password.component';
-import { ToastService } from '../../../services/toastService';
+import { ToastService } from '../../../../services/toastService';
 import { PasswordToggleComponent } from '../../../administrator/shared/password-toggle/password-toggle.component';
 @Component({
   selector: 'app-change-password',

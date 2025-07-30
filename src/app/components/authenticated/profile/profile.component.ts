@@ -1,9 +1,9 @@
 import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
-import { UserService } from '../../services/user.service';
-import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../../services/user.service';
+import { AuthService } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ToastService } from '../../services/toastService';
+import { ToastService } from '../../../services/toastService';
 import { PersonalInfoComponent } from './personal-info/personal-info.component';
 import { AddressesComponent } from './addresses/addresses.component';
 import { Router } from '@angular/router';

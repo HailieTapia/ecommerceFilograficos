@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { switchMap, tap, catchError, take } from 'rxjs/operators';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 import { CsrfService } from './csrf.service';
 
 @Injectable({

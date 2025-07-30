@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
-import { UserService } from '../../../services/user.service';
+import { UserService } from '../../../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ToastService } from '../../../services/toastService';
+import { ToastService } from '../../../../services/toastService';
 import { ModalComponent } from '../../../reusable/modal/modal.component';
 import * as addressData from '../../../administrator/shared/direccion.json';
 import { Subscription } from 'rxjs';

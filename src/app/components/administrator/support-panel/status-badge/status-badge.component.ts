@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SupportInquiryService } from '../../../services/support-inquiry.service';
+import { SupportInquiryService } from '../../../../services/support-inquiry.service';
 
 @Component({
   selector: 'app-status-badge',

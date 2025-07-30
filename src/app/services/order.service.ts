@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular
 import { Observable, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
-import { environment } from '../../environments/config';
+import { environment } from '../environments/config';
 
 // Interfaz para las instrucciones de pago
 export interface PaymentInstructions {

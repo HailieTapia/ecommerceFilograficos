@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ThemeService } from '../../services/theme.service';
+import { ThemeService } from '../../../services/theme.service';
 
 // Definir una interfaz para las traducciones
 interface Translations {

@@ -1,9 +1,9 @@
 import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
-import { ReviewService, ReviewsResponse, Review } from '../../../../services/review.service';
+import { ReviewService, ReviewsResponse, Review } from '../../../../../services/review.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SpinnerComponent } from '../../../../reusable/spinner/spinner.component';
-import { ToastService } from '../../../../services/toastService';
+import { ToastService } from '../../../../../services/toastService';
 import { ReviewImageModalComponent } from '../review-image-modal/review-image-modal.component';
 
 @Component({

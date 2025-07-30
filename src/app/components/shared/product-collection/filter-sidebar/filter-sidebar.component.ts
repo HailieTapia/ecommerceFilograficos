@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CategorieService } from '../../../services/categorieService';
-import { CollaboratorsService } from '../../../services/collaborators.service';
+import { CategorieService } from '../../../../services/categorieService';
+import { CollaboratorsService } from '../../../../services/collaborators.service';
 import { take } from 'rxjs/operators';
 
 interface Category {

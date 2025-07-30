@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { CategorieService } from '../../services/categorieService';
-import { ToastService } from '../../services/toastService';
+import { CategorieService } from '../../../services/categorieService';
+import { ToastService } from '../../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 
 @Component({

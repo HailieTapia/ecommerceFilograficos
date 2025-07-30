@@ -1,7 +1,7 @@
 import { Component, OnInit, LOCALE_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
-import { SupportInquiryService } from '../../services/support-inquiry.service';
+import { SupportInquiryService } from '../../../services/support-inquiry.service';
 import { StatusCardsComponent } from './status-cards/status-cards.component';
 import { ConsultationRowComponent } from './consultation-row/consultation-row.component';
 import { StatusBadgeComponent } from './status-badge/status-badge.component';

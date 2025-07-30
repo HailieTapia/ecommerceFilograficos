@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CartService, CartResponse, CartItem, Promotion } from '../../services/cart.service';
-import { OrderService } from '../../services/order.service';
-import { ToastService } from '../../services/toastService';
+import { CartService, CartResponse, CartItem, Promotion } from '../../../services/cart.service';
+import { OrderService } from '../../../services/order.service';
+import { ToastService } from '../../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
-import { UserService } from '../../services/user.service';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-checkout',
