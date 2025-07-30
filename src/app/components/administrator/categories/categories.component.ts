@@ -14,43 +14,45 @@ import { ToastService } from '../../services/toastService';
   styleUrl: './categories.component.css'
 })
 export class CategoriesComponent implements OnInit, AfterViewInit {
-  @ViewChild('modal') modal!: ModalComponent;
+  @ViewChild('createEditModal') createEditModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
+
   categories: any[] = [];
   total: number = 0;
   currentPage: number = 1;
   itemsPerPage: number = 10;
   categoryForm!: FormGroup;
   selectedCategoryId: number | null = null;
-  imagePreview: string | null = null; // Para previsualización de imagen
-  selectedImageFile: File | null = null; // Archivo de imagen seleccionado
-
-  // Propiedades para los filtros y ordenamiento
-  filterActive: boolean | undefined = undefined; // undefined = todas, true = activas, false = desactivadas
-  filterName: string = ''; // Filtro por nombre
-  sortBy: string = 'name'; // Campo por defecto para ordenar
-  sortOrder: 'ASC' | 'DESC' = 'ASC'; // Dirección por defecto del ordenamiento
+  imagePreview: string | null = null;
+  selectedImageFile: File | null = null;
+  filterActive: boolean | undefined = undefined;
+  filterName: string = '';
+  sortBy: string = 'name';
+  sortOrder: 'ASC' | 'DESC' = 'ASC';
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
 
   constructor(
     private toastService: ToastService,
     private categoriesService: CategorieService,
-    private fb: FormBuilder,
+    private fb: FormBuilder
   ) {
     this.categoryForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]],
-      color_fondo: ['', [Validators.pattern(/^#([0-9A-F]{6}|[0-9A-F]{8})$/i)]], // Validar hexadecimal
-      imagen_url: ['', [Validators.pattern(/^https?:\/\/[^\s/$.?#].[^\s]*$/i)]], // Validar URL válida
-      removeImage: [false] // Para eliminar imagen en edición
+      color_fondo: ['', [Validators.pattern(/^#([0-9A-F]{6}|[0-9A-F]{8})$/i)]],
+      imagen_url: ['', [Validators.pattern(/^https?:\/\/[^\s/$.?#].[^\s]*$/i)]],
+      removeImage: [false]
     });
 
-    // Sincronizar color_fondo
     this.categoryForm.get('color_fondo')?.valueChanges.subscribe(value => {
       if (value && /^#[0-9A-F]{6}$/i.test(value)) {
         this.categoryForm.get('color_fondo')?.setValue(value.toUpperCase(), { emitEvent: false });
       }
     });
 
-    // Sincronizar imagen_url con previsualización
     this.categoryForm.get('imagen_url')?.valueChanges.subscribe(value => {
       this.updateImagePreview();
     });
@@ -61,12 +63,11 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    if (!this.modal) {
-      this.toastService.showToast('El modal no está inicializado correctamente.', 'info');
+    if (!this.createEditModal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
     }
   }
 
-  // Obtener todas las categorías con filtros y ordenamiento
   getAllCategories(): void {
     this.categoriesService
       .getAllCategories(
@@ -91,22 +92,23 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       });
   }
 
-  // Maneja el cambio de página
   onPageChange(newPage: number): void {
     this.currentPage = newPage;
     this.getAllCategories();
   }
 
-  // Abrir modal para crear categoría
   openCreateModal(): void {
     this.selectedCategoryId = null;
-    this.categoryForm.reset();
+    this.categoryForm.reset({ removeImage: false });
     this.imagePreview = null;
     this.selectedImageFile = null;
-    this.modal.open();
+    if (this.createEditModal) {
+      this.createEditModal.modalType = 'success';
+      this.createEditModal.title = 'Nueva Categoría';
+      this.createEditModal.open();
+    }
   }
 
-  // Abrir modal para editar categoría
   openEditModal(categoryId: number): void {
     this.selectedCategoryId = categoryId;
     this.categoriesService.getCategoryById(categoryId).subscribe({
@@ -121,7 +123,11 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
           });
           this.imagePreview = category.imagen_url || null;
           this.selectedImageFile = null;
-          this.modal.open();
+          if (this.createEditModal) {
+            this.createEditModal.modalType = 'info';
+            this.createEditModal.title = 'Editar Categoría';
+            this.createEditModal.open();
+          }
         } else {
           this.toastService.showToast('La categoría no está disponible para edición.', 'error');
         }
@@ -132,7 +138,21 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Guardar categoría (crear o actualizar)
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmAction = action;
+    if (this.confirmModal) {
+      this.confirmModal.title = title;
+      this.confirmModal.modalType = modalType;
+      this.confirmModal.isConfirmModal = true;
+      this.confirmModal.confirmText = 'Confirmar';
+      this.confirmModal.cancelText = 'Cancelar';
+      this.confirmModal.open();
+    }
+  }
+
   saveCategory(): void {
     if (this.categoryForm.invalid) {
       this.categoryForm.markAllAsTouched();
@@ -149,7 +169,6 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       removeImage: this.categoryForm.get('removeImage')?.value || undefined
     };
 
-    // Si hay imagen_url, ignorar image y removeImage
     if (categoryData.imagen_url) {
       categoryData.image = undefined;
       categoryData.removeImage = undefined;
@@ -166,7 +185,7 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
           'success'
         );
         this.getAllCategories();
-        this.modal.close();
+        if (this.createEditModal) this.createEditModal.close();
       },
       error: (err) => {
         const errorMessage = err?.error?.message || 'Error al guardar categoría';
@@ -175,48 +194,57 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Eliminar categoría
   deleteCategory(categoryId: number): void {
-    this.toastService.showToast(
-      '¿Estás seguro de que deseas eliminar esta categoría? Esta acción no se puede deshacer.',
-      'warning',
-      'Confirmar',
+    const category = this.categories.find(c => c.category_id === categoryId);
+    if (!category) {
+      this.toastService.showToast('Categoría no encontrada.', 'error');
+      return;
+    }
+    this.openConfirmModal(
+      'Eliminar Categoría',
+      `¿Estás seguro de que deseas eliminar la categoría "${category.name}"? Esta acción no se puede deshacer.`,
+      'danger',
       () => {
         this.categoriesService.deleteCategory(categoryId).subscribe({
           next: (response) => {
             this.toastService.showToast(response.message || 'Categoría eliminada exitosamente', 'success');
             this.getAllCategories();
+            if (this.confirmModal) this.confirmModal.close();
           },
-          error: (error) => {
-            const errorMessage = error?.error?.message || 'Error al eliminar la categoría';
+          error: (err) => {
+            const errorMessage = err?.error?.message || 'Error al eliminar la categoría';
             this.toastService.showToast(errorMessage, 'error');
+            if (this.confirmModal) this.confirmModal.close();
           }
         });
       }
     );
   }
 
-  // Manejar cambio en el filtro por nombre
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
+  }
+
   onNameFilterChange(name: string): void {
     this.filterName = name;
     this.currentPage = 1;
     this.getAllCategories();
   }
 
-  // Manejar cambio en el filtro de estado
   onActiveFilterChange(active: boolean | undefined): void {
     this.filterActive = active;
     this.currentPage = 1;
     this.getAllCategories();
   }
 
-  // Alternar ordenamiento
   toggleSortOrder(): void {
     this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC';
     this.getAllCategories();
   }
 
-  // Manejar selección de archivo de imagen
   handleImageUpload(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
@@ -224,7 +252,6 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // Manejar drag-and-drop de imagen
   handleDrop(event: DragEvent): void {
     event.preventDefault();
     if (event.dataTransfer?.files && event.dataTransfer.files[0]) {
@@ -232,12 +259,10 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     }
   }
 
-  // Prevenir comportamiento por defecto en dragover
   handleDragOver(event: DragEvent): void {
     event.preventDefault();
   }
 
-  // Establecer archivo de imagen y generar previsualización
   private setImageFile(file: File): void {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
@@ -251,10 +276,9 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     this.selectedImageFile = file;
     this.imagePreview = URL.createObjectURL(file);
     this.categoryForm.get('removeImage')?.setValue(false);
-    this.categoryForm.get('imagen_url')?.setValue(''); // Limpiar URL si se sube archivo
+    this.categoryForm.get('imagen_url')?.setValue('');
   }
 
-  // Limpiar imagen seleccionada
   clearImage(): void {
     this.selectedImageFile = null;
     this.imagePreview = null;
@@ -262,11 +286,9 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
     this.categoryForm.get('imagen_url')?.setValue('');
   }
 
-  // Actualizar previsualización desde URL
   updateImagePreview(): void {
     const url = this.categoryForm.get('imagen_url')?.value;
     if (url) {
-      // Intentar cargar la imagen para validar
       const img = new Image();
       img.src = url;
       img.onload = () => {

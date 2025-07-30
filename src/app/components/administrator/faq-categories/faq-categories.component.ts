@@ -1,12 +1,12 @@
-import { Component, OnInit, ViewChild, LOCALE_ID } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, LOCALE_ID } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { FaqCategoryService } from '../../services/faq-category.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
 import { ToastService } from '../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 
@@ -31,8 +31,9 @@ registerLocaleData(localeEs);
     { provide: LOCALE_ID, useValue: 'es' }
   ]
 })
-export class FaqCategoriesComponent implements OnInit {
-  @ViewChild('faqCategoryModal') faqCategoryModal!: ModalComponent;
+export class FaqCategoriesComponent implements OnInit, OnDestroy {
+  @ViewChild('createEditModal') createEditModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
 
   categories: any[] = [];
   totalCategories = 0;
@@ -42,6 +43,11 @@ export class FaqCategoriesComponent implements OnInit {
   searchTerm = '';
   categoryForm!: FormGroup;
   selectedCategoryId: string | null = null;
+  private subscriptions: Subscription = new Subscription();
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
 
   constructor(
     private faqCategoryService: FaqCategoryService,
@@ -73,17 +79,30 @@ export class FaqCategoriesComponent implements OnInit {
     this.loadCategories();
   }
 
+  ngAfterViewInit(): void {
+    if (!this.createEditModal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   loadCategories(): void {
-    this.faqCategoryService.getAllCategories(this.currentPage, this.itemsPerPage, this.searchTerm).subscribe({
-      next: (response) => {
-        this.categories = response.faqCategories;
-        this.totalCategories = response.total;
-        this.totalPages = Math.ceil(response.total / this.itemsPerPage);
-      },
-      error: (err) => {
-        this.toastService.showToast('Error al cargar las categorías', 'error');
-      },
-    });
+    this.subscriptions.add(
+      this.faqCategoryService.getAllCategories(this.currentPage, this.itemsPerPage, this.searchTerm).subscribe({
+        next: (response) => {
+          this.categories = response.faqCategories;
+          this.totalCategories = response.total;
+          this.totalPages = Math.ceil(response.total / this.itemsPerPage);
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar las categorías';
+          this.toastService.showToast(errorMessage, 'error');
+        },
+      })
+    );
   }
 
   onPageChange(newPage: number): void {
@@ -110,17 +129,17 @@ export class FaqCategoriesComponent implements OnInit {
   }
 
   // Validadores personalizados
-  noSpecialCharsValidator(control: any) {
+  noSpecialCharsValidator(control: AbstractControl) {
     const hasDangerousChars = /[<>'"`;]/.test(control.value);
     return hasDangerousChars ? { invalidContent: true } : null;
   }
 
-  noNumbersValidator(control: any) {
+  noNumbersValidator(control: AbstractControl) {
     const hasNumbers = /\d/.test(control.value);
     return hasNumbers ? { invalidContent: true } : null;
   }
 
-  noSQLInjectionValidator(control: any) {
+  noSQLInjectionValidator(control: AbstractControl) {
     const sqlKeywords = /(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|EXEC|UNION|GRANT|REVOKE)/i;
     return sqlKeywords.test(control.value) ? { invalidContent: true } : null;
   }
@@ -129,31 +148,71 @@ export class FaqCategoriesComponent implements OnInit {
     return input.replace(/[<>'"`;]/g, '').replace(/(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|EXEC|UNION|GRANT|REVOKE)/gi, '');
   }
 
-  openCategoryModal(mode: 'create' | 'edit', category?: any): void {
-    if (mode === 'create') {
-      this.selectedCategoryId = null;
-      this.categoryForm.reset();
-      this.faqCategoryModal.open();
-    } else if (category) {
-      this.selectedCategoryId = category.category_id;
+  openCreateModal(): void {
+    if (!this.createEditModal) {
+      this.toastService.showToast('Error: Modal de creación no inicializado', 'error');
+      return;
+    }
+    this.selectedCategoryId = null;
+    this.categoryForm.reset();
+    this.createEditModal.modalType = 'success';
+    this.createEditModal.title = 'Crear Categoría';
+    this.createEditModal.open();
+  }
+
+  openEditModal(category: any): void {
+    if (!this.createEditModal) {
+      this.toastService.showToast('Error: Modal de edición no inicializado', 'error');
+      return;
+    }
+    this.selectedCategoryId = category.category_id;
+    this.subscriptions.add(
       this.faqCategoryService.getCategoryById(category.category_id).subscribe({
         next: (response) => {
           this.categoryForm.patchValue({
             name: response.faqCategory.name,
             description: response.faqCategory.description,
           });
-          this.faqCategoryModal.open();
+          this.createEditModal.modalType = 'info';
+          this.createEditModal.title = 'Editar Categoría';
+          this.createEditModal.open();
         },
         error: (err) => {
-          this.toastService.showToast('Error al cargar los detalles de la categoría', 'error');
+          const errorMessage = err?.error?.message || 'Error al cargar los detalles de la categoría';
+          this.toastService.showToast(errorMessage, 'error');
         },
-      });
+      })
+    );
+  }
+
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    if (!this.confirmModal) {
+      this.toastService.showToast('Error: Modal de confirmación no inicializado', 'error');
+      return;
+    }
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmAction = action;
+    this.confirmModal.title = title;
+    this.confirmModal.modalType = modalType;
+    this.confirmModal.isConfirmModal = true;
+    this.confirmModal.confirmText = 'Confirmar';
+    this.confirmModal.cancelText = 'Cancelar';
+    this.confirmModal.open();
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
     }
   }
 
   saveCategory(): void {
     if (this.categoryForm.invalid) {
       this.categoryForm.markAllAsTouched();
+      this.toastService.showToast('Formulario inválido. Revisa los campos.', 'error');
       return;
     }
 
@@ -166,36 +225,44 @@ export class FaqCategoriesComponent implements OnInit {
       ? this.faqCategoryService.updateCategory(this.selectedCategoryId, categoryData)
       : this.faqCategoryService.createCategory(categoryData);
 
-    serviceCall.subscribe({
-      next: (response) => {
-        this.toastService.showToast(
-          this.selectedCategoryId ? 'Categoría actualizada exitosamente' : 'Categoría creada exitosamente',
-          'success'
-        );
-        this.loadCategories();
-        this.faqCategoryModal.close();
-      },
-      error: (err) => {
-        this.toastService.showToast(err.message || 'Error al guardar la categoría', 'error');
-      },
-    });
+    this.subscriptions.add(
+      serviceCall.subscribe({
+        next: () => {
+          this.toastService.showToast(
+            this.selectedCategoryId ? 'Categoría actualizada exitosamente' : 'Categoría creada exitosamente',
+            'success'
+          );
+          this.loadCategories();
+          if (this.createEditModal) this.createEditModal.close();
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al guardar la categoría';
+          this.toastService.showToast(errorMessage, 'error');
+        },
+      })
+    );
   }
 
   deleteCategory(category: any): void {
-    this.toastService.showToast(
+    this.openConfirmModal(
+      'Eliminar Categoría',
       `¿Estás seguro de que deseas eliminar la categoría "${category.name}"? Esto eliminará todas las preguntas frecuentes asociadas.`,
-      'warning',
-      'Confirmar',
+      'danger',
       () => {
-        this.faqCategoryService.deleteCategory(category.category_id).subscribe({
-          next: () => {
-            this.toastService.showToast('Categoría eliminada exitosamente', 'success');
-            this.loadCategories();
-          },
-          error: (err) => {
-            this.toastService.showToast(err.message || 'Error al eliminar la categoría', 'error');
-          },
-        });
+        this.subscriptions.add(
+          this.faqCategoryService.deleteCategory(category.category_id).subscribe({
+            next: () => {
+              this.toastService.showToast('Categoría eliminada exitosamente', 'success');
+              this.loadCategories();
+              if (this.confirmModal) this.confirmModal.close();
+            },
+            error: (err) => {
+              const errorMessage = err?.error?.message || 'Error al eliminar la categoría';
+              this.toastService.showToast(errorMessage, 'error');
+              if (this.confirmModal) this.confirmModal.close();
+            },
+          })
+        );
       }
     );
   }

@@ -1,41 +1,35 @@
-<div class="bg-light-background dark:bg-dark-background max-full mx-auto p-6 font-sans">
-  <div class="flex justify-between items-center mb-6">
+<div class="bg-light-background dark:bg-dark-background max-w-full mx-auto p-6 font-sans">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
     <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
       <i class="fas fa-list text-light-primary dark:text-dark-primary"></i> Gestión de Categorías
     </h1>
     <button (click)="openCreateModal()"
-      class="bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
+      class="w-full sm:w-auto bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
       <i class="fas fa-plus"></i> Agregar Categoría
     </button>
   </div>
 
   <!-- Filtros -->
-  <div class="flex justify-between items-center mb-6 gap-4">
-    <!-- Filtro por nombre -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
     <div class="relative w-full">
       <input type="text" [(ngModel)]="filterName" (ngModelChange)="onNameFilterChange($event)"
         placeholder="Buscar categoría..."
         class="w-full pl-10 pr-4 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg placeholder-light-secondary dark:placeholder-dark-secondary text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200">
-      <i
-        class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
+      <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
     </div>
-
-    <!-- Filtro por estado -->
-    <div class="relative">
+    <div class="relative w-full sm:w-auto">
       <select [(ngModel)]="filterActive" (ngModelChange)="onActiveFilterChange($event)"
         class="appearance-none pl-4 pr-8 py-2 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-200 text-light-text dark:text-dark-text">
         <option [ngValue]="undefined">Todos los estados</option>
         <option [ngValue]="true">Activo</option>
         <option [ngValue]="false">Inactivo</option>
       </select>
-      <i
-        class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
+      <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary"></i>
     </div>
   </div>
 
   <!-- Contenedor Principal -->
-  <div
-    class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
+  <div class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
     <h2 class="text-center font-medium text-light-text dark:text-dark-text mb-4 text-lg">Lista de Categorías</h2>
     <div *ngIf="categories.length > 0; else noCategories">
       <div class="overflow-x-auto">
@@ -84,14 +78,12 @@
                   <button (click)="openEditModal(category.category_id)"
                     class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                     <i class="fas fa-edit"></i>
-                    <span
-                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
                   </button>
                   <button (click)="deleteCategory(category.category_id)"
                     class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
                     <i class="fas fa-trash"></i>
-                    <span
-                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
                   </button>
                 </div>
               </td>
@@ -103,96 +95,130 @@
         (pageChange)="onPageChange($event)"></app-pagination>
     </div>
     <ng-template #noCategories>
-      <p class="text-light-secondary dark:text-dark-secondary flex items-center gap-2"> 
+      <p class="text-light-secondary dark:text-dark-secondary flex items-center gap-2">
         <i class="fas fa-exclamation-triangle text-red-500"></i> No hay categorías registradas.
       </p>
     </ng-template>
   </div>
-</div>
 
-<!-- Modal para Crear/Editar Categoría -->
-<app-modal #modal title="{{ selectedCategoryId ? 'Editar Categoría' : 'Nueva Categoría' }}">
-  <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="p-6 space-y-6">
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Nombre <span class="text-red-500">*</span></label>
-      <input formControlName="name" type="text" required
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500"
-        [ngClass]="{'border-red-500': categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched}">
-      <p *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched" class="mt-1 text-sm text-red-500">
-        El nombre es obligatorio y debe tener entre 3 y 100 caracteres.
-      </p>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Descripción</label>
-      <textarea formControlName="description" rows="3"
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500"
-        [ngClass]="{'border-red-500': categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched}">
-      </textarea>
-      <p *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched" class="mt-1 text-sm text-red-500">
-        La descripción no debe exceder 500 caracteres.
-      </p>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Color de fondo (Hexadecimal, ej. #FF5733)</label>
-      <div class="flex items-center gap-2">
-        <input formControlName="color_fondo" type="text" placeholder="#FF5733"
-          class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500"
-          [ngClass]="{'border-red-500': categoryForm.get('color_fondo')?.invalid && categoryForm.get('color_fondo')?.touched}">
-        <input formControlName="color_fondo" type="color"
-          class="w-10 h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
-      </div>
-      <p *ngIf="categoryForm.get('color_fondo')?.invalid && categoryForm.get('color_fondo')?.touched" class="mt-1 text-sm text-red-500">
-        Debe ser un color hexadecimal válido (ej. #FF5733 o #FF5733AA).
-      </p>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">URL de imagen</label>
-      <input formControlName="imagen_url" type="text" placeholder="https://example.com/image"
-        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 placeholder-gray-500"
-        [ngClass]="{'border-red-500': categoryForm.get('imagen_url')?.invalid && categoryForm.get('imagen_url')?.touched, 'cursor-not-allowed opacity-50': selectedImageFile !== null}"
-        [disabled]="selectedImageFile !== null">
-      <p *ngIf="categoryForm.get('imagen_url')?.invalid && categoryForm.get('imagen_url')?.touched" class="mt-1 text-sm text-red-500">
-        Debe ser una URL válida (http o https).
-      </p>
-    </div>
-
-    <div>
-      <label class="block text-gray-900 font-medium mb-2">Subir imagen de la categoría</label>
-      <div class="relative w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center transition-all duration-200"
-        [ngClass]="{'cursor-not-allowed opacity-50': categoryForm.get('imagen_url')?.value, 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700': !categoryForm.get('imagen_url')?.value}"
-        (drop)="categoryForm.get('imagen_url')?.value ? null : handleDrop($event)"
-        (dragover)="categoryForm.get('imagen_url')?.value ? null : handleDragOver($event)">
-        <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" #fileInput
-          (change)="categoryForm.get('imagen_url')?.value ? null : handleImageUpload($event)"
-          [disabled]="categoryForm.get('imagen_url')?.value">
-        <ng-container *ngIf="!imagePreview">
-          <i class="fas fa-upload text-gray-400 dark:text-dark-secondary text-2xl mb-2"></i>
-          <p class="text-sm text-gray-500 dark:text-dark-secondary">
-            {{ categoryForm.get('imagen_url')?.value ? 'Subida deshabilitada (URL activa)' : 'Arrastra y suelta una imagen o haz clic para seleccionar' }}
+  <!-- Modal para Crear/Editar Categoría -->
+  <app-modal
+    #createEditModal
+    [title]="selectedCategoryId ? 'Editar Categoría' : 'Nueva Categoría'"
+    [modalType]="selectedCategoryId ? 'info' : 'success'"
+    [isConfirmModal]="false"
+  >
+    <ng-container slot="body">
+      <form [formGroup]="categoryForm" class="p-6 space-y-6">
+        <div>
+          <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Nombre <span class="text-red-500">*</span></label>
+          <input formControlName="name" type="text"
+            class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 placeholder-gray-500 dark:placeholder-dark-secondary text-gray-900 dark:text-dark-text"
+            [ngClass]="{'border-red-500': categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched}">
+          <p *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched" class="mt-1 text-sm text-red-500">
+            El nombre es obligatorio y debe tener entre 3 y 100 caracteres.
           </p>
-          <p class="text-xs text-gray-400 dark:text-dark-secondary mt-1">Formatos: JPG, PNG, WebP. Máx: 2MB</p>
-        </ng-container>
-        <img *ngIf="imagePreview" [src]="imagePreview" alt="Previsualización" class="w-full h-full object-cover rounded-lg">
-        <button *ngIf="imagePreview" type="button" (click)="clearImage()"
-          class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
-          <i class="fas fa-times text-xs"></i>
-        </button>
-        <button type="button" (click)="categoryForm.get('imagen_url')?.value ? null : fileInput.click()"
-          class="absolute inset-0 w-full h-full opacity-0"
-          [disabled]="categoryForm.get('imagen_url')?.value"></button>
-      </div>
-      <div *ngIf="selectedCategoryId && imagePreview && !selectedImageFile && !categoryForm.get('imagen_url')?.value" class="mt-2 flex items-center gap-2">
-        <input type="checkbox" formControlName="removeImage" id="removeImage">
-        <label for="removeImage" class="text-sm text-gray-600 dark:text-dark-secondary">Eliminar imagen actual</label>
-      </div>
-    </div>
+        </div>
 
-    <button type="submit" [disabled]="categoryForm.invalid && categoryForm.touched"
-      class="w-full bg-blue-600 text-white font-medium py-2 rounded-md hover:bg-blue-700 transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed">
-      {{ selectedCategoryId ? 'Actualizar' : 'Crear' }}
-    </button>
-  </form>
-</app-modal>
+        <div>
+          <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Descripción</label>
+          <textarea formControlName="description" rows="3"
+            class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 placeholder-gray-500 dark:placeholder-dark-secondary text-gray-900 dark:text-dark-text"
+            [ngClass]="{'border-red-500': categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched}">
+          </textarea>
+          <p *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched" class="mt-1 text-sm text-red-500">
+            La descripción no debe exceder 500 caracteres.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Color de fondo (Hexadecimal, ej. #FF5733)</label>
+          <div class="flex items-center gap-2">
+            <input formControlName="color_fondo" type="text" placeholder="#FF5733"
+              class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 placeholder-gray-500 dark:placeholder-dark-secondary text-gray-900 dark:text-dark-text"
+              [ngClass]="{'border-red-500': categoryForm.get('color_fondo')?.invalid && categoryForm.get('color_fondo')?.touched}">
+            <input formControlName="color_fondo" type="color"
+              class="w-10 h-10 p-1 border border-gray-300 dark:border-gray-600 rounded-md cursor-pointer">
+          </div>
+          <p *ngIf="categoryForm.get('color_fondo')?.invalid && categoryForm.get('color_fondo')?.touched" class="mt-1 text-sm text-red-500">
+            Debe ser un color hexadecimal válido (ej. #FF5733 o #FF5733AA).
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">URL de imagen</label>
+          <input formControlName="imagen_url" type="text" placeholder="https://example.com/image"
+            class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 placeholder-gray-500 dark:placeholder-dark-secondary text-gray-900 dark:text-dark-text"
+            [ngClass]="{'border-red-500': categoryForm.get('imagen_url')?.invalid && categoryForm.get('imagen_url')?.touched, 'cursor-not-allowed opacity-50': selectedImageFile !== null}"
+            [disabled]="selectedImageFile !== null">
+          <p *ngIf="categoryForm.get('imagen_url')?.invalid && categoryForm.get('imagen_url')?.touched" class="mt-1 text-sm text-red-500">
+            Debe ser una URL válida (http o https).
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Subir imagen de la categoría</label>
+          <div class="relative w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex flex-col items-center justify-center transition-all duration-200"
+            [ngClass]="{'cursor-not-allowed opacity-50': categoryForm.get('imagen_url')?.value, 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700': !categoryForm.get('imagen_url')?.value}"
+            (drop)="categoryForm.get('imagen_url')?.value ? null : handleDrop($event)"
+            (dragover)="categoryForm.get('imagen_url')?.value ? null : handleDragOver($event)">
+            <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" #fileInput
+              (change)="categoryForm.get('imagen_url')?.value ? null : handleImageUpload($event)"
+              [disabled]="categoryForm.get('imagen_url')?.value">
+            <ng-container *ngIf="!imagePreview">
+              <i class="fas fa-upload text-gray-400 dark:text-dark-secondary text-2xl mb-2"></i>
+              <p class="text-sm text-gray-500 dark:text-dark-secondary">
+                {{ categoryForm.get('imagen_url')?.value ? 'Subida deshabilitada (URL activa)' : 'Arrastra y suelta una imagen o haz clic para seleccionar' }}
+              </p>
+              <p class="text-xs text-gray-400 dark:text-dark-secondary mt-1">Formatos: JPG, PNG, WebP. Máx: 2MB</p>
+            </ng-container>
+            <img *ngIf="imagePreview" [src]="imagePreview" alt="Previsualización" class="w-full h-full object-cover rounded-lg">
+            <button *ngIf="imagePreview" type="button" (click)="clearImage()"
+              class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600">
+              <i class="fas fa-times text-xs"></i>
+            </button>
+            <button type="button" (click)="categoryForm.get('imagen_url')?.value ? null : fileInput.click()"
+              class="absolute inset-0 w-full h-full opacity-0"
+              [disabled]="categoryForm.get('imagen_url')?.value"></button>
+          </div>
+          <div *ngIf="selectedCategoryId && imagePreview && !selectedImageFile && !categoryForm.get('imagen_url')?.value" class="mt-2 flex items-center gap-2">
+            <input type="checkbox" formControlName="removeImage" id="removeImage" class="text-blue-600 dark:text-dark-primary">
+            <label for="removeImage" class="text-sm text-gray-600 dark:text-dark-secondary">Eliminar imagen actual</label>
+          </div>
+        </div>
+      </form>
+    </ng-container>
+    <ng-container slot="actions">
+      <div class="flex flex-col sm:flex-row justify-end gap-4 p-4">
+        <button
+          (click)="createEditModal.close()"
+          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="saveCategory()"
+          [disabled]="categoryForm.invalid && categoryForm.touched"
+          class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+        >
+          {{ selectedCategoryId ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </ng-container>
+  </app-modal>
+
+  <!-- Modal para Confirmaciones -->
+  <app-modal
+    #confirmModal
+    [title]="confirmModalTitle"
+    [modalType]="confirmModalType"
+    [isConfirmModal]="true"
+    [confirmText]="'Confirmar'"
+    [cancelText]="'Cancelar'"
+    (confirm)="handleConfirm()"
+  >
+    <ng-container slot="body">
+      <p class="text-light-text dark:text-dark-text">{{ confirmModalMessage }}</p>
+    </ng-container>
+  </app-modal>
+</div>

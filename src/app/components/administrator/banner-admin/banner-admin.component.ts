@@ -23,7 +23,8 @@ import { ToastService } from '../../services/toastService';
   styleUrls: ['./banner-admin.component.css']
 })
 export class BannerAdminComponent implements OnInit, OnDestroy {
-  @ViewChild('bannerModal') bannerModal!: ModalComponent;
+  @ViewChild('createEditModal') createEditModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
 
   banners: Banner[] = [];
   showLimitWarning = false;
@@ -35,6 +36,12 @@ export class BannerAdminComponent implements OnInit, OnDestroy {
   showBannersToUsers = true;
   private destroy$ = new Subject<void>();
   private loading = false;
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle = '';
+  confirmModalMessage = ''; // New property to store the message
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
+  confirmModalText = 'Confirmar';
+  cancelModalText = 'Cancelar';
 
   constructor(
     private bannerService: BannerService,
@@ -116,7 +123,7 @@ export class BannerAdminComponent implements OnInit, OnDestroy {
   openCreateModal() {
     if (this.banners.length >= 5) {
       this.showLimitWarning = true;
-      this.toastService.showToast('No se pueden registrar más de 5 banners.', 'warning');
+      this.toastService.showToast('No se pueden registrar más de 5 banners.', 'error');
       setTimeout(() => (this.showLimitWarning = false), 3000);
       return;
     }
@@ -125,7 +132,10 @@ export class BannerAdminComponent implements OnInit, OnDestroy {
     this.imagePreview = null;
     this.bannerForm.reset({ is_active: true });
     this.updateAvailableOrders();
-    if (this.bannerModal) this.bannerModal.open();
+    if (this.createEditModal) {
+      this.createEditModal.modalType = 'success';
+      this.createEditModal.open();
+    }
   }
 
   openEditModal(banner: Banner) {
@@ -134,7 +144,27 @@ export class BannerAdminComponent implements OnInit, OnDestroy {
     this.imagePreview = banner.image_url;
     this.bannerForm.patchValue(banner);
     this.updateAvailableOrders();
-    if (this.bannerModal) this.bannerModal.open();
+    if (this.createEditModal) {
+      this.createEditModal.modalType = 'info';
+      this.createEditModal.open();
+    }
+  }
+
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message; // Store the message
+    this.confirmModalType = modalType;
+    this.confirmModalText = 'Confirmar';
+    this.cancelModalText = 'Cancelar';
+    this.confirmAction = action;
+    if (this.confirmModal) {
+      this.confirmModal.title = title;
+      this.confirmModal.modalType = modalType;
+      this.confirmModal.isConfirmModal = true;
+      this.confirmModal.confirmText = 'Confirmar';
+      this.confirmModal.cancelText = 'Cancelar';
+      this.confirmModal.open();
+    }
   }
 
   onFileSelected(event: Event) {
@@ -177,7 +207,7 @@ export class BannerAdminComponent implements OnInit, OnDestroy {
     request.pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: { success: boolean; message: string; banners?: Banner[]; banner?: Banner }) => {
         this.loadBanners();
-        if (this.bannerModal) this.bannerModal.close();
+        if (this.createEditModal) this.createEditModal.close();
         this.toastService.showToast(response.message, 'success');
       },
       error: (err: HttpErrorResponse) => {
@@ -187,19 +217,20 @@ export class BannerAdminComponent implements OnInit, OnDestroy {
   }
 
   deleteBanner(banner: Banner) {
-    this.selectedBanner = banner;
-    this.toastService.showToast(
+    this.openConfirmModal(
+      'Eliminar Banner',
       `¿Estás seguro de que deseas eliminar el banner "${banner.title}"?`,
-      'warning',
-      'Confirmar',
+      'danger',
       () => {
         this.bannerService.deleteBanner(banner.banner_id).pipe(takeUntil(this.destroy$)).subscribe({
           next: (response: { success: boolean; message: string }) => {
             this.loadBanners();
             this.toastService.showToast(response.message, 'success');
+            if (this.confirmModal) this.confirmModal.close();
           },
           error: (err: HttpErrorResponse) => {
             this.toastService.showToast('Error al eliminar banner: ' + err.message, 'error');
+            if (this.confirmModal) this.confirmModal.close();
           }
         });
       }
@@ -207,40 +238,58 @@ export class BannerAdminComponent implements OnInit, OnDestroy {
   }
 
   toggleActive(banner: Banner) {
-    const formData = new FormData();
-    formData.append('is_active', (!banner.is_active).toString());
-    this.bannerService.updateBanner(banner.banner_id, formData).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: { success: boolean; message: string; banner: Banner }) => {
-        this.loadBanners();
-        this.toastService.showToast(response.message, 'success');
-      },
-      error: (err: HttpErrorResponse) => {
-        this.toastService.showToast('Error al actualizar estado: ' + err.message, 'error');
+    this.openConfirmModal(
+      'Cambiar Estado del Banner',
+      `¿Estás seguro de que deseas ${banner.is_active ? 'desactivar' : 'activar'} el banner "${banner.title}"?`,
+      'warning',
+      () => {
+        const formData = new FormData();
+        formData.append('is_active', (!banner.is_active).toString());
+        this.bannerService.updateBanner(banner.banner_id, formData).pipe(takeUntil(this.destroy$)).subscribe({
+          next: (response: { success: boolean; message: string; banner: Banner }) => {
+            this.loadBanners();
+            this.toastService.showToast(response.message, 'success');
+            if (this.confirmModal) this.confirmModal.close();
+          },
+          error: (err: HttpErrorResponse) => {
+            this.toastService.showToast('Error al actualizar estado: ' + err.message, 'error');
+            if (this.confirmModal) this.confirmModal.close();
+          }
+        });
       }
-    });
+    );
   }
 
   onVisibilityToggle(event: Event) {
     const checked = (event.target as HTMLInputElement).checked;
-    this.toastService.showToast(
+    this.openConfirmModal(
+      'Cambiar Visibilidad de Banners',
       `¿Estás seguro de ${checked ? 'mostrar' : 'ocultar'} los banners a los usuarios?`,
       'warning',
-      'Confirmar',
       () => {
         this.bannerService.toggleBannersVisibility(checked).pipe(takeUntil(this.destroy$)).subscribe({
           next: (response: { success: boolean; message: string; show_banners_to_users: boolean }) => {
             if (response.success) {
               this.showBannersToUsers = response.show_banners_to_users;
               this.toastService.showToast(response.message, 'success');
+              if (this.confirmModal) this.confirmModal.close();
             }
           },
           error: (err: HttpErrorResponse) => {
             this.toastService.showToast('Error al cambiar visibilidad: ' + err.message, 'error');
             const input = event.target as HTMLInputElement;
             input.checked = this.showBannersToUsers; // Reset checkbox on error
+            if (this.confirmModal) this.confirmModal.close();
           }
         });
       }
     );
+  }
+
+  handleConfirm() {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
   }
 }

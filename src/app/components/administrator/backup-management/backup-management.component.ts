@@ -40,6 +40,9 @@ interface Backup {
 })
 export class BackupManagementComponent implements OnInit {
   @ViewChild('configModal') configModal!: ModalComponent;
+  @ViewChild('manualBackupModal') manualBackupModal!: ModalComponent;
+  @ViewChild('restoreModal') restoreModal!: ModalComponent;
+  @ViewChild('detailsModal') detailsModal!: ModalComponent;
 
   isAuthenticated = false;
   backups: Backup[] = [];
@@ -51,6 +54,8 @@ export class BackupManagementComponent implements OnInit {
 
   fullBackupForm: FormGroup;
   differentialBackupForm: FormGroup;
+  selectedBackup: Backup | null = null;
+  manualBackupType: 'full' | 'differential' | null = null;
 
   frequencyOptions = {
     full: ['weekly'],
@@ -213,8 +218,19 @@ export class BackupManagementComponent implements OnInit {
     this.configModal.open();
   }
 
-  closeConfigModal() {
-    this.configModal.close();
+  openManualBackupModal(type: 'full' | 'differential') {
+    this.manualBackupType = type;
+    this.manualBackupModal.open();
+  }
+
+  openRestoreModal(backup: Backup) {
+    this.selectedBackup = backup;
+    this.restoreModal.open();
+  }
+
+  openDetailsModal(backup: Backup) {
+    this.selectedBackup = backup;
+    this.detailsModal.open();
   }
 
   switchTab(tab: 'full' | 'differential') {
@@ -238,15 +254,13 @@ export class BackupManagementComponent implements OnInit {
         data_types: form.value.data_types,
         schedule_time: form.value.schedule_time
       };
-      console.log('Datos enviados al backend:', formData);
       this.backupService.configureBackup(backupType, formData).subscribe({
         next: () => {
           this.toastService.showToast(`Configuración de respaldo ${backupType} guardada con éxito`, 'success');
-          this.closeConfigModal();
+          this.configModal.close();
           this.isLoading = false;
         },
         error: (err) => {
-          console.error('Error del backend:', err);
           const errorMessage = err.error?.message || `Error al guardar la configuración de ${backupType}`;
           this.toastService.showToast(errorMessage, 'error');
           this.isLoading = false;
@@ -258,16 +272,36 @@ export class BackupManagementComponent implements OnInit {
     }
   }
 
-  runManualBackup(type: 'full' | 'differential') {
+  runManualBackup() {
+    if (!this.manualBackupType) return;
     this.isLoading = true;
-    this.backupService.runBackup(type).subscribe({
+    this.backupService.runBackup(this.manualBackupType).subscribe({
       next: () => {
-        this.toastService.showToast(`Respaldo manual ${type} iniciado con éxito`, 'success');
+        this.toastService.showToast(`Respaldo manual ${this.manualBackupType} iniciado con éxito`, 'success');
         this.loadBackups();
+        this.manualBackupModal.close();
         this.isLoading = false;
       },
       error: (err) => {
-        const errorMessage = err.error?.message || `Error al iniciar respaldo manual ${type}`;
+        const errorMessage = err.error?.message || `Error al iniciar respaldo manual ${this.manualBackupType}`;
+        this.toastService.showToast(errorMessage, 'error');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  restoreBackup() {
+    if (!this.selectedBackup) return;
+    this.isLoading = true;
+    this.backupService.restoreBackup(this.selectedBackup.backup_id).subscribe({
+      next: () => {
+        this.toastService.showToast('Restauración iniciada con éxito', 'success');
+        this.loadBackups();
+        this.restoreModal.close();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Error al restaurar el respaldo';
         this.toastService.showToast(errorMessage, 'error');
         this.isLoading = false;
       }
@@ -276,29 +310,6 @@ export class BackupManagementComponent implements OnInit {
 
   getBackupFileName(backup: Backup): string {
     return backup.BackupFiles && backup.BackupFiles.length > 0 ? backup.BackupFiles[0].file_name : 'N/A';
-  }
-
-  restoreBackup(backup: Backup) {
-    this.toastService.showToast(
-      `¿Estás seguro de que deseas restaurar el respaldo "${this.getBackupFileName(backup)}"?`,
-      'warning',
-      'Confirmar',
-      () => {
-        this.isLoading = true;
-        this.backupService.restoreBackup(backup.backup_id).subscribe({
-          next: () => {
-            this.toastService.showToast('Restauración iniciada con éxito', 'success');
-            this.loadBackups();
-            this.isLoading = false;
-          },
-          error: (err) => {
-            const errorMessage = err.error?.message || 'Error al restaurar el respaldo';
-            this.toastService.showToast(errorMessage, 'error');
-            this.isLoading = false;
-          }
-        });
-      }
-    );
   }
 
   onPageChange(newPage: number) {

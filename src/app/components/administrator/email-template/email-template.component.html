@@ -10,7 +10,7 @@
     <div class="flex gap-2 w-full sm:w-auto">
       <button
         (click)="openCreateModal()"
-        class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-800 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2"
+        class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2"
       >
         <i class="fas fa-plus"></i> Agregar Plantilla
       </button>
@@ -40,15 +40,15 @@
             <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
               <button (click)="openViewModal(template.template_id)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                 <i class="fas fa-eye"></i>
-                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
+                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
               </button>
               <button (click)="openEditModal(template.template_id)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                 <i class="fas fa-edit"></i>
-                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
               </button>
               <button (click)="deleteEmailTemplate(template.template_id)" class="group text-gray-500 dark:text-dark-secondary hover:text-red-600 dark:hover:text-dark-danger transition-all duration-300 relative">
                 <i class="fas fa-trash"></i>
-                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
               </button>
             </td>
           </tr>
@@ -61,9 +61,14 @@
   </div>
 
   <!-- Modal para Crear/Editar Plantilla -->
-  <app-modal #modal [title]="emailTemplateId ? 'Editar Plantilla' : 'Crear Plantilla'">
-    <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto">
-      <form [formGroup]="emailTemplateForm" (ngSubmit)="saveTemplate()" class="space-y-4">
+  <app-modal
+    #createEditModal
+    [title]="emailTemplateId ? 'Editar Plantilla' : 'Crear Plantilla'"
+    [modalType]="emailTemplateId ? 'info' : 'success'"
+    [isConfirmModal]="false"
+  >
+    <ng-container slot="body">
+      <form [formGroup]="emailTemplateForm" class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Nombre <span class="text-red-500 dark:text-red-400">*</span></label>
@@ -72,9 +77,12 @@
               type="text"
               placeholder="Ej. Plantilla de Bienvenida"
               class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('name')?.touched && emailTemplateForm.get('name')?.invalid}"
             />
-            <div *ngIf="emailTemplateForm.get('name')?.touched && emailTemplateForm.get('name')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
-              El nombre es obligatorio.
+            <div *ngIf="emailTemplateForm.get('name')?.touched && emailTemplateForm.get('name')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+              <div *ngIf="emailTemplateForm.get('name')?.hasError('required')">El nombre es obligatorio.</div>
+              <div *ngIf="emailTemplateForm.get('name')?.hasError('minlength')">Debe tener al menos 3 caracteres.</div>
+              <div *ngIf="emailTemplateForm.get('name')?.hasError('maxlength')">No debe exceder 100 caracteres.</div>
             </div>
           </div>
           <div>
@@ -84,10 +92,11 @@
               type="number"
               placeholder="Ej. 1"
               class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('email_type_id')?.touched && emailTemplateForm.get('email_type_id')?.invalid}"
             />
             <div *ngIf="emailTemplateForm.get('email_type_id')?.touched && emailTemplateForm.get('email_type_id')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
               <div *ngIf="emailTemplateForm.get('email_type_id')?.hasError('required')">El tipo de email es obligatorio.</div>
-              <div *ngIf="emailTemplateForm.get('email_type_id')?.hasError('pattern')">Debe ser un número válido.</div>
+              <div *ngIf="emailTemplateForm.get('email_type_id')?.hasError('pattern')">Debe ser un número positivo.</div>
             </div>
           </div>
         </div>
@@ -98,9 +107,12 @@
             type="text"
             placeholder="Ej. Bienvenido a nuestro sistema"
             class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('subject')?.touched && emailTemplateForm.get('subject')?.invalid}"
           />
-          <div *ngIf="emailTemplateForm.get('subject')?.touched && emailTemplateForm.get('subject')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
-            El asunto es obligatorio.
+          <div *ngIf="emailTemplateForm.get('subject')?.touched && emailTemplateForm.get('subject')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+            <div *ngIf="emailTemplateForm.get('subject')?.hasError('required')">El asunto es obligatorio.</div>
+            <div *ngIf="emailTemplateForm.get('subject')?.hasError('minlength')">Debe tener al menos 3 caracteres.</div>
+            <div *ngIf="emailTemplateForm.get('subject')?.hasError('maxlength')">No debe exceder 255 caracteres.</div>
           </div>
         </div>
         <div>
@@ -110,6 +122,7 @@
             placeholder="Ej. <p>Bienvenido, {USER_NAME}!</p>"
             class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
             rows="6"
+            [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('html_content')?.touched && emailTemplateForm.get('html_content')?.hasError('required')}"
           ></textarea>
           <div *ngIf="emailTemplateForm.get('html_content')?.touched && emailTemplateForm.get('html_content')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
             El contenido HTML es obligatorio.
@@ -122,6 +135,7 @@
             placeholder="Ej. Bienvenido, {USER_NAME}!"
             class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
             rows="4"
+            [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('text_content')?.touched && emailTemplateForm.get('text_content')?.hasError('required')}"
           ></textarea>
           <div *ngIf="emailTemplateForm.get('text_content')?.touched && emailTemplateForm.get('text_content')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
             El contenido de texto es obligatorio.
@@ -134,49 +148,76 @@
             placeholder='Ej. ["USER_NAME", "EMAIL"]'
             class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
             rows="3"
+            [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('variables')?.touched && emailTemplateForm.get('variables')?.invalid}"
           ></textarea>
-          <div *ngIf="emailTemplateForm.get('variables')?.touched && emailTemplateForm.get('variables')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
-            Las variables son obligatorias.
+          <div *ngIf="emailTemplateForm.get('variables')?.touched && emailTemplateForm.get('variables')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+            <div *ngIf="emailTemplateForm.get('variables')?.hasError('required')">Las variables son obligatorias.</div>
+            <div *ngIf="emailTemplateForm.get('variables')?.hasError('pattern')">Debe ser un JSON válido (ej. ["USER_NAME", "EMAIL"]).</div>
           </div>
         </div>
-        <div class="flex flex-col sm:flex-row justify-end gap-4">
-          <button
-            type="button"
-            (click)="modal.close()"
-            class="w-full sm:w-auto px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="emailTemplateForm.invalid"
-            class="w-full sm:w-auto px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
-          >
-            {{ emailTemplateId ? 'Actualizar' : 'Crear' }}
-          </button>
-        </div>
       </form>
-    </div>
+    </ng-container>
+    <ng-container slot="actions">
+      <div class="flex flex-col sm:flex-row justify-end gap-4 p-4">
+        <button
+          (click)="createEditModal.close()"
+          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="saveTemplate()"
+          [disabled]="emailTemplateForm.invalid && emailTemplateForm.touched"
+          class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+        >
+          {{ emailTemplateId ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </ng-container>
   </app-modal>
 
   <!-- Modal para Ver Detalles -->
-  <app-modal #viewModal title="Detalles de la Plantilla">
-    <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text space-y-4">
-      <p><strong class="text-light-text dark:text-dark-text">Nombre:</strong> {{ selectedEmailTemplate?.name || 'N/A' }}</p>
-      <p><strong class="text-light-text dark:text-dark-text">Asunto:</strong> {{ selectedEmailTemplate?.subject || 'N/A' }}</p>
-      <p><strong class="text-light-text dark:text-dark-text">Contenido HTML:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.html_content || 'N/A' }}</span></p>
-      <p><strong class="text-light-text dark:text-dark-text">Contenido de Texto:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.text_content || 'N/A' }}</span></p>
-      <p><strong class="text-light-text dark:text-dark-text">Tipo de Email:</strong> {{ selectedEmailTemplate?.EmailType?.name || 'N/A' }}</p>
-      <p><strong class="text-light-text dark:text-dark-text">Fecha de Creación:</strong> {{ selectedEmailTemplate?.created_at | date:'medium' || 'N/A' }}</p>
-      <p><strong class="text-light-text dark:text-dark-text">Variables:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.variables?.join(', ') || 'N/A' }}</span></p>
-      <div class="flex justify-end">
+  <app-modal
+    #viewDetailsModal
+    [title]="'Detalles de la Plantilla'"
+    [modalType]="'default'"
+    [isConfirmModal]="false"
+  >
+    <ng-container slot="body">
+      <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text space-y-4">
+        <p><strong class="text-light-text dark:text-dark-text">Nombre:</strong> {{ selectedEmailTemplate?.name || 'N/A' }}</p>
+        <p><strong class="text-light-text dark:text-dark-text">Asunto:</strong> {{ selectedEmailTemplate?.subject || 'N/A' }}</p>
+        <p><strong class="text-light-text dark:text-dark-text">Contenido HTML:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.html_content || 'N/A' }}</span></p>
+        <p><strong class="text-light-text dark:text-dark-text">Contenido de Texto:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.text_content || 'N/A' }}</span></p>
+        <p><strong class="text-light-text dark:text-dark-text">Tipo de Email:</strong> {{ selectedEmailTemplate?.EmailType?.name || 'N/A' }}</p>
+        <p><strong class="text-light-text dark:text-dark-text">Fecha de Creación:</strong> {{ selectedEmailTemplate?.created_at | date:'medium' || 'N/A' }}</p>
+        <p><strong class="text-light-text dark:text-dark-text">Variables:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.variables?.join(', ') || 'N/A' }}</span></p>
+      </div>
+    </ng-container>
+    <ng-container slot="actions">
+      <div class="flex justify-end p-4">
         <button
-          (click)="viewModal.close()"
-          class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300"
+          (click)="viewDetailsModal.close()"
+          class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
         >
           Cerrar
         </button>
       </div>
-    </div>
+    </ng-container>
+  </app-modal>
+
+  <!-- Modal para Confirmaciones -->
+  <app-modal
+    #confirmModal
+    [title]="confirmModalTitle"
+    [modalType]="confirmModalType"
+    [isConfirmModal]="true"
+    [confirmText]="'Confirmar'"
+    [cancelText]="'Cancelar'"
+    (confirm)="handleConfirm()"
+  >
+    <ng-container slot="body">
+      <p class="text-light-text dark:text-dark-text">{{ confirmModalMessage }}</p>
+    </ng-container>
   </app-modal>
 </div>

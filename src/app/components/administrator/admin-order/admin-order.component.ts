@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FullCalendarModule } from '@fullcalendar/angular';
@@ -11,6 +11,7 @@ import { AdminOrderService, AdminOrder, AdminOrdersResponse, AdminOrderResponse,
 import { ToastService } from '../../services/toastService';
 import { ModalComponent } from '../../../modal/modal.component';
 import { format, startOfMonth, endOfMonth, isSameDay, addDays } from 'date-fns';
+import { Subscription } from 'rxjs';
 
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
 
@@ -22,16 +23,20 @@ type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
   styleUrls: ['./admin-order.component.css'],
   providers: [DatePipe, CurrencyPipe]
 })
-export class AdminOrderComponent implements OnInit, AfterViewInit {
+export class AdminOrderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('orderModal') orderModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
 
   orders: AdminOrder[] = [];
   summary: AdminOrderSummaryResponse['data'] | null = null;
   selectedOrder: AdminOrder | null = null;
   selectedDate: Date | null = null;
   isLoading = false;
-  error: string | null = null;
-  tempOrderStatus: OrderStatus | null = null; // Temporary variable for status
+  tempOrderStatus: OrderStatus | null = null;
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
 
   // Filtros
   searchTerm = '';
@@ -42,6 +47,8 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   minTotal: number | null = null;
   maxTotal: number | null = null;
   isUrgent: boolean | null = null;
+
+  private subscriptions: Subscription = new Subscription();
 
   private statusTranslations: { [key in OrderStatus]: string } = {
     pending: 'Pendiente',
@@ -96,13 +103,20 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    if (!this.orderModal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+    }
     this.updateCalendarEvents();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   customEventContent(arg: any): { html: string } {
     const order = arg.event.extendedProps['order'] as AdminOrder;
     const statusColor = this.getEventColor(order.order_status);
-    const maxLength = 20; // Limit text length to prevent overflow
+    const maxLength = 20;
     const truncatedTitle = `#${order.order_id} - ${order.customer_name.length > maxLength ? order.customer_name.substring(0, maxLength) + '...' : order.customer_name}`;
     return {
       html: `
@@ -145,57 +159,65 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
     const startDate = format(startOfMonth(new Date()), 'yyyy-MM-dd');
     const endDate = format(endOfMonth(new Date()), 'yyyy-MM-dd');
-    this.orderService.getOrders(
-      1,
-      50,
-      this.searchTerm,
-      this.statusFilter,
-      `${startDate},${endDate}`,
-      this.dateField,
-      this.paymentMethod,
-      this.deliveryOption,
-      this.minTotal,
-      this.maxTotal,
-      this.isUrgent
-    ).subscribe({
-      next: (response: AdminOrdersResponse) => {
-        this.orders = response.data.orders;
-        this.updateCalendarEvents();
-        this.isLoading = false;
-      },
-      error: (err) => {
-        this.error = err.message;
-        this.isLoading = false;
-        this.toastService.showToast(err.message || 'Error al cargar las órdenes', 'error');
-      }
-    });
+    this.subscriptions.add(
+      this.orderService.getOrders(
+        1,
+        50,
+        this.searchTerm,
+        this.statusFilter,
+        `${startDate},${endDate}`,
+        this.dateField,
+        this.paymentMethod,
+        this.deliveryOption,
+        this.minTotal,
+        this.maxTotal,
+        this.isUrgent
+      ).subscribe({
+        next: (response: AdminOrdersResponse) => {
+          this.orders = response.data.orders;
+          this.updateCalendarEvents();
+          this.isLoading = false;
+          this.toastService.showToast('Órdenes cargadas exitosamente.', 'success');
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar las órdenes';
+          this.isLoading = false;
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
   loadSummary(): void {
-    this.orderService.getOrderSummary().subscribe({
-      next: (response: AdminOrderSummaryResponse) => {
-        this.summary = response.data;
-      },
-      error: (err) => {
-        this.error = err.message;
-        this.toastService.showToast(err.message || 'Error al cargar el resumen', 'error');
-      }
-    });
+    this.subscriptions.add(
+      this.orderService.getOrderSummary().subscribe({
+        next: (response: AdminOrderSummaryResponse) => {
+          this.summary = response.data;
+          this.toastService.showToast('Resumen cargado exitosamente.', 'success');
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar el resumen';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
   handleDateClick(arg: DateClickArg): void {
     this.selectedDate = arg.date;
     const date = format(arg.date, 'yyyy-MM-dd');
-    this.orderService.getOrdersByDate(date, this.dateField).subscribe({
-      next: (response: AdminOrdersByDateResponse) => {
-        this.orders = response.data;
-        this.toastService.showToast(`Órdenes cargadas para ${this.formatDate(date)}`, 'info');
-      },
-      error: (err) => {
-        this.error = err.message;
-        this.toastService.showToast(err.message || 'Error al cargar órdenes por fecha', 'error');
-      }
-    });
+    this.subscriptions.add(
+      this.orderService.getOrdersByDate(date, this.dateField).subscribe({
+        next: (response: AdminOrdersByDateResponse) => {
+          this.orders = response.data;
+          this.toastService.showToast(`Órdenes cargadas para ${this.formatDate(date)}`, 'info');
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar órdenes por fecha';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
   handleEventClick(arg: EventClickArg): void {
@@ -208,56 +230,91 @@ export class AdminOrderComponent implements OnInit, AfterViewInit {
   }
 
   private loadOrderDetails(orderId: number): void {
-    this.orderService.getOrderById(orderId).subscribe({
-      next: (response: AdminOrderResponse) => {
-        this.selectedOrder = response.data;
-        this.tempOrderStatus = response.data.order_status; // Initialize temp status
-        this.orderModal.open();
-      },
-      error: (err) => {
-        this.error = err.message;
-        this.toastService.showToast(err.message || 'Error al cargar detalles de la orden', 'error');
-      }
-    });
+    this.subscriptions.add(
+      this.orderService.getOrderById(orderId).subscribe({
+        next: (response: AdminOrderResponse) => {
+          this.selectedOrder = response.data;
+          this.tempOrderStatus = response.data.order_status;
+          this.orderModal.title = `Detalles de la Orden #${response.data.order_id}`;
+          this.orderModal.modalType = 'info';
+          this.orderModal.isConfirmModal = false;
+          this.orderModal.open();
+          this.toastService.showToast('Detalles de la orden cargados exitosamente.', 'success');
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar detalles de la orden';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
+  }
+
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    if (!this.confirmModal) {
+      this.toastService.showToast('Error: Modal de confirmación no inicializado', 'error');
+      return;
+    }
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmAction = action;
+    this.confirmModal.title = title;
+    this.confirmModal.modalType = modalType;
+    this.confirmModal.isConfirmModal = true;
+    this.confirmModal.confirmText = 'Confirmar';
+    this.confirmModal.cancelText = 'Cancelar';
+    this.confirmModal.open();
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
   }
 
   confirmUpdateStatus(): void {
-    if (this.selectedOrder && this.tempOrderStatus && this.tempOrderStatus !== this.selectedOrder.order_status) {
-      this.toastService.showToast(
-        `¿Estás seguro de cambiar el estado de la orden #${this.selectedOrder.order_id} a ${this.statusTranslations[this.tempOrderStatus]}?`,
-        'warning',
-        'Confirmar',
-        () => {
-          this.updateOrderStatus(this.selectedOrder!.order_id, this.tempOrderStatus!);
-          this.orderModal.close();
-          this.toastService.hideToast();
-        }
-      );
-    } else {
-      this.orderModal.close();
-      this.toastService.hideToast();
+    if (!this.selectedOrder || !this.tempOrderStatus) {
+      this.toastService.showToast('No se ha seleccionado una orden o estado.', 'error');
+      return;
     }
+    if (this.tempOrderStatus === this.selectedOrder.order_status) {
+      this.orderModal.close();
+      this.toastService.showToast('No se han realizado cambios en el estado.', 'info');
+      return;
+    }
+    this.openConfirmModal(
+      'Confirmar Cambio de Estado',
+      `¿Estás seguro de cambiar el estado de la orden #${this.selectedOrder.order_id} a ${this.statusTranslations[this.tempOrderStatus]}?`,
+      'warning',
+      () => {
+        this.updateOrderStatus(this.selectedOrder!.order_id, this.tempOrderStatus!);
+        this.orderModal.close();
+      }
+    );
   }
 
   updateOrderStatus(orderId: number, newStatus: OrderStatus): void {
     const request: UpdateOrderStatusRequest = { newStatus };
-    this.orderService.updateOrderStatus(orderId, request).subscribe({
-      next: (response: any) => {
-        this.orders = this.orders.map(order =>
-          order.order_id === orderId ? response.data : order
-        );
-        if (this.selectedOrder?.order_id === orderId) {
-          this.selectedOrder = response.data;
-          this.tempOrderStatus = response.data.order_status;
+    this.subscriptions.add(
+      this.orderService.updateOrderStatus(orderId, request).subscribe({
+        next: (response: any) => {
+          this.orders = this.orders.map(order =>
+            order.order_id === orderId ? response.data : order
+          );
+          if (this.selectedOrder?.order_id === orderId) {
+            this.selectedOrder = response.data;
+            this.tempOrderStatus = response.data.order_status;
+          }
+          this.updateCalendarEvents();
+          this.toastService.showToast('Estado de la orden actualizado exitosamente.', 'success');
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al actualizar el estado';
+          this.toastService.showToast(errorMessage, 'error');
         }
-        this.updateCalendarEvents();
-        this.toastService.showToast('Estado de la orden actualizado exitosamente', 'success');
-      },
-      error: (err) => {
-        this.error = err.message;
-        this.toastService.showToast(err.message || 'Error al actualizar el estado', 'error');
-      }
-    });
+      })
+    );
   }
 
   private updateCalendarEvents(): void {

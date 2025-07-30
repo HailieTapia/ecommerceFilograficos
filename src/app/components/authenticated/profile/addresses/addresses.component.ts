@@ -1,10 +1,11 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { UserService } from '../../../services/user.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastService } from '../../../services/toastService';
 import { ModalComponent } from '../../../../modal/modal.component';
 import * as addressData from '../../../administrator/shared/direccion.json';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-addresses',
@@ -13,13 +14,21 @@ import * as addressData from '../../../administrator/shared/direccion.json';
   templateUrl: './addresses.component.html',
   styleUrls: ['./addresses.component.css']
 })
-export class AddressesComponent implements OnInit {
+export class AddressesComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('modal') modal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
+
   userProfile: any = {};
   addressForm: FormGroup;
   addressData: any[] = (addressData as any).default || addressData;
   uniquePostalCodes: string[] = [];
   filteredAsentamientos: string[] = [];
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
+
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private toastService: ToastService,
@@ -43,48 +52,89 @@ export class AddressesComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-    if (!this.modal) {
-      console.error('El modal no está inicializado correctamente.');
+    if (!this.modal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
     }
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   openCreateModal(): void {
+    if (!this.modal) {
+      this.toastService.showToast('Error: Modal de dirección no inicializado', 'error');
+      return;
+    }
     this.addressForm.reset({ city: 'Pachuca', state: 'Hidalgo' });
     this.filteredAsentamientos = [];
+    this.modal.title = 'Crear Dirección';
+    this.modal.modalType = 'success';
+    this.modal.isConfirmModal = false;
     this.modal.open();
   }
 
   openEditModal(): void {
-    this.userService.getProfile().subscribe({
-      next: (response) => {
-        if (response.address) {
-          const address = response.address;
-          const streetParts = address.street.split(', ');
-          const street = streetParts[0] || '';
-          const asentamiento = streetParts[1] || ''; // Extrae el asentamiento
-          const postalCode = address.postal_code;
+    if (!this.modal) {
+      this.toastService.showToast('Error: Modal de dirección no inicializado', 'error');
+      return;
+    }
+    this.subscriptions.add(
+      this.userService.getProfile().subscribe({
+        next: (response) => {
+          if (response.address) {
+            const address = response.address;
+            const streetParts = address.street.split(', ');
+            const street = streetParts[0] || '';
+            const asentamiento = streetParts[1] || '';
+            const postalCode = address.postal_code;
 
-          // Filtrar asentamientos antes de patchValue
-          this.filterAsentamientos(postalCode);
-          
-          // Rellenar el formulario
-          this.addressForm.patchValue({
-            street,
-            asentamiento, // Asigna el asentamiento parseado
-            postal_code: postalCode,
-            city: 'Pachuca',
-            state: 'Hidalgo'
-          });
-          this.modal.open();
-        } else {
-          this.toastService.showToast('No hay dirección para editar', 'error');
+            this.filterAsentamientos(postalCode);
+            this.addressForm.patchValue({
+              street,
+              asentamiento,
+              postal_code: postalCode,
+              city: 'Pachuca',
+              state: 'Hidalgo'
+            });
+            this.modal.title = 'Editar Dirección';
+            this.modal.modalType = 'info';
+            this.modal.isConfirmModal = false;
+            this.modal.open();
+          } else {
+            this.toastService.showToast('No hay dirección para editar', 'error');
+          }
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar la dirección';
+          this.toastService.showToast(errorMessage, 'error');
         }
-      },
-      error: (err) => {
-        console.error('Error al obtener la dirección:', err);
-        this.toastService.showToast('Error al cargar la dirección', 'error');
-      }
-    });
+      })
+    );
+  }
+
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    if (!this.confirmModal) {
+      this.toastService.showToast('Error: Modal de confirmación no inicializado', 'error');
+      return;
+    }
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmAction = action;
+    this.confirmModal.title = title;
+    this.confirmModal.modalType = modalType;
+    this.confirmModal.isConfirmModal = true;
+    this.confirmModal.confirmText = 'Confirmar';
+    this.confirmModal.cancelText = 'Cancelar';
+    this.confirmModal.open();
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
   }
 
   filterAsentamientos(postalCode?: string): void {
@@ -107,55 +157,58 @@ export class AddressesComponent implements OnInit {
 
   savePerfil(): void {
     if (this.addressForm.invalid) {
+      this.addressForm.markAllAsTouched();
       this.toastService.showToast('Formulario inválido. Revisa los campos.', 'error');
       return;
     }
 
     const formValue = this.addressForm.getRawValue();
     const selectedAsentamiento = this.addressData.find(item => item.asentamiento === formValue.asentamiento && item.cp.toString() === formValue.postal_code);
+    if (!selectedAsentamiento) {
+      this.toastService.showToast('Asentamiento no válido para el código postal seleccionado.', 'error');
+      return;
+    }
     const addressData = {
-      street: `${formValue.street}, ${formValue.asentamiento}, ${selectedAsentamiento?.zona || 'Urbano'}, ${selectedAsentamiento?.tipo || 'Colonia'}`,
+      street: `${formValue.street}, ${formValue.asentamiento}, ${selectedAsentamiento.zona || 'Urbano'}, ${selectedAsentamiento.tipo || 'Colonia'}`,
       city: 'Pachuca',
       state: 'Hidalgo',
       postal_code: formValue.postal_code,
       is_primary: true
     };
 
-    if (this.userProfile.address) {
-      this.userService.updateUserProfile(addressData).subscribe({
+    this.subscriptions.add(
+      (this.userProfile.address
+        ? this.userService.updateUserProfile(addressData)
+        : this.userService.addAddress(addressData)
+      ).subscribe({
         next: () => {
-          this.toastService.showToast('Dirección actualizada exitosamente', 'success');
+          this.toastService.showToast(
+            this.userProfile.address ? 'Dirección actualizada exitosamente' : 'Dirección creada exitosamente',
+            'success'
+          );
           this.getUserInfo();
           this.modal.close();
         },
         error: (err) => {
-          const errorMessage = err?.error?.message || 'Error al actualizar la dirección';
+          const errorMessage = err?.error?.message || `Error al ${this.userProfile.address ? 'actualizar' : 'crear'} la dirección`;
           this.toastService.showToast(errorMessage, 'error');
         }
-      });
-    } else {
-      this.userService.addAddress(addressData).subscribe({
-        next: () => {
-          this.toastService.showToast('Dirección creada exitosamente', 'success');
-          this.getUserInfo();
-          this.modal.close();
-        },
-        error: (err) => {
-          const errorMessage = err?.error?.message || 'Error al crear la dirección';
-          this.toastService.showToast(errorMessage, 'error');
-        }
-      });
-    }
+      })
+    );
   }
 
   getUserInfo(): void {
-    this.userService.getProfile().subscribe({
-      next: (profile) => {
-        this.userProfile = profile;
-      },
-      error: (error) => {
-        this.toastService.showToast(error?.error?.message || 'Error al obtener el perfil', 'error');
-      }
-    });
+    this.subscriptions.add(
+      this.userService.getProfile().subscribe({
+        next: (profile) => {
+          this.userProfile = profile;
+          this.toastService.showToast('Perfil cargado exitosamente.', 'success');
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || 'Error al obtener el perfil';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 }

@@ -8,7 +8,7 @@
       <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Administra las categorías de preguntas frecuentes</p>
     </div>
     <button
-      (click)="openCategoryModal('create')"
+      (click)="openCreateModal()"
       class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-800 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2"
     >
       <i class="fas fa-plus"></i> Crear Categoría
@@ -76,22 +76,22 @@
             <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-normal break-words max-w-[200px] sm:max-w-[300px]">{{ category.description }}</td>
             <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-nowrap">{{ formatDate(category.created_at) }}</td>
             <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
-              <button (click)="openCategoryModal('edit', category)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+              <button (click)="openEditModal(category)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
                 <i class="fas fa-edit"></i>
-                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   Editar
                 </span>
               </button>
               <button (click)="deleteCategory(category)" class="group text-gray-500 dark:text-dark-secondary hover:text-red-600 dark:hover:text-dark-danger transition-all duration-300 relative">
                 <i class="fas fa-trash"></i>
-                <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   Eliminar
                 </span>
               </button>
             </td>
           </tr>
           <tr *ngIf="categories.length === 0">
-            <td colspan="6" class="p-2 sm:p-3 text-center text-sm text-light-secondary dark:text-dark-secondary">
+            <td colspan="5" class="p-2 sm:p-3 text-center text-sm text-light-secondary dark:text-dark-secondary">
               No hay categorías activas disponibles
             </td>
           </tr>
@@ -108,16 +108,22 @@
   </div>
 
   <!-- Modal para Crear/Editar Categoría -->
-  <app-modal #faqCategoryModal [title]="selectedCategoryId ? 'Editar Categoría' : 'Crear Categoría'">
-    <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto">
-      <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="space-y-4">
+  <app-modal
+    #createEditModal
+    [title]="selectedCategoryId ? 'Editar Categoría' : 'Crear Categoría'"
+    [modalType]="selectedCategoryId ? 'info' : 'success'"
+    [isConfirmModal]="false"
+  >
+    <ng-container slot="body">
+      <form [formGroup]="categoryForm" class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto space-y-4">
         <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Nombre</label>
+          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Nombre <span class="text-red-500 dark:text-red-400">*</span></label>
           <input
             formControlName="name"
             type="text"
             placeholder="Ej. General"
             class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base"
+            [ngClass]="{'border-red-500 dark:border-red-400': categoryForm.get('name')?.touched && categoryForm.get('name')?.invalid}"
           />
           <div *ngIf="categoryForm.get('name')?.touched && categoryForm.get('name')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
             <div *ngIf="categoryForm.get('name')?.errors?.['required']">El nombre es obligatorio.</div>
@@ -127,12 +133,13 @@
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Descripción</label>
+          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Descripción <span class="text-red-500 dark:text-red-400">*</span></label>
           <textarea
             formControlName="description"
             placeholder="Ej. Preguntas generales sobre el sistema"
             class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm sm:text-base"
             rows="4"
+            [ngClass]="{'border-red-500 dark:border-red-400': categoryForm.get('description')?.touched && categoryForm.get('description')?.invalid}"
           ></textarea>
           <div *ngIf="categoryForm.get('description')?.touched && categoryForm.get('description')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
             <div *ngIf="categoryForm.get('description')?.errors?.['required']">La descripción es obligatoria.</div>
@@ -141,23 +148,39 @@
             <div *ngIf="categoryForm.get('description')?.errors?.['invalidContent']">No se permiten números, caracteres especiales ni palabras SQL.</div>
           </div>
         </div>
-        <div class="flex flex-col sm:flex-row justify-end gap-4">
-          <button
-            type="button"
-            (click)="faqCategoryModal.close()"
-            class="w-full sm:w-auto px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="categoryForm.invalid"
-            class="w-full sm:w-auto px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
-          >
-            {{ selectedCategoryId ? 'Actualizar' : 'Crear' }}
-          </button>
-        </div>
       </form>
-    </div>
+    </ng-container>
+    <ng-container slot="actions">
+      <div class="flex flex-col sm:flex-row justify-end gap-4 p-4">
+        <button
+          (click)="createEditModal.close()"
+          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
+        >
+          Cancelar
+        </button>
+        <button
+          (click)="saveCategory()"
+          [disabled]="categoryForm.invalid && categoryForm.touched"
+          class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+        >
+          {{ selectedCategoryId ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </ng-container>
+  </app-modal>
+
+  <!-- Modal para Confirmaciones -->
+  <app-modal
+    #confirmModal
+    [title]="confirmModalTitle"
+    [modalType]="confirmModalType"
+    [isConfirmModal]="true"
+    [confirmText]="'Confirmar'"
+    [cancelText]="'Cancelar'"
+    (confirm)="handleConfirm()"
+  >
+    <ng-container slot="body">
+      <p class="text-light-text dark:text-dark-text">{{ confirmModalMessage }}</p>
+    </ng-container>
   </app-modal>
 </div>

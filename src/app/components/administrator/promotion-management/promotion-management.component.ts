@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe, registerLocaleData } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PromotionService, Promotion, PromotionQueryParams, Variant, VariantQueryParams, PromotionData } from '../../services/promotion.service';
@@ -7,7 +7,7 @@ import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
 import { ToastService } from '../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import localeEs from '@angular/common/locales/es';
 import { LOCALE_ID } from '@angular/core';
 
@@ -30,8 +30,9 @@ registerLocaleData(localeEs);
     { provide: LOCALE_ID, useValue: 'es' }
   ]
 })
-export class PromotionManagementComponent implements OnInit {
+export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('promotionModal') promotionModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
 
   promotions: Promotion[] = [];
   totalPromotions = 0;
@@ -48,11 +49,16 @@ export class PromotionManagementComponent implements OnInit {
   filteredVariants: Variant[] = [];
   selectedVariantIds: number[] = [];
   variantSearchTerm: string = '';
-
   availableCategories: { category_id: number; name: string }[] = [];
   filteredCategories: { category_id: number; name: string }[] = [];
   selectedCategoryIds: number[] = [];
   categorySearchTerm: string = '';
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
+
+  private subscriptions: Subscription = new Subscription();
 
   promotionTypeLabels = {
     quantity_discount: 'Descuento por Cantidad',
@@ -105,6 +111,16 @@ export class PromotionManagementComponent implements OnInit {
     this.setupCategorySearch();
   }
 
+  ngAfterViewInit(): void {
+    if (!this.promotionModal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   dateNotBeforeToday(control: any) {
     const selectedDate = new Date(control.value);
     const today = new Date();
@@ -123,34 +139,40 @@ export class PromotionManagementComponent implements OnInit {
 
   loadAvailableVariants() {
     const params: VariantQueryParams = {};
-    this.promotionService.getAllVariants(params).subscribe({
-      next: (response) => {
-        this.availableVariants = response.variants;
-        this.filteredVariants = [...this.availableVariants];
-      },
-      error: (err) => {
-        this.toastService.showToast('Error al cargar las variantes', 'error');
-        this.availableVariants = [];
-        this.filteredVariants = [];
-      }
-    });
+    this.subscriptions.add(
+      this.promotionService.getAllVariants(params).subscribe({
+        next: (response) => {
+          this.availableVariants = response.variants;
+          this.filteredVariants = [...this.availableVariants];
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar las variantes';
+          this.toastService.showToast(errorMessage, 'error');
+          this.availableVariants = [];
+          this.filteredVariants = [];
+        }
+      })
+    );
   }
 
   loadAvailableCategories() {
-    this.categorieService.getCategories().subscribe({
-      next: (response: any) => {
-        this.availableCategories = response.map((cat: any) => ({
-          category_id: cat.category_id,
-          name: cat.name
-        }));
-        this.filteredCategories = [...this.availableCategories];
-      },
-      error: (err) => {
-        this.toastService.showToast('Error al cargar las categorías', 'error');
-        this.availableCategories = [];
-        this.filteredCategories = [];
-      }
-    });
+    this.subscriptions.add(
+      this.categorieService.getCategories().subscribe({
+        next: (response: any) => {
+          this.availableCategories = response.map((cat: any) => ({
+            category_id: cat.category_id,
+            name: cat.name
+          }));
+          this.filteredCategories = [...this.availableCategories];
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar las categorías';
+          this.toastService.showToast(errorMessage, 'error');
+          this.availableCategories = [];
+          this.filteredCategories = [];
+        }
+      })
+    );
   }
 
   getVariantName(variantId: number): string | undefined {
@@ -166,25 +188,29 @@ export class PromotionManagementComponent implements OnInit {
   }
 
   setupVariantSearch() {
-    of(this.variantSearchTerm).pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(term => {
-        this.filterVariants(term);
-        return of(null);
-      })
-    ).subscribe();
+    this.subscriptions.add(
+      of(this.variantSearchTerm).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(term => {
+          this.filterVariants(term);
+          return of(null);
+        })
+      ).subscribe()
+    );
   }
 
   setupCategorySearch() {
-    of(this.categorySearchTerm).pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(term => {
-        this.filterCategories(term);
-        return of(null);
-      })
-    ).subscribe();
+    this.subscriptions.add(
+      of(this.categorySearchTerm).pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(term => {
+          this.filterCategories(term);
+          return of(null);
+        })
+      ).subscribe()
+    );
   }
 
   filterVariants(searchTerm: string) {
@@ -280,16 +306,19 @@ export class PromotionManagementComponent implements OnInit {
       search: this.searchTerm || undefined
     };
 
-    this.promotionService.getAllPromotions(params).subscribe({
-      next: (response) => {
-        this.promotions = response.promotions;
-        this.totalPromotions = response.total;
-        this.totalPages = Math.ceil(response.total / this.itemsPerPage);
-      },
-      error: (err) => {
-        this.toastService.showToast('Error al cargar las promociones', 'error');
-      }
-    });
+    this.subscriptions.add(
+      this.promotionService.getAllPromotions(params).subscribe({
+        next: (response) => {
+          this.promotions = response.promotions;
+          this.totalPromotions = response.total;
+          this.totalPages = Math.ceil(response.total / this.itemsPerPage);
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar las promociones';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
   onPageChange(newPage: number) {
@@ -304,7 +333,9 @@ export class PromotionManagementComponent implements OnInit {
 
   onSearchChange() {
     this.currentPage = 1;
-    this.debounceSearch().subscribe(() => this.loadPromotions());
+    this.subscriptions.add(
+      this.debounceSearch().subscribe(() => this.loadPromotions())
+    );
   }
 
   debounceSearch() {
@@ -326,6 +357,10 @@ export class PromotionManagementComponent implements OnInit {
   }
 
   openPromotionModal(mode: 'create' | 'edit', promotion?: Promotion) {
+    if (!this.promotionModal) {
+      this.toastService.showToast('Error: Modal de promoción no inicializado', 'error');
+      return;
+    }
     if (mode === 'create') {
       this.selectedPromotionId = null;
       this.selectedVariantIds = [];
@@ -340,43 +375,52 @@ export class PromotionManagementComponent implements OnInit {
         variantIds: [],
         categoryIds: []
       });
+      this.promotionModal.title = 'Crear Nueva Promoción';
+      this.promotionModal.modalType = 'success';
+      this.promotionModal.isConfirmModal = false;
       this.filterVariants('');
       this.filterCategories('');
       this.promotionModal.open();
     } else if (promotion) {
       this.selectedPromotionId = promotion.promotion_id;
-      this.promotionService.getPromotionById(promotion.promotion_id).subscribe({
-        next: (response) => {
-          const promo = response.promotion;
-          this.selectedVariantIds = (promo as any).variantIds?.map((v: any) => v.variant_id) || 
-                                   promo.ProductVariants?.map(v => v.variant_id) || [];
-          this.selectedCategoryIds = (promo as any).categoryIds?.map((c: any) => c.category_id) || 
-                                    promo.Categories?.map(c => c.category_id) || [];
-          this.variantSearchTerm = '';
-          this.categorySearchTerm = '';
-          this.promotionForm.patchValue({
-            name: promo.name,
-            promotion_type: promo.promotion_type,
-            discount_value: promo.discount_value,
-            min_quantity: promo.min_quantity,
-            min_order_count: promo.min_order_count,
-            min_unit_measure: promo.min_unit_measure,
-            applies_to: promo.applies_to,
-            is_exclusive: promo.is_exclusive,
-            start_date: this.formatDateForInput(promo.start_date),
-            end_date: this.formatDateForInput(promo.end_date),
-            variantIds: this.selectedVariantIds,
-            categoryIds: this.selectedCategoryIds
-          });
-          this.toggleFieldsBasedOnType(promo.promotion_type);
-          this.filterVariants('');
-          this.filterCategories('');
-          this.promotionModal.open();
-        },
-        error: (err) => {
-          this.toastService.showToast('Error al cargar los detalles de la promoción', 'error');
-        }
-      });
+      this.subscriptions.add(
+        this.promotionService.getPromotionById(promotion.promotion_id).subscribe({
+          next: (response) => {
+            const promo = response.promotion;
+            this.selectedVariantIds = (promo as any).variantIds?.map((v: any) => v.variant_id) || 
+                                     promo.ProductVariants?.map(v => v.variant_id) || [];
+            this.selectedCategoryIds = (promo as any).categoryIds?.map((c: any) => c.category_id) || 
+                                      promo.Categories?.map(c => c.category_id) || [];
+            this.variantSearchTerm = '';
+            this.categorySearchTerm = '';
+            this.promotionForm.patchValue({
+              name: promo.name,
+              promotion_type: promo.promotion_type,
+              discount_value: promo.discount_value,
+              min_quantity: promo.min_quantity,
+              min_order_count: promo.min_order_count,
+              min_unit_measure: promo.min_unit_measure,
+              applies_to: promo.applies_to,
+              is_exclusive: promo.is_exclusive,
+              start_date: this.formatDateForInput(promo.start_date),
+              end_date: this.formatDateForInput(promo.end_date),
+              variantIds: this.selectedVariantIds,
+              categoryIds: this.selectedCategoryIds
+            });
+            this.toggleFieldsBasedOnType(promo.promotion_type);
+            this.filterVariants('');
+            this.filterCategories('');
+            this.promotionModal.title = 'Editar Promoción';
+            this.promotionModal.modalType = 'info';
+            this.promotionModal.isConfirmModal = false;
+            this.promotionModal.open();
+          },
+          error: (err) => {
+            const errorMessage = err?.error?.message || 'Error al cargar los detalles de la promoción';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        })
+      );
     }
   }
 
@@ -423,24 +467,74 @@ export class PromotionManagementComponent implements OnInit {
       delete promotionData.status;
     }
 
-    const serviceCall = this.selectedPromotionId
-      ? this.promotionService.updatePromotion(this.selectedPromotionId, promotionData)
-      : this.promotionService.createPromotion(promotionData);
+    this.subscriptions.add(
+      (this.selectedPromotionId
+        ? this.promotionService.updatePromotion(this.selectedPromotionId, promotionData)
+        : this.promotionService.createPromotion(promotionData)
+      ).subscribe({
+        next: (response) => {
+          this.toastService.showToast(
+            this.selectedPromotionId ? 'Promoción actualizada exitosamente' : 'Promoción creada exitosamente',
+            'success'
+          );
+          this.loadPromotions();
+          this.promotionModal.close();
+          this.resetForm();
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al guardar la promoción';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
+  }
 
-    serviceCall.subscribe({
-      next: (response) => {
-        this.toastService.showToast(
-          this.selectedPromotionId ? 'Promoción actualizada exitosamente' : 'Promoción creada exitosamente',
-          'success'
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    if (!this.confirmModal) {
+      this.toastService.showToast('Error: Modal de confirmación no inicializado', 'error');
+      return;
+    }
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmAction = action;
+    this.confirmModal.title = title;
+    this.confirmModal.modalType = modalType;
+    this.confirmModal.isConfirmModal = true;
+    this.confirmModal.confirmText = 'Confirmar';
+    this.confirmModal.cancelText = 'Cancelar';
+    this.confirmModal.open();
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
+  }
+
+  deletePromotion(promotion: Promotion) {
+    this.openConfirmModal(
+      'Eliminar Promoción',
+      `¿Estás seguro de que deseas eliminar la promoción "${promotion.name}"?`,
+      'danger',
+      () => {
+        this.subscriptions.add(
+          this.promotionService.deletePromotion(promotion.promotion_id).subscribe({
+            next: () => {
+              this.toastService.showToast('Promoción eliminada exitosamente', 'success');
+              this.loadPromotions();
+              if (this.confirmModal) this.confirmModal.close();
+            },
+            error: (err) => {
+              const errorMessage = err?.error?.message || 'Error al eliminar la promoción';
+              this.toastService.showToast(errorMessage, 'error');
+              if (this.confirmModal) this.confirmModal.close();
+            }
+          })
         );
-        this.loadPromotions();
-        this.promotionModal.close();
-        this.resetForm();
-      },
-      error: (err) => {
-        this.toastService.showToast(err.message || 'Error al guardar la promoción', 'error');
       }
-    });
+    );
   }
 
   resetForm() {
@@ -459,25 +553,6 @@ export class PromotionManagementComponent implements OnInit {
     this.toggleFieldsBasedOnType('');
     this.filterVariants('');
     this.filterCategories('');
-  }
-
-  deletePromotion(promotion: Promotion) {
-    this.toastService.showToast(
-      `¿Estás seguro de que deseas eliminar la promoción ${promotion.promotion_id}?`,
-      'warning',
-      'Confirmar',
-      () => {
-        this.promotionService.deletePromotion(promotion.promotion_id).subscribe({
-          next: () => {
-            this.toastService.showToast('Promoción eliminada exitosamente', 'success');
-            this.loadPromotions();
-          },
-          error: (err) => {
-            this.toastService.showToast(err.message || 'Error al eliminar la promoción', 'error');
-          }
-        });
-      }
-    );
   }
 
   formatDate(date: string | null | undefined): string {

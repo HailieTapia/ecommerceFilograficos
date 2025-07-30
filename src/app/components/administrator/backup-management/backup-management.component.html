@@ -36,13 +36,13 @@
     <!-- Botones para respaldos manuales -->
     <div class="mb-6 flex gap-4">
       <button
-        (click)="runManualBackup('full')"
+        (click)="openManualBackupModal('full')"
         class="px-4 py-2 bg-green-600 dark:bg-green-600 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-700 transition-all duration-300 flex items-center gap-2"
       >
         <i class="fas fa-play"></i> Respaldo Manual Full
       </button>
       <button
-        (click)="runManualBackup('differential')"
+        (click)="openManualBackupModal('differential')"
         class="px-4 py-2 bg-green-600 dark:bg-green-600 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-700 transition-all duration-300 flex items-center gap-2"
       >
         <i class="fas fa-play"></i> Respaldo Manual Diferencial
@@ -110,7 +110,16 @@
               </td>
               <td class="p-3 text-center space-x-4">
                 <button
-                  (click)="restoreBackup(backup)"
+                  (click)="openDetailsModal(backup)"
+                  class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative"
+                >
+                  <i class="fas fa-eye"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition">
+                    Ver Detalles
+                  </span>
+                </button>
+                <button
+                  (click)="openRestoreModal(backup)"
                   class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative"
                   [disabled]="backup.status !== 'successful'"
                 >
@@ -138,8 +147,8 @@
   </div>
 
   <!-- Modal para configurar respaldos -->
-  <app-modal #configModal title="Configurar Respaldos">
-    <div class="p-4 sm:p-6 bg-white dark:bg-gray-900 dark:text-gray-100 text-gray-900 max-h-[80vh] overflow-y-auto">
+  <app-modal #configModal title="Configurar Respaldos" modalType="info">
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-900 dark:text-gray-100 text-gray-900 max-h-[80vh] overflow-y-auto">
       <!-- Tabs -->
       <div class="flex border-b border-gray-200 dark:border-gray-800 mb-4">
         <button
@@ -147,7 +156,7 @@
           class="px-4 py-2 text-sm font-medium"
           [ngClass]="{
             'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': activeTab === 'full',
-            'text-gray-500 dark:text-gray-400 hover:text-gray-200 dark:hover:text-gray-200': activeTab !== 'full'
+            'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300': activeTab !== 'full'
           }"
         >
           Respaldo Full
@@ -157,8 +166,9 @@
           class="px-4 py-2 text-sm font-medium"
           [ngClass]="{
             'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400': activeTab === 'differential',
-            'text-gray-500 dark:text-gray-400 hover:text-gray-200 dark:hover:text-gray-300': activeTab !== 'differential'
-          }">
+            'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300': activeTab !== 'differential'
+          }"
+        >
           Respaldo Diferencial
         </button>
       </div>
@@ -219,22 +229,6 @@
             <div *ngIf="fullBackupForm.get('schedule_time')?.hasError('pattern')">Formato inválido (HH:mm:ss)</div>
           </div>
         </div>
-        <div class="flex justify-end gap-2">
-          <button
-            type="button"
-            (click)="closeConfigModal()"
-            class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="fullBackupForm.invalid"
-            class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
-          >
-            Guardar
-          </button>
-        </div>
       </form>
 
       <!-- Contenido del formulario diferencial -->
@@ -293,23 +287,71 @@
             <div *ngIf="differentialBackupForm.get('schedule_time')?.hasError('pattern')">Formato inválido (HH:mm:ss)</div>
           </div>
         </div>
-        <div class="flex justify-end gap-2">
-          <button
-            type="button"
-            (click)="closeConfigModal()"
-            class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            [disabled]="differentialBackupForm.invalid"
-            class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
-          >
-            Guardar
-          </button>
-        </div>
       </form>
+    </div>
+    <div slot="actions" class="flex justify-end gap-2 p-4">
+      <button
+        (click)="configModal.close()"
+        class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="saveBackupConfig()"
+        [disabled]="(activeTab === 'full' ? fullBackupForm : differentialBackupForm).invalid"
+        class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
+      >
+        Guardar
+      </button>
+    </div>
+  </app-modal>
+
+  <!-- Modal para confirmar respaldo manual -->
+  <app-modal
+    #manualBackupModal
+    [title]="manualBackupType === 'full' ? 'Confirmar Respaldo Manual Full' : 'Confirmar Respaldo Manual Diferencial'"
+    modalType="success"
+    [isConfirmModal]="true"
+    confirmText="Iniciar"
+    (confirm)="runManualBackup()"
+    (cancel)="manualBackupModal.close()"
+  >
+    <p slot="body">¿Estás seguro de que deseas iniciar un respaldo manual {{ manualBackupType }}?</p>
+  </app-modal>
+
+  <!-- Modal para confirmar restauración -->
+  <app-modal
+    #restoreModal
+    title="Confirmar Restauración"
+    modalType="danger"
+    [isConfirmModal]="true"
+    confirmText="Restaurar"
+    (confirm)="restoreBackup()"
+    (cancel)="restoreModal.close()"
+  >
+    <p slot="body" *ngIf="selectedBackup">¿Estás seguro de que deseas restaurar el respaldo "{{ getBackupFileName(selectedBackup) }}" del {{ formatDate(selectedBackup.backup_datetime) }}?</p>
+  </app-modal>
+
+  <!-- Modal para ver detalles -->
+  <app-modal
+    #detailsModal
+    title="Detalles del Respaldo"
+    modalType="default"
+  >
+    <div slot="body" class="space-y-4" *ngIf="selectedBackup">
+      <p><strong>ID:</strong> {{ selectedBackup.backup_id }}</p>
+      <p><strong>Fecha:</strong> {{ formatDate(selectedBackup.backup_datetime) }}</p>
+      <p><strong>Tipo:</strong> {{ selectedBackup.data_type | titlecase }}</p>
+      <p><strong>Nombre del Archivo:</strong> {{ getBackupFileName(selectedBackup) }}</p>
+      <p><strong>Estado:</strong> {{ selectedBackup.status | titlecase }}</p>
+    </div>
+    <div slot="actions" class="flex justify-end gap-2 p-4">
+      <button
+        (click)="detailsModal.close()"
+        class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500"
+      >
+        Cerrar
+      </button>
     </div>
   </app-modal>
 </div>

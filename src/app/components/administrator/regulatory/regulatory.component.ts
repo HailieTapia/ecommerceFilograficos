@@ -1,46 +1,57 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { RegulatoryService } from '../../services/regulatory.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ModalComponent } from '../../../modal/modal.component';
+import { ToastService } from '../../services/toastService';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { LOCALE_ID } from '@angular/core';
+import { Subscription } from 'rxjs';
 
-// Registrar los datos de localización para español
 registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-regulatory',
   standalone: true,
-  imports: [ModalComponent, CommonModule, ReactiveFormsModule, DatePipe],
+  imports: [ModalComponent, CommonModule, ReactiveFormsModule],
   templateUrl: './regulatory.component.html',
-  styleUrl: './regulatory.component.css',
+  styleUrls: ['./regulatory.component.css'],
   providers: [
     DatePipe,
     { provide: LOCALE_ID, useValue: 'es' }
   ]
 })
-export class RegulatoryComponent implements OnInit {
+export class RegulatoryComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('modal') modal!: ModalComponent;
+  @ViewChild('historyModal') historyModal!: ModalComponent;
+  @ViewChild('currentVersionModal') currentVersionModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
+
   documentForm: FormGroup;
   documents: any[] = [];
   documentId: number | null = null;
-  successMessage: string = '';
-  errorMessage: string = '';
   versionHistory: any[] = [];
   documentData: any = {};
   file: File | null = null;
   titleOptions = ['Política de privacidad', 'Términos y condiciones', 'Deslinde legal'];
   currentVersion: any = null;
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
+
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private fb: FormBuilder,
     private regulatoryService: RegulatoryService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private toastService: ToastService
   ) {
     this.documentForm = this.fb.group({
       title: ['', Validators.required],
-      effective_date: ['', Validators.required],
+      effective_date: ['', [Validators.required, this.dateNotBeforeToday.bind(this)]],
       file: [null, Validators.required]
     });
   }
@@ -49,74 +60,141 @@ export class RegulatoryComponent implements OnInit {
     this.getAllCurrentVersions();
   }
 
+  ngAfterViewInit(): void {
+    if (!this.modal || !this.historyModal || !this.currentVersionModal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  dateNotBeforeToday(control: any) {
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return selectedDate < today ? { dateBeforeToday: true } : null;
+  }
+
   getAllCurrentVersions(): void {
-    this.regulatoryService.getAllCurrentVersions().subscribe(
-      (response) => {
-        this.documents = response;
-      },
-      (error) => {
-        console.error('Error al obtener:', error);
-      }
+    this.subscriptions.add(
+      this.regulatoryService.getAllCurrentVersions().subscribe({
+        next: (response) => {
+          this.documents = response;
+          this.toastService.showToast('Documentos cargados exitosamente.', 'success');
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || 'Error al obtener los documentos';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
     );
   }
 
   getVersionHistory(documentId: number): void {
     this.documentId = documentId;
-    this.regulatoryService.getVersionHistory(documentId).subscribe({
-      next: (data) => {
-        this.versionHistory = data.DocumentVersions;
-      },
-      error: (error) => {
-        console.error('Error al obtener el historial:', error);
-        this.versionHistory = [];
-      }
-    });
+    this.subscriptions.add(
+      this.regulatoryService.getVersionHistory(documentId).subscribe({
+        next: (data) => {
+          this.versionHistory = data.DocumentVersions;
+          this.historyModal.title = 'Historial de Versiones';
+          this.historyModal.modalType = 'info';
+          this.historyModal.isConfirmModal = false;
+          this.historyModal.open();
+          this.toastService.showToast('Historial de versiones cargado exitosamente.', 'success');
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || 'Error al obtener el historial';
+          this.toastService.showToast(errorMessage, 'error');
+          this.versionHistory = [];
+        }
+      })
+    );
+  }
+
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    if (!this.confirmModal) {
+      this.toastService.showToast('Error: Modal de confirmación no inicializado', 'error');
+      return;
+    }
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmAction = action;
+    this.confirmModal.title = title;
+    this.confirmModal.modalType = modalType;
+    this.confirmModal.isConfirmModal = true;
+    this.confirmModal.confirmText = 'Confirmar';
+    this.confirmModal.cancelText = 'Cancelar';
+    this.confirmModal.open();
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
   }
 
   deleteVersion(versionId: number) {
     if (!this.documentId) {
-      console.error('No se ha seleccionado un documento.');
+      this.toastService.showToast('No se ha seleccionado un documento.', 'error');
       return;
     }
 
-    const confirmDelete = confirm('¿Estás seguro de que deseas eliminar esta versión?');
-    if (!confirmDelete) {
-      return;
-    }
-
-    this.regulatoryService.deleteRegulatoryDocumentVersion(this.documentId, versionId).subscribe({
-      next: () => {
-        this.versionHistory = this.versionHistory.filter(v => v.version_id !== versionId);
-        console.log(`Versión ${versionId} eliminada con éxito.`);
-        this.getAllCurrentVersions();
-        if (this.versionHistory.length === 0) {
-          this.historyModal.close();
-        }
-      },
-      error: (error) => {
-        console.error('Error al eliminar la versión:', error);
+    this.openConfirmModal(
+      'Eliminar Versión',
+      `¿Estás seguro de que deseas eliminar la versión ${versionId}?`,
+      'danger',
+      () => {
+        this.subscriptions.add(
+          this.regulatoryService.deleteRegulatoryDocumentVersion(this.documentId!, versionId).subscribe({
+            next: () => {
+              this.versionHistory = this.versionHistory.filter(v => v.version_id !== versionId);
+              this.toastService.showToast(`Versión ${versionId} eliminada exitosamente.`, 'success');
+              this.getAllCurrentVersions();
+              if (this.versionHistory.length === 0 && this.historyModal) {
+                this.historyModal.close();
+              }
+            },
+            error: (error) => {
+              const errorMessage = error?.error?.message || 'Error al eliminar la versión';
+              this.toastService.showToast(errorMessage, 'error');
+            }
+          })
+        );
       }
-    });
+    );
   }
 
   deleteRegulatoryDocument(documentId: number): void {
-    if (!confirm('¿Estás seguro de que deseas eliminar este documento?')) {
-      return;
-    }
-    this.regulatoryService.deleteRegulatoryDocument(documentId).subscribe({
-      next: () => {
-        console.log('Documento eliminado exitosamente.');
-        this.documents = this.documents.filter(doc => doc.id !== documentId);
-      },
-      error: (error) => {
-        console.error('Error al eliminar documento:', error);
+    this.openConfirmModal(
+      'Eliminar Documento',
+      `¿Estás seguro de que deseas eliminar este documento?`,
+      'danger',
+      () => {
+        this.subscriptions.add(
+          this.regulatoryService.deleteRegulatoryDocument(documentId).subscribe({
+            next: () => {
+              this.documents = this.documents.filter(doc => doc.id !== documentId);
+              this.toastService.showToast('Documento eliminado exitosamente.', 'success');
+              if (this.confirmModal) this.confirmModal.close();
+            },
+            error: (error) => {
+              const errorMessage = error?.error?.message || 'Error al eliminar el documento';
+              this.toastService.showToast(errorMessage, 'error');
+            }
+          })
+        );
       }
-    });
+    );
   }
 
   saveRegulatoryDocument(): void {
     if (this.documentForm.invalid) {
-      console.log('Por favor, complete todos los campos requeridos y seleccione un archivo.');
+      this.documentForm.markAllAsTouched();
+      this.toastService.showToast('Por favor, complete todos los campos requeridos y seleccione un archivo válido.', 'error');
       return;
     }
 
@@ -125,31 +203,27 @@ export class RegulatoryComponent implements OnInit {
     const effective_date = formData.effective_date;
     const file = formData.file;
 
-    if (this.documentId) {
-      this.regulatoryService.updateRegulatoryDocument(this.documentId, file, effective_date).subscribe({
+    this.subscriptions.add(
+      (this.documentId
+        ? this.regulatoryService.updateRegulatoryDocument(this.documentId, file, effective_date)
+        : this.regulatoryService.createRegulatoryDocument(file, title, effective_date)
+      ).subscribe({
         next: () => {
-          console.log('Documento actualizado exitosamente.');
-          this.getAllCurrentVersions();
-          this.modal.close();
-          this.documentForm.reset();
-        },
-        error: (error) => {
-          console.error('Error al actualizar documento:', error);
-        }
-      });
-    } else {
-      this.regulatoryService.createRegulatoryDocument(file, title, effective_date).subscribe({
-        next: () => {
-          console.log('Documento creado exitosamente.');
+          this.toastService.showToast(
+            this.documentId ? 'Documento actualizado exitosamente.' : 'Documento creado exitosamente.',
+            'success'
+          );
           this.getAllCurrentVersions();
           this.documentForm.reset();
+          this.file = null;
           this.modal.close();
         },
         error: (error) => {
-          console.error('Error al crear documento:', error);
+          const errorMessage = error?.error?.message || `Error al ${this.documentId ? 'actualizar' : 'crear'} el documento`;
+          this.toastService.showToast(errorMessage, 'error');
         }
-      });
-    }
+      })
+    );
   }
 
   onFileChange(event: any): void {
@@ -160,52 +234,67 @@ export class RegulatoryComponent implements OnInit {
         this.file = file;
         this.documentForm.get('file')?.setValue(file);
       } else {
-        alert('Por favor, selecciona un archivo .docx válido.');
         this.file = null;
         this.documentForm.get('file')?.setValue(null);
+        this.toastService.showToast('Por favor, selecciona un archivo .docx válido.', 'error');
       }
     }
   }
 
-  @ViewChild('historyModal') historyModal!: ModalComponent;
   openHistoryModal(documentId: number): void {
     this.getVersionHistory(documentId);
-    this.historyModal.open();
   }
 
-  @ViewChild('currentVersionModal') currentVersionModal!: ModalComponent;
   viewCurrentVersion(documentId: number): void {
     this.currentVersion = null;
-    this.regulatoryService.getCurrentVersionById(documentId).subscribe({
-      next: (response) => {
-        this.currentVersion = response.DocumentVersions[0];
-        this.currentVersionModal.open();
-      },
-      error: (error) => {
-        console.error('Error al obtener la versión vigente:', error);
-      }
-    });
+    this.subscriptions.add(
+      this.regulatoryService.getCurrentVersionById(documentId).subscribe({
+        next: (response) => {
+          this.currentVersion = response.DocumentVersions[0];
+          this.currentVersionModal.title = 'Versión Vigente';
+          this.currentVersionModal.modalType = 'info';
+          this.currentVersionModal.isConfirmModal = false;
+          this.currentVersionModal.open();
+          this.toastService.showToast('Versión vigente cargada exitosamente.', 'success');
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || 'Error al obtener la versión vigente';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
-  @ViewChild('modal') modal!: ModalComponent;
   openModal(document?: any) {
+    if (!this.modal) {
+      this.toastService.showToast('Error: Modal de documento no inicializado', 'error');
+      return;
+    }
     this.documentForm.reset();
-    this.successMessage = '';
-    this.errorMessage = '';
     this.file = null;
+    this.documentId = null;
     if (document) {
       this.documentId = document.document_id;
       this.documentForm.patchValue({
         title: document.title,
-        effective_date: document.effective_date
+        effective_date: this.formatDateForInput(document.effective_date)
       });
+      this.modal.title = 'Editar Documento';
+      this.modal.modalType = 'info';
     } else {
-      this.documentId = null;
+      this.modal.title = 'Crear Documento';
+      this.modal.modalType = 'success';
     }
+    this.modal.isConfirmModal = false;
     this.modal.open();
   }
 
   formatDate(date: string): string {
     return this.datePipe.transform(date, "d 'de' MMMM 'de' yyyy", undefined, 'es') || 'Fecha no disponible';
+  }
+
+  formatDateForInput(date: string): string {
+    const d = new Date(date);
+    return d.toISOString().slice(0, 10);
   }
 }

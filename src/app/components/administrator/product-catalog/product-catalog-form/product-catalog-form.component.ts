@@ -1,12 +1,14 @@
-import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ProductService, NewProduct, Variant, DeleteVariantResponse } from '../../../services/product.service';
 import { CategorieService } from '../../../services/categorieService';
 import { CollaboratorsService } from '../../../services/collaborators.service';
 import { ProductAttributeService, Attribute, CategoryWithAttributes } from '../../../services/product-attribute.service';
+import { ToastService } from '../../../services/toastService';
 import { SafeUrlPipe } from '../../../pipes/safe-url.pipe';
 import { debounceTime } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 interface Category {
   category_id: number;
@@ -51,11 +53,12 @@ const customizationTypeMap = {
   selector: 'app-product-catalog-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, SafeUrlPipe, NgFor],
-  templateUrl: './product-catalog-form.component.html'
+  templateUrl: './product-catalog-form.component.html',
+  styleUrls: ['./product-catalog-form.component.css']
 })
-export class ProductCatalogFormComponent implements OnInit {
+export class ProductCatalogFormComponent implements OnInit, OnDestroy {
   @Input() productId?: number;
-  @Output() productSaved = new EventEmitter<void>();
+  @Output() productSaved = new EventEmitter<string>();
 
   currentStep = 1;
   productForm: FormGroup;
@@ -69,12 +72,14 @@ export class ProductCatalogFormComponent implements OnInit {
 
   readonly MAX_PROFIT_MARGIN: number = 500;
   customizationTypes = ['Texto', 'Imagen', 'Archivo'];
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private productService: ProductService,
     private categorieService: CategorieService,
     private collaboratorsService: CollaboratorsService,
     private productAttributeService: ProductAttributeService,
+    private toastService: ToastService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef
   ) {
@@ -195,39 +200,51 @@ export class ProductCatalogFormComponent implements OnInit {
     this.loadCollaborators();
     this.loadAttributesByActiveCategories();
 
-    this.productForm.get('category_id')?.valueChanges.subscribe(categoryId => {
-      this.updateAllVariantAttributes(categoryId);
-    });
+    this.subscriptions.add(
+      this.productForm.get('category_id')?.valueChanges.subscribe(categoryId => {
+        this.updateAllVariantAttributes(categoryId);
+      })
+    );
 
-    this.productForm.get('product_type')?.valueChanges.subscribe(() => this.validateStep1());
+    this.subscriptions.add(
+      this.productForm.get('product_type')?.valueChanges.subscribe(() => this.validateStep1())
+    );
 
-    this.productForm.get('name')?.valueChanges.subscribe(value => {
-      if (value) {
-        const capitalizedValue = this.capitalizeFirstWord(value);
-        if (capitalizedValue !== value) {
-          this.productForm.get('name')?.setValue(capitalizedValue, { emitEvent: false });
+    this.subscriptions.add(
+      this.productForm.get('name')?.valueChanges.subscribe(value => {
+        if (value) {
+          const capitalizedValue = this.capitalizeFirstWord(value);
+          if (capitalizedValue !== value) {
+            this.productForm.get('name')?.setValue(capitalizedValue, { emitEvent: false });
+          }
         }
-      }
-    });
+      })
+    );
 
-    this.productForm.get('description')?.valueChanges.subscribe(value => {
-      if (value) {
-        const capitalizedValue = this.capitalizeFirstWord(value);
-        if (capitalizedValue !== value) {
-          this.productForm.get('description')?.setValue(capitalizedValue, { emitEvent: false });
+    this.subscriptions.add(
+      this.productForm.get('description')?.valueChanges.subscribe(value => {
+        if (value) {
+          const capitalizedValue = this.capitalizeFirstWord(value);
+          if (capitalizedValue !== value) {
+            this.productForm.get('description')?.setValue(capitalizedValue, { emitEvent: false });
+          }
         }
-      }
-    });
+      })
+    );
 
-    this.productForm.get('urgent_delivery_enabled')?.valueChanges.subscribe(() => {
-      this.toggleUrgentDeliveryFields();
-      this.validateStep1();
-    });
+    this.subscriptions.add(
+      this.productForm.get('urgent_delivery_enabled')?.valueChanges.subscribe(() => {
+        this.toggleUrgentDeliveryFields();
+        this.validateStep1();
+      })
+    );
 
-    this.variants.valueChanges.pipe(debounceTime(100)).subscribe(() => {
-      this.variants.controls.forEach(variant => this.calculatePrice(variant as FormGroup));
-      this.updateErrors();
-    });
+    this.subscriptions.add(
+      this.variants.valueChanges.pipe(debounceTime(100)).subscribe(() => {
+        this.variants.controls.forEach(variant => this.calculatePrice(variant as FormGroup));
+        this.updateErrors();
+      })
+    );
 
     if (this.productId) {
       this.isEditMode = true;
@@ -238,84 +255,85 @@ export class ProductCatalogFormComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   loadProductData(productId: number) {
-    this.productService.getProductById(productId).subscribe({
-      next: (response) => {
-        console.log('Datos del producto cargados:', response.product);
-        const product = response.product;
+    this.subscriptions.add(
+      this.productService.getProductById(productId).subscribe({
+        next: (response) => {
+          const product = response.product;
 
-        // Map backend product_type to form-compatible values
-        const productTypeMap: { [key: string]: string } = {
-          'Existencia': 'Existencia',
-          'Semi Personalizado': 'semi_personalizado',
-          'Personalizado': 'Personalizado'
-        };
+          // Map backend product_type to form-compatible values
+          const productTypeMap: { [key: string]: string } = {
+            'Existencia': 'Existencia',
+            'Semi Personalizado': 'semi_personalizado',
+            'Personalizado': 'personalizado'
+          };
 
-        this.productForm.patchValue({
-          name: product.name,
-          description: product.description,
-          category_id: product.category?.category_id || null,
-          collaborator_id: product.collaborator?.collaborator_id || null,
-          product_type: productTypeMap[product.product_type] || product.product_type, // Use mapped value or fallback
-          standard_delivery_days: product.standard_delivery_days,
-          urgent_delivery_enabled: product.urgent_delivery_enabled,
-          urgent_delivery_days: product.urgent_delivery_days,
-          urgent_delivery_cost: product.urgent_delivery_cost
-        });
-
-        // Rest of the method remains unchanged
-        while (this.customizations.length > 0) this.customizations.removeAt(0);
-        if (product.customizations && product.customizations.length > 0) {
-          product.customizations.forEach(cust => {
-            const displayType = customizationTypeMap.toDisplay[cust.type] || cust.type;
-            console.log('Cargando personalización:', { type: displayType, description: cust.description });
-            this.customizations.push(this.fb.group({
-              type: [displayType, Validators.required],
-              description: [cust.description || '']
-            }));
-          });
-        }
-
-        while (this.variants.length > 0) this.variants.removeAt(0);
-        product.variants.forEach(variant => {
-          const variantGroup = this.createVariantFormGroup(variant.sku);
-          variantGroup.patchValue({
-            variant_id: variant.variant_id,
-            sku: variant.sku,
-            production_cost: variant.production_cost,
-            profit_margin: variant.profit_margin,
-            calculated_price: variant.calculated_price,
-            existingImages: variant.images || [],
-            images: [],
-            imagesToDelete: []
+          this.productForm.patchValue({
+            name: product.name,
+            description: product.description,
+            category_id: product.category?.category_id || null,
+            collaborator_id: product.collaborator?.collaborator_id || null,
+            product_type: productTypeMap[product.product_type] || product.product_type,
+            standard_delivery_days: product.standard_delivery_days,
+            urgent_delivery_enabled: product.urgent_delivery_enabled,
+            urgent_delivery_days: product.urgent_delivery_days,
+            urgent_delivery_cost: product.urgent_delivery_cost
           });
 
-          const attributesGroup = variantGroup.get('attributes') as FormGroup;
-          const categoryId = product.category?.category_id || null;
-          if (categoryId && this.attributesByCategory[categoryId]) {
-            this.attributesByCategory[categoryId].forEach(attr => {
-              const attrValue = variant.attributes.find(a => a.attribute_id === attr.attribute_id)?.value || '';
-              const validators = attr.is_required ? [Validators.required] : [];
-              attributesGroup.addControl(
-                attr.attribute_id.toString(),
-                this.fb.control(attrValue, validators)
-              );
+          while (this.customizations.length > 0) this.customizations.removeAt(0);
+          if (product.customizations && product.customizations.length > 0) {
+            product.customizations.forEach(cust => {
+              const displayType = customizationTypeMap.toDisplay[cust.type] || cust.type;
+              this.customizations.push(this.fb.group({
+                type: [displayType, Validators.required],
+                description: [cust.description || '']
+              }));
             });
           }
 
-          this.variants.push(variantGroup);
-        });
+          while (this.variants.length > 0) this.variants.removeAt(0);
+          product.variants.forEach(variant => {
+            const variantGroup = this.createVariantFormGroup(variant.sku);
+            variantGroup.patchValue({
+              variant_id: variant.variant_id,
+              sku: variant.sku,
+              production_cost: variant.production_cost,
+              profit_margin: variant.profit_margin,
+              calculated_price: variant.calculated_price,
+              existingImages: variant.images || [],
+              images: [],
+              imagesToDelete: []
+            });
 
-        this.toggleUrgentDeliveryFields();
-        this.cdr.detectChanges();
-        console.log('Formulario después de cargar datos:', this.productForm.value);
-        console.log('Customizations FormArray:', this.customizations.value);
-      },
-      error: (err) => {
-        console.error('Error al cargar producto:', err);
-        window.alert('Error al cargar los datos del producto');
-      }
-    });
+            const attributesGroup = variantGroup.get('attributes') as FormGroup;
+            const categoryId = product.category?.category_id || null;
+            if (categoryId && this.attributesByCategory[categoryId]) {
+              this.attributesByCategory[categoryId].forEach(attr => {
+                const attrValue = variant.attributes.find(a => a.attribute_id === attr.attribute_id)?.value || '';
+                const validators = attr.is_required ? [Validators.required] : [];
+                attributesGroup.addControl(
+                  attr.attribute_id.toString(),
+                  this.fb.control(attrValue, validators)
+                );
+              });
+            }
+
+            this.variants.push(variantGroup);
+          });
+
+          this.toggleUrgentDeliveryFields();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar los datos del producto';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
   capitalizeFirstWord(text: string): string {
@@ -329,45 +347,60 @@ export class ProductCatalogFormComponent implements OnInit {
   }
 
   loadCategories() {
-    this.categorieService.getCategories().subscribe({
-      next: (response: any[]) => {
-        this.categories = response.map(cat => ({
-          category_id: cat.category_id,
-          name: cat.name
-        }));
-      },
-      error: (err) => console.error('Error al cargar categorías:', err)
-    });
+    this.subscriptions.add(
+      this.categorieService.getCategories().subscribe({
+        next: (response: any[]) => {
+          this.categories = response.map(cat => ({
+            category_id: cat.category_id,
+            name: cat.name
+          }));
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar categorías';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
   loadCollaborators() {
-    this.collaboratorsService.getAllCollaborators().subscribe({
-      next: (response: any[]) => {
-        this.collaborators = response.filter(col => col.active).map(col => ({
-          collaborator_id: col.collaborator_id,
-          name: col.name
-        }));
-      },
-      error: (err) => console.error('Error al cargar colaboradores:', err)
-    });
+    this.subscriptions.add(
+      this.collaboratorsService.getAllCollaborators().subscribe({
+        next: (response: any[]) => {
+          this.collaborators = response.filter(col => col.active).map(col => ({
+            collaborator_id: col.collaborator_id,
+            name: col.name
+          }));
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar colaboradores';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
   loadAttributesByActiveCategories() {
-    this.productAttributeService.getAttributesByActiveCategories().subscribe({
-      next: (response: CategoryWithAttributes[]) => {
-        this.attributesByCategory = response.reduce((acc, category) => {
-          acc[category.category_id] = category.attributes.map(attr => ({
-            attribute_id: attr.attribute_id,
-            attribute_name: attr.attribute_name,
-            data_type: attr.data_type,
-            allowed_values: attr.allowed_values,
-            is_required: attr.is_required || false
-          }));
-          return acc;
-        }, {} as { [key: number]: Attribute[] });
-      },
-      error: (err) => console.error('Error al cargar atributos por categorías activas:', err)
-    });
+    this.subscriptions.add(
+      this.productAttributeService.getAttributesByActiveCategories().subscribe({
+        next: (response: CategoryWithAttributes[]) => {
+          this.attributesByCategory = response.reduce((acc, category) => {
+            acc[category.category_id] = category.attributes.map(attr => ({
+              attribute_id: attr.attribute_id,
+              attribute_name: attr.attribute_name,
+              data_type: attr.data_type,
+              allowed_values: attr.allowed_values,
+              is_required: attr.is_required || false
+            }));
+            return acc;
+          }, {} as { [key: number]: Attribute[] });
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al cargar atributos por categorías activas';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
   }
 
   updateAllVariantAttributes(categoryId: number | null) {
@@ -409,23 +442,25 @@ export class ProductCatalogFormComponent implements OnInit {
       description: ['']
     });
 
-    customizationGroup.get('type')?.valueChanges.subscribe(type => {
-      if (type && !customizationGroup.get('description')?.touched) {
-        let defaultDescription = '';
-        switch (type) {
-          case 'Texto':
-            defaultDescription = 'Ej: Escribe tu mensaje';
-            break;
-          case 'Imagen':
-            defaultDescription = 'Ej: Sube tu diseño';
-            break;
-          case 'Archivo':
-            defaultDescription = 'Ej: Sube tu archivo PDF';
-            break;
+    this.subscriptions.add(
+      customizationGroup.get('type')?.valueChanges.subscribe(type => {
+        if (type && !customizationGroup.get('description')?.touched) {
+          let defaultDescription = '';
+          switch (type) {
+            case 'Texto':
+              defaultDescription = 'Ej: Escribe tu mensaje';
+              break;
+            case 'Imagen':
+              defaultDescription = 'Ej: Sube tu diseño';
+              break;
+            case 'Archivo':
+              defaultDescription = 'Ej: Sube tu archivo PDF';
+              break;
+          }
+          customizationGroup.get('description')?.setValue(defaultDescription);
         }
-        customizationGroup.get('description')?.setValue(defaultDescription);
-      }
-    });
+      })
+    );
 
     this.customizations.push(customizationGroup);
   }
@@ -491,20 +526,6 @@ export class ProductCatalogFormComponent implements OnInit {
 
   goToNextStep() {
     if (this.validateStep1()) {
-      const step1Data = {
-        name: this.productForm.get('name')?.value,
-        description: this.productForm.get('description')?.value,
-        category_id: this.productForm.get('category_id')?.value,
-        collaborator_id: this.productForm.get('collaborator_id')?.value,
-        product_type: this.productForm.get('product_type')?.value,
-        standard_delivery_days: this.productForm.get('standard_delivery_days')?.value,
-        urgent_delivery_enabled: this.productForm.get('urgent_delivery_enabled')?.value,
-        urgent_delivery_days: this.productForm.get('urgent_delivery_days')?.value,
-        urgent_delivery_cost: this.productForm.get('urgent_delivery_cost')?.value,
-        customizations: this.customizations.value
-      };
-      console.log('Datos del Paso 1 al pasar al Paso 2:', step1Data);
-
       if (!this.isEditMode) {
         const productName = this.productForm.get('name')?.value;
         this.variants.controls.forEach((variant, index) => {
@@ -669,7 +690,7 @@ export class ProductCatalogFormComponent implements OnInit {
       if (!sku?.trim()) {
         newErrors[`sku_${index}`] = 'El SKU es obligatorio';
       } else if (skuControl?.errors?.['pattern']) {
-        newErrors[`sku_${index}`] = 'El SKU debe tener el formato AAAA-123';
+        newErrors[`sku_${index}`] = 'El SKU debe tener el formato AAAA-NNNNNN-NN';
       } else if (skus.has(sku)) {
         newErrors[`sku_${index}`] = 'El SKU ya existe en otra variante';
       } else {
@@ -740,7 +761,7 @@ export class ProductCatalogFormComponent implements OnInit {
 
   saveProduct() {
     if (!this.validateStep2()) {
-      window.alert('Por favor corrige los errores en las variantes antes de guardar');
+      this.toastService.showToast('Por favor corrige los errores en las variantes antes de guardar', 'error');
       return;
     }
 
@@ -785,38 +806,34 @@ export class ProductCatalogFormComponent implements OnInit {
         ? this.productService.updateProduct(this.productId, productData)
         : this.productService.createProduct(productData);
 
-      saveObservable.subscribe({
-        next: (response) => {
-          console.log(this.isEditMode ? 'Producto actualizado:' : 'Producto creado:', response);
-          window.alert(this.isEditMode ? 'Producto actualizado con éxito' : 'Producto guardado con éxito');
-          this.productSaved.emit();
-          this.resetForm();
-        },
-        error: (err) => {
-          console.error('Error al guardar producto:', err);
-          window.alert('Error al guardar el producto');
-        }
-      });
+      this.subscriptions.add(
+        saveObservable.subscribe({
+          next: (response) => {
+            const message = this.isEditMode ? 'Producto actualizado con éxito' : 'Producto guardado con éxito';
+            this.productSaved.emit(message);
+            this.resetForm();
+          },
+          error: (err) => {
+            const errorMessage = err?.error?.message || 'Error al guardar el producto';
+            this.toastService.showToast(errorMessage, 'error');
+          }
+        })
+      );
     };
 
     if (this.isEditMode && this.productId && this.variantsToDelete.length > 0) {
-      const variantSkus = this.variantsToDelete.map(id => {
-        const variant = this.productForm.value.variants.find((v: any) => v.variant_id === id);
-        return variant ? variant.sku : id.toString();
-      });
-      const confirmMessage = `¿Estás seguro de que deseas eliminar las siguientes variantes: ${variantSkus.join(', ')}? Esta acción es irreversible.`;
-      if (window.confirm(confirmMessage)) {
+      this.subscriptions.add(
         this.productService.deleteVariant(this.productId, this.variantsToDelete).subscribe({
           next: (response: DeleteVariantResponse) => {
-            console.log(`${response.deletedCount} variantes eliminadas: ${response.message}`);
+            this.toastService.showToast(`${response.deletedCount} variantes eliminadas: ${response.message}`, 'success');
             saveAction();
           },
           error: (err) => {
-            console.error('Error al eliminar variantes:', err);
-            window.alert('Error al eliminar las variantes');
+            const errorMessage = err?.error?.message || 'Error al eliminar las variantes';
+            this.toastService.showToast(errorMessage, 'error');
           }
-        });
-      }
+        })
+      );
     } else {
       saveAction();
     }

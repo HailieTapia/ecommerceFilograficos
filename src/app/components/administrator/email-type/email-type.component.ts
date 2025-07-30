@@ -14,20 +14,27 @@ import { ToastService } from '../../services/toastService';
   styleUrls: ['./email-type.component.css'],
 })
 export class EmailTypeComponent implements OnInit {
+  @ViewChild('createEditModal') createEditModal!: ModalComponent;
+  @ViewChild('viewDetailsModal') viewDetailsModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
+
   emailTypeForm: FormGroup;
   emailTypeId: number | null = null;
   emailTypes: any[] = [];
   selectedEmailType: any = null;
   variablesList: string[] = [];
-  variableControl: FormControl = new FormControl('');
+  variableControl: FormControl = new FormControl('', [Validators.required, Validators.pattern(/\S+/)]);
 
-  @ViewChild('modal') modal!: ModalComponent;
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
 
   constructor(private toastService: ToastService, private typeService: TypeService, private fb: FormBuilder) {
     this.emailTypeForm = this.fb.group({
-      token: ['', [Validators.required, Validators.maxLength(50)]],
-      name: ['', [Validators.required, Validators.maxLength(100)]],
-      description: [''],
+      token: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50), Validators.pattern(/^[A-Z0-9_]+$/)]],
+      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+      description: ['', [Validators.maxLength(255)]],
       required_variables: [[], [
         Validators.required,
         (control: AbstractControl) => {
@@ -41,57 +48,131 @@ export class EmailTypeComponent implements OnInit {
     this.getAllEmailTypes();
   }
 
+  ngAfterViewInit(): void {
+    if (!this.createEditModal || !this.viewDetailsModal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+    }
+  }
+
   getAllEmailTypes(): void {
     this.typeService.getAllEmailTypes().subscribe({
       next: (data) => {
         this.emailTypes = data.emailTypes;
       },
       error: (err) => {
-        this.toastService.showToast('Error al obtener los tipos de correo electrónico: ' + err.message, 'error');
+        const errorMessage = err?.error?.message || 'Error al obtener los tipos de correo electrónico';
+        this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
 
-  deleteEmailType(id: number): void {
-    this.toastService.showToast(
-      '¿Estás seguro de que deseas eliminar este tipo? Esta acción no se puede deshacer.',
-      'warning',
-      'Confirmar',
-      () => {
-        this.typeService.deleteEmailType(id).subscribe({
-          next: (response) => {
-            this.toastService.showToast(response.message || 'Tipo eliminado exitosamente', 'success');
-            this.getAllEmailTypes();
-          },
-          error: (error) => {
-            const errorMessage = error?.error?.message || 'Error al eliminar el tipo de correo electrónico';
-            this.toastService.showToast(errorMessage, 'error');
-          }
-        });
-      }
-    );
-  }
-
-  getEmailTypeById(id: number): void {
+  openViewModal(id: number): void {
     this.typeService.getEmailTypeById(id).subscribe({
       next: (data) => {
         this.selectedEmailType = data.emailType;
-        this.openModal(this.selectedEmailType);
+        if (this.viewDetailsModal) {
+          this.viewDetailsModal.modalType = 'default';
+          this.viewDetailsModal.title = 'Detalles del Tipo de Correo';
+          this.viewDetailsModal.open();
+        }
       },
       error: (err) => {
-        this.toastService.showToast('Error al obtener el tipo de correo electrónico: ' + err.message, 'error');
+        const errorMessage = err?.error?.message || 'Error al obtener los detalles del tipo de correo';
+        this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
 
-  submitEmailType() {
+  openEditModal(id: number): void {
+    this.emailTypeId = id;
+    this.typeService.getEmailTypeById(id).subscribe({
+      next: (data) => {
+        this.selectedEmailType = data.emailType;
+        this.variablesList = data.emailType.required_variables || [];
+        this.emailTypeForm.patchValue({
+          token: data.emailType.token,
+          name: data.emailType.name,
+          description: data.emailType.description,
+          required_variables: this.variablesList
+        });
+        if (this.createEditModal) {
+          this.createEditModal.modalType = 'info';
+          this.createEditModal.title = 'Editar Tipo de Correo';
+          this.createEditModal.open();
+        }
+      },
+      error: (err) => {
+        const errorMessage = err?.error?.message || 'Error al obtener el tipo de correo';
+        this.toastService.showToast(errorMessage, 'error');
+      }
+    });
+  }
+
+  openCreateModal(): void {
+    this.emailTypeId = null;
+    this.variablesList = [];
+    this.variableControl.reset();
+    this.emailTypeForm.reset();
+    if (this.createEditModal) {
+      this.createEditModal.modalType = 'success';
+      this.createEditModal.title = 'Crear Tipo de Correo';
+      this.createEditModal.open();
+    }
+  }
+
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmAction = action;
+    if (this.confirmModal) {
+      this.confirmModal.title = title;
+      this.confirmModal.modalType = modalType;
+      this.confirmModal.isConfirmModal = true;
+      this.confirmModal.confirmText = 'Confirmar';
+      this.confirmModal.cancelText = 'Cancelar';
+      this.confirmModal.open();
+    }
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
+  }
+
+  addVariable(): void {
+    const variable = this.variableControl.value.trim();
+    if (this.variableControl.invalid) {
+      this.toastService.showToast('La variable no puede estar vacía.', 'error');
+      return;
+    }
+    if (this.variablesList.includes(variable)) {
+      this.toastService.showToast('La variable ya está en la lista.', 'error');
+      this.variableControl.reset();
+      return;
+    }
+    this.variablesList.push(variable);
+    this.variableControl.reset();
     this.emailTypeForm.patchValue({
       required_variables: this.variablesList
     });
+    this.emailTypeForm.controls['required_variables'].updateValueAndValidity();
+  }
 
+  removeVariable(variable: string): void {
+    this.variablesList = this.variablesList.filter(v => v !== variable);
+    this.emailTypeForm.patchValue({
+      required_variables: this.variablesList
+    });
+    this.emailTypeForm.controls['required_variables'].updateValueAndValidity();
+  }
+
+  submitEmailType(): void {
     if (this.emailTypeForm.invalid) {
       this.emailTypeForm.markAllAsTouched();
-      this.toastService.showToast('Por favor, completa todos los campos requeridos.', 'error');
+      this.toastService.showToast('Formulario inválido. Revisa los campos.', 'error');
       return;
     }
 
@@ -104,70 +185,58 @@ export class EmailTypeComponent implements OnInit {
     }
   }
 
-  private createEmailType(data: any) {
+  private createEmailType(data: any): void {
     this.typeService.createEmailType(data).subscribe({
       next: (response) => {
         this.toastService.showToast('Tipo de correo electrónico creado exitosamente.', 'success');
-        this.modal.close();
+        if (this.createEditModal) this.createEditModal.close();
         this.getAllEmailTypes();
       },
-      error: (error) => {
-        this.toastService.showToast('Error al crear el tipo de correo electrónico: ' + error.message, 'error');
+      error: (err) => {
+        const errorMessage = err?.error?.message || 'Error al crear el tipo de correo electrónico';
+        this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
 
-  private updateEmailType(id: number, data: any) {
+  private updateEmailType(id: number, data: any): void {
     this.typeService.updateEmailType(id, data).subscribe({
       next: (response) => {
         this.toastService.showToast('Tipo de correo electrónico actualizado exitosamente.', 'success');
-        this.modal.close();
+        if (this.createEditModal) this.createEditModal.close();
         this.getAllEmailTypes();
       },
-      error: (error) => {
-        this.toastService.showToast('Error al actualizar el tipo de correo electrónico: ' + error.message, 'error');
+      error: (err) => {
+        const errorMessage = err?.error?.message || 'Error al actualizar el tipo de correo electrónico';
+        this.toastService.showToast(errorMessage, 'error');
       }
     });
   }
 
-  addVariable() {
-    const variable = this.variableControl.value.trim();
-    if (variable) {
-      this.variablesList.push(variable);
-      this.variableControl.reset();
-      this.emailTypeForm.patchValue({
-        required_variables: this.variablesList
-      });
-      this.emailTypeForm.controls['required_variables'].updateValueAndValidity();
+  deleteEmailType(id: number): void {
+    const emailType = this.emailTypes.find(t => t.email_type_id === id);
+    if (!emailType) {
+      this.toastService.showToast('Tipo de correo no encontrado.', 'error');
+      return;
     }
-  }
-
-  removeVariable(variable: string) {
-    this.variablesList = this.variablesList.filter(v => v !== variable);
-    this.emailTypeForm.patchValue({
-      required_variables: this.variablesList
-    });
-    this.emailTypeForm.controls['required_variables'].updateValueAndValidity();
-  }
-
-  openModal(emailType?: any) {
-    this.emailTypeForm.reset();
-    this.variablesList = [];
-    this.variableControl.reset();
-
-    if (emailType) {
-      this.emailTypeId = emailType.email_type_id;
-      this.variablesList = emailType.required_variables || [];
-      this.emailTypeForm.patchValue({
-        token: emailType.token,
-        name: emailType.name,
-        description: emailType.description,
-        required_variables: this.variablesList
-      });
-    } else {
-      this.emailTypeId = null;
-    }
-
-    this.modal.open();
+    this.openConfirmModal(
+      'Eliminar Tipo de Correo',
+      `¿Estás seguro de que deseas eliminar el tipo de correo "${emailType.name}"? Esta acción no se puede deshacer.`,
+      'danger',
+      () => {
+        this.typeService.deleteEmailType(id).subscribe({
+          next: (response) => {
+            this.toastService.showToast(response.message || 'Tipo de correo eliminado exitosamente', 'success');
+            this.getAllEmailTypes();
+            if (this.confirmModal) this.confirmModal.close();
+          },
+          error: (err) => {
+            const errorMessage = err?.error?.message || 'Error al eliminar el tipo de correo';
+            this.toastService.showToast(errorMessage, 'error');
+            if (this.confirmModal) this.confirmModal.close();
+          }
+        });
+      }
+    );
   }
 }

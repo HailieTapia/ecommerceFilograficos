@@ -33,7 +33,9 @@ registerLocaleData(localeEs);
   ]
 })
 export class FaqComponentAdmin implements OnInit, OnDestroy {
-  @ViewChild('faqModal') faqModal!: ModalComponent;
+  @ViewChild('createEditModal') createEditModal!: ModalComponent;
+  @ViewChild('viewDetailsModal') viewDetailsModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
 
   faqs: (Faq | GroupedFaq)[] = [];
   totalFaqs = 0;
@@ -46,7 +48,12 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
   categories: { id: number; name: string; description?: string }[] = [];
   faqForm!: FormGroup;
   selectedFaqId: number | null = null;
+  selectedFaq: Faq | null = null;
   private subscriptions: Subscription = new Subscription();
+  confirmAction: (() => void) | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
 
   constructor(
     private faqService: FaqService,
@@ -65,6 +72,12 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadFaqs();
     this.loadCategories();
+  }
+
+  ngAfterViewInit(): void {
+    if (!this.createEditModal || !this.viewDetailsModal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+    }
   }
 
   ngOnDestroy(): void {
@@ -88,7 +101,8 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
           this.totalPages = Math.ceil(response.total / this.itemsPerPage);
         },
         error: (err) => {
-          this.toastService.showToast('Error al cargar las FAQs', 'error');
+          const errorMessage = err?.error?.message || 'Error al cargar las FAQs';
+          this.toastService.showToast(errorMessage, 'error');
         },
       })
     );
@@ -105,7 +119,8 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
           }));
         },
         error: (err) => {
-          this.toastService.showToast('Error al cargar las categorías', 'error');
+          const errorMessage = err?.error?.message || 'Error al cargar las categorías';
+          this.toastService.showToast(errorMessage, 'error');
         },
       })
     );
@@ -145,25 +160,67 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
     this.loadFaqs();
   }
 
-  openFaqModal(mode: 'create' | 'edit', faq?: Faq): void {
-    if (mode === 'create') {
-      this.selectedFaqId = null;
-      this.faqForm.reset();
-      this.faqModal.open();
-    } else if (faq) {
-      this.selectedFaqId = faq.id;
-      this.faqForm.patchValue({
-        category_id: faq.category.id,
-        question: faq.question,
-        answer: faq.answer,
-      });
-      this.faqModal.open();
+  openCreateModal(): void {
+    this.selectedFaqId = null;
+    this.selectedFaq = null;
+    this.faqForm.reset();
+    if (this.createEditModal) {
+      this.createEditModal.modalType = 'success';
+      this.createEditModal.title = 'Crear FAQ';
+      this.createEditModal.open();
+    }
+  }
+
+  openEditModal(faq: Faq): void {
+    this.selectedFaqId = faq.id;
+    this.selectedFaq = faq;
+    this.faqForm.patchValue({
+      category_id: faq.category.id,
+      question: faq.question,
+      answer: faq.answer,
+    });
+    if (this.createEditModal) {
+      this.createEditModal.modalType = 'info';
+      this.createEditModal.title = 'Editar FAQ';
+      this.createEditModal.open();
+    }
+  }
+
+  openViewModal(faq: Faq): void {
+    this.selectedFaq = faq;
+    if (this.viewDetailsModal) {
+      this.viewDetailsModal.modalType = 'default';
+      this.viewDetailsModal.title = 'Detalles de la FAQ';
+      this.viewDetailsModal.open();
+    }
+  }
+
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void) {
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmAction = action;
+    if (this.confirmModal) {
+      this.confirmModal.title = title;
+      this.confirmModal.modalType = modalType;
+      this.confirmModal.isConfirmModal = true;
+      this.confirmModal.confirmText = 'Confirmar';
+      this.confirmModal.cancelText = 'Cancelar';
+      this.confirmModal.open();
+    }
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
     }
   }
 
   saveFaq(): void {
     if (this.faqForm.invalid) {
       this.faqForm.markAllAsTouched();
+      this.toastService.showToast('Formulario inválido. Revisa los campos.', 'error');
       return;
     }
 
@@ -180,29 +237,33 @@ export class FaqComponentAdmin implements OnInit, OnDestroy {
             'success'
           );
           this.loadFaqs();
-          this.faqModal.close();
+          if (this.createEditModal) this.createEditModal.close();
         },
         error: (err) => {
-          this.toastService.showToast(err.message || 'Error al guardar la FAQ', 'error');
+          const errorMessage = err?.error?.message || 'Error al guardar la FAQ';
+          this.toastService.showToast(errorMessage, 'error');
         },
       })
     );
   }
 
   deleteFaq(faq: Faq): void {
-    this.toastService.showToast(
-      `¿Estás seguro de que deseas eliminar la FAQ "${faq.question}"?`,
-      'warning',
-      'Confirmar',
+    this.openConfirmModal(
+      'Eliminar FAQ',
+      `¿Estás seguro de que deseas eliminar la FAQ "${faq.question}"? Esta acción no se puede deshacer.`,
+      'danger',
       () => {
         this.subscriptions.add(
           this.faqService.deleteFaq(faq.id.toString()).subscribe({
             next: () => {
               this.toastService.showToast('FAQ eliminada exitosamente', 'success');
               this.loadFaqs();
+              if (this.confirmModal) this.confirmModal.close();
             },
             error: (err) => {
-              this.toastService.showToast(err.message || 'Error al eliminar la FAQ', 'error');
+              const errorMessage = err?.error?.message || 'Error al eliminar la FAQ';
+              this.toastService.showToast(errorMessage, 'error');
+              if (this.confirmModal) this.confirmModal.close();
             },
           })
         );

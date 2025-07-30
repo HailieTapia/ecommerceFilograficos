@@ -5,6 +5,7 @@ import { ProductService, StockVariant, StockVariantsResponse, UpdateStockRequest
 import { CategorieService } from '../../services/categorieService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../../modal/modal.component';
+import { ToastService } from '../../services/toastService';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { LOCALE_ID } from '@angular/core';
@@ -31,6 +32,7 @@ registerLocaleData(localeEs);
 })
 export class ProductStockComponent implements OnInit {
   @ViewChild('updateModal') updateModal!: ModalComponent;
+  @ViewChild('confirmationModal') confirmationModal!: ModalComponent;
 
   stockVariants: StockVariant[] = [];
   filteredStockVariants: StockVariant[] = [];
@@ -45,12 +47,14 @@ export class ProductStockComponent implements OnInit {
 
   updateForm: FormGroup;
   selectedVariant: StockVariant | null = null;
+  pendingUpdateData: UpdateStockRequest | null = null;
 
   constructor(
     private productService: ProductService,
     private categorieService: CategorieService,
     private fb: FormBuilder,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private toastService: ToastService
   ) {
     this.updateForm = this.fb.group({
       stock: ['', [Validators.required, Validators.min(0)]],
@@ -78,10 +82,10 @@ export class ProductStockComponent implements OnInit {
         this.applySearchFilter();
       },
       error: (err) => {
-        console.error('Error al cargar variantes de stock:', err);
         this.stockVariants = [];
         this.filteredStockVariants = [];
         this.totalItems = 0;
+        this.toastService.showToast('Error al cargar las variantes de stock', 'error');
       }
     });
   }
@@ -95,8 +99,8 @@ export class ProductStockComponent implements OnInit {
         }));
       },
       error: (err) => {
-        console.error('Error al cargar categorías:', err);
         this.allCategories = [];
+        this.toastService.showToast('Error al cargar las categorías', 'error');
       }
     });
   }
@@ -149,54 +153,59 @@ export class ProductStockComponent implements OnInit {
   saveStockUpdate(): void {
     if (this.updateForm.invalid || !this.selectedVariant) {
       this.updateForm.markAllAsTouched();
-      alert('Formulario inválido. Revisa los campos.');
+      this.toastService.showToast('Formulario inválido. Revisa los campos.', 'error');
       return;
     }
 
     const newStock = this.updateForm.value.stock;
     const newThreshold = this.updateForm.value.stock_threshold || this.selectedVariant.stock_threshold;
-    const currentStock = this.selectedVariant.stock;
 
-    if (newStock < currentStock) {
-      const confirmReduce = confirm(
-        `Estás reduciendo el stock de ${currentStock} a ${newStock}. ¿Estás seguro de continuar?`
-      );
-      if (!confirmReduce) {
-        return;
-      }
-    }
-
-    const confirmUpdate = confirm('¿Estás seguro de que deseas actualizar el stock y el umbral?');
-    if (!confirmUpdate) {
-      return;
-    }
-
-    const updateData: UpdateStockRequest = {
+    this.pendingUpdateData = {
       variant_id: this.selectedVariant.variant_id,
       stock: newStock,
       stock_threshold: newThreshold
     };
 
-    this.productService.updateStock(updateData).subscribe({
+    if (newStock < this.selectedVariant.stock) {
+      this.confirmationModal.open();
+    } else {
+      this.performStockUpdate();
+    }
+  }
+
+  confirmStockReduction(): void {
+    this.performStockUpdate();
+    this.confirmationModal.close();
+  }
+
+  cancelStockReduction(): void {
+    this.pendingUpdateData = null;
+    this.confirmationModal.close();
+  }
+
+  private performStockUpdate(): void {
+    if (!this.pendingUpdateData) return;
+
+    this.productService.updateStock(this.pendingUpdateData).subscribe({
       next: (response) => {
-        alert('Stock actualizado exitosamente');
+        this.toastService.showToast('Stock actualizado exitosamente', 'success');
         this.loadStockVariants();
         this.updateModal.close();
+        this.pendingUpdateData = null;
       },
       error: (err) => {
-        console.error('Error al actualizar stock:', err);
-        alert('Error al actualizar el stock');
+        this.toastService.showToast('Error al actualizar el stock', 'error');
       }
     });
   }
 
   getStatusStyle(status: string): string {
     switch (status) {
-      case 'in_stock': return 'bg-green-500 text-white';
-      case 'low_stock': return 'bg-yellow-500 text-white';
-      case 'out_of_stock': return 'bg-red-500 text-white';
-      case 'no_stock': return 'bg-gray-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'in_stock': return 'bg-green-500 dark:bg-dark-success text-white dark:text-dark-text';
+      case 'low_stock': return 'bg-yellow-500 dark:bg-yellow-600 text-white dark:text-dark-text';
+      case 'out_of_stock': return 'bg-red-500 dark:bg-dark-danger text-white dark:text-dark-text';
+      case 'no_stock': return 'bg-gray-500 dark:bg-gray-600 text-white dark:text-dark-text';
+      default: return 'bg-gray-500 dark:bg-gray-600 text-white dark:text-dark-text';
     }
   }
 
