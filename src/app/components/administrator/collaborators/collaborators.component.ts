@@ -5,6 +5,7 @@ import { ModalComponent } from '../../reusable/modal/modal.component';
 import { CommonModule } from '@angular/common';
 import { ToastService } from '../../../services/toastService';
 import { PaginationComponent } from '../pagination/pagination.component';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-collaborators',
@@ -21,6 +22,7 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
   collaboratorForm!: FormGroup;
   selectedColaId: number | null = null;
   selectedFile: File | null = null;
+  imagePreview: SafeUrl | string | null = null;
   total: number = 0;
   currentPage: number = 1;
   itemsPerPage: number = 10;
@@ -32,7 +34,8 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
   constructor(
     private toastService: ToastService,
     private collaboratorsService: CollaboratorsService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private sanitizer: DomSanitizer
   ) {
     this.collaboratorForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
@@ -98,6 +101,8 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
             contact: colaborador.contact
           });
           this.selectedFile = null;
+          // Mostrar imagen existente si hay una
+          this.imagePreview = colaborador.logo || null;
           if (this.createEditModal) {
             this.createEditModal.modalType = 'info';
             this.createEditModal.title = 'Editar Colaborador';
@@ -141,16 +146,29 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
     if (input.files && input.files[0]) {
       const file = input.files[0];
       const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      
       if (!validTypes.includes(file.type)) {
         this.toastService.showToast('Solo se permiten imágenes JPG, PNG o WebP.', 'error');
         return;
       }
+      
       if (file.size > 2 * 1024 * 1024) {
         this.toastService.showToast('La imagen no debe exceder 2MB.', 'error');
         return;
       }
+      
       this.selectedFile = file;
+      // Crear vista previa de la imagen
+      this.createImagePreview(file);
     }
+  }
+
+  createImagePreview(file: File): void {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.imagePreview = this.sanitizer.bypassSecurityTrustUrl(e.target.result);
+    };
+    reader.readAsDataURL(file);
   }
 
   saveCollaborator(): void {
@@ -223,6 +241,7 @@ export class CollaboratorsComponent implements OnInit, AfterViewInit {
   resetForm(): void {
     this.collaboratorForm.reset({ collaborator_type: '' });
     this.selectedFile = null;
+    this.imagePreview = null;
     this.selectedColaId = null;
   }
 }

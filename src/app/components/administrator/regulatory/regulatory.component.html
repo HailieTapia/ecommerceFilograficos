@@ -1,218 +1,275 @@
-<div class="bg-light-background dark:bg-dark-background max-w-full mx-auto p-6 font-sans">
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
     <div>
-      <h1 class="text-xl sm:text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
-        <i class="fas fa-clipboard text-light-primary dark:text-dark-primary"></i> Documentos Regulatorios
+      <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-clipboard text-blue-600 dark:text-blue-400"></i> Documentos Regulatorios
       </h1>
-      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Gestiona los documentos regulatorios del sistema.</p>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Gestiona los documentos regulatorios del sistema.</p>
     </div>
-    <button (click)="openModal()" class="w-full sm:w-auto mt-4 sm:mt-0 bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
-      <i class="fas fa-plus"></i> Agregar documento
+    <button
+      (click)="openModal()"
+      class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md"
+    >
+      <i class="fas fa-plus"></i> Agregar Documento
     </button>
   </div>
-  <div class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
-    <h2 class="text-center font-medium text-light-text dark:text-dark-text mb-4 text-lg">Lista de Documentos</h2>
-    <div *ngIf="documents.length > 0; else noDocuments">
-      <div class="overflow-x-auto">
-        <table class="min-w-full border-collapse">
-          <thead class="bg-light-table-header dark:bg-dark-table-header">
-            <tr>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Título</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Versión Actual</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Fecha de Efectividad</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let document of documents" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ document.title }}</td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ document.current_version }}</td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ formatDate(document.effective_date) }}</td>
-              <td class="px-4 py-3">
-                <div class="flex justify-center items-center gap-4">
-                  <button (click)="viewCurrentVersion(document.document_id)" class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
-                    <i class="fas fa-eye"></i>
-                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
-                  </button>
-                  <button (click)="openModal(document)" class="group text-light-primary hover:text-light-primary-hover dark:text-dark-primary dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                    <i class="fas fa-edit"></i>
-                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
-                  </button>
-                  <button (click)="deleteRegulatoryDocument(document.document_id)" class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
-                    <i class="fas fa-trash"></i>
-                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-                  </button>
-                  <button (click)="openHistoryModal(document.document_id)" class="group text-light-pending hover:text-light-pending-hover dark:text-dark-pending dark:hover:text-dark-pending-hover transition-all duration-300 relative">
-                    <i class="fas fa-history"></i>
-                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Historial</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
+  <!-- Lista de Documentos -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Lista de Documentos</h2>
+    </div>
+    <div *ngIf="documents.length > 0; else noDocuments" class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-gray-100 dark:bg-gray-700">
+          <tr>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Título</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Versión Actual</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Fecha de Efectividad</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+          <tr *ngFor="let document of documents" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[120px] sm:max-w-[150px] md:max-w-[200px]">{{ document.title }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-nowrap hidden sm:table-cell">{{ document.current_version }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-nowrap hidden sm:table-cell">{{ formatDate(document.effective_date) }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-center">
+              <div class="flex justify-center items-center gap-1 sm:gap-2">
+                <button (click)="viewCurrentVersion(document.document_id)" class="group text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 relative">
+                  <i class="fas fa-eye"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
+                </button>
+                <button (click)="openModal(document)" class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                  <i class="fas fa-edit"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                </button>
+                <button (click)="deleteRegulatoryDocument(document.document_id)" class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                  <i class="fas fa-trash"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                </button>
+                <button (click)="openHistoryModal(document.document_id)" class="group text-yellow-500 dark:text-yellow-400 hover:text-yellow-600 dark:hover:text-yellow-300 transition-all duration-300 relative">
+                  <i class="fas fa-history"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Historial</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <ng-template #noDocuments>
-      <p class="text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-        <i class="fas fa-exclamation-triangle text-red-500"></i> No hay documentos registrados.
-      </p>
+      <div class="p-3 sm:p-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+        <i class="fas fa-exclamation-triangle w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+        <p>No hay documentos registrados.</p>
+      </div>
     </ng-template>
   </div>
 
   <!-- Modal para Crear/Editar Documento -->
-  <app-modal #modal [title]="documentId ? 'Editar Documento' : 'Crear Documento'" [modalType]="documentId ? 'info' : 'success'">
-    <div slot="body" class="space-y-4 p-4">
+  <app-modal
+    #modal
+    [title]="documentId ? 'Editar Documento' : 'Crear Documento'"
+    [modalType]="documentId ? 'info' : 'success'"
+    [isConfirmModal]="false"
+  >
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 space-y-4 sm:space-y-6">
       <form [formGroup]="documentForm" class="space-y-4">
         <div>
-          <label for="title" class="block text-sm font-medium text-light-text dark:text-dark-text">Título</label>
-          <select id="title" formControlName="title" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary">
+          <label for="title" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Título <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <select
+            id="title"
+            formControlName="title"
+            class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+            [ngClass]="{'border-red-500 dark:border-red-400': documentForm.get('title')?.invalid && documentForm.get('title')?.touched}"
+          >
             <option value="" disabled>Seleccione un título</option>
             <option *ngFor="let option of titleOptions" [value]="option">{{ option }}</option>
           </select>
-          <div *ngIf="documentForm.get('title')?.touched && documentForm.get('title')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+          <div *ngIf="documentForm.get('title')?.touched && documentForm.get('title')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
             El título es obligatorio.
           </div>
         </div>
         <div>
-          <label for="effective_date" class="block text-sm font-medium text-light-text dark:text-dark-text">Fecha de vigencia</label>
-          <input id="effective_date" formControlName="effective_date" type="date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary">
-          <div *ngIf="documentForm.get('effective_date')?.touched && documentForm.get('effective_date')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
-            <div *ngIf="documentForm.get('effective_date')?.errors?.['required']">La fecha de vigencia es obligatoria.</div>
-            <div *ngIf="documentForm.get('effective_date')?.errors?.['dateBeforeToday']">No puede ser anterior a la fecha actual.</div>
+          <label for="effective_date" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Fecha de Vigencia <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <input
+            id="effective_date"
+            formControlName="effective_date"
+            type="date"
+            class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+            [ngClass]="{'border-red-500 dark:border-red-400': documentForm.get('effective_date')?.invalid && documentForm.get('effective_date')?.touched}"
+          />
+          <div *ngIf="documentForm.get('effective_date')?.touched && documentForm.get('effective_date')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+            <p *ngIf="documentForm.get('effective_date')?.errors?.['required']">La fecha de vigencia es obligatoria.</p>
+            <p *ngIf="documentForm.get('effective_date')?.errors?.['dateBeforeToday']">No puede ser anterior a la fecha actual.</p>
           </div>
         </div>
         <div>
-          <label for="file" class="block text-sm font-medium text-light-text dark:text-dark-text">Archivo .docx</label>
-          <div class="border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" (click)="fileInput.click()">
-            <div class="flex flex-col items-center justify-center space-y-4">
-              <ng-container *ngIf="!file; else fileSelected">
-                <div class="rounded-full bg-blue-50 p-3">
-                  <i class="fas fa-upload text-blue-600"></i>
+          <label for="file" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Archivo .docx <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 sm:p-4 flex flex-col items-center justify-center bg-white dark:bg-gray-700">
+            <ng-container *ngIf="!file; else fileSelected">
+              <i class="fas fa-upload text-gray-500 dark:text-gray-400 mb-2 text-lg sm:text-xl"></i>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">Arrastra y suelta un archivo .docx o</p>
+              <button
+                type="button"
+                (click)="fileInput.click()"
+                class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300 text-xs sm:text-sm"
+              >
+                Seleccionar archivo
+              </button>
+            </ng-container>
+            <ng-template #fileSelected>
+              <div class="flex items-center gap-2 sm:gap-3 w-full justify-center">
+                <i class="fas fa-file text-green-600 dark:text-green-400 text-lg sm:text-xl"></i>
+                <div class="flex-1 text-center">
+                  <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">{{ file?.name }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Archivo seleccionado</p>
                 </div>
-                <div class="text-center">
-                  <p class="text-sm font-medium text-gray-700 dark:text-gray-100">Arrastre y suelte su archivo aquí o</p>
-                  <p class="text-sm text-gray-500 dark:text-gray-400">Haga clic para seleccionar</p>
-                </div>
-                <button type="button" class="h-10 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                  Seleccionar archivo
-                </button>
-              </ng-container>
-              <ng-template #fileSelected>
-                <div class="flex items-center space-x-4 w-full">
-                  <div class="rounded-full bg-green-50 p-2">
-                    <i class="fas fa-file text-green-600"></i>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-100">{{ file?.name }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Archivo seleccionado</p>
-                  </div>
-                  <div class="rounded-full bg-green-50 p-1">
-                    <i class="fas fa-check text-green-600"></i>
-                  </div>
-                </div>
-              </ng-template>
-            </div>
+                <i class="fas fa-check text-green-600 dark:text-green-400 text-lg sm:text-xl"></i>
+              </div>
+            </ng-template>
+            <input
+              id="file"
+              type="file"
+              #fileInput
+              (change)="onFileChange($event)"
+              accept=".docx"
+              class="hidden"
+            />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Formato: .docx</p>
           </div>
-          <input id="file" type="file" #fileInput (change)="onFileChange($event)" accept=".docx" class="hidden" />
-          <div *ngIf="documentForm.get('file')?.touched && documentForm.get('file')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+          <div *ngIf="documentForm.get('file')?.touched && documentForm.get('file')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
             Debe seleccionar un archivo .docx.
           </div>
         </div>
       </form>
     </div>
-    <div slot="actions" class="p-4 flex flex-col sm:flex-row justify-end gap-4">
-      <button type="button" (click)="modal.close()" class="w-full sm:w-auto px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300">
+    <div slot="actions" class="p-3 sm:p-4 flex justify-end gap-2 sm:gap-4">
+      <button
+        type="button"
+        (click)="modal.close()"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
+      >
         Cancelar
       </button>
-      <button type="submit" (click)="saveRegulatoryDocument()" [disabled]="documentForm.invalid" class="w-full sm:w-auto px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed">
-        <i class="fas fa-save mr-2"></i> {{ documentId ? 'Actualizar Documento' : 'Crear Documento' }}
+      <button
+        type="submit"
+        (click)="saveRegulatoryDocument()"
+        [disabled]="documentForm.invalid"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition duration-300 text-xs sm:text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+      >
+        <i class="fas fa-save mr-2"></i> {{ documentId ? 'Actualizar' : 'Crear' }}
       </button>
     </div>
   </app-modal>
 
   <!-- Modal para Historial de Versiones -->
-  <app-modal #historyModal title="Historial de Versiones" modalType="info">
-    <div slot="body" class="flex flex-col h-full p-4">
-      <div class="flex-1 overflow-y-auto">
-        <div *ngIf="versionHistory.length > 0; else noHistory">
-          <div *ngFor="let version of versionHistory" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 mb-4 overflow-hidden">
-            <div class="p-4 border-b bg-blue-50 dark:bg-blue-900">
-              <div class="flex justify-between items-start">
-                <div class="flex items-center gap-2">
-                  <div class="bg-blue-100 dark:bg-blue-800 p-2 rounded-full">
-                    <i class="fas fa-file-alt text-blue-600 dark:text-blue-400"></i>
-                  </div>
-                  <div>
-                    <h3 class="font-semibold text-gray-800 dark:text-gray-100">Versión: {{ version.version }}</h3>
-                    <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      <i class="fas fa-calendar-alt"></i>
-                      <span>{{ formatDate(version.created_at) }}</span>
-                    </div>
-                  </div>
+  <app-modal
+    #historyModal
+    [title]="'Historial de Versiones'"
+    [modalType]="'info'"
+    [isConfirmModal]="false"
+  >
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 space-y-4 sm:space-y-6">
+      <div *ngIf="versionHistory.length > 0; else noHistory">
+        <div *ngFor="let version of versionHistory" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden">
+          <div class="p-3 sm:p-4 border-b bg-blue-50 dark:bg-blue-900 flex justify-between items-start">
+            <div class="flex items-center gap-2 sm:gap-3">
+              <div class="bg-blue-100 dark:bg-blue-800 p-2 rounded-full">
+                <i class="fas fa-file-alt text-blue-600 dark:text-blue-400"></i>
+              </div>
+              <div>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100">Versión: {{ version.version }}</h3>
+                <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span>{{ formatDate(version.created_at) }}</span>
                 </div>
-                <button (click)="deleteVersion(version.version_id)" class="text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 flex items-center gap-1 px-3 py-1 rounded-md">
-                  <i class="fas fa-trash"></i>
-                  Eliminar
-                </button>
               </div>
             </div>
-            <div class="p-4">
-              <h4 class="font-medium text-gray-700 dark:text-gray-100 mb-2">Contenido:</h4>
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                <p>{{ version.content }}</p>
-              </div>
+            <button
+              (click)="deleteVersion(version.version_id)"
+              class="px-2 sm:px-3 py-1 text-xs sm:text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded-md flex items-center gap-1 transition-all duration-300"
+            >
+              <i class="fas fa-trash"></i> Eliminar
+            </button>
+          </div>
+          <div class="p-3 sm:p-4">
+            <h4 class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Contenido:</h4>
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed prose max-w-none">
+              <div [innerHTML]="formatDocumentContent(version.content) | safeHtml"></div>
             </div>
           </div>
         </div>
-        <ng-template #noHistory>
-          <p class="text-gray-700 dark:text-gray-300">No hay historial de versiones disponible.</p>
-        </ng-template>
       </div>
+      <ng-template #noHistory>
+        <div class="p-3 sm:p-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          <i class="fas fa-exclamation-triangle w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+          <p>No hay historial de versiones disponible.</p>
+        </div>
+      </ng-template>
     </div>
   </app-modal>
 
   <!-- Modal para Versión Vigente -->
-  <app-modal #currentVersionModal title="Versión Vigente" modalType="info">
-    <div slot="body" class="flex flex-col h-full p-4">
-      <div class="flex-1 overflow-y-auto">
-        <div *ngIf="currentVersion; else noCurrentVersion">
-          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 mb-4 overflow-hidden">
-            <div class="p-4 border-b bg-blue-50 dark:bg-blue-900">
-              <div class="flex justify-between items-start">
-                <div class="flex items-center gap-2">
-                  <div class="bg-blue-100 dark:bg-blue-800 p-2 rounded-full">
-                    <i class="fas fa-file-alt text-blue-600 dark:text-blue-400"></i>
-                  </div>
-                  <div>
-                    <h3 class="font-semibold text-gray-800 dark:text-gray-100">Versión: {{ currentVersion.version }}</h3>
-                    <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      <i class="fas fa-calendar-alt"></i>
-                      <span>{{ formatDate(currentVersion.created_at) }}</span>
-                    </div>
-                  </div>
+  <app-modal
+    #currentVersionModal
+    [title]="'Versión Vigente'"
+    [modalType]="'info'"
+    [isConfirmModal]="false"
+  >
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 space-y-4 sm:space-y-6">
+      <div *ngIf="currentVersion; else noCurrentVersion">
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 mb-4 overflow-hidden">
+          <div class="p-3 sm:p-4 border-b bg-blue-50 dark:bg-blue-900 flex justify-between items-start">
+            <div class="flex items-center gap-2 sm:gap-3">
+              <div class="bg-blue-100 dark:bg-blue-800 p-2 rounded-full">
+                <i class="fas fa-file-alt text-blue-600 dark:text-blue-400"></i>
+              </div>
+              <div>
+                <h3 class="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-100">Versión: {{ currentVersion.version }}</h3>
+                <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span>{{ formatDate(currentVersion.created_at) }}</span>
                 </div>
               </div>
             </div>
-            <div class="p-4">
-              <h4 class="font-medium text-gray-700 dark:text-gray-100 mb-2">Contenido:</h4>
-              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                <p>{{ currentVersion.content }}</p>
-              </div>
+          </div>
+          <div class="p-3 sm:p-4">
+            <h4 class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Contenido:</h4>
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed prose max-w-none">
+              <div [innerHTML]="formatDocumentContent(currentVersion.content) | safeHtml"></div>
             </div>
           </div>
         </div>
-        <ng-template #noCurrentVersion>
-          <p class="text-gray-700 dark:text-gray-300">No hay información disponible para la versión vigente.</p>
-        </ng-template>
       </div>
+      <ng-template #noCurrentVersion>
+        <div class="p-3 sm:p-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          <i class="fas fa-exclamation-triangle w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+          <p>No hay información disponible para la versión vigente.</p>
+        </div>
+      </ng-template>
     </div>
   </app-modal>
 
   <!-- Modal de Confirmación -->
-  <app-modal #confirmModal [title]="confirmModalTitle" [modalType]="confirmModalType" [isConfirmModal]="true" (confirm)="handleConfirm()">
-    <div slot="body" class="p-4 sm:p-6 text-light-text dark:text-dark-text">
-      <p>{{ confirmModalMessage }}</p>
+  <app-modal
+    #confirmModal
+    [title]="confirmModalTitle"
+    [modalType]="confirmModalType"
+    [isConfirmModal]="true"
+    [confirmText]="'Confirmar'"
+    [cancelText]="'Cancelar'"
+    (confirm)="handleConfirm()"
+  >
+    <div slot="body" class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+      <p class="text-xs sm:text-sm">{{ confirmModalMessage }}</p>
     </div>
   </app-modal>
 </div>

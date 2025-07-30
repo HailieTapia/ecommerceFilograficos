@@ -33,7 +33,6 @@ export class FooterComponent implements OnInit {
     this.companyService.getCompanyInfo().subscribe({
       next: (response) => {
         this.companyInfo = response.company;
-        console.log(this.companyInfo);
       },
       error: (error) => {
         console.error('Error al obtener la información de la empresa:', error);

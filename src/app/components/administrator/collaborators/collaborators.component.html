@@ -1,74 +1,81 @@
-<div class="bg-light-background dark:bg-dark-background max-w-full mx-auto p-6 font-sans">
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
-        <i class="fas fa-users text-light-primary dark:text-dark-primary"></i> Gestión de Colaboradores
+      <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-users text-blue-600 dark:text-blue-400"></i> Gestión de Colaboradores
       </h1>
-      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Gestiona los colaboradores del sistema.</p>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Gestiona los colaboradores del sistema.</p>
     </div>
-    <button (click)="openModal()"
-      class="w-full sm:w-auto bg-light-primary dark:bg-dark-primary text-white px-5 py-2 rounded-lg hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center gap-2 shadow-md">
+    <button
+      (click)="openModal()"
+      class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md"
+    >
       <i class="fas fa-plus"></i> Agregar Colaborador
     </button>
   </div>
-  <div class="bg-light-background dark:bg-dark-background p-6 rounded-md shadow-sm border border-gray-200 dark:border-gray-600">
-    <h2 class="text-center font-medium text-light-text dark:text-dark-text mb-4 text-lg">Lista de Colaboradores</h2>
-    <div *ngIf="collaborators.length > 0; else noCollaborators">
-      <div class="overflow-x-auto">
-        <table class="min-w-full border-collapse">
-          <thead class="bg-light-table-header dark:bg-dark-table-header">
-            <tr>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">ID</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Logo</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Nombre</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Email</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Tipo</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Contacto</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Teléfono</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-light-text dark:text-dark-text">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let collaborator of collaborators"
-              class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ collaborator.collaborator_id }}</td>
-              <td class="px-4 py-3">
-                <div class="flex items-center justify-center">
-                  <img *ngIf="collaborator.logo" [src]="collaborator.logo" alt="Logo"
-                    class="w-12 h-12 object-contain rounded border border-gray-200 dark:border-gray-600 shadow-sm bg-white p-1">
-                  <span *ngIf="!collaborator.logo" class="text-light-secondary dark:text-dark-secondary">Sin logo</span>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ collaborator.name }}</td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ collaborator.email }}</td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ collaborator.collaborator_type }}</td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ collaborator.contact || '-' }}</td>
-              <td class="px-4 py-3 text-light-text dark:text-dark-text">{{ collaborator.phone || '-' }}</td>
-              <td class="px-4 py-3">
-                <div class="flex justify-center items-center gap-4">
-                  <button (click)="openEditModal(collaborator.collaborator_id)"
-                    class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                    <i class="fas fa-edit"></i>
-                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
-                  </button>
-                  <button (click)="deleteCollaborator(collaborator.collaborator_id)"
-                    class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
-                    <i class="fas fa-trash"></i>
-                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <app-pagination [currentPage]="currentPage" [totalItems]="total" [itemsPerPage]="itemsPerPage"
-        (pageChange)="onPageChange($event)"></app-pagination>
+
+  <!-- Lista de Colaboradores -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Lista de Colaboradores</h2>
+    </div>
+    <div *ngIf="collaborators.length > 0; else noCollaborators" class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-gray-100 dark:bg-gray-700">
+          <tr>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">ID</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Logo</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Nombre</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Email</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Tipo</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Contacto</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Teléfono</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+          <tr *ngFor="let collaborator of collaborators" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ collaborator.collaborator_id }}</td>
+            <td class="p-1 sm:p-2 md:p-3">
+              <div class="flex items-center justify-center">
+                <img *ngIf="collaborator.logo" [src]="collaborator.logo" alt="Logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded border border-gray-200 dark:border-gray-600 shadow-sm bg-white p-1">
+                <span *ngIf="!collaborator.logo" class="text-xs text-gray-500 dark:text-gray-400">Sin logo</span>
+              </div>
+            </td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[80px] sm:max-w-[120px] md:max-w-[150px]">{{ collaborator.name }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-nowrap hidden sm:table-cell">{{ collaborator.email }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-nowrap hidden sm:table-cell">{{ collaborator.collaborator_type }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[100px] sm:max-w-[150px] md:max-w-[200px] hidden sm:table-cell">{{ collaborator.contact || '-' }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-nowrap hidden sm:table-cell">{{ collaborator.phone || '-' }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-center">
+              <div class="flex justify-center items-center gap-1 sm:gap-2">
+                <button (click)="openEditModal(collaborator.collaborator_id)" class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                  <i class="fas fa-edit"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                </button>
+                <button (click)="deleteCollaborator(collaborator.collaborator_id)" class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                  <i class="fas fa-trash"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalItems]="total"
+        [itemsPerPage]="itemsPerPage"
+        (pageChange)="onPageChange($event)"
+        class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"
+      ></app-pagination>
     </div>
     <ng-template #noCollaborators>
-      <p class="text-light-secondary dark:text-dark-secondary flex items-center gap-2">
-        <i class="fas fa-exclamation-triangle text-red-500"></i> No hay colaboradores registrados.
-      </p>
+      <div class="p-3 sm:p-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+        <i class="fas fa-exclamation-triangle w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+        <p>No hay colaboradores registrados.</p>
+      </div>
     </ng-template>
   </div>
 
@@ -79,84 +86,155 @@
     [modalType]="selectedColaId ? 'info' : 'success'"
     [isConfirmModal]="false"
   >
-    <ng-container slot="body">
-      <form [formGroup]="collaboratorForm" class="p-6 space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+     <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto space-y-4 sm:space-y-6">
+      <form [formGroup]="collaboratorForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4">
           <div>
-            <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Nombre <span class="text-red-500">*</span></label>
-            <input formControlName="name" type="text"
-              class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 placeholder-gray-500 dark:placeholder-dark-secondary text-gray-900 dark:text-dark-text"
-              [ngClass]="{'border-red-500': collaboratorForm.get('name')?.invalid && collaboratorForm.get('name')?.touched}">
-            <p *ngIf="collaboratorForm.get('name')?.invalid && collaboratorForm.get('name')?.touched" class="mt-1 text-sm text-red-500">
-              El nombre es obligatorio y debe tener entre 3 y 255 caracteres.
-            </p>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Nombre <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input
+              formControlName="name"
+              type="text"
+              placeholder="Ingrese nombre"
+              class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': collaboratorForm.get('name')?.invalid && collaboratorForm.get('name')?.touched}"
+            />
+            <div *ngIf="collaboratorForm.get('name')?.invalid && collaboratorForm.get('name')?.touched" class="mt-1 text-xs text-red-500 dark:text-red-400">
+              <p *ngIf="collaboratorForm.get('name')?.errors?.['required']">El nombre es obligatorio.</p>
+              <p *ngIf="collaboratorForm.get('name')?.errors?.['minlength']">Debe tener al menos 3 caracteres.</p>
+              <p *ngIf="collaboratorForm.get('name')?.errors?.['maxlength']">No puede exceder 255 caracteres.</p>
+            </div>
           </div>
           <div>
-            <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Tipo <span class="text-red-500">*</span></label>
-            <select formControlName="collaborator_type"
-              class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 text-gray-900 dark:text-dark-text"
-              [ngClass]="{'border-red-500': collaboratorForm.get('collaborator_type')?.invalid && collaboratorForm.get('collaborator_type')?.touched}">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Tipo <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <select
+              formControlName="collaborator_type"
+              class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': collaboratorForm.get('collaborator_type')?.invalid && collaboratorForm.get('collaborator_type')?.touched}"
+            >
               <option value="" disabled>Selecciona un tipo</option>
               <option value="individual">Individual</option>
               <option value="marca">Marca</option>
             </select>
-            <p *ngIf="collaboratorForm.get('collaborator_type')?.invalid && collaboratorForm.get('collaborator_type')?.touched" class="mt-1 text-sm text-red-500">
+            <p *ngIf="collaboratorForm.get('collaborator_type')?.invalid && collaboratorForm.get('collaborator_type')?.touched" class="mt-1 text-xs text-red-500 dark:text-red-400">
               El tipo es obligatorio.
             </p>
           </div>
           <div>
-            <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Email <span class="text-red-500">*</span></label>
-            <input formControlName="email" type="email"
-              class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 placeholder-gray-500 dark:placeholder-dark-secondary text-gray-900 dark:text-dark-text"
-              [ngClass]="{'border-red-500': collaboratorForm.get('email')?.invalid && collaboratorForm.get('email')?.touched}">
-            <p *ngIf="collaboratorForm.get('email')?.invalid && collaboratorForm.get('email')?.touched" class="mt-1 text-sm text-red-500">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Email <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input
+              formControlName="email"
+              type="email"
+              placeholder="Ej. ejemplo@correo.com"
+              class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': collaboratorForm.get('email')?.invalid && collaboratorForm.get('email')?.touched}"
+            />
+            <p *ngIf="collaboratorForm.get('email')?.invalid && collaboratorForm.get('email')?.touched" class="mt-1 text-xs text-red-500 dark:text-red-400">
               Debe ser un email válido.
             </p>
           </div>
           <div>
-            <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Teléfono</label>
-            <input formControlName="phone" type="text" maxlength="15"
-              class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 placeholder-gray-500 dark:placeholder-dark-secondary text-gray-900 dark:text-dark-text"
-              [ngClass]="{'border-red-500': collaboratorForm.get('phone')?.invalid && collaboratorForm.get('phone')?.touched}">
-            <p *ngIf="collaboratorForm.get('phone')?.invalid && collaboratorForm.get('phone')?.touched" class="mt-1 text-sm text-red-500">
-              El teléfono debe tener entre 8 y 15 dígitos.
-            </p>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Teléfono
+            </label>
+            <input
+              formControlName="phone"
+              type="text"
+              placeholder="Ej. 1234567890"
+              maxlength="15"
+              class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': collaboratorForm.get('phone')?.invalid && collaboratorForm.get('phone')?.touched}"
+            />
+            <div *ngIf="collaboratorForm.get('phone')?.invalid && collaboratorForm.get('phone')?.touched" class="mt-1 text-xs text-red-500 dark:text-red-400">
+              <p *ngIf="collaboratorForm.get('phone')?.errors?.['pattern']">Solo se permiten números.</p>
+              <p *ngIf="collaboratorForm.get('phone')?.errors?.['minlength']">Debe tener al menos 8 dígitos.</p>
+              <p *ngIf="collaboratorForm.get('phone')?.errors?.['maxlength']">No puede exceder 15 dígitos.</p>
+            </div>
           </div>
           <div>
-            <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Contacto</label>
-            <input formControlName="contact" type="text"
-              class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 placeholder-gray-500 dark:placeholder-dark-secondary text-gray-900 dark:text-dark-text"
-              [ngClass]="{'border-red-500': collaboratorForm.get('contact')?.invalid && collaboratorForm.get('contact')?.touched}">
-            <p *ngIf="collaboratorForm.get('contact')?.invalid && collaboratorForm.get('contact')?.touched" class="mt-1 text-sm text-red-500">
-              El contacto no debe exceder 255 caracteres.
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Contacto
+            </label>
+            <input
+              formControlName="contact"
+              type="text"
+              placeholder="Ej. Nombre del contacto"
+              class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': collaboratorForm.get('contact')?.invalid && collaboratorForm.get('contact')?.touched}"
+            />
+            <p *ngIf="collaboratorForm.get('contact')?.invalid && collaboratorForm.get('contact')?.touched" class="mt-1 text-xs text-red-500 dark:text-red-400">
+              No puede exceder 255 caracteres.
             </p>
           </div>
-          <div>
-            <label class="block text-gray-900 dark:text-dark-text font-medium mb-2">Logo</label>
-            <input type="file" (change)="onFileSelected($event)" accept="image/jpeg,image/png,image/webp"
-              class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-blue-600 dark:focus:ring-dark-primary focus:border-blue-600 dark:focus:border-dark-primary transition-all duration-200 text-gray-900 dark:text-dark-text file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-gray-200 dark:file:bg-gray-600 file:text-gray-900 dark:file:text-gray-200">
-            <p class="mt-1 text-xs text-gray-500 dark:text-dark-secondary">Formatos: JPG, PNG, WebP. Máx: 2MB</p>
+          <div class="md:col-span-2">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Logo
+            </label>
+                  
+            <!-- Vista previa de la imagen -->
+            <div *ngIf="imagePreview" class="mb-4 flex flex-col items-center">
+              <div class="relative">
+                <img 
+                  [src]="imagePreview" 
+                  alt="Vista previa del logo" 
+                  class="w-32 h-32 object-contain rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm bg-white p-2"
+                >
+                <button 
+                  type="button" 
+                  (click)="imagePreview = null; selectedFile = null"
+                  class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                  title="Eliminar imagen"
+                >
+                  <i class="fas fa-times text-xs"></i>
+                </button>
+              </div>
+              <span class="text-xs text-gray-500 dark:text-gray-400 mt-2">Vista previa de la imagen</span>
+            </div>
+                  
+            <!-- Área de carga de archivos -->
+            <div *ngIf="!imagePreview" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 sm:p-4 flex flex-col items-center justify-center bg-white dark:bg-gray-700">
+              <i class="fas fa-upload text-gray-500 dark:text-gray-400 mb-2 text-lg sm:text-xl"></i>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">Arrastra y suelta una imagen o</p>
+              <input
+                type="file"
+                (change)="onFileSelected($event)"
+                accept="image/jpeg,image/png,image/webp"
+                class="hidden"
+                #fileInput
+              />
+              <button
+                type="button"
+                (click)="fileInput.click()"
+                class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300 text-xs sm:text-sm"
+              >
+                Seleccionar archivo
+              </button>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Formatos: JPG, PNG, WebP (máx. 2MB)</p>
+            </div>
           </div>
         </div>
       </form>
-    </ng-container>
-    <ng-container slot="actions">
-      <div class="flex flex-col sm:flex-row justify-end gap-4 p-4">
-        <button
-          (click)="createEditModal.close()"
-          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
-        >
-          Cancelar
-        </button>
-        <button
-          (click)="saveCollaborator()"
-          [disabled]="collaboratorForm.invalid && collaboratorForm.touched"
-          class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-200 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
-        >
-          {{ selectedColaId ? 'Actualizar' : 'Crear' }}
-        </button>
-      </div>
-    </ng-container>
+    </div>
+    <div slot="actions" class="p-3 sm:p-4 flex justify-end gap-2 sm:gap-4">
+      <button
+        (click)="createEditModal.close()"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="saveCollaborator()"
+        [disabled]="collaboratorForm.invalid && collaboratorForm.touched"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition duration-300 text-xs sm:text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+      >
+        {{ selectedColaId ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
   </app-modal>
 
   <!-- Modal para Confirmaciones -->
@@ -168,9 +246,10 @@
     [confirmText]="'Confirmar'"
     [cancelText]="'Cancelar'"
     (confirm)="handleConfirm()"
+    (cancel)="confirmModal.close()"
   >
-    <ng-container slot="body">
-      <p class="text-light-text dark:text-dark-text">{{ confirmModalMessage }}</p>
-    </ng-container>
+    <div slot="body" class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+      <p class="text-xs sm:text-sm">{{ confirmModalMessage }}</p>
+    </div>
   </app-modal>
 </div>

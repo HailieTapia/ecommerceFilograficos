@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, NgZone, ViewChild, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { RegulatoryService } from '../../../services/regulatory.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -8,13 +8,14 @@ import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { LOCALE_ID } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { SafeHtmlPipe } from '../../../pipes/safe-html.pipe';
 
 registerLocaleData(localeEs);
 
 @Component({
   selector: 'app-regulatory',
   standalone: true,
-  imports: [ModalComponent, CommonModule, ReactiveFormsModule],
+  imports: [ModalComponent, CommonModule, ReactiveFormsModule, SafeHtmlPipe],
   templateUrl: './regulatory.component.html',
   styleUrls: ['./regulatory.component.css'],
   providers: [
@@ -40,14 +41,15 @@ export class RegulatoryComponent implements OnInit, AfterViewInit, OnDestroy {
   confirmModalTitle: string = '';
   confirmModalMessage: string = '';
   confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
-
+  private isHandlingCancel: boolean = false;
   private subscriptions: Subscription = new Subscription();
 
   constructor(
     private fb: FormBuilder,
     private regulatoryService: RegulatoryService,
     private datePipe: DatePipe,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private zone: NgZone
   ) {
     this.documentForm = this.fb.group({
       title: ['', Validators.required],
@@ -127,6 +129,14 @@ export class RegulatoryComponent implements OnInit, AfterViewInit, OnDestroy {
     this.confirmModal.isConfirmModal = true;
     this.confirmModal.confirmText = 'Confirmar';
     this.confirmModal.cancelText = 'Cancelar';
+
+    // Subscribe to cancel event to handle closing
+    this.subscriptions.add(
+      this.confirmModal.cancel.subscribe(() => {
+        this.handleCancel();
+      })
+    );
+
     this.confirmModal.open();
   }
 
@@ -134,6 +144,32 @@ export class RegulatoryComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.confirmAction) {
       this.confirmAction();
       this.confirmAction = null;
+    }
+    if (this.confirmModal) {
+      this.confirmModal.close();
+    }
+  }
+
+  handleCancel(): void {
+    if (this.isHandlingCancel) {
+      return;
+    }
+    this.isHandlingCancel = true;
+    if (this.confirmModal) {
+      this.zone.runOutsideAngular(() => {
+        try {
+          this.confirmModal.isOpen = false; // Fix: Set confirmModal.isOpen instead of this.isOpen
+          this.confirmAction = null;
+        } catch (error) {
+          this.zone.run(() => {
+            this.toastService.showToast('Error al cerrar el modal de confirmación.', 'error');
+          });
+        } finally {
+          this.isHandlingCancel = false;
+        }
+      });
+    } else {
+      this.isHandlingCancel = false;
     }
   }
 
@@ -296,5 +332,25 @@ export class RegulatoryComponent implements OnInit, AfterViewInit, OnDestroy {
   formatDateForInput(date: string): string {
     const d = new Date(date);
     return d.toISOString().slice(0, 10);
+  }
+
+  formatDocumentContent(content: string): string {
+    if (!content) return '<p>No hay contenido disponible.</p>';
+
+    let formattedContent = '<div class="space-y-6">';
+    const lines = content.split('\n').filter(line => line.trim());
+
+    lines.forEach(line => {
+      if (line.startsWith('¿') || line.includes('?')) {
+        formattedContent += `<h3 class="text-lg font-semibold">${line.trim()}</h3>`;
+      } else if (line.includes(':')) {
+        formattedContent += `<p><strong>${line.split(':')[0]}:</strong> ${line.split(':')[1].trim()}</p>`;
+      } else {
+        formattedContent += `<p>${line.trim()}</p>`;
+      }
+    });
+
+    formattedContent += '</div>';
+    return formattedContent;
   }
 }
