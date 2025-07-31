@@ -48,7 +48,7 @@ export class SidebarComponent implements OnInit {
       label: 'Productos',
       collapsed: true,
       items: [
-        { path: '/category', icon: 'fa-folder', label: 'Categorías', badge: null },
+        { path: '/category', icon: 'fa-folder-tree', label: 'Categorías', badge: null },
         { path: '/product-attributes', icon: 'fa-cogs', label: 'Atributos de productos', badge: null },
         { path: '/product-catalog', icon: 'fa-box', label: 'Catálogo de productos', badge: null },
         { path: '/product-stock', icon: 'fa-warehouse', label: 'Inventario de productos', badge: null },
@@ -66,7 +66,7 @@ export class SidebarComponent implements OnInit {
         { path: '/template', icon: 'fa-file-alt', label: 'Plantillas', badge: null },
         { path: '/regulatory', icon: 'fa-balance-scale', label: 'Regulaciones', badge: null },
         { path: '/collaborators', icon: 'fa-users', label: 'Colaboradores', badge: null },
-        { path: '/backup-management', icon: 'fa-database', label: 'Gestión de respaldos', badge: null }
+        { path: '/backup-management', icon: ' fa-cloud-upload-alt', label: 'Gestión de respaldos', badge: null }
       ]
     }
   ];

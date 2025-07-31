@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
@@ -49,12 +49,18 @@ export class BackupService {
     );
   }
 
-  listBackups(backupType?: 'full' | 'differential' | 'transactional'): Observable<any> {
+  listBackups(backupType?: 'full' | 'differential' | 'transactional', page: number = 1, pageSize: number = 20): Observable<any> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        const url = backupType ? `${this.apiUrl}/history?backup_type=${backupType}` : `${this.apiUrl}/history`;
-        return this.http.get(url, { headers, withCredentials: true });
+        let params = new HttpParams()
+          .set('page', page.toString())
+          .set('pageSize', pageSize.toString());
+        if (backupType) {
+          params = params.set('backup_type', backupType);
+        }
+        const url = `${this.apiUrl}/history`;
+        return this.http.get(url, { headers, params, withCredentials: true });
       })
     );
   }

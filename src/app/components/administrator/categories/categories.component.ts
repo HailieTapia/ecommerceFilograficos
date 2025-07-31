@@ -304,4 +304,9 @@ export class CategoriesComponent implements OnInit, AfterViewInit {
       this.imagePreview = this.selectedImageFile ? URL.createObjectURL(this.selectedImageFile) : null;
     }
   }
+
+  onItemsPerPageChange(): void {
+    this.currentPage = 1; // Reset to first page when items per page changes
+    this.getAllCategories();
+  }
 }

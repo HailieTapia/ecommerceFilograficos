@@ -18,7 +18,11 @@ interface Backup {
   backup_datetime: string;
   status: string;
   data_type: string;
-  BackupFiles?: { file_name: string }[];
+  file_name?: string;
+  file_size?: number;
+  checksum?: string;
+  location?: string;
+  performed_by?: number;
 }
 
 @Component({
@@ -195,15 +199,27 @@ export class BackupManagementComponent implements OnInit {
 
   loadBackups() {
     this.isLoading = true;
-    this.backupService.listBackups(this.selectedBackupType).subscribe({
+    this.backupService.listBackups(this.selectedBackupType, this.currentPage, this.itemsPerPage).subscribe({
       next: (response) => {
-        this.backups = response.backups || [];
-        this.totalBackups = this.backups.length;
-        this.totalPages = Math.ceil(this.totalBackups / this.itemsPerPage);
+        if (response.success) {
+          this.backups = response.data.backups || [];
+          this.totalBackups = response.data.total || 0;
+          this.currentPage = response.data.page || 1;
+          this.itemsPerPage = response.data.pageSize || this.itemsPerPage;
+          this.totalPages = Math.ceil(this.totalBackups / this.itemsPerPage);
+        } else {
+          this.backups = [];
+          this.totalBackups = 0;
+          this.totalPages = 1;
+          this.toastService.showToast(response.message || 'Error al cargar el historial de respaldos', 'error');
+        }
         this.isLoading = false;
       },
       error: (err) => {
         this.isLoading = false;
+        this.backups = [];
+        this.totalBackups = 0;
+        this.totalPages = 1;
         this.toastService.showToast('Error al cargar el historial de respaldos', 'error');
       }
     });
@@ -309,7 +325,7 @@ export class BackupManagementComponent implements OnInit {
   }
 
   getBackupFileName(backup: Backup): string {
-    return backup.BackupFiles && backup.BackupFiles.length > 0 ? backup.BackupFiles[0].file_name : 'N/A';
+    return backup.file_name || 'N/A';
   }
 
   onPageChange(newPage: number) {
