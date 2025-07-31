@@ -1,11 +1,17 @@
 import { Component, OnInit, LOCALE_ID, ViewChild, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { SupportInquiryService } from '../../../services/support-inquiry.service';
 import { PaginationComponent } from '../pagination/pagination.component';
-import { FiltersPanelComponent } from './filters-panel/filters-panel.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';
 import { ToastService } from '../../../services/toastService';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { forkJoin, Subject } from 'rxjs';
@@ -20,9 +26,15 @@ registerLocaleData(localeEs);
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     PaginationComponent,
-    FiltersPanelComponent,
     ModalComponent,
+    MatSelectModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+    MatButtonModule,
     DatePipe
   ],
   templateUrl: './support-panel.component.html',
@@ -54,15 +66,40 @@ export class SupportPanelComponent implements OnInit, OnDestroy {
   cancelModalText = 'Cancelar';
   confirmAction: (() => void) | null = null;
   private loading = false;
+  filtersForm: FormGroup;
+  activeFilters: { key: string; value: string }[] = [];
 
   constructor(
     private supportService: SupportInquiryService,
     private datePipe: DatePipe,
-    private toastService: ToastService
-  ) {}
+    private toastService: ToastService,
+    private fb: FormBuilder
+  ) {
+    this.filtersForm = this.fb.group({
+      status: [''],
+      contact_channel: [''],
+      response_channel: [''],
+      user_id: [''],
+      startDate: [''],
+      endDate: ['']
+    });
+  }
 
   ngOnInit(): void {
     this.loadData();
+    // Cargar filtros guardados en localStorage
+    const savedFilters = localStorage.getItem('supportFilters');
+    if (savedFilters) {
+      const filters = JSON.parse(savedFilters);
+      this.filtersForm.patchValue(filters);
+      this.updateActiveFilters(filters);
+    }
+    // Escuchar cambios en el formulario
+    this.filtersForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((filters) => {
+      this.updateActiveFilters(filters);
+      this.onFiltersChanged(filters);
+      localStorage.setItem('supportFilters', JSON.stringify(filters));
+    });
   }
 
   ngOnDestroy(): void {
@@ -293,6 +330,50 @@ export class SupportPanelComponent implements OnInit, OnDestroy {
   }
 
   public getStatusText(status: string): string {
-    return this.supportService.getStatusText(status);
+    const statusMap: { [key: string]: string } = {
+      pending: 'Pendiente',
+      in_progress: 'En Proceso',
+      resolved: 'Resuelto',
+      closed: 'Cerrado'
+    };
+    return statusMap[status] || status;
+  }
+
+  // Filter Methods
+  updateActiveFilters(filters: any): void {
+    this.activeFilters = Object.keys(filters)
+      .filter((key) => filters[key])
+      .map((key) => ({
+        key,
+        value: this.getFilterDisplayValue(key, filters[key])
+      }));
+  }
+
+  getFilterDisplayValue(key: string, value: string): string {
+    switch (key) {
+      case 'status':
+        return `Estado: ${this.getStatusText(value)}`;
+      case 'contact_channel':
+        return `Canal de Contacto: ${value}`;
+      case 'response_channel':
+        return `Canal de Respuesta: ${value}`;
+      case 'user_id':
+        return value === 'registered' ? 'Usuarios Registrados' : 'Usuarios No Registrados';
+      case 'startDate':
+        return `Desde: ${value}`;
+      case 'endDate':
+        return `Hasta: ${value}`;
+      default:
+        return value;
+    }
+  }
+
+  resetFilters(): void {
+    this.filtersForm.reset();
+    localStorage.removeItem('supportFilters');
+  }
+
+  removeFilter(key: string): void {
+    this.filtersForm.get(key)?.setValue('');
   }
 }

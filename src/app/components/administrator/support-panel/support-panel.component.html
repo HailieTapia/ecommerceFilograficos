@@ -1,128 +1,194 @@
-<div class="w-full p-4">
-  <!-- Sección de Estadísticas -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    <!-- Pendientes -->
-    <div class="p-6 bg-white rounded-lg shadow">
-      <div class="flex items-center gap-4">
-        <div class="bg-yellow-100 p-3 rounded-full">
-          <i class="fas fa-clock text-yellow-500 text-xl"></i>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
+    <div>
+      <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-headset text-blue-600 dark:text-blue-400 text-lg sm:text-xl"></i> Panel de Soporte
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administra los tickets de soporte de los usuarios</p>
+    </div>
+  </div>
+
+  <!-- Statistics Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+    <div class="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="bg-yellow-100 dark:bg-yellow-900/20 p-2 sm:p-3 rounded-full">
+          <i class="fas fa-clock text-yellow-500 dark:text-yellow-400 text-lg sm:text-xl"></i>
         </div>
         <div>
-          <h3 class="text-sm font-medium text-gray-600">Pendientes</h3>
-          <p class="text-2xl font-bold mt-1">{{ consultationCounts['pending'] || 0 }}</p>
+          <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Pendientes</h3>
+          <p class="text-xl sm:text-2xl font-bold mt-1 text-gray-900 dark:text-gray-100">{{ consultationCounts['pending'] || 0 }}</p>
         </div>
       </div>
     </div>
-
-    <!-- En Proceso -->
-    <div class="p-6 bg-white rounded-lg shadow">
-      <div class="flex items-center gap-4">
-        <div class="bg-blue-100 p-3 rounded-full">
-          <i class="fas fa-comments text-blue-500 text-xl"></i>
+    <div class="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="bg-blue-100 dark:bg-blue-900/20 p-2 sm:p-3 rounded-full">
+          <i class="fas fa-comments text-blue-500 dark:text-blue-400 text-lg sm:text-xl"></i>
         </div>
         <div>
-          <h3 class="text-sm font-medium text-gray-600">En Proceso</h3>
-          <p class="text-2xl font-bold mt-1">{{ consultationCounts['in_progress'] || 0 }}</p>
+          <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">En Proceso</h3>
+          <p class="text-xl sm:text-2xl font-bold mt-1 text-gray-900 dark:text-gray-100">{{ consultationCounts['in_progress'] || 0 }}</p>
         </div>
       </div>
     </div>
-
-    <!-- Resueltos -->
-    <div class="p-6 bg-white rounded-lg shadow">
-      <div class="flex items-center gap-4">
-        <div class="bg-green-100 p-3 rounded-full">
-          <i class="fas fa-check-circle text-green-500 text-xl"></i>
+    <div class="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="bg-green-100 dark:bg-green-900/20 p-2 sm:p-3 rounded-full">
+          <i class="fas fa-check-circle text-green-500 dark:text-green-400 text-lg sm:text-xl"></i>
         </div>
         <div>
-          <h3 class="text-sm font-medium text-gray-600">Resueltos</h3>
-          <p class="text-2xl font-bold mt-1">{{ consultationCounts['resolved'] || 0 }}</p>
+          <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Resueltos</h3>
+          <p class="text-xl sm:text-2xl font-bold mt-1 text-gray-900 dark:text-gray-100">{{ consultationCounts['resolved'] || 0 }}</p>
         </div>
       </div>
     </div>
-
-    <!-- Cerrados -->
-    <div class="p-6 bg-white rounded-lg shadow">
-      <div class="flex items-center gap-4">
-        <div class="bg-red-100 p-3 rounded-full">
-          <i class="fas fa-times-circle text-red-500 text-xl"></i>
+    <div class="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="bg-red-100 dark:bg-red-900/20 p-2 sm:p-3 rounded-full">
+          <i class="fas fa-times-circle text-red-500 dark:text-red-400 text-lg sm:text-xl"></i>
         </div>
         <div>
-          <h3 class="text-sm font-medium text-gray-600">Cerrados</h3>
-          <p class="text-2xl font-bold mt-1">{{ consultationCounts['closed'] || 0 }}</p>
+          <h3 class="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Cerrados</h3>
+          <p class="text-xl sm:text-2xl font-bold mt-1 text-gray-900 dark:text-gray-100">{{ consultationCounts['closed'] || 0 }}</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Barra de búsqueda y botón de filtros -->
-  <div class="mb-6">
-    <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
-      <!-- Barra de búsqueda -->
-      <div class="flex-1 relative w-full md:w-3/4">
-        <input
-          type="text"
-          [(ngModel)]="searchQuery"
-          (input)="onSearch()"
-          placeholder="Buscar tickets por ID, nombre, email o asunto..."
-          class="w-full p-2 pl-10 border rounded-md"
-        />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+  <!-- Search and Filters -->
+  <div class="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-lg shadow-sm mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+    <div class="space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100">Filtros Avanzados</h3>
+        <button
+          class="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-1 sm:gap-2"
+          (click)="resetFilters()"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+          <i class="fas fa-sync-alt text-xs"></i> Resetear Filtros
+        </button>
       </div>
-
-      <!-- Botón para mostrar/ocultar filtros -->
-      <button
-        class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors w-full md:w-1/4"
-        (click)="toggleFilters()"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-4 h-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+      <div [formGroup]="filtersForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <!-- Search -->
+        <div class="relative">
+          <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+          <input
+            type="text"
+            formControlName="searchQuery"
+            [(ngModel)]="searchQuery"
+            (input)="onSearch()"
+            placeholder="Buscar por ID, nombre, email o asunto..."
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+            [ngClass]="{'border-red-500 dark:border-red-400': searchQuery && searchQuery.length > 500}"
           />
-        </svg>
-        {{ showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
-      </button>
+        </div>
+        <!-- Estado -->
+        <div class="relative">
+          <i class="fas fa-info-circle absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-400"></i>
+          <select
+            formControlName="status"
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+          >
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendiente</option>
+            <option value="in_progress">En Proceso</option>
+            <option value="resolved">Resuelto</option>
+            <option value="closed">Cerrado</option>
+          </select>
+        </div>
+        <!-- Canal de Contacto -->
+        <div class="relative">
+          <i class="fas fa-comment absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 dark:text-blue-400"></i>
+          <select
+            formControlName="contact_channel"
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+          >
+            <option value="">Todos los canales</option>
+            <option value="email">Email</option>
+            <option value="phone">Teléfono</option>
+            <option value="form">Formulario Web</option>
+            <option value="whatsapp">Whatsapp</option>
+          </select>
+        </div>
+        <!-- Canal de Respuesta -->
+        <div class="relative">
+          <i class="fas fa-reply absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-500 dark:text-purple-400"></i>
+          <select
+            formControlName="response_channel"
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+          >
+            <option value="">Todos los canales</option>
+            <option value="email">Email</option>
+            <option value="whatsapp">Whatsapp</option>
+            <option value="phone">Teléfono</option>
+          </select>
+        </div>
+        <!-- Tipo de Usuario -->
+        <div class="relative">
+          <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-green-500 dark:text-green-400"></i>
+          <select
+            formControlName="user_id"
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+          >
+            <option value="">Todos los usuarios</option>
+            <option value="registered">Usuarios Registrados</option>
+            <option value="null">Usuarios No Registrados</option>
+          </select>
+        </div>
+        <!-- Rango de Fechas -->
+        <div class="flex gap-2 sm:gap-3 items-center">
+          <div class="relative flex-1">
+            <i class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-orange-500 dark:text-orange-400"></i>
+            <input
+              type="date"
+              formControlName="startDate"
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+            />
+          </div>
+          <span class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">a</span>
+          <div class="relative flex-1">
+            <i class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-orange-500 dark:text-orange-400"></i>
+            <input
+              type="date"
+              formControlName="endDate"
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+            />
+          </div>
+        </div>
+      </div>
+      <!-- Resumen de Filtros Activos -->
+      <div *ngIf="activeFilters.length > 0" class="pt-4 border-t border-gray-200 dark:border-gray-600">
+        <h4 class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2 sm:mb-3">Filtros activos:</h4>
+        <div class="flex flex-wrap gap-2">
+          <span
+            *ngFor="let filter of activeFilters"
+            class="px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full flex items-center gap-1 sm:gap-2"
+          >
+            {{ filter.value }}
+            <button
+              class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              (click)="removeFilter(filter.key)"
+            >
+              &times;
+            </button>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Componente de filtrado (condicional) -->
-  <app-filters-panel
-    *ngIf="showFilters"
-    (filtersChanged)="onFiltersChanged($event)"
-  ></app-filters-panel>
-
-  <!-- Tabla de Consultas -->
-  <div class="bg-white rounded-lg shadow overflow-hidden">
-    <div class="p-4 border-b flex justify-between items-center">
-      <h2 class="text-lg font-semibold">Tickets de Soporte</h2>
-      <div class="flex items-center gap-2">
-        <label for="itemsPerPage" class="text-sm text-gray-600">Elementos por página:</label>
+  <!-- Consultation Table -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Tickets de Soporte</h2>
+      <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+        <label for="itemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Elementos por página:</label>
         <select
           id="itemsPerPage"
           [(ngModel)]="itemsPerPage"
           (change)="onItemsPerPageChange()"
-          class="p-1 border rounded-md text-sm"
+          class="w-full sm:w-24 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 text-xs sm:text-sm"
         >
           <option value="5">5</option>
           <option value="10">10</option>
@@ -131,241 +197,245 @@
         </select>
       </div>
     </div>
-
-    <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead class="bg-gray-50">
+    <div class="overflow-x-auto w-full">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-gray-100 dark:bg-gray-700">
           <tr>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">ID</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Usuario</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Asunto</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Estado</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Fecha Creación</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Última Actualización</th>
-            <th class="p-3 text-left text-sm font-medium text-gray-600">Acciones</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">ID</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Usuario</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap w-[30%]">Asunto</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Estado</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Fecha Creación</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden md:table-cell">Última Actualización</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let consultation of consultations" class="hover:bg-gray-50">
-            <td class="p-3">#{{ consultation.inquiry_id }}</td>
-            <td class="p-3">
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+          <tr *ngFor="let consultation of consultations" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">#{{ consultation.inquiry_id }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 hidden sm:table-cell">
               <div class="flex items-center gap-2">
-                <i class="fas fa-user text-gray-600"></i>
+                <i class="fas fa-user text-gray-600 dark:text-gray-400"></i>
                 <div>
                   <div class="flex items-center gap-1">
                     <p class="font-medium">{{ consultation.user_name }}</p>
-                    <div class="relative group">
-                      <i
-                        [class]="consultation.user_id ? 'fas fa-check-circle text-green-500 cursor-pointer' : ''"
-                        class="text-sm"
-                      ></i>
-                      <div
-                        *ngIf="consultation.user_id"
-                        class="absolute left-0 -bottom-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-normal sm:whitespace-nowrap"
-                      >
-                        Este usuario está registrado en la aplicación
-                      </div>
+                    <div class="relative group" *ngIf="consultation.user_id">
+                      <i class="fas fa-check-circle text-green-500 dark:text-green-400 text-xs"></i>
+                      <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                        Usuario registrado
+                      </span>
                     </div>
                   </div>
-                  <p class="text-sm text-gray-500">{{ consultation.user_email }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ consultation.user_email }}</p>
                 </div>
               </div>
             </td>
-            <td class="p-3">{{ consultation.subject }}</td>
-            <td class="p-3">
-              <span [class]="getStatusClass(consultation.status)">
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words" style="width: 30%;">{{ consultation.subject }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm">
+              <span
+                [class]="getStatusClass(consultation.status)"
+                class="px-2 py-1 rounded-full text-xs"
+              >
                 {{ getStatusText(consultation.status) }}
               </span>
             </td>
-            <td class="p-3 text-sm">{{ getFormattedDate(consultation.created_at) }}</td>
-            <td class="p-3 text-sm">{{ getFormattedDate(consultation.updated_at, true) }}</td>
-            <td class="p-3">
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">{{ getFormattedDate(consultation.created_at) }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden md:table-cell">{{ getFormattedDate(consultation.updated_at, true) }}</td>
+            <td class="p-2 sm:p-3 text-center">
               <div *ngIf="editingState[consultation.inquiry_id]?.isEditing; else viewMode">
-                <div class="bg-gray-50 p-4 rounded-lg space-y-4 border">
-                  <!-- Sección de Estado -->
-                  <div>
-                    <div class="flex items-center gap-2 mb-2">
-                      <label class="text-sm font-medium text-gray-700">Estado del Ticket</label>
-                      <div class="relative group">
-                        <i class="fas fa-info-circle text-gray-400 cursor-pointer"></i>
-                        <div class="absolute left-0 -bottom-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          Selecciona el nuevo estado del ticket
-                        </div>
+                <div class="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-600 space-y-3 sm:space-y-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+                    <div>
+                      <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+                        Estado del Ticket
+                      </label>
+                      <div class="relative">
+                        <i class="fas fa-info-circle absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+                        <select
+                          [(ngModel)]="editingState[consultation.inquiry_id].editState.status"
+                          class="w-full p-2 sm:p-3 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 text-xs sm:text-sm"
+                        >
+                          <option value="pending">Pendiente</option>
+                          <option value="in_progress">En Proceso</option>
+                          <option value="resolved">Resuelto</option>
+                          <option value="closed">Cerrado</option>
+                        </select>
                       </div>
                     </div>
-                    <select [(ngModel)]="editingState[consultation.inquiry_id].editState.status" class="w-full p-2 border rounded">
-                      <option value="pending">Pendiente</option>
-                      <option value="in_progress">En Proceso</option>
-                      <option value="resolved">Resuelto</option>
-                      <option value="closed">Cerrado</option>
-                    </select>
-                  </div>
-                  
-                  <!-- Sección de Canal de Respuesta -->
-                  <div>
-                    <div class="flex items-center gap-2 mb-2">
-                      <label class="text-sm font-medium text-gray-700">Canal de Respuesta</label>
-                      <div class="relative group">
-                        <i class="fas fa-info-circle text-gray-400 cursor-pointer"></i>
-                        <div class="absolute left-0 -bottom-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          Selecciona el canal por donde se responderá al usuario
-                        </div>
+                    <div>
+                      <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+                        Canal de Respuesta
+                      </label>
+                      <div class="relative">
+                        <i [class]="getResponseChannelIcon(editingState[consultation.inquiry_id].editState.response_channel)" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+                        <select
+                          [(ngModel)]="editingState[consultation.inquiry_id].editState.response_channel"
+                          class="w-full p-2 sm:p-3 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 text-xs sm:text-sm"
+                        >
+                          <option value="email">Correo</option>
+                          <option value="whatsapp">WhatsApp</option>
+                          <option value="phone">Teléfono</option>
+                        </select>
                       </div>
                     </div>
-                    <select [(ngModel)]="editingState[consultation.inquiry_id].editState.response_channel" class="w-full p-2 border rounded">
-                      <option value="email">Correo</option>
-                      <option value="whatsapp">WhatsApp</option>
-                      <option value="phone">Teléfono</option>
-                    </select>
                   </div>
-                  
-                  <!-- Botones de Acción -->
-                  <div class="flex gap-2 pt-2">
-                    <button (click)="handleSave(consultation.inquiry_id)" class="bg-blue-500 text-white px-3 py-1 rounded text-sm">
-                      Guardar Cambios
+                  <div class="flex gap-2 sm:gap-3">
+                    <button
+                      (click)="handleSave(consultation.inquiry_id)"
+                      class="px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-all duration-300 text-xs sm:text-sm"
+                    >
+                      <i class="fas fa-save mr-1 sm:mr-2"></i> Guardar
                     </button>
-                    <button (click)="editingState[consultation.inquiry_id].isEditing = false" class="bg-gray-200 px-3 py-1 rounded text-sm">
-                      Cancelar
+                    <button
+                      (click)="editingState[consultation.inquiry_id].isEditing = false"
+                      class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 text-xs sm:text-sm"
+                    >
+                      <i class="fas fa-times mr-1 sm:mr-2"></i> Cancelar
                     </button>
                   </div>
                 </div>
               </div>
               <ng-template #viewMode>
-                <div class="flex gap-2 items-center">
-                  <button (click)="openModal(consultation.inquiry_id)"
-                    class="group text-light-secondary hover:text-light-secondary-hover dark:text-dark-secondary dark:hover:text-dark-secondary-hover transition-all duration-300 relative">
-                    <i class="fas fa-eye"></i>
-                    <span
-                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
+                <div class="flex justify-center items-center gap-2">
+                  <button
+                    (click)="openModal(consultation.inquiry_id)"
+                    class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative"
+                  >
+                    <i class="fas fa-eye text-sm"></i>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
                   </button>
-                  <button (click)="handleEdit(consultation.inquiry_id)"
-                    class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                    <i class="fas fa-edit"></i>
-                    <span
-                      class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                  <button
+                    (click)="handleEdit(consultation.inquiry_id)"
+                    class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative"
+                  >
+                    <i class="fas fa-edit text-sm"></i>
+                    <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
                   </button>
                 </div>
               </ng-template>
             </td>
           </tr>
+          <tr *ngIf="consultations.length === 0">
+            <td colspan="7" class="p-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              <i class="fas fa-box-open w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+              <p>No hay tickets de soporte disponibles</p>
+            </td>
+          </tr>
         </tbody>
       </table>
-      <app-pagination
-        [currentPage]="currentPage"
-        [totalItems]="totalItems"
-        [itemsPerPage]="itemsPerPage"
-        (pageChange)="onPageChange($event)"
-        class="mt-4 p-4 border-t"
-      ></app-pagination>
     </div>
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalItems]="totalItems"
+      [itemsPerPage]="itemsPerPage"
+      (pageChange)="onPageChange($event)"
+      class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"
+    ></app-pagination>
   </div>
 
-  <!-- Modal para Detalles de Consulta -->
+  <!-- Modal for Consultation Details -->
   <app-modal
     #detailsModal
     title="Detalles de la Consulta"
     modalType="info"
     [isConfirmModal]="false"
   >
-    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto">
-      <div class="border-b">
-        <div class="flex justify-between items-start">
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto space-y-4 sm:space-y-6">
+      <div class="border-b border-gray-200 dark:border-gray-600 pb-4 sm:pb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
           <div>
-            <h2 class="text-2xl font-bold mb-2">{{ consultation?.subject }}</h2>
-            <p class="text-sm text-gray-500">Ticket #{{ consultation?.inquiry_id }}</p>
+            <h2 class="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 mb-1 sm:mb-2">{{ consultation?.subject }}</h2>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Ticket #{{ consultation?.inquiry_id }}</p>
           </div>
-          <span [class]="getStatusClass(consultation?.status)">
+          <span
+            [class]="getStatusClass(consultation?.status)"
+            class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm"
+          >
             {{ getStatusText(consultation?.status) }}
           </span>
         </div>
       </div>
-      
-      <div class="pt-6">
-        <div class="grid gap-6">
-          <!-- Información del Usuario -->
-          <section class="bg-gray-50 p-4 rounded-lg">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-              <i class="fas fa-user"></i>
-              Información del Usuario
-              <div class="relative group" *ngIf="consultation?.user_id">
-                <i class="fas fa-check-circle text-green-500 text-sm cursor-pointer"></i>
-                <div class="absolute left-0 -bottom-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-normal sm:whitespace-nowrap">
-                  Este usuario está registrado en la aplicación
-                </div>
-              </div>
-            </h3>
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <p class="text-sm text-gray-500">Nombre</p>
-                <p class="font-medium">{{ consultation?.user_name }}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Correo Electrónico</p>
-                <p class="font-medium">{{ consultation?.user_email }}</p>
-              </div>
+      <div class="space-y-4 sm:space-y-6">
+        <!-- User Information -->
+        <section class="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+          <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4 flex items-center gap-2">
+            <i class="fas fa-user text-blue-600 dark:text-blue-400"></i>
+            Información del Usuario
+            <div class="relative group" *ngIf="consultation?.user_id">
+              <i class="fas fa-check-circle text-green-500 dark:text-green-400 text-xs cursor-pointer"></i>
+              <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                Usuario registrado
+              </span>
             </div>
-          </section>
-    
-          <!-- Detalles del Mensaje -->
-          <section class="border-t pt-6">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-              <i class="fas fa-comment"></i>
-              Mensaje
-            </h3>
-            <p class="whitespace-pre-wrap bg-white p-4 rounded-lg border">
-              {{ consultation?.message }}
-            </p>
-          </section>
-    
-          <!-- Información de Contacto -->
-          <section class="border-t pt-6">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-              <i class="fas fa-envelope"></i>
-              Canales de Comunicación
-            </h3>
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <p class="text-sm text-gray-500">Canal de Contacto</p>
-                <p class="font-medium capitalize">{{ consultation?.contact_channel }}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Canal de Respuesta</p>
-                <p class="font-medium capitalize">{{ consultation?.response_channel }}</p>
-              </div>
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+            <div>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nombre</p>
+              <p class="font-medium text-gray-900 dark:text-gray-100">{{ consultation?.user_name || 'N/A' }}</p>
             </div>
-          </section>
-    
-          <!-- Información Temporal -->
-          <section class="border-t pt-6">
-            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-              <i class="fas fa-clock"></i>
-              Registro Temporal
-            </h3>
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <p class="text-sm text-gray-500">Creado</p>
-                <p class="font-medium">{{ getFormattedDate(consultation?.created_at) }}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">Última Actualización</p>
-                <p class="font-medium">{{ getFormattedDate(consultation?.updated_at, true) }}</p>
-              </div>
+            <div>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Correo Electrónico</p>
+              <p class="font-medium text-gray-900 dark:text-gray-100">{{ consultation?.user_email || 'N/A' }}</p>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
+        <!-- Message Details -->
+        <section class="border-t border-gray-200 dark:border-gray-600 pt-4 sm:pt-6">
+          <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4 flex items-center gap-2">
+            <i class="fas fa-comment text-blue-600 dark:text-blue-400"></i>
+            Mensaje
+          </h3>
+          <p class="whitespace-pre-wrap bg-white dark:bg-gray-700 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-600 text-xs sm:text-sm text-gray-900 dark:text-gray-100">
+            {{ consultation?.message || 'N/A' }}
+          </p>
+        </section>
+        <!-- Communication Channels -->
+        <section class="border-t border-gray-200 dark:border-gray-600 pt-4 sm:pt-6">
+          <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4 flex items-center gap-2">
+            <i class="fas fa-envelope text-blue-600 dark:text-blue-400"></i>
+            Canales de Comunicación
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+            <div>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Canal de Contacto</p>
+              <p class="font-medium text-gray-900 dark:text-gray-100 capitalize">{{ consultation?.contact_channel || 'N/A' }}</p>
+            </div>
+            <div>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Canal de Respuesta</p>
+              <p class="font-medium text-gray-900 dark:text-gray-100 capitalize">{{ consultation?.response_channel || 'N/A' }}</p>
+            </div>
+          </div>
+        </section>
+        <!-- Temporal Information -->
+        <section class="border-t border-gray-200 dark:border-gray-600 pt-4 sm:pt-6">
+          <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4 flex items-center gap-2">
+            <i class="fas fa-clock text-blue-600 dark:text-blue-400"></i>
+            Registro Temporal
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+            <div>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Creado</p>
+              <p class="font-medium text-gray-900 dark:text-gray-100">{{ getFormattedDate(consultation?.created_at) }}</p>
+            </div>
+            <div>
+              <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Última Actualización</p>
+              <p class="font-medium text-gray-900 dark:text-gray-100">{{ getFormattedDate(consultation?.updated_at, true) }}</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
     <div slot="actions" class="p-3 sm:p-4 flex justify-end gap-2 sm:gap-4">
       <button
         (click)="closeModal()"
-        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 text-xs sm:text-sm"
       >
         Cerrar
       </button>
     </div>
   </app-modal>
 
-  <!-- Modal para Confirmaciones -->
+  <!-- Confirmation Modal -->
   <app-modal
     #confirmModal
     [title]="confirmModalTitle"
