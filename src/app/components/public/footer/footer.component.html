@@ -1,18 +1,18 @@
-<footer class="bg-light-pie dark:bg-dark-background text-light-blanco dark:text-dark-text pt-9 pb-3">
+<footer class="bg-light-pie dark:bg-dark-background text-light-blanco dark:text-dark-text pt-6 sm:pt-9 pb-3">
   <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-1 justify-items-center">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-1 justify-items-center">
       <div>
-        <h4 class="font-bold text-3xl mb-3">{{ companyInfo?.name || 'Compañía' }}</h4>
-        <p class="text-sm dark:text-dark-secondary mb-8">{{ companyInfo?.slogan || 'Nuestro lema' }}</p>
-        <ul class="space-y-3">
+        <h4 class="font-bold text-xl sm:text-2xl md:text-3xl mb-2 sm:mb-3">{{ companyInfo?.name || 'Compañía' }}</h4>
+        <p class="text-xs sm:text-sm dark:text-dark-secondary mb-6 sm:mb-8">{{ companyInfo?.slogan || 'Nuestro lema' }}</p>
+        <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm">
           <li><a href="#" class="hover:text-light-fondo dark:hover:text-dark-primary">Acerca de</a></li>
           <li><a href="#" class="hover:text-light-fondo dark:hover:text-dark-primary">Misión y Visión</a></li>
           <li><a href="#" class="hover:text-light-fondo dark:hover:text-dark-primary">Equipo</a></li>
         </ul>
       </div>
       <div>
-        <h4 class="font-bold text-lg mb-4">Soporte</h4>
-        <ul class="space-y-3">  
+        <h4 class="font-bold text-base sm:text-lg mb-3 sm:mb-4">Soporte</h4>
+        <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm">  
           <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: categoryIds['Métodos de Pago'] }" class="hover:text-light-fondo dark:hover:text-dark-primary">Métodos de Pago</a></li>
           <li><a href="support-inquiry" class="hover:text-light-fondo dark:hover:text-dark-primary">Consulta soporte</a></li>
           <li><a [routerLink]="['/help']" [queryParams]="{ categoryId: categoryIds['Devoluciones'] }" class="hover:text-light-fondo dark:hover:text-dark-primary">Devoluciones</a></li>
@@ -21,40 +21,40 @@
         </ul>
       </div>
       <div>
-        <h4 class="font-bold text-lg mb-4">Legal</h4>
-        <ul class="space-y-3">
+        <h4 class="font-bold text-base sm:text-lg mb-3 sm:mb-4">Legal</h4>
+        <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm">
           <li><a href="legal?document=Términos%20y%20Condiciones" class="hover:text-light-fondo dark:hover:text-dark-primary">Términos de Servicio</a></li>
           <li><a href="legal?document=Política%20de%20Privacidad" class="hover:text-light-fondo dark:hover:text-dark-primary">Política de Privacidad</a></li>
           <li><a href="legal" class="hover:text-light-fondo dark:hover:text-dark-primary">Documentos Legales</a></li>
         </ul>
       </div>
       <div class="text-center">
-        <div class="mb-8">
-          <h4 class="font-bold text-lg mb-4">Contáctanos</h4>
-          <div class="flex justify-center space-x-4">
+        <div class="mb-6 sm:mb-8">
+          <h4 class="font-bold text-base sm:text-lg mb-3 sm:mb-4">Contáctanos</h4>
+          <div class="flex justify-center space-x-3 sm:space-x-4">
             <a *ngIf="companyInfo?.phone_number" [href]="'https://wa.me/' + companyInfo.phone_number" class="hover:text-light-fondo dark:hover:text-dark-primary" target="_blank">
-              <i class="fab fa-whatsapp text-2xl"></i>
+              <i class="fab fa-whatsapp text-xl sm:text-2xl"></i>
             </a>
             <a *ngIf="companyInfo?.email" [href]="'mailto:' + companyInfo.email" class="hover:text-light-fondo dark:hover:text-dark-primary">
-              <i class="fas fa-envelope text-2xl"></i>
+              <i class="fas fa-envelope text-xl sm:text-2xl"></i>
             </a>
             <a *ngIf="companyInfo?.address_street" href="https://maps.app.goo.gl/irSjJ9RzgT6yxpCz7" class="hover:text-light-fondo dark:hover:text-dark-primary" target="_blank">
-              <i class="fas fa-map-marker-alt text-2xl"></i>
+              <i class="fas fa-map-marker-alt text-xl sm:text-2xl"></i>
             </a>
           </div>
         </div>
         <div>
-          <h4 class="font-bold text-lg mb-4">Síguenos</h4>
-          <div class="flex flex-wrap justify-center gap-4">
+          <h4 class="font-bold text-base sm:text-lg mb-3 sm:mb-4">Síguenos</h4>
+          <div class="flex flex-wrap justify-center gap-3 sm:gap-4">
             <a
               *ngFor="let social of companyInfo?.SocialMedia"
               [href]="social.link"
               target="_blank"
               class="hover:text-light-fondo dark:hover:text-dark-primary"
             >
-              <i [class]="companyService.getSocialMediaIcon(social.name)" class="text-2xl"></i>
+              <i [class]="companyService.getSocialMediaIcon(social.name)" class="text-xl sm:text-2xl"></i>
             </a>
-            <p *ngIf="!companyInfo?.SocialMedia?.length" class="text-sm text-light-secondary dark:text-dark-secondary">
+            <p *ngIf="!companyInfo?.SocialMedia?.length" class="text-xs sm:text-sm text-light-secondary dark:text-dark-secondary">
               No hay redes sociales disponibles.
             </p>
           </div>
@@ -63,15 +63,15 @@
     </div>
 
     <!-- Bottom Section -->
-    <div class="mt-12 pt-8 border-t flex flex-col justify-center items-center  border-light-table-header">
-      <div class="flex items-center space-x-2 mb-4">
-        <i class="fas fa-heart text-sm text-light-texto "></i>
-        <p class="text-sm text-light-blanco dark:text-dark-secondary">
+    <div class="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t flex flex-col justify-center items-center border-light-table-header">
+      <div class="flex items-center space-x-2 mb-3 sm:mb-4">
+        <i class="fas fa-heart text-xs sm:text-sm text-light-texto"></i>
+        <p class="text-xs sm:text-sm text-light-blanco dark:text-dark-secondary">
           © 2025 Filograficos. Hecho con amor en México.
         </p>
       </div>
       <div class="flex items-center space-x-4">
-        <span class="text-xs text-light-blanco dark:text-dark-secondary">
+        <span class="text-xs xs:text-xs text-light-blanco dark:text-dark-secondary">
           Pachuca de Soto, Hidalgo
         </span>
       </div>

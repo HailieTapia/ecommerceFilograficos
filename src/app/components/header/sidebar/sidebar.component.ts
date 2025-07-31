@@ -64,7 +64,7 @@ export class SidebarComponent implements OnInit {
         { path: '/security', icon: 'fa-shield-alt', label: 'Seguridad', badge: null },
         { path: '/type', icon: 'fa-tags', label: 'Tipos', badge: null },
         { path: '/template', icon: 'fa-file-alt', label: 'Plantillas', badge: null },
-        { path: '/regulatory', icon: 'fa-balance-scale', label: 'Regulaciones', badge: null },
+        { path: '/regulatory', icon: 'fa-gavel', label: 'Regulaciones', badge: null },
         { path: '/collaborators', icon: 'fa-users', label: 'Colaboradores', badge: null },
         { path: '/backup-management', icon: ' fa-cloud-upload-alt', label: 'Gestión de respaldos', badge: null }
       ]
