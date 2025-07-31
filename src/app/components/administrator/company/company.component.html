@@ -1,405 +1,560 @@
-<div class="bg-light-background dark:bg-dark-background p-6 font-sans">
-    <h2 class="text-2xl font-bold text-light-text dark:text-dark-text mb-6 flex items-center gap-2">
-      <i class="fas fa-building text-light-primary dark:text-dark-primary"></i> Información de la Empresa
-    </h2>
-    <form
-      [formGroup]="companyForm"
-      (ngSubmit)="updateCompanyInfo()"
-      class="bg-light-background dark:bg-dark-background shadow-md rounded-lg p-6 space-y-8 border border-gray-200 dark:border-gray-600"
-    >
-      <!-- Nombre y Slogan -->
-      <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-        <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Nombre y Slogan</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+  <!-- Encabezado -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
+    <div>
+      <h2 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-building text-blue-600 dark:text-blue-400"></i> Información de la Empresa
+      </h2>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administra la información de la empresa y sus redes sociales.</p>
+    </div>
+  </div>
+
+  <!-- Formulario Principal -->
+  <form
+    [formGroup]="companyForm"
+    (ngSubmit)="updateCompanyInfo()"
+    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 md:p-6 space-y-6 sm:space-y-8"
+  >
+    <!-- Información General (Nombre, Slogan, Logo) -->
+    <div class="border-t-2 border-blue-500 dark:border-blue-500 pt-4 sm:pt-6">
+      <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">Información General</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        <div class="space-y-4">
           <div>
-            <label
-              for="name"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-            >
-              Nombre de la Empresa <span class="text-light-danger dark:text-dark-danger">*</span>
+            <label for="name" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Nombre de la Empresa <span class="text-red-500 dark:text-red-400">*</span>
             </label>
             <div class="relative">
+              <i class="fas fa-signature absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
               <input
                 id="name"
                 formControlName="name"
-                class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                class="w-full p-2 sm:p-3 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
                 placeholder="Ingrese el nombre"
+                [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('name')?.invalid && companyForm.get('name')?.touched}"
               />
-              <i
-                class="fas fa-signature absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
             </div>
+            <p
+              *ngIf="companyForm.get('name')?.invalid && companyForm.get('name')?.touched"
+              class="mt-1 text-xs text-red-500 dark:text-red-400"
+            >
+              El nombre es obligatorio y debe tener entre 2 y 100 caracteres.
+            </p>
           </div>
           <div>
-            <label
-              for="slogan"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-            >
+            <label for="slogan" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
               Slogan
             </label>
             <div class="relative">
+              <i class="fas fa-quote-left absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
               <input
                 id="slogan"
                 formControlName="slogan"
-                class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
+                class="w-full p-2 sm:p-3 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
                 placeholder="Ingrese el slogan"
+                [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('slogan')?.invalid && companyForm.get('slogan')?.touched}"
               />
-              <i
-                class="fas fa-quote-left absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
             </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Logo -->
-      <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-        <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Logo de la empresa</h3>
-        <div class="flex flex-col md:flex-row items-center gap-6">
-          <div
-            class="relative w-40 h-40 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm overflow-hidden group transition-all duration-300"
-          >
-            <img
-              *ngIf="logoPreview"
-              [src]="logoPreview"
-              alt="Vista previa del logo"
-              class="w-full h-full object-contain p-2"
-            />
-            <div
-              *ngIf="!logoPreview"
-              class="flex items-center justify-center w-full h-full text-light-secondary dark:text-dark-secondary"
+            <p
+              *ngIf="companyForm.get('slogan')?.invalid && companyForm.get('slogan')?.touched"
+              class="mt-1 text-xs text-red-500 dark:text-red-400"
             >
-              <i class="fas fa-image text-3xl"></i>
-            </div>
-            <div
-              class="absolute inset-0 bg-gray-900 bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center transition-all duration-300"
-            >
-              <span class="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">Cambiar Logo</span>
-            </div>
-          </div>
-          <div class="flex flex-col gap-2">
-            <button
-              type="button"
-              (click)="triggerFileInput(fileInput)"
-              class="cursor-pointer inline-flex items-center justify-center px-4 py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 shadow-md"
-            >
-              <i class="fas fa-upload mr-2"></i> Seleccionar Logo
-            </button>
-            <input type="file" #fileInput (change)="onLogoSelected($event)" accept="image/*" class="hidden" />
-            <p class="text-xs text-light-secondary dark:text-dark-secondary">
-              Formatos aceptados: JPG, PNG, GIF. Tamaño máximo: 2MB.
+              El slogan no debe exceder 100 caracteres.
             </p>
           </div>
         </div>
-      </div>
-  
-      <!-- Contacto -->
-      <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-        <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Contacto</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label
-              for="phone_number"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-            >
-              Número de Teléfono
-            </label>
-            <div class="relative">
-              <input
-                id="phone_number"
-                formControlName="phone_number"
-                maxlength="10"
-                class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-                placeholder="Ingrese el teléfono"
+        <div>
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Logo de la Empresa
+          </label>
+          <div class="flex flex-col gap-2">
+            <div class="relative w-32 sm:w-40 h-32 sm:h-40 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden group transition-all duration-300">
+              <img
+                *ngIf="logoPreview"
+                [src]="logoPreview"
+                alt="Vista previa del logo"
+                class="w-full h-full object-contain p-2"
               />
-              <i
-                class="fas fa-phone absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
+              <div
+                *ngIf="!logoPreview"
+                class="flex items-center justify-center w-full h-full text-gray-600 dark:text-gray-400"
+              >
+                <i class="fas fa-image text-xl sm:text-2xl"></i>
+              </div>
+              <div
+                class="absolute inset-0 bg-gray-900 bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center transition-all duration-300 cursor-pointer"
+                (click)="triggerFileInput(fileInput)"
+              >
+                <span class="text-white opacity-0 group-hover:opacity-100 text-[10px] sm:text-xs font-medium">Cambiar Logo</span>
+              </div>
             </div>
-          </div>
-          <div>
-            <label
-              for="email"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
+            <button
+              type="button"
+              (click)="triggerFileInput(fileInput)"
+              class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md"
             >
-              Correo Electrónico <span class="text-light-danger dark:text-dark-danger">*</span>
-            </label>
-            <div class="relative">
-              <input
-                id="email"
-                formControlName="email"
-                class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-                placeholder="Ingrese el correo"
-              />
-              <i
-                class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
-            </div>
+              <i class="fas fa-upload"></i> Seleccionar Logo
+            </button>
+            <input type="file" #fileInput (change)="onLogoSelected($event)" accept="image/jpeg,image/png,image/gif" class="hidden" />
+            <p class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Formatos: JPG, PNG, GIF. Máx: 2MB.</p>
           </div>
         </div>
       </div>
-  
-      <!-- Dirección -->
-      <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-        <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Dirección</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label
-              for="address_street"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-            >
-              Calle
-            </label>
-            <div class="relative">
-              <input
-                id="address_street"
-                formControlName="address_street"
-                class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-                placeholder="Ingrese la calle"
-              />
-              <i
-                class="fas fa-road absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
-            </div>
+    </div>
+
+    <!-- Contacto -->
+    <div class="border-t-2 border-blue-500 dark:border-blue-500 pt-4 sm:pt-6">
+      <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">Contacto</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+        <div>
+          <label for="phone_number" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Número de Teléfono
+          </label>
+          <div class="relative">
+            <i class="fas fa-phone absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+            <input
+              id="phone_number"
+              formControlName="phone_number"
+              maxlength="10"
+              class="w-full p-2 sm:p-3 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              placeholder="Ingrese el teléfono"
+              [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('phone_number')?.invalid && companyForm.get('phone_number')?.touched}"
+            />
           </div>
-          <div>
-            <label
-              for="address_city"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-            >
-              Ciudad
-            </label>
-            <div class="relative">
-              <i
-                class="fas fa-city absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
-              <select
-                id="address_city"
-                formControlName="address_city"
-                class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none"
-              >
-                <option value="">Seleccione una ciudad</option>
-                <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
-              </select>
-              <i
-                class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"
-              ></i>
-            </div>
-          </div>
-          <div>
-            <label
-              for="addressState"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-            >
-              Estado
-            </label>
-            <div class="relative">
-              <i
-                class="fas fa-map absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
-              <select
-                id="addressState"
-                formControlName="address_state"
-                class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none"
-              >
-                <option value="">Seleccione un estado</option>
-                <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
-              </select>
-              <i
-                class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"
-              ></i>
-            </div>
-          </div>
-          <div>
-            <label
-              for="address_postal_code"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-            >
-              Código Postal
-            </label>
-            <div class="relative">
-              <i
-                class="fas fa-mail-bulk absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
-              <select
-                id="address_postal_code"
-                formControlName="address_postal_code"
-                class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none"
-              >
-                <option value="">Seleccione un código</option>
-                <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">
-                  {{ postal.postal_code }}
-                </option>
-              </select>
-              <i
-                class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"
-              ></i>
-            </div>
-          </div>
-          <div>
-            <label
-              for="address_country"
-              class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-            >
-              País
-            </label>
-            <div class="relative">
-              <i
-                class="fas fa-globe absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
-              <select
-                id="address_country"
-                formControlName="address_country"
-                class="mt-1 p-3 pl-10 pr-8 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300 appearance-none"
-              >
-                <option value="">Seleccione un país</option>
-                <option *ngFor="let country of address.countries" [value]="country.name">{{ country.name }}</option>
-              </select>
-              <i
-                class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-light-secondary dark:text-dark-secondary pointer-events-none"
-              ></i>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Redes Sociales -->
-      <div class="border-t-2 border-light-primary dark:border-dark-primary pt-6">
-        <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-4">Redes Sociales</h3>
-        <div class="space-y-6">
-          <!-- Lista de redes sociales existentes -->
-          <div
-            *ngIf="company?.SocialMedia?.length"
-            class="grid grid-cols-1 gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg shadow-sm"
+          <p
+            *ngIf="companyForm.get('phone_number')?.invalid && companyForm.get('phone_number')?.touched"
+            class="mt-1 text-xs text-red-500 dark:text-red-400"
           >
-            <div
-              *ngFor="let social of company.SocialMedia"
-              class="flex items-center justify-between bg-white dark:bg-gray-700 p-3 rounded-md shadow-sm hover:shadow-md transition-all duration-300"
+            Debe ser un número de 10 dígitos.
+          </p>
+        </div>
+        <div>
+          <label for="email" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Correo Electrónico <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <i class="fas fa-envelope absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+            <input
+              id="email"
+              formControlName="email"
+              class="w-full p-2 sm:p-3 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              placeholder="Ingrese el correo"
+              [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('email')?.invalid && companyForm.get('email')?.touched}"
+            />
+          </div>
+          <p
+            *ngIf="companyForm.get('email')?.invalid && companyForm.get('email')?.touched"
+            class="mt-1 text-xs text-red-500 dark:text-red-400"
+          >
+            Debe ser un correo electrónico válido.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dirección -->
+    <div class="border-t-2 border-blue-500 dark:border-blue-500 pt-4 sm:pt-6">
+      <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">Dirección</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+        <div>
+          <label for="address_street" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Calle
+          </label>
+          <div class="relative">
+            <i class="fas fa-road absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+            <input
+              id="address_street"
+              formControlName="address_street"
+              class="w-full p-2 sm:p-3 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              placeholder="Ingrese la calle"
+              [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('address_street')?.invalid && companyForm.get('address_street')?.touched}"
+            />
+          </div>
+          <p
+            *ngIf="companyForm.get('address_street')?.invalid && companyForm.get('address_street')?.touched"
+            class="mt-1 text-xs text-red-500 dark:text-red-400"
+          >
+            La calle debe tener entre 3 y 100 caracteres.
+          </p>
+        </div>
+        <div>
+          <label for="address_city" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Ciudad <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <i class="fas fa-city absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+            <select
+              id="address_city"
+              formControlName="address_city"
+              class="w-full p-2 sm:p-3 pl-8 sm:pl-10 pr-8 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm appearance-none"
+              [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('address_city')?.invalid && companyForm.get('address_city')?.touched}"
             >
-              <div class="flex items-center gap-3">
+              <option value="">Seleccione una ciudad</option>
+              <option *ngFor="let city of address.cities" [value]="city.name">{{ city.name }}</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 dark:text-gray-400 pointer-events-none"></i>
+          </div>
+          <p
+            *ngIf="companyForm.get('address_city')?.invalid && companyForm.get('address_city')?.touched"
+            class="mt-1 text-xs text-red-500 dark:text-red-400"
+          >
+            La ciudad es obligatoria.
+          </p>
+        </div>
+        <div>
+          <label for="address_state" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Estado <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <i class="fas fa-map absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+            <select
+              id="address_state"
+              formControlName="address_state"
+              class="w-full p-2 sm:p-3 pl-8 sm:pl-10 pr-8 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm appearance-none"
+              [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('address_state')?.invalid && companyForm.get('address_state')?.touched}"
+            >
+              <option value="">Seleccione un estado</option>
+              <option *ngFor="let state of address.states" [value]="state.name">{{ state.name }}</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 dark:text-gray-400 pointer-events-none"></i>
+          </div>
+          <p
+            *ngIf="companyForm.get('address_state')?.invalid && companyForm.get('address_state')?.touched"
+            class="mt-1 text-xs text-red-500 dark:text-red-400"
+          >
+            El estado es obligatorio.
+          </p>
+        </div>
+        <div>
+          <label for="address_postal_code" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Código Postal <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <i class="fas fa-mail-bulk absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+            <select
+              id="address_postal_code"
+              formControlName="address_postal_code"
+              class="w-full p-2 sm:p-3 pl-8 sm:pl-10 pr-8 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm appearance-none"
+              [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('address_postal_code')?.invalid && companyForm.get('address_postal_code')?.touched}"
+            >
+              <option value="">Seleccione un código</option>
+              <option *ngFor="let postal of address.postal_codes" [value]="postal.postal_code">{{ postal.postal_code }}</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 dark:text-gray-400 pointer-events-none"></i>
+          </div>
+          <p
+            *ngIf="companyForm.get('address_postal_code')?.invalid && companyForm.get('address_postal_code')?.touched"
+            class="mt-1 text-xs text-red-500 dark:text-red-400"
+          >
+            El código postal es obligatorio.
+          </p>
+        </div>
+        <div>
+          <label for="address_country" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            País <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <div class="relative">
+            <i class="fas fa-globe absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+            <select
+              id="address_country"
+              formControlName="address_country"
+              class="w-full p-2 sm:p-3 pl-8 sm:pl-10 pr-8 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm appearance-none"
+              [ngClass]="{'border-red-500 dark:border-red-400': companyForm.get('address_country')?.invalid && companyForm.get('address_country')?.touched}"
+            >
+              <option value="">Seleccione un país</option>
+              <option *ngFor="let country of address.countries" [value]="country.name">{{ country.name }}</option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 dark:text-gray-400 pointer-events-none"></i>
+          </div>
+          <p
+            *ngIf="companyForm.get('address_country')?.invalid && companyForm.get('address_country')?.touched"
+            class="mt-1 text-xs text-red-500 dark:text-red-400"
+          >
+            El país es obligatorio.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="flex justify-end gap-2 sm:gap-4 mt-4 sm:mt-6">
+      <button
+        *ngIf="isEditing"
+        type="button"
+        (click)="cancelEdit()"
+        class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 text-xs sm:text-sm shadow-md"
+      >
+        Cancelar
+      </button>
+      <button
+        type="submit"
+        [disabled]="companyForm.invalid"
+        class="w-full sm:w-auto px-3 sm:px-4 py-2 sm:py-3 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md"
+      >
+        <i class="fas fa-save"></i> Actualizar Información
+      </button>
+    </div>
+  </form>
+
+  <!-- Redes Sociales -->
+  <div class="mt-4 sm:mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+    <div class="border-t-2 border-blue-500 dark:border-blue-500 p-3 sm:p-4 md:p-6 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+      <div>
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+          <i class="fas fa-globe mr-2 text-blue-600 dark:text-blue-400"></i> Redes Sociales
+        </h3>
+        <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Conecta con tus clientes en redes sociales.</p>
+      </div>
+      <button
+        *ngIf="!showAddSocial && !isEditingSocialMedia"
+        (click)="showAddSocial = true"
+        class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md"
+      >
+        <i class="fas fa-plus"></i> Agregar Red Social
+      </button>
+    </div>
+
+    <div class="p-3 sm:p-4 md:p-6">
+      <!-- Formulario para AGREGAR nueva red social -->
+      <div *ngIf="showAddSocial && !isEditingSocialMedia" class="mb-4 sm:mb-6 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+        <h4 class="text-sm sm:text-md font-medium text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
+          Nueva Red Social
+        </h4>
+        <form
+          [formGroup]="socialMediaForm"
+          (ngSubmit)="addSocialMedia()"
+          class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4"
+        >
+          <div class="relative sm:col-span-5">
+            <label for="socialMediaName" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Nombre de la Red Social <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input
+              #socialMediaInput
+              id="socialMediaName"
+              formControlName="socialMediaName"
+              type="text"
+              class="w-full p-2 sm:p-3 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              placeholder="Escribe o selecciona una red social"
+              (input)="onSocialMediaInput($event)"
+              [ngClass]="{'border-red-500 dark:border-red-400': socialMediaForm.get('socialMediaName')?.invalid && socialMediaForm.get('socialMediaName')?.touched}"
+            />
+            <i class="fas fa-network-wired absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+            <ul
+              *ngIf="filteredSocialMedia.length && socialMediaInputValue"
+              class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto mt-1"
+            >
+              <li
+                *ngFor="let option of filteredSocialMedia"
+                (click)="socialMediaForm.patchValue({ socialMediaName: option }); filterSocialMedia(option)"
+                class="p-2 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer text-gray-900 dark:text-gray-100 text-xs sm:text-sm"
+              >
+                {{ option }}
+              </li>
+            </ul>
+            <p
+              *ngIf="socialMediaForm.get('socialMediaName')?.invalid && socialMediaForm.get('socialMediaName')?.touched"
+              class="mt-1 text-xs text-red-500 dark:text-red-400"
+            >
+              El nombre de la red social es obligatorio.
+            </p>
+          </div>
+          <div class="sm:col-span-5">
+            <label for="socialMediaLink" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+              Enlace <span class="text-red-500 dark:text-red-400">*</span>
+            </label>
+            <input
+              id="socialMediaLink"
+              formControlName="socialMediaLink"
+              class="w-full p-2 sm:p-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              placeholder="https://..."
+              [ngClass]="{'border-red-500 dark:border-red-400': socialMediaForm.get('socialMediaLink')?.invalid && socialMediaForm.get('socialMediaLink')?.touched}"
+            />
+            <p
+              *ngIf="socialMediaForm.get('socialMediaLink')?.invalid && socialMediaForm.get('socialMediaLink')?.touched"
+              class="mt-1 text-xs text-red-500 dark:text-red-400"
+            >
+              Debe ser una URL válida (http o https).
+            </p>
+          </div>
+          <div class="sm:col-span-2 flex items-end gap-2">
+            <button
+              type="submit"
+              [disabled]="socialMediaForm.invalid"
+              class="w-full py-2 sm:py-3 px-3 sm:px-4 bg-green-600 dark:bg-green-600 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-500 transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md"
+            >
+              <i class="fas fa-plus"></i> Agregar
+            </button>
+            <button
+              type="button"
+              (click)="cancelSocialMedia()"
+              class="w-full py-2 sm:py-3 px-3 sm:px-4 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md"
+            >
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Lista de redes sociales -->
+      <div *ngIf="company?.SocialMedia?.length; else noSocialMedia" class="space-y-4">
+        <div
+          *ngFor="let social of company.SocialMedia"
+          class="border border-gray-200 dark:border-gray-600 rounded-lg p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300"
+        >
+          <!-- Mostrar formulario de edición SOLO para el elemento que se está editando -->
+          <form *ngIf="isEditingSocialMedia && editingSocialMediaId === social.social_media_id; else displaySocial"
+                [formGroup]="socialMediaForm"
+                (ngSubmit)="addSocialMedia()"
+                class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4">
+            <div class="relative sm:col-span-5">
+              <label for="editSocialMediaName" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+                Nombre de la Red Social <span class="text-red-500 dark:text-red-400">*</span>
+              </label>
+              <input
+                #socialMediaInput
+                id="editSocialMediaName"
+                formControlName="socialMediaName"
+                type="text"
+                class="w-full p-2 sm:p-3 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+                placeholder="Escribe o selecciona una red social"
+                (input)="onSocialMediaInput($event)"
+                [ngClass]="{'border-red-500 dark:border-red-400': socialMediaForm.get('socialMediaName')?.invalid && socialMediaForm.get('socialMediaName')?.touched}"
+              />
+              <i class="fas fa-network-wired absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-blue-600 dark:text-blue-400"></i>
+              <ul
+                *ngIf="filteredSocialMedia.length && socialMediaInputValue"
+                class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto mt-1"
+              >
+                <li
+                  *ngFor="let option of filteredSocialMedia"
+                  (click)="socialMediaForm.patchValue({ socialMediaName: option }); filterSocialMedia(option)"
+                  class="p-2 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer text-gray-900 dark:text-gray-100 text-xs sm:text-sm"
+                >
+                  {{ option }}
+                </li>
+              </ul>
+              <p
+                *ngIf="socialMediaForm.get('socialMediaName')?.invalid && socialMediaForm.get('socialMediaName')?.touched"
+                class="mt-1 text-xs text-red-500 dark:text-red-400"
+              >
+                El nombre de la red social es obligatorio.
+              </p>
+            </div>
+            <div class="sm:col-span-5">
+              <label for="editSocialMediaLink" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+                Enlace <span class="text-red-500 dark:text-red-400">*</span>
+              </label>
+              <input
+                id="editSocialMediaLink"
+                formControlName="socialMediaLink"
+                class="w-full p-2 sm:p-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+                placeholder="https://..."
+                [ngClass]="{'border-red-500 dark:border-red-400': socialMediaForm.get('socialMediaLink')?.invalid && socialMediaForm.get('socialMediaLink')?.touched}"
+              />
+              <p
+                *ngIf="socialMediaForm.get('socialMediaLink')?.invalid && socialMediaForm.get('socialMediaLink')?.touched"
+                class="mt-1 text-xs text-red-500 dark:text-red-400"
+              >
+                Debe ser una URL válida (http o https).
+              </p>
+            </div>
+            <div class="sm:col-span-2 flex items-end gap-2">
+              <button
+                type="submit"
+                [disabled]="socialMediaForm.invalid"
+                class="w-full py-2 sm:py-3 px-3 sm:px-4 bg-green-600 dark:bg-green-600 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 dark:focus:ring-green-500 transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shadow-md"
+              >
+                <i class="fas fa-check-circle"></i> Guardar
+              </button>
+              <button
+                type="button"
+                (click)="cancelSocialMedia()"
+                class="w-full py-2 sm:py-3 px-3 sm:px-4 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md"
+              >
+                <i class="fas fa-times"></i> Cancelar
+              </button>
+            </div>
+          </form>
+
+          <ng-template #displaySocial>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 sm:gap-3">
                 <i
                   [class]="companyService.getSocialMediaIcon(social.name)"
-                  class="text-xl text-light-primary dark:text-dark-primary"
+                  class="text-lg sm:text-xl text-blue-600 dark:text-blue-400"
                 ></i>
                 <div>
-                  <p class="text-sm font-medium text-light-text dark:text-dark-text">{{ social.name }}</p>
+                  <p class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100">{{ social.name }}</p>
                   <a
                     [href]="social.link"
                     target="_blank"
-                    class="text-xs text-light-secondary dark:text-dark-secondary hover:text-light-primary dark:hover:text-dark-primary transition-colors duration-200 truncate max-w-[200px]"
+                    class="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 break-all max-w-[150px] sm:max-w-[200px] md:max-w-[300px]"
                   >
                     {{ social.link }}
                   </a>
                 </div>
               </div>
-              <div class="flex gap-2">
+              <div class="flex items-center gap-1 sm:gap-2">
                 <button
                   type="button"
                   (click)="editSocialMedia(social)"
-                  class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative"
+                  class="group text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-500 transition-all duration-300 relative"
                 >
-                  <i class="fas fa-edit text-sm"></i>
+                  <i class="fas fa-edit text-[12px] sm:text-md"></i>
                   <span
-                    class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   >
                     Editar
                   </span>
                 </button>
                 <button
                   type="button"
-                  (click)="deleteSocialMedia(social.social_media_id)"
+                  (click)="openConfirmModal(social)"
                   [disabled]="!canDeleteSocialMedia()"
-                  class="group text-light-danger dark:text-dark-danger hover:text-light-danger-hover dark:hover:text-dark-danger-hover transition-all duration-300 relative disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="group text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-500 transition-all duration-300 relative disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <i class="fas fa-trash text-sm"></i>
+                  <i class="fas fa-trash text-[12px] sm:text-md"></i>
                   <span
-                    class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   >
                     {{ canDeleteSocialMedia() ? 'Eliminar' : 'No se puede eliminar' }}
                   </span>
                 </button>
               </div>
             </div>
-            <p
-              *ngIf="company.SocialMedia.length === 1"
-              class="text-xs text-light-secondary dark:text-dark-secondary mt-2"
-            >
-              Debe haber al menos una red social registrada.
-            </p>
-          </div>
-  
-          <!-- Formulario para agregar/actualizar red social -->
-          <form
-            [formGroup]="socialMediaForm"
-            (ngSubmit)="addSocialMedia()"
-            class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg shadow-sm"
-          >
-            <div class="relative md:col-span-5">
-              <label
-                for="socialMediaName"
-                class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-              >
-                Nombre de la Red Social
-              </label>
-              <input
-                #socialMediaInput
-                id="socialMediaName"
-                formControlName="socialMediaName"
-                type="text"
-                class="mt-1 p-3 pl-10 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-                placeholder="Escribe o selecciona una red social"
-                (input)="onSocialMediaInput($event)"
-              />
-              <i
-                class="fas fa-network-wired absolute left-3 top-1/2 transform -translate-y-1/2 text-light-primary dark:text-dark-primary"
-              ></i>
-              <ul
-                *ngIf="filteredSocialMedia.length && socialMediaInputValue"
-                class="absolute z-10 w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-lg max-h-40 overflow-y-auto mt-1"
-              >
-                <li
-                  *ngFor="let option of filteredSocialMedia"
-                  (click)="socialMediaForm.patchValue({ socialMediaName: option }); filterSocialMedia(option)"
-                  class="p-2 hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover cursor-pointer text-light-text dark:text-dark-text"
-                >
-                  {{ option }}
-                </li>
-              </ul>
-            </div>
-            <div class="md:col-span-6">
-              <label
-                for="socialMediaLink"
-                class="block text-sm font-medium text-light-secondary dark:text-dark-secondary flex items-center gap-2"
-              >
-                Enlace
-              </label>
-              <input
-                id="socialMediaLink"
-                formControlName="socialMediaLink"
-                class="mt-1 p-3 block w-full bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text placeholder-light-secondary dark:placeholder-dark-secondary focus:ring-2 focus:ring-light-primary-hover dark:focus:ring-dark-primary-hover focus:border-light-primary-hover dark:focus:border-dark-primary-hover transition-all duration-300"
-                placeholder="Ingrese el enlace (https://...)"
-              />
-            </div>
-            <div class="md:col-span-1 flex items-end">
-              <button
-                type="submit"
-                [disabled]="socialMediaForm.invalid"
-                class="w-full py-3 px-4 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover disabled:bg-light-secondary dark:disabled:bg-dark-secondary transition-all duration-300 flex items-center justify-center gap-2 shadow-md"
-              >
-                <i class="fas fa-{{isEditingSocialMedia ? 'save' : 'plus'}}"></i>
-              </button>
-            </div>
-          </form>
+          </ng-template>
         </div>
+        <p
+          *ngIf="company?.SocialMedia?.length === 1"
+          class="mt-2 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400"
+        >
+          Debe haber al menos una red social registrada.
+        </p>
       </div>
-  
-      <!-- Botón de envío -->
-      <button
-        type="submit"
-        [disabled]="companyForm.invalid"
-        class="w-full py-3 mt-6 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover disabled:bg-light-secondary dark:disabled:bg-dark-secondary transition-all duration-300 flex items-center justify-center gap-2 shadow-md"
-      >
-        <i class="fas fa-save"></i> Actualizar Información
-      </button>
-    </form>
+      <ng-template #noSocialMedia>
+        <div class="p-3 sm:p-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+          <i class="fas fa-globe w-12 h-12 mx-auto mb-2 text-gray-300 dark:text-gray-400"></i>
+          <p class="text-sm sm:text-lg font-medium">No hay redes sociales configuradas</p>
+          <p class="text-[10px] sm:text-sm">Agrega tus redes sociales para conectar mejor con tus clientes</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Modal para Confirmaciones -->
+  <app-modal
+    #confirmModal
+    [title]="confirmModalTitle"
+    [modalType]="confirmModalType"
+    [isConfirmModal]="true"
+    [confirmText]="confirmModalText"
+    [cancelText]="cancelModalText"
+    (confirm)="handleConfirm()"
+    (cancel)="confirmModal.close()"
+  >
+    <div slot="body" class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+      <p class="text-xs sm:text-sm">{{ confirmModalMessage }}</p>
+    </div>
+  </app-modal>
 </div>

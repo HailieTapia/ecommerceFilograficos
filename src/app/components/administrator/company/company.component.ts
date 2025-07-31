@@ -1,19 +1,24 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CompanyService } from '../../../services/company.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import * as addressData from '../shared/direccion.json';
 import { CommonModule } from '@angular/common';
 import { noXSSValidator } from '../shared/validators';
 import { ToastService } from '../../../services/toastService';
+import { Subscription } from 'rxjs';
+import { ModalComponent } from '../../reusable/modal/modal.component';
 
 @Component({
   selector: 'app-company',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ModalComponent],
   templateUrl: './company.component.html',
   styleUrls: ['./company.component.css']
 })
-export class CompanyComponent implements OnInit {
+export class CompanyComponent implements OnInit, OnDestroy {
+  @ViewChild('socialMediaInput') socialMediaInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
+
   company: any;
   companyForm: FormGroup;
   socialMediaForm: FormGroup;
@@ -30,8 +35,15 @@ export class CompanyComponent implements OnInit {
   socialMediaInputValue: string = '';
   isEditingSocialMedia: boolean = false;
   editingSocialMediaId: number | null = null;
-
-  @ViewChild('socialMediaInput') socialMediaInput!: ElementRef<HTMLInputElement>;
+  isEditing: boolean = false;
+  showAddSocial: boolean = false;
+  private formSubscription: Subscription | null = null;
+  confirmModalTitle: string = '';
+  confirmModalMessage: string = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
+  confirmModalText: string = 'Confirmar';
+  cancelModalText: string = 'Cancelar';
+  private confirmAction: (() => void) | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -59,6 +71,15 @@ export class CompanyComponent implements OnInit {
   ngOnInit(): void {
     this.getCompanyInfo();
     this.filteredSocialMedia = [...this.socialMediaOptions];
+    this.formSubscription = this.companyForm.valueChanges.subscribe(() => {
+      this.isEditing = true;
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.formSubscription) {
+      this.formSubscription.unsubscribe();
+    }
   }
 
   filterSocialMedia(value: string): void {
@@ -96,6 +117,7 @@ export class CompanyComponent implements OnInit {
       }
 
       this.selectedLogoFile = file;
+      this.isEditing = true;
       const reader = new FileReader();
       reader.onload = () => {
         this.logoPreview = reader.result;
@@ -127,6 +149,7 @@ export class CompanyComponent implements OnInit {
         if (this.company.logo) {
           this.logoPreview = this.company.logo;
         }
+        this.isEditing = false;
         this.isLoading = false;
       },
       error: (error) => {
@@ -151,6 +174,7 @@ export class CompanyComponent implements OnInit {
       this.companyService.updateCompany(formData).subscribe({
         next: (response) => {
           this.toastService.showToast('Información actualizada correctamente.', 'success');
+          this.isEditing = false;
           this.getCompanyInfo();
         },
         error: (error) => {
@@ -159,6 +183,14 @@ export class CompanyComponent implements OnInit {
         }
       });
     }
+  }
+
+  cancelEdit(): void {
+    this.companyForm.reset();
+    this.selectedLogoFile = null;
+    this.logoPreview = null;
+    this.isEditing = false;
+    this.getCompanyInfo();
   }
 
   addSocialMedia(): void {
@@ -183,6 +215,7 @@ export class CompanyComponent implements OnInit {
   }
 
   editSocialMedia(socialMedia: any): void {
+    this.showAddSocial = false;
     this.isEditingSocialMedia = true;
     this.editingSocialMediaId = socialMedia.social_media_id;
     this.socialMediaForm.patchValue({
@@ -206,29 +239,41 @@ export class CompanyComponent implements OnInit {
     });
   }
 
-  deleteSocialMedia(socialMediaId: number): void {
+  openConfirmModal(socialMedia: any): void {
     if (this.company?.SocialMedia?.length <= 1) {
       this.toastService.showToast('No puedes eliminar la única red social registrada.', 'warning');
       return;
     }
 
-    this.toastService.showToast(
-      '¿Estás seguro de que deseas eliminar esta red social? Esta acción no se puede deshacer.',
-      'warning',
-      'Confirmar',
-      () => {
-        this.companyService.deleteSocialMedia(socialMediaId).subscribe({
-          next: (response) => {
-            this.toastService.showToast(response.message || 'Red social eliminada exitosamente', 'success');
-            this.getCompanyInfo();
-          },
-          error: (error) => {
-            const errorMessage = error?.error?.message || 'Error al eliminar la red social';
-            this.toastService.showToast(errorMessage, 'error');
-          }
-        });
-      }
-    );
+    this.confirmModalTitle = 'Eliminar Red Social';
+    this.confirmModalMessage = `¿Estás seguro de que deseas eliminar la red social "${socialMedia.name}"? Esta acción no se puede deshacer.`;
+    this.confirmModalType = 'danger';
+    this.confirmModalText = 'Confirmar';
+    this.cancelModalText = 'Cancelar';
+    this.confirmAction = () => {
+      this.companyService.deleteSocialMedia(socialMedia.social_media_id).subscribe({
+        next: (response) => {
+          this.toastService.showToast(response.message || 'Red social eliminada exitosamente', 'success');
+          this.getCompanyInfo();
+          if (this.confirmModal) this.confirmModal.close();
+        },
+        error: (error) => {
+          const errorMessage = error?.error?.message || 'Error al eliminar la red social';
+          this.toastService.showToast(errorMessage, 'error');
+          if (this.confirmModal) this.confirmModal.close();
+        }
+      });
+    };
+    if (this.confirmModal) {
+      this.confirmModal.open();
+    }
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
   }
 
   resetSocialMediaForm(): void {
@@ -237,6 +282,12 @@ export class CompanyComponent implements OnInit {
     this.socialMediaInputValue = '';
     this.isEditingSocialMedia = false;
     this.editingSocialMediaId = null;
+    this.showAddSocial = false;
+  }
+
+  cancelSocialMedia(): void {
+    this.showAddSocial = false;
+    this.resetSocialMediaForm();
   }
 
   canDeleteSocialMedia(): boolean {
