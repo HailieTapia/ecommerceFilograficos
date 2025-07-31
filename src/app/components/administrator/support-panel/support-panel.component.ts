@@ -1,12 +1,15 @@
-import { Component, OnInit, LOCALE_ID } from '@angular/core';
+import { Component, OnInit, LOCALE_ID, ViewChild, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { SupportInquiryService } from '../../../services/support-inquiry.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { FiltersPanelComponent } from './filters-panel/filters-panel.component';
+import { ModalComponent } from '../../reusable/modal/modal.component';
+import { ToastService } from '../../../services/toastService';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 // Registrar los datos de localización para español
 registerLocaleData(localeEs);
@@ -19,6 +22,7 @@ registerLocaleData(localeEs);
     FormsModule,
     PaginationComponent,
     FiltersPanelComponent,
+    ModalComponent,
     DatePipe
   ],
   templateUrl: './support-panel.component.html',
@@ -27,12 +31,14 @@ registerLocaleData(localeEs);
     { provide: LOCALE_ID, useValue: 'es' }
   ]
 })
-export class SupportPanelComponent implements OnInit {
+export class SupportPanelComponent implements OnInit, OnDestroy {
+  @ViewChild('detailsModal') detailsModal!: ModalComponent;
+  @ViewChild('confirmModal') confirmModal!: ModalComponent;
+
   consultationCounts: any = {};
   consultations: any[] = [];
   selectedConsultationId: string | null = null;
   consultation: any = null;
-  showModal: boolean = false;
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalItems: number = 0;
@@ -40,20 +46,42 @@ export class SupportPanelComponent implements OnInit {
   showFilters: boolean = false;
   currentFilters: any = {};
   editingState: { [key: string]: { isEditing: boolean, editState: { status: string, response_channel: string }, errorMessage: string } } = {};
+  private destroy$ = new Subject<void>();
+  confirmModalTitle = '';
+  confirmModalMessage = '';
+  confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
+  confirmModalText = 'Confirmar';
+  cancelModalText = 'Cancelar';
+  confirmAction: (() => void) | null = null;
+  private loading = false;
 
   constructor(
     private supportService: SupportInquiryService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   public loadData(): void {
-    this.supportService.getConsultationCountsByStatus().subscribe({
-      next: (res) => this.processCounts(res.consultationCounts),
-      error: (e) => console.error('Error counts:', e),
+    if (this.loading) return;
+    this.loading = true;
+    this.supportService.getConsultationCountsByStatus().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        this.processCounts(res.consultationCounts);
+        this.loading = false;
+      },
+      error: (e) => {
+        this.toastService.showToast('Error al cargar conteos: ' + e.message, 'error');
+        this.loading = false;
+      }
     });
 
     this.loadConsultations();
@@ -65,11 +93,10 @@ export class SupportPanelComponent implements OnInit {
       filters.search = this.searchQuery;
     }
 
-    this.supportService.getFilteredConsultations(filters, this.currentPage, this.itemsPerPage).subscribe({
+    this.supportService.getFilteredConsultations(filters, this.currentPage, this.itemsPerPage).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => {
         this.consultations = res.consultations;
         this.totalItems = res.total;
-        // Initialize editing state for each consultation
         this.consultations.forEach(consultation => {
           if (!this.editingState[consultation.inquiry_id]) {
             this.editingState[consultation.inquiry_id] = {
@@ -80,7 +107,9 @@ export class SupportPanelComponent implements OnInit {
           }
         });
       },
-      error: (e) => console.error('Error al cargar consultas:', e),
+      error: (e) => {
+        this.toastService.showToast('Error al cargar consultas: ' + e.message, 'error');
+      }
     });
   }
 
@@ -118,23 +147,28 @@ export class SupportPanelComponent implements OnInit {
 
   openModal(consultationId: string): void {
     this.selectedConsultationId = consultationId;
-    this.showModal = true;
     this.loadConsultationDetails();
   }
 
   closeModal(): void {
-    this.showModal = false;
+    if (this.detailsModal) {
+      this.detailsModal.close();
+    }
     this.selectedConsultationId = null;
     this.consultation = null;
   }
 
   private loadConsultationDetails(): void {
     if (this.selectedConsultationId) {
-      this.supportService.getConsultationById(this.selectedConsultationId).subscribe({
+      this.supportService.getConsultationById(this.selectedConsultationId).pipe(takeUntil(this.destroy$)).subscribe({
         next: (res) => {
           this.consultation = res.consultation;
+          if (this.detailsModal) {
+            this.detailsModal.modalType = 'info';
+            this.detailsModal.open();
+          }
         },
-        error: (e) => console.error('Error loading consultation details:', e)
+        error: (e) => this.toastService.showToast('Error al cargar detalles de consulta: ' + e.message, 'error')
       });
     }
   }
@@ -155,16 +189,28 @@ export class SupportPanelComponent implements OnInit {
     const isResponseChannelChanged = consultation.response_channel !== editState.response_channel;
 
     if (isStatusChanged && !this.supportService.isValidStatusTransition(consultation.status, editState.status)) {
-      this.editingState[consultationId].errorMessage = 'No se puede cambiar el estado a uno anterior...';
-      setTimeout(() => {
-        this.editingState[consultationId].errorMessage = '';
-        this.resetEditState(consultationId);
-      }, 3000);
+      this.toastService.showToast('No se puede cambiar el estado a uno anterior...', 'error');
+      setTimeout(() => this.resetEditState(consultationId), 3000);
       return;
     }
 
-    if (isStatusChanged && !confirm(this.getConfirmationMessage(consultationId))) return;
+    if (isStatusChanged) {
+      this.openConfirmModal(
+        'Confirmar Cambio de Estado',
+        this.getConfirmationMessage(consultationId),
+        'warning',
+        () => {
+          this.performSave(consultationId, isStatusChanged, isResponseChannelChanged);
+          if (this.confirmModal) this.confirmModal.close();
+        }
+      );
+    } else {
+      this.performSave(consultationId, isStatusChanged, isResponseChannelChanged);
+    }
+  }
 
+  private performSave(consultationId: string, isStatusChanged: boolean, isResponseChannelChanged: boolean): void {
+    const { editState } = this.editingState[consultationId];
     const updates = [];
     if (isStatusChanged) {
       updates.push(this.supportService.updateConsultationStatus(consultationId, { status: editState.status }));
@@ -174,14 +220,14 @@ export class SupportPanelComponent implements OnInit {
     }
 
     if (updates.length > 0) {
-      forkJoin(updates).subscribe({
+      forkJoin(updates).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
-          this.loadData(); // Refresh data after save
+          this.loadData();
           this.editingState[consultationId].isEditing = false;
+          this.toastService.showToast('Cambios guardados exitosamente', 'success');
         },
         error: (error) => {
-          console.error('Error saving changes:', error);
-          this.editingState[consultationId].errorMessage = 'Error al guardar cambios...';
+          this.toastService.showToast('Error al guardar cambios: ' + error.message, 'error');
         }
       });
     } else {
@@ -202,6 +248,30 @@ export class SupportPanelComponent implements OnInit {
       response_channel: consultation.response_channel
     };
     this.editingState[consultationId].isEditing = false;
+  }
+
+  openConfirmModal(title: string, message: string, modalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default', action: () => void): void {
+    this.confirmModalTitle = title;
+    this.confirmModalMessage = message;
+    this.confirmModalType = modalType;
+    this.confirmModalText = 'Confirmar';
+    this.cancelModalText = 'Cancelar';
+    this.confirmAction = action;
+    if (this.confirmModal) {
+      this.confirmModal.title = title;
+      this.confirmModal.modalType = modalType;
+      this.confirmModal.isConfirmModal = true;
+      this.confirmModal.confirmText = 'Confirmar';
+      this.confirmModal.cancelText = 'Cancelar';
+      this.confirmModal.open();
+    }
+  }
+
+  handleConfirm(): void {
+    if (this.confirmAction) {
+      this.confirmAction();
+      this.confirmAction = null;
+    }
   }
 
   getResponseChannelIcon(channel: string): string {

@@ -228,14 +228,6 @@
                       Cancelar
                     </button>
                   </div>
-                  
-                  <!-- Mensajes de error -->
-                  <div *ngIf="editingState[consultation.inquiry_id]?.errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span class="block sm:inline">{{ editingState[consultation.inquiry_id].errorMessage }}</span>
-                    <button (click)="editingState[consultation.inquiry_id].errorMessage = ''" class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                      <i class="fas fa-times"></i>
-                    </button>
-                  </div>
                 </div>
               </div>
               <ng-template #viewMode>
@@ -268,103 +260,124 @@
     </div>
   </div>
 
-  <!-- Modal -->
-  <div *ngIf="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center p-4 border-b sticky top-0 bg-white z-10">
-        <h2 class="text-xl font-bold">Detalles de la Consulta</h2>
-        <button (click)="closeModal()" class="text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="p-4 max-w-3xl mx-auto">
-        <div class="border-b">
-          <div class="flex justify-between items-start">
-            <div>
-              <h2 class="text-2xl font-bold mb-2">{{ consultation?.subject }}</h2>
-              <p class="text-sm text-gray-500">Ticket #{{ consultation?.inquiry_id }}</p>
-            </div>
-            <span [class]="getStatusClass(consultation?.status)">
-              {{ getStatusText(consultation?.status) }}
-            </span>
-        </div>
-        </div>
-        
-        <div class="pt-6">
-          <div class="grid gap-6">
-            <!-- Información del Usuario -->
-            <section class="bg-gray-50 p-4 rounded-lg">
-              <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fas fa-user"></i>
-                Información del Usuario
-                <div class="relative group" *ngIf="consultation?.user_id">
-                  <i class="fas fa-check-circle text-green-500 text-sm cursor-pointer"></i>
-                  <div class="absolute left-0 -bottom-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-normal sm:whitespace-nowrap">
-                    Este usuario está registrado en la aplicación
-                  </div>
-                </div>
-              </h3>
-              <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                  <p class="text-sm text-gray-500">Nombre</p>
-                  <p class="font-medium">{{ consultation?.user_name }}</p>
-                </div>
-                <div>
-                  <p class="text-sm text-gray-500">Correo Electrónico</p>
-                  <p class="font-medium">{{ consultation?.user_email }}</p>
-                </div>
-              </div>
-            </section>
-      
-            <!-- Detalles del Mensaje -->
-            <section class="border-t pt-6">
-              <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fas fa-comment"></i>
-                Mensaje
-              </h3>
-              <p class="whitespace-pre-wrap bg-white p-4 rounded-lg border">
-                {{ consultation?.message }}
-              </p>
-            </section>
-      
-            <!-- Información de Contacto -->
-            <section class="border-t pt-6">
-              <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fas fa-envelope"></i>
-                Canales de Comunicación
-              </h3>
-              <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                  <p class="text-sm text-gray-500">Canal de Contacto</p>
-                  <p class="font-medium capitalize">{{ consultation?.contact_channel }}</p>
-                </div>
-                <div>
-                  <p class="text-sm text-gray-500">Canal de Respuesta</p>
-                  <p class="font-medium capitalize">{{ consultation?.response_channel }}</p>
-                </div>
-              </div>
-            </section>
-      
-            <!-- Información Temporal -->
-            <section class="border-t pt-6">
-              <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fas fa-clock"></i>
-                Registro Temporal
-              </h3>
-              <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                  <p class="text-sm text-gray-500">Creado</p>
-                  <p class="font-medium">{{ getFormattedDate(consultation?.created_at) }}</p>
-                </div>
-                <div>
-                  <p class="text-sm text-gray-500">Última Actualización</p>
-                  <p class="font-medium">{{ getFormattedDate(consultation?.updated_at, true) }}</p>
-                </div>
-              </div>
-            </section>
+  <!-- Modal para Detalles de Consulta -->
+  <app-modal
+    #detailsModal
+    title="Detalles de la Consulta"
+    modalType="info"
+    [isConfirmModal]="false"
+  >
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto">
+      <div class="border-b">
+        <div class="flex justify-between items-start">
+          <div>
+            <h2 class="text-2xl font-bold mb-2">{{ consultation?.subject }}</h2>
+            <p class="text-sm text-gray-500">Ticket #{{ consultation?.inquiry_id }}</p>
           </div>
+          <span [class]="getStatusClass(consultation?.status)">
+            {{ getStatusText(consultation?.status) }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="pt-6">
+        <div class="grid gap-6">
+          <!-- Información del Usuario -->
+          <section class="bg-gray-50 p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+              <i class="fas fa-user"></i>
+              Información del Usuario
+              <div class="relative group" *ngIf="consultation?.user_id">
+                <i class="fas fa-check-circle text-green-500 text-sm cursor-pointer"></i>
+                <div class="absolute left-0 -bottom-8 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-normal sm:whitespace-nowrap">
+                  Este usuario está registrado en la aplicación
+                </div>
+              </div>
+            </h3>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Nombre</p>
+                <p class="font-medium">{{ consultation?.user_name }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Correo Electrónico</p>
+                <p class="font-medium">{{ consultation?.user_email }}</p>
+              </div>
+            </div>
+          </section>
+    
+          <!-- Detalles del Mensaje -->
+          <section class="border-t pt-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+              <i class="fas fa-comment"></i>
+              Mensaje
+            </h3>
+            <p class="whitespace-pre-wrap bg-white p-4 rounded-lg border">
+              {{ consultation?.message }}
+            </p>
+          </section>
+    
+          <!-- Información de Contacto -->
+          <section class="border-t pt-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+              <i class="fas fa-envelope"></i>
+              Canales de Comunicación
+            </h3>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Canal de Contacto</p>
+                <p class="font-medium capitalize">{{ consultation?.contact_channel }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Canal de Respuesta</p>
+                <p class="font-medium capitalize">{{ consultation?.response_channel }}</p>
+              </div>
+            </div>
+          </section>
+    
+          <!-- Información Temporal -->
+          <section class="border-t pt-6">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+              <i class="fas fa-clock"></i>
+              Registro Temporal
+            </h3>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Creado</p>
+                <p class="font-medium">{{ getFormattedDate(consultation?.created_at) }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Última Actualización</p>
+                <p class="font-medium">{{ getFormattedDate(consultation?.updated_at, true) }}</p>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     </div>
-  </div>
+    <div slot="actions" class="p-3 sm:p-4 flex justify-end gap-2 sm:gap-4">
+      <button
+        (click)="closeModal()"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
+      >
+        Cerrar
+      </button>
+    </div>
+  </app-modal>
+
+  <!-- Modal para Confirmaciones -->
+  <app-modal
+    #confirmModal
+    [title]="confirmModalTitle"
+    [modalType]="confirmModalType"
+    [isConfirmModal]="true"
+    [confirmText]="confirmModalText"
+    [cancelText]="cancelModalText"
+    (confirm)="handleConfirm()"
+    (cancel)="confirmModal.close()"
+  >
+    <div slot="body" class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+      <p class="text-xs sm:text-sm">{{ confirmModalMessage }}</p>
+    </div>
+  </app-modal>
 </div>
