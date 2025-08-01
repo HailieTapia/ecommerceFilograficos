@@ -62,7 +62,7 @@ export class SidebarComponent implements OnInit {
       items: [
         { path: '/support-panel', icon: 'fa-headset', label: 'Panel de Soporte', badge: null },
         { path: '/security', icon: 'fa-shield-alt', label: 'Seguridad', badge: null },
-        { path: '/type', icon: 'fa-tags', label: 'Tipos', badge: null },
+        { path: '/type', icon: 'fa-inbox', label: 'Tipos', badge: null },
         { path: '/template', icon: 'fa-file-alt', label: 'Plantillas', badge: null },
         { path: '/regulatory', icon: 'fa-gavel', label: 'Regulaciones', badge: null },
         { path: '/collaborators', icon: 'fa-users', label: 'Colaboradores', badge: null },

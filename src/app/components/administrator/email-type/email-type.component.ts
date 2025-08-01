@@ -1,19 +1,22 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ModalComponent } from '../../reusable/modal/modal.component';
 import { TypeService } from '../../../services/type.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
 import { AbstractControl } from '@angular/forms';
 import { ToastService } from '../../../services/toastService';
+import { PaginationComponent } from '../pagination/pagination.component';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-email-type',
-  imports: [ModalComponent, ReactiveFormsModule, CommonModule, FormsModule],
+  imports: [ModalComponent, ReactiveFormsModule, CommonModule, FormsModule, PaginationComponent],
   standalone: true,
   templateUrl: './email-type.component.html',
   styleUrls: ['./email-type.component.css'],
 })
-export class EmailTypeComponent implements OnInit {
+export class EmailTypeComponent implements OnInit, OnDestroy {
   @ViewChild('createEditModal') createEditModal!: ModalComponent;
   @ViewChild('viewDetailsModal') viewDetailsModal!: ModalComponent;
   @ViewChild('confirmModal') confirmModal!: ModalComponent;
@@ -30,6 +33,12 @@ export class EmailTypeComponent implements OnInit {
   confirmModalMessage: string = '';
   confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
 
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalItems: number = 0;
+  private destroy$ = new Subject<void>();
+  private loading = false;
+
   constructor(private toastService: ToastService, private typeService: TypeService, private fb: FormBuilder) {
     this.emailTypeForm = this.fb.group({
       token: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50), Validators.pattern(/^[A-Z0-9_]+$/)]],
@@ -45,7 +54,12 @@ export class EmailTypeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.getAllEmailTypes();
+    this.loadEmailTypes();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   ngAfterViewInit(): void {
@@ -54,16 +68,33 @@ export class EmailTypeComponent implements OnInit {
     }
   }
 
-  getAllEmailTypes(): void {
-    this.typeService.getAllEmailTypes().subscribe({
+  loadEmailTypes(): void {
+    if (this.loading) return;
+    this.loading = true;
+    this.typeService.getEmailTypes(this.currentPage, this.itemsPerPage).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
         this.emailTypes = data.emailTypes;
+        this.totalItems = data.total;
+        this.currentPage = data.page;
+        this.itemsPerPage = data.pageSize;
+        this.loading = false;
       },
       error: (err) => {
         const errorMessage = err?.error?.message || 'Error al obtener los tipos de correo electrónico';
         this.toastService.showToast(errorMessage, 'error');
+        this.loading = false;
       }
     });
+  }
+
+  onPageChange(newPage: number): void {
+    this.currentPage = newPage;
+    this.loadEmailTypes();
+  }
+
+  onItemsPerPageChange(): void {
+    this.currentPage = 1;
+    this.loadEmailTypes();
   }
 
   openViewModal(id: number): void {
@@ -190,7 +221,7 @@ export class EmailTypeComponent implements OnInit {
       next: (response) => {
         this.toastService.showToast('Tipo de correo electrónico creado exitosamente.', 'success');
         if (this.createEditModal) this.createEditModal.close();
-        this.getAllEmailTypes();
+        this.loadEmailTypes();
       },
       error: (err) => {
         const errorMessage = err?.error?.message || 'Error al crear el tipo de correo electrónico';
@@ -204,7 +235,7 @@ export class EmailTypeComponent implements OnInit {
       next: (response) => {
         this.toastService.showToast('Tipo de correo electrónico actualizado exitosamente.', 'success');
         if (this.createEditModal) this.createEditModal.close();
-        this.getAllEmailTypes();
+        this.loadEmailTypes();
       },
       error: (err) => {
         const errorMessage = err?.error?.message || 'Error al actualizar el tipo de correo electrónico';
@@ -227,7 +258,7 @@ export class EmailTypeComponent implements OnInit {
         this.typeService.deleteEmailType(id).subscribe({
           next: (response) => {
             this.toastService.showToast(response.message || 'Tipo de correo eliminado exitosamente', 'success');
-            this.getAllEmailTypes();
+            this.loadEmailTypes();
             if (this.confirmModal) this.confirmModal.close();
           },
           error: (err) => {

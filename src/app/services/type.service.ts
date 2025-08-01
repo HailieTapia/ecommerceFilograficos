@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { environment } from '../environments/config';
@@ -22,6 +22,7 @@ export class TypeService {
             })
         );
     }
+
     // Obtener tipo por ID
     getEmailTypeById(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -31,6 +32,7 @@ export class TypeService {
             })
         );
     }
+
     // Obtener todos los tipos activos
     getAllEmailTypes(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -40,6 +42,20 @@ export class TypeService {
             })
         );
     }
+
+    // Obtener tipos activos con paginación
+    getEmailTypes(page: number = 1, pageSize: number = 10): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                const params = new HttpParams()
+                    .set('page', page.toString())
+                    .set('pageSize', pageSize.toString());
+                return this.http.get(`${this.apiUrl}/email-types/pag`, { headers, params, withCredentials: true });
+            })
+        );
+    }
+
     // Actualizar tipo de email
     updateEmailType(id: number, data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -55,7 +71,7 @@ export class TypeService {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.delete(`${this.apiUrl}/email-types/${id}`,{ headers, withCredentials: true });
+                return this.http.delete(`${this.apiUrl}/email-types/${id}`, { headers, withCredentials: true });
             })
         );
     }
