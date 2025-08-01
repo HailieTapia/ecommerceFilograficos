@@ -76,11 +76,10 @@
           <input
             type="text"
             formControlName="searchQuery"
-            [(ngModel)]="searchQuery"
             (input)="onSearch()"
             placeholder="Buscar por ID, nombre, email o asunto..."
             class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
-            [ngClass]="{'border-red-500 dark:border-red-400': searchQuery && searchQuery.length > 500}"
+            [ngClass]="{'border-red-500 dark:border-red-400': filtersForm.get('searchQuery')?.value && filtersForm.get('searchQuery')?.value.length > 500}"
           />
         </div>
         <!-- Estado -->
@@ -201,19 +200,19 @@
       <table class="w-full table-auto border-collapse">
         <thead class="bg-gray-100 dark:bg-gray-700">
           <tr>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">ID</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Usuario</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap w-[30%]">Asunto</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Estado</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Fecha Creación</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden md:table-cell">Última Actualización</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words">ID</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">Usuario</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words w-[30%]">Asunto</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words">Estado</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">Fecha Creación</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden md:table-cell">Última Actualización</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
           <tr *ngFor="let consultation of consultations" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">#{{ consultation.inquiry_id }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 hidden sm:table-cell">
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words">#{{ consultation.inquiry_id }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words hidden sm:table-cell">
               <div class="flex items-center gap-2">
                 <i class="fas fa-user text-gray-600 dark:text-gray-400"></i>
                 <div>
@@ -231,7 +230,7 @@
               </div>
             </td>
             <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words" style="width: 30%;">{{ consultation.subject }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm">
+            <td class="p-2 sm:p-3 text-xs sm:text-sm whitespace-normal break-words">
               <span
                 [class]="getStatusClass(consultation.status)"
                 class="px-2 py-1 rounded-full text-xs"
@@ -239,8 +238,8 @@
                 {{ getStatusText(consultation.status) }}
               </span>
             </td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">{{ getFormattedDate(consultation.created_at) }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden md:table-cell">{{ getFormattedDate(consultation.updated_at, true) }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">{{ getFormattedDate(consultation.created_at) }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden md:table-cell">{{ getFormattedDate(consultation.updated_at, true) }}</td>
             <td class="p-2 sm:p-3 text-center">
               <div *ngIf="editingState[consultation.inquiry_id]?.isEditing; else viewMode">
                 <div class="bg-gray-50 dark:bg-gray-700 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-600 space-y-3 sm:space-y-4">

@@ -54,7 +54,6 @@ export class SupportPanelComponent implements OnInit, OnDestroy {
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalItems: number = 0;
-  searchQuery: string = '';
   showFilters: boolean = false;
   currentFilters: any = {};
   editingState: { [key: string]: { isEditing: boolean, editState: { status: string, response_channel: string }, errorMessage: string } } = {};
@@ -76,6 +75,7 @@ export class SupportPanelComponent implements OnInit, OnDestroy {
     private fb: FormBuilder
   ) {
     this.filtersForm = this.fb.group({
+      searchQuery: [''],  // Añade esta línea
       status: [''],
       contact_channel: [''],
       response_channel: [''],
@@ -126,8 +126,10 @@ export class SupportPanelComponent implements OnInit, OnDestroy {
 
   private loadConsultations(): void {
     const filters = { ...this.currentFilters };
-    if (this.searchQuery) {
-      filters.search = this.searchQuery;
+    const searchQuery = this.filtersForm.get('searchQuery')?.value;
+    
+    if (searchQuery) {
+      filters.search = searchQuery;
     }
 
     this.supportService.getFilteredConsultations(filters, this.currentPage, this.itemsPerPage).pipe(takeUntil(this.destroy$)).subscribe({
@@ -152,6 +154,7 @@ export class SupportPanelComponent implements OnInit, OnDestroy {
 
   onSearch(): void {
     this.currentPage = 1;
+    this.currentFilters = this.filtersForm.value; // Actualiza los filtros con los valores del formulario
     this.loadConsultations();
   }
 
@@ -371,6 +374,7 @@ export class SupportPanelComponent implements OnInit, OnDestroy {
   resetFilters(): void {
     this.filtersForm.reset();
     localStorage.removeItem('supportFilters');
+    this.loadConsultations();
   }
 
   removeFilter(key: string): void {
