@@ -1,63 +1,104 @@
-<div class="min-h-screen bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text p-4 sm:p-6 font-sans">
-  <!-- Encabezado -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 bg-light-table-header dark:bg-dark-table-header p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-4">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
     <div>
-      <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-light-text dark:text-dark-text flex items-center gap-2">
-        <i class="fas fa-envelope text-light-primary dark:text-dark-primary"></i> Gestión de Plantillas de Correo
+      <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-envelope text-blue-600 dark:text-blue-400 text-lg sm:text-xl"></i> Gestión de Plantillas de Correo
       </h1>
-      <p class="text-light-secondary dark:text-dark-secondary text-sm mt-1">Administra las plantillas de correos electrónicos del sistema</p>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administra las plantillas de correos electrónicos del sistema</p>
     </div>
-    <div class="flex gap-2 w-full sm:w-auto">
-      <button
-        (click)="openCreateModal()"
-        class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-lg hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2"
-      >
-        <i class="fas fa-plus"></i> Agregar Plantilla
-      </button>
-    </div>
+    <button
+      (click)="openCreateModal()"
+      class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md"
+    >
+      <i class="fas fa-plus"></i> Agregar Plantilla
+    </button>
   </div>
 
-  <!-- Tabla -->
-  <div class="bg-light-background dark:bg-dark-background rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-600">
-    <div class="p-4 border-b border-gray-200 dark:border-gray-600">
-      <h2 class="text-lg font-semibold text-light-text dark:text-dark-text">Plantillas Activas</h2>
+  <!-- Table -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Plantillas Activas</h2>
+      <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+        <label for="itemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Elementos por página:</label>
+        <select
+          id="itemsPerPage"
+          [(ngModel)]="itemsPerPage"
+          (change)="onItemsPerPageChange()"
+          class="w-full sm:w-24 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 text-xs sm:text-sm"
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
     </div>
-    <div class="overflow-x-auto">
-      <table class="w-full table-auto border-collapse min-w-[640px]">
-        <thead class="bg-light-table-header dark:bg-dark-table-header">
+    <div class="overflow-x-auto w-full">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-gray-100 dark:bg-gray-700">
           <tr>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Nombre</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap hidden sm:table-cell">Asunto</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Tipo de Email</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-semibold text-light-text dark:text-dark-text uppercase whitespace-nowrap">Acciones</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Nombre</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Asunto</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Tipo de Email</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Variables</th>
+            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-          <tr *ngFor="let template of emailTemplates" class="hover:bg-light-row-hover dark:hover:bg-dark-row-hover transition-all duration-300">
-            <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text whitespace-nowrap">{{ template.name }}</td>
-            <td class="p-2 sm:p-3 text-sm text-light-secondary dark:text-dark-secondary whitespace-normal break-words max-w-[150px] sm:max-w-[200px] hidden sm:table-cell">{{ template.subject }}</td>
-            <td class="p-2 sm:p-3 text-sm text-light-text dark:text-dark-text whitespace-nowrap">{{ template.EmailType?.name || 'N/A' }}</td>
-            <td class="p-2 sm:p-3 text-center space-x-2 sm:space-x-4">
-              <button (click)="openViewModal(template.template_id)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                <i class="fas fa-eye"></i>
-                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
-              </button>
-              <button (click)="openEditModal(template.template_id)" class="group text-blue-600 dark:text-dark-primary hover:text-blue-800 dark:hover:text-dark-primary-hover transition-all duration-300 relative">
-                <i class="fas fa-edit"></i>
-                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
-              </button>
-              <button (click)="deleteEmailTemplate(template.template_id)" class="group text-gray-500 dark:text-dark-secondary hover:text-red-600 dark:hover:text-dark-danger transition-all duration-300 relative">
-                <i class="fas fa-trash"></i>
-                <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
-              </button>
+          <tr *ngFor="let template of emailTemplates" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[150px] sm:max-w-[200px] md:max-w-[250px]">{{ template.name }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words max-w-[150px] sm:max-w-[200px] hidden sm:table-cell">{{ template.subject }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ template.EmailType?.name || 'N/A' }}</td>
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal">
+              <div class="flex flex-wrap gap-1">
+                <span *ngFor="let variable of template.variables.slice(0, 2)" class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full mr-2 mb-2">{{ variable }}</span>
+                <span *ngIf="template.variables.length > 2" class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full mr-2 mb-2">+{{ template.variables.length - 2 }}</span>
+                <span *ngIf="!template.variables || template.variables.length === 0">N/A</span>
+              </div>
+            </td>
+            <td class="p-2 sm:p-3 text-center">
+              <div class="flex justify-center items-center gap-2">
+                <button
+                  (click)="openViewModal(template.template_id)"
+                  class="group text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-300 relative"
+                >
+                  <i class="fas fa-eye text-xs sm:text-sm"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Ver</span>
+                </button>
+                <button
+                  (click)="openEditModal(template.template_id)"
+                  class="group text-blue-600 dark:text-blue-400 hover{text-blue-800 dark:hover:text-blue-300 transition-all duration-300 relative"
+                >
+                  <i class="fas fa-edit text-xs sm:text-sm"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                </button>
+                <button
+                  (click)="deleteEmailTemplate(template.template_id)"
+                  class="group text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all duration-300 relative"
+                >
+                  <i class="fas fa-trash text-xs sm:text-sm"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                </button>
+              </div>
             </td>
           </tr>
           <tr *ngIf="emailTemplates.length === 0">
-            <td colspan="4" class="p-2 sm:p-3 text-center text-sm text-light-secondary dark:text-dark-secondary">No hay plantillas de correo electrónico disponibles</td>
+            <td colspan="5" class="p-4 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              <i class="fas fa-box-open w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+              <p>No hay plantillas de correo electrónico disponibles</p>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalItems]="totalItems"
+      [itemsPerPage]="itemsPerPage"
+      (pageChange)="onPageChange($event)"
+      class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"
+    ></app-pagination>
   </div>
 
   <!-- Modal para Crear/Editar Plantilla -->
@@ -68,107 +109,112 @@
     [isConfirmModal]="false"
   >
     <ng-container slot="body">
-      <form [formGroup]="emailTemplateForm" class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text max-h-[80vh] overflow-y-auto space-y-4">
+      <form [formGroup]="emailTemplateForm" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto space-y-4 sm:space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Nombre <span class="text-red-500 dark:text-red-400">*</span></label>
+          <div class="relative">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Nombre <span class="text-red-500 dark:text-red-400">*</span></label>
+            <i class="fas fa-tag absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
             <input
               formControlName="name"
               type="text"
               placeholder="Ej. Plantilla de Bienvenida"
-              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
               [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('name')?.touched && emailTemplateForm.get('name')?.invalid}"
             />
-            <div *ngIf="emailTemplateForm.get('name')?.touched && emailTemplateForm.get('name')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+            <div *ngIf="emailTemplateForm.get('name')?.touched && emailTemplateForm.get('name')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
               <div *ngIf="emailTemplateForm.get('name')?.hasError('required')">El nombre es obligatorio.</div>
               <div *ngIf="emailTemplateForm.get('name')?.hasError('minlength')">Debe tener al menos 3 caracteres.</div>
               <div *ngIf="emailTemplateForm.get('name')?.hasError('maxlength')">No debe exceder 100 caracteres.</div>
             </div>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Tipo de Email <span class="text-red-500 dark:text-red-400">*</span></label>
-            <input
+          <div class="relative">
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Tipo de Email <span class="text-red-500 dark:text-red-400">*</span></label>
+            <i class="fas fa-inbox absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <select
               formControlName="email_type_id"
-              type="number"
-              placeholder="Ej. 1"
-              class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
               [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('email_type_id')?.touched && emailTemplateForm.get('email_type_id')?.invalid}"
-            />
-            <div *ngIf="emailTemplateForm.get('email_type_id')?.touched && emailTemplateForm.get('email_type_id')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+            >
+              <option value="" disabled>Seleccione un tipo de email</option>
+              <option *ngFor="let type of emailTypes" [value]="type.email_type_id">{{ type.name }}</option>
+            </select>
+            <div *ngIf="emailTemplateForm.get('email_type_id')?.touched && emailTemplateForm.get('email_type_id')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
               <div *ngIf="emailTemplateForm.get('email_type_id')?.hasError('required')">El tipo de email es obligatorio.</div>
-              <div *ngIf="emailTemplateForm.get('email_type_id')?.hasError('pattern')">Debe ser un número positivo.</div>
             </div>
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Asunto <span class="text-red-500 dark:text-red-400">*</span></label>
+        <div class="relative">
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Asunto <span class="text-red-500 dark:text-red-400">*</span></label>
+          <i class="fas fa-heading absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
           <input
             formControlName="subject"
             type="text"
             placeholder="Ej. Bienvenido a nuestro sistema"
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
             [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('subject')?.touched && emailTemplateForm.get('subject')?.invalid}"
           />
-          <div *ngIf="emailTemplateForm.get('subject')?.touched && emailTemplateForm.get('subject')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+          <div *ngIf="emailTemplateForm.get('subject')?.touched && emailTemplateForm.get('subject')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
             <div *ngIf="emailTemplateForm.get('subject')?.hasError('required')">El asunto es obligatorio.</div>
             <div *ngIf="emailTemplateForm.get('subject')?.hasError('minlength')">Debe tener al menos 3 caracteres.</div>
             <div *ngIf="emailTemplateForm.get('subject')?.hasError('maxlength')">No debe exceder 255 caracteres.</div>
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Contenido HTML <span class="text-red-500 dark:text-red-400">*</span></label>
+        <div class="relative">
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Contenido HTML <span class="text-red-500 dark:text-red-400">*</span></label>
+          <i class="fas fa-code absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
           <textarea
             formControlName="html_content"
             placeholder="Ej. <p>Bienvenido, {USER_NAME}!</p>"
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
             rows="6"
             [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('html_content')?.touched && emailTemplateForm.get('html_content')?.hasError('required')}"
           ></textarea>
-          <div *ngIf="emailTemplateForm.get('html_content')?.touched && emailTemplateForm.get('html_content')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
+          <div *ngIf="emailTemplateForm.get('html_content')?.touched && emailTemplateForm.get('html_content')?.hasError('required')" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
             El contenido HTML es obligatorio.
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Contenido de Texto <span class="text-red-500 dark:text-red-400">*</span></label>
+        <div class="relative">
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Contenido de Texto <span class="text-red-500 dark:text-red-400">*</span></label>
+          <i class="fas fa-align-left absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
           <textarea
             formControlName="text_content"
             placeholder="Ej. Bienvenido, {USER_NAME}!"
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
             rows="4"
             [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('text_content')?.touched && emailTemplateForm.get('text_content')?.hasError('required')}"
           ></textarea>
-          <div *ngIf="emailTemplateForm.get('text_content')?.touched && emailTemplateForm.get('text_content')?.hasError('required')" class="text-red-500 dark:text-red-400 text-sm mt-1">
+          <div *ngIf="emailTemplateForm.get('text_content')?.touched && emailTemplateForm.get('text_content')?.hasError('required')" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
             El contenido de texto es obligatorio.
           </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-light-text dark:text-dark-text mb-1">Variables (JSON) <span class="text-red-500 dark:text-red-400">*</span></label>
+        <div class="relative">
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Variables (JSON) <span class="text-red-500 dark:text-red-400">*</span></label>
+          <i class="fas fa-code absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
           <textarea
             formControlName="variables"
-            placeholder='Ej. ["USER_NAME", "EMAIL"]'
-            class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-light-primary dark:focus:border-dark-primary text-sm"
+            readonly
+            class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none text-xs sm:text-sm cursor-not-allowed"
             rows="3"
             [ngClass]="{'border-red-500 dark:border-red-400': emailTemplateForm.get('variables')?.touched && emailTemplateForm.get('variables')?.invalid}"
           ></textarea>
-          <div *ngIf="emailTemplateForm.get('variables')?.touched && emailTemplateForm.get('variables')?.invalid" class="text-red-500 dark:text-red-400 text-sm mt-1">
+          <div *ngIf="emailTemplateForm.get('variables')?.touched && emailTemplateForm.get('variables')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
             <div *ngIf="emailTemplateForm.get('variables')?.hasError('required')">Las variables son obligatorias.</div>
-            <div *ngIf="emailTemplateForm.get('variables')?.hasError('pattern')">Debe ser un JSON válido (ej. ["USER_NAME", "EMAIL"]).</div>
           </div>
         </div>
       </form>
     </ng-container>
     <ng-container slot="actions">
-      <div class="flex flex-col sm:flex-row justify-end gap-4 p-4">
+      <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 p-3 sm:p-4">
         <button
           (click)="createEditModal.close()"
-          class="w-full sm:w-auto px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
+          class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 text-xs sm:text-sm"
         >
           Cancelar
         </button>
         <button
           (click)="saveTemplate()"
           [disabled]="emailTemplateForm.invalid && emailTemplateForm.touched"
-          class="w-full sm:w-auto px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-700 dark:hover:bg-dark-primary-hover transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+          class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-xs sm:text-sm"
         >
           {{ emailTemplateId ? 'Actualizar' : 'Crear' }}
         </button>
@@ -184,21 +230,47 @@
     [isConfirmModal]="false"
   >
     <ng-container slot="body">
-      <div class="p-4 sm:p-6 bg-light-background dark:bg-dark-background text-light-text dark:text-dark-text space-y-4">
-        <p><strong class="text-light-text dark:text-dark-text">Nombre:</strong> {{ selectedEmailTemplate?.name || 'N/A' }}</p>
-        <p><strong class="text-light-text dark:text-dark-text">Asunto:</strong> {{ selectedEmailTemplate?.subject || 'N/A' }}</p>
-        <p><strong class="text-light-text dark:text-dark-text">Contenido HTML:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.html_content || 'N/A' }}</span></p>
-        <p><strong class="text-light-text dark:text-dark-text">Contenido de Texto:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.text_content || 'N/A' }}</span></p>
-        <p><strong class="text-light-text dark:text-dark-text">Tipo de Email:</strong> {{ selectedEmailTemplate?.EmailType?.name || 'N/A' }}</p>
-        <p><strong class="text-light-text dark:text-dark-text">Fecha de Creación:</strong> {{ selectedEmailTemplate?.created_at | date:'medium' || 'N/A' }}</p>
-        <p><strong class="text-light-text dark:text-dark-text">Variables:</strong> <span class="text-light-secondary dark:text-dark-secondary">{{ selectedEmailTemplate?.variables?.join(', ') || 'N/A' }}</span></p>
+      <div class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 space-y-4 sm:space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
+          <div>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Nombre</p>
+            <p class="font-medium text-gray-900 dark:text-gray-100">{{ selectedEmailTemplate?.name || 'N/A' }}</p>
+          </div>
+          <div>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Asunto</p>
+            <p class="font-medium text-gray-900 dark:text-gray-100">{{ selectedEmailTemplate?.subject || 'N/A' }}</p>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Tipo de Email</p>
+          <p class="font-medium text-gray-900 dark:text-gray-100">{{ selectedEmailTemplate?.EmailType?.name || 'N/A' }}</p>
+        </div>
+        <div>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Contenido HTML</p>
+          <p class="text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{{ selectedEmailTemplate?.html_content || 'N/A' }}</p>
+        </div>
+        <div>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Contenido de Texto</p>
+          <p class="text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{{ selectedEmailTemplate?.text_content || 'N/A' }}</p>
+        </div>
+        <div>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Variables</p>
+          <div class="flex flex-wrap gap-2">
+            <span *ngFor="let variable of selectedEmailTemplate?.variables" class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full">{{ variable }}</span>
+            <span *ngIf="!selectedEmailTemplate?.variables || selectedEmailTemplate?.variables.length === 0" class="text-gray-500 dark:text-gray-400">N/A</span>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Fecha de Creación</p>
+          <p class="text-gray-500 dark:text-gray-400">{{ selectedEmailTemplate?.created_at | date:'medium' || 'N/A' }}</p>
+        </div>
       </div>
     </ng-container>
     <ng-container slot="actions">
-      <div class="flex justify-end p-4">
+      <div class="flex justify-end p-3 sm:p-4">
         <button
           (click)="viewDetailsModal.close()"
-          class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-all duration-300"
+          class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 text-xs sm:text-sm"
         >
           Cerrar
         </button>
@@ -217,7 +289,7 @@
     (confirm)="handleConfirm()"
   >
     <ng-container slot="body">
-      <p class="text-light-text dark:text-dark-text">{{ confirmModalMessage }}</p>
+      <p class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">{{ confirmModalMessage }}</p>
     </ng-container>
   </app-modal>
 </div>

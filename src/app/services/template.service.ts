@@ -22,6 +22,7 @@ export class TemplateService {
             })
         );
     }
+
     // Obtener todas las plantillas activas
     getAllTemplates(): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -31,6 +32,20 @@ export class TemplateService {
             })
         );
     }
+
+    // Obtener todas las plantillas activas con paginación
+    getPaginatedTemplates(page: number, pageSize: number): Observable<any> {
+        return this.csrfService.getCsrfToken().pipe(
+            switchMap(csrfToken => {
+                const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+                const params = new HttpParams()
+                    .set('page', page.toString())
+                    .set('pageSize', pageSize.toString());
+                return this.http.get(`${this.apiUrl}/email-templates/pag`, { headers, params, withCredentials: true });
+            })
+        );
+    }
+
     // Obtener plantilla por ID
     getEmailTemplateById(id: number): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(
@@ -40,6 +55,7 @@ export class TemplateService {
             })
         );
     }
+
     // Actualizar plantilla de email
     updateEmailTemplate(id: number, data: any): Observable<any> {
         return this.csrfService.getCsrfToken().pipe(

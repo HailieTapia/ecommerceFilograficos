@@ -1,24 +1,29 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { ModalComponent } from '../../reusable/modal/modal.component';
 import { TemplateService } from '../../../services/template.service';
+import { TypeService } from '../../../services/type.service';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ToastService } from '../../../services/toastService';
+import { PaginationComponent } from '../pagination/pagination.component';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-email-template',
   standalone: true,
-  imports: [ModalComponent, CommonModule, ReactiveFormsModule],
+  imports: [ModalComponent, CommonModule, ReactiveFormsModule, FormsModule, PaginationComponent],
   templateUrl: './email-template.component.html',
   styleUrls: ['./email-template.component.css']
 })
-export class EmailTemplateComponent implements OnInit, AfterViewInit {
+export class EmailTemplateComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('createEditModal') createEditModal!: ModalComponent;
   @ViewChild('viewDetailsModal') viewDetailsModal!: ModalComponent;
   @ViewChild('confirmModal') confirmModal!: ModalComponent;
 
   emailTemplateForm: FormGroup;
   emailTemplates: any[] = [];
+  emailTypes: any[] = [];
   emailTemplateId: number | null = null;
   selectedEmailTemplate: any = null;
   confirmAction: (() => void) | null = null;
@@ -26,19 +31,38 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
   confirmModalMessage: string = '';
   confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
 
-  constructor(private toastService: ToastService, private templateService: TemplateService, private fb: FormBuilder) {
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalItems: number = 0;
+  private destroy$ = new Subject<void>();
+  private loading = false;
+
+  constructor(
+    private toastService: ToastService,
+    private templateService: TemplateService,
+    private typeService: TypeService,
+    private fb: FormBuilder
+  ) {
     this.emailTemplateForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      email_type_id: ['', [Validators.required, Validators.pattern('^[1-9][0-9]*$')]], // Positive integer
+      email_type_id: ['', [Validators.required]],
       subject: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
       html_content: ['', [Validators.required]],
       text_content: ['', [Validators.required]],
-      variables: ['', [Validators.required, Validators.pattern(/^\[.*\]$/)]]
+      variables: [{ value: '', disabled: true }, [Validators.required]]
+    });
+
+    // Subscribe to email_type_id changes to update variables
+    this.emailTemplateForm.get('email_type_id')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(emailTypeId => {
+      const selectedType = this.emailTypes.find(type => type.email_type_id === +emailTypeId);
+      const variables = selectedType?.required_variables || [];
+      this.emailTemplateForm.get('variables')?.setValue(JSON.stringify(variables));
     });
   }
 
   ngOnInit(): void {
-    this.getAllTemplates();
+    this.loadEmailTemplates();
+    this.loadEmailTypes();
   }
 
   ngAfterViewInit(): void {
@@ -47,16 +71,50 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getAllTemplates(): void {
-    this.templateService.getAllTemplates().subscribe({
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadEmailTypes(): void {
+    this.typeService.getAllEmailTypes().pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
-        this.emailTemplates = data;
+        this.emailTypes = data.emailTypes;
+      },
+      error: (err) => {
+        const errorMessage = err?.error?.message || 'Error al obtener los tipos de correo electrónico';
+        this.toastService.showToast(errorMessage, 'error');
+      }
+    });
+  }
+
+  loadEmailTemplates(): void {
+    if (this.loading) return;
+    this.loading = true;
+    this.templateService.getPaginatedTemplates(this.currentPage, this.itemsPerPage).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => {
+        this.emailTemplates = data.templates;
+        this.totalItems = data.total;
+        this.currentPage = data.page;
+        this.itemsPerPage = data.pageSize;
+        this.loading = false;
       },
       error: (err) => {
         const errorMessage = err?.error?.message || 'Error al obtener las plantillas de correo electrónico';
         this.toastService.showToast(errorMessage, 'error');
+        this.loading = false;
       }
     });
+  }
+
+  onPageChange(newPage: number): void {
+    this.currentPage = newPage;
+    this.loadEmailTemplates();
+  }
+
+  onItemsPerPageChange(): void {
+    this.currentPage = 1;
+    this.loadEmailTemplates();
   }
 
   openViewModal(templateId: number): void {
@@ -145,8 +203,8 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
     }
 
     const templateData = {
-      ...this.emailTemplateForm.value,
-      variables: JSON.parse(this.emailTemplateForm.value.variables)
+      ...this.emailTemplateForm.getRawValue(),
+      variables: JSON.parse(this.emailTemplateForm.getRawValue().variables)
     };
 
     const saveAction = this.emailTemplateId
@@ -159,7 +217,7 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
           this.emailTemplateId ? 'Plantilla actualizada exitosamente' : 'Plantilla creada exitosamente',
           'success'
         );
-        this.getAllTemplates();
+        this.loadEmailTemplates();
         if (this.createEditModal) this.createEditModal.close();
       },
       error: (err) => {
@@ -183,7 +241,7 @@ export class EmailTemplateComponent implements OnInit, AfterViewInit {
         this.templateService.deleteEmailTemplate(id).subscribe({
           next: (response) => {
             this.toastService.showToast(response.message || 'Plantilla eliminada exitosamente', 'success');
-            this.getAllTemplates();
+            this.loadEmailTemplates();
             if (this.confirmModal) this.confirmModal.close();
           },
           error: (err) => {
