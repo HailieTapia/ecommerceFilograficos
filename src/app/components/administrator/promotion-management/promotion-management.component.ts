@@ -309,6 +309,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     this.subscriptions.add(
       this.promotionService.getAllPromotions(params).subscribe({
         next: (response) => {
+          console.log(response)
           this.promotions = response.promotions;
           this.totalPromotions = response.total;
           this.totalPages = Math.ceil(response.total / this.itemsPerPage);
