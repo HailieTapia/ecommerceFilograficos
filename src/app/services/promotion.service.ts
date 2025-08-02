@@ -5,36 +5,41 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 import { environment } from '../environments/config';
 
-// Interfaz para tipar las promociones (actualizada para reflejar todos los campos del backend)
+// Interfaz para tipar las promociones
 export interface Promotion {
   promotion_id: number;
   name: string;
-  promotion_type: 'quantity_discount' | 'order_count_discount' | 'unit_discount';
+  coupon_type: 'quantity_discount' | 'order_count_discount' | 'unit_discount';
   discount_value: number;
   min_quantity?: number | null;
   min_order_count?: number | null;
   min_unit_measure?: number | null;
+  max_uses?: number | null;
+  max_uses_per_user?: number | null;
+  min_order_value?: number | null;
+  free_shipping_enabled?: boolean;
   applies_to: 'specific_products' | 'specific_categories' | 'all';
   is_exclusive: boolean;
   start_date: string;
   end_date: string;
   status: 'active' | 'inactive';
-  created_by?: number; // ID del usuario que creó
+  created_by?: number;
   created_at?: string;
-  updated_by?: number | null; // ID del usuario que actualizó (puede ser null)
+  updated_by?: number | null;
   updated_at?: string | null;
-  ProductVariants?: { variant_id: number; sku: string; product_name?: string }[]; // Añadido product_name opcional
+  coupon_code?: string | null;
+  ProductVariants?: { variant_id: number; sku: string; product_name?: string }[];
   Categories?: { category_id: number; name: string }[];
-  product_variants_count?: number; // Solo en getAllPromotions
-  category_count?: number; // Solo en getAllPromotions
+  product_variants_count?: number;
+  category_count?: number;
 }
 
-// Interfaz para los parámetros de consulta de getAllPromotions (sin status)
+// Interfaz para los parámetros de consulta de getAllPromotions
 export interface PromotionQueryParams {
   search?: string;
   page?: number;
   pageSize?: number;
-  sort?: string; // Ejemplo: "promotion_id:ASC,start_date:DESC,end_date:DESC"
+  sort?: string;
 }
 
 // Interfaz para tipar las variantes
@@ -53,18 +58,29 @@ export interface VariantQueryParams {
 // Interfaz para los datos de creación/actualización de una promoción
 export interface PromotionData {
   name: string;
-  promotion_type: 'quantity_discount' | 'order_count_discount' | 'unit_discount';
+  coupon_type: 'quantity_discount' | 'order_count_discount' | 'unit_discount';
   discount_value: number;
-  min_quantity?: number | null; // Requerido si promotion_type es 'quantity_discount'
-  min_order_count?: number | null; // Requerido si promotion_type es 'order_count_discount'
-  min_unit_measure?: number | null; // Requerido si promotion_type es 'unit_discount'
+  min_quantity?: number | null;
+  min_order_count?: number | null;
+  min_unit_measure?: number | null;
+  max_uses?: number | null;
+  max_uses_per_user?: number | null;
+  min_order_value?: number | null;
+  free_shipping_enabled?: boolean;
   applies_to: 'specific_products' | 'specific_categories' | 'all';
   is_exclusive: boolean;
-  start_date: string; // Formato ISO 8601
-  end_date: string; // Formato ISO 8601, debe ser posterior a start_date
-  status?: 'active' | 'inactive'; // Opcional en actualización, por defecto 'active' en creación
-  variantIds?: number[]; // Requerido si applies_to es 'specific_products'
-  categoryIds?: number[]; // Requerido si applies_to es 'specific_categories'
+  start_date: string;
+  end_date: string;
+  status?: 'active' | 'inactive';
+  variantIds?: number[];
+  categoryIds?: number[];
+  coupon_code?: string | null;
+}
+
+// Interfaz para aplicar promoción/cupón
+export interface ApplyPromotionRequest {
+  promotion_id?: number;
+  coupon_code?: string;
 }
 
 @Injectable({
@@ -75,14 +91,12 @@ export class PromotionService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
-  // Manejo de errores
   private handleError(error: HttpErrorResponse): Observable<never> {
     const message = error.error?.message || 'Error en la comunicación con el servidor';
     console.error('Error en la solicitud:', error);
     return throwError(() => new Error(message));
   }
 
-  // Crear una nueva promoción
   createPromotion(promotionData: PromotionData): Observable<{ message: string; promotion: Promotion }> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -97,7 +111,6 @@ export class PromotionService {
     );
   }
 
-  // Obtener una promoción por ID
   getPromotionById(id: number): Observable<{ message: string; promotion: Promotion }> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -111,7 +124,6 @@ export class PromotionService {
     );
   }
 
-  // Obtener todas las promociones activas con paginación, ordenamiento y búsqueda
   getAllPromotions(params: PromotionQueryParams = {}): Observable<{
     message: string;
     promotions: Promotion[];
@@ -142,9 +154,7 @@ export class PromotionService {
     );
   }
 
-  // Actualizar una promoción
   updatePromotion(id: number, updatedData: PromotionData): Observable<{ message: string; promotion: Promotion }> {
-    // Validación básica en el frontend
     if (updatedData.start_date && updatedData.end_date) {
       const startDate = new Date(updatedData.start_date);
       const endDate = new Date(updatedData.end_date);
@@ -174,7 +184,6 @@ export class PromotionService {
     );
   }
 
-  // Eliminar (lógicamente) una promoción
   deletePromotion(id: number): Observable<{ message: string }> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -188,7 +197,6 @@ export class PromotionService {
     );
   }
 
-  // Obtener todas las variantes con búsqueda
   getAllVariants(params: VariantQueryParams = {}): Observable<{
     message: string;
     variants: Variant[];
@@ -207,6 +215,33 @@ export class PromotionService {
           variants: Variant[];
           total: number;
         }>(url, { headers, withCredentials: true });
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  applyPromotion(data: ApplyPromotionRequest): Observable<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.post<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }>(
+          `${this.apiUrl}/apply`,
+          data,
+          { headers, withCredentials: true }
+        );
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  getAvailablePromotions(): Observable<{ message: string; promotions: Promotion[] }> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<{ message: string; promotions: Promotion[] }>(
+          `${this.apiUrl}/available`,
+          { headers, withCredentials: true }
+        );
       }),
       catchError(this.handleError)
     );

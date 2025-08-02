@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CartService, CartResponse, CartItem, Promotion } from '../../../services/cart.service';
-import { OrderService } from '../../../services/order.service';
+import { CartService, CartResponse, CartItem, CartPromotion } from '../../../services/cart.service';
+import { OrderService, CreateOrderRequest, CreateOrderResponse, ShippingOption } from '../../../services/order.service';
 import { ToastService } from '../../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { UserService } from '../../../services/user.service';
@@ -11,19 +11,27 @@ import { UserService } from '../../../services/user.service';
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, SpinnerComponent, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, SpinnerComponent, ReactiveFormsModule, CurrencyPipe],
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.css'],
-  providers: [DatePipe]
+  providers: [DatePipe, CurrencyPipe]
 })
 export class CheckoutComponent implements OnInit {
-  cart: CartResponse = { items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] };
+  cart: CartResponse = { 
+    items: [], 
+    total: 0, 
+    total_urgent_delivery_fee: 0, 
+    estimated_delivery_days: 0, 
+    promotions: [], 
+    total_discount: 0, 
+    coupon_code: null 
+  };
   buyNowItem: CartItem | null = null;
   isLoading: boolean = false;
   shippingCost: number = 0;
   orderForm: FormGroup;
   address: any;
-  shippingOptions: any[] = [];
+  shippingOptions: ShippingOption[] = [];
 
   constructor(
     private userService: UserService,
@@ -53,7 +61,9 @@ export class CheckoutComponent implements OnInit {
         total: this.buyNowItem.subtotal,
         total_urgent_delivery_fee: this.buyNowItem.is_urgent ? this.buyNowItem.urgent_delivery_fee : 0,
         estimated_delivery_days: this.buyNowItem.is_urgent ? this.buyNowItem.urgent_delivery_days || this.buyNowItem.standard_delivery_days : this.buyNowItem.standard_delivery_days,
-        promotions: []
+        promotions: [],
+        total_discount: 0,
+        coupon_code: null
       };
       this.loadAddresses();
       this.loadShippingOptions();
@@ -79,7 +89,12 @@ export class CheckoutComponent implements OnInit {
     this.isLoading = true;
     this.orderService.getShippingOptions().subscribe({
       next: (response) => {
+        console.log('Shipping options response:', response);
         this.shippingOptions = response.data || [];
+        // Ensure default delivery_option is valid
+        if (this.shippingOptions.length > 0 && !this.shippingOptions.some(option => option.name === this.orderForm.get('delivery_option')?.value)) {
+          this.orderForm.patchValue({ delivery_option: this.shippingOptions[0].name });
+        }
         this.isLoading = false;
       },
       error: (error) => {
@@ -94,6 +109,9 @@ export class CheckoutComponent implements OnInit {
     this.cartService.loadCart().subscribe({
       next: (response) => {
         this.cart = response;
+        this.orderForm.patchValue({
+          coupon_code: this.cart.coupon_code || ''
+        });
         this.isLoading = false;
         if (this.cart.items.length === 0) {
           this.toastService.showToast('El carrito está vacío. Por favor, añade productos.', 'error');
@@ -134,31 +152,24 @@ export class CheckoutComponent implements OnInit {
 
     this.isLoading = true;
     const totals = this.calculateTotals();
-    const orderData = {
+    const orderData: CreateOrderRequest = {
       payment_method: this.orderForm.value.payment_method,
-      address_id: this.orderForm.value.delivery_option === 'Entrega a Domicilio' ? this.orderForm.value.address_id : null,
-      coupon_code: this.orderForm.value.coupon_code || '', // Ensure empty string instead of null
       delivery_option: this.orderForm.value.delivery_option,
-      shipping_cost: totals.shipping_cost,
-      total: totals.total,
+      address_id: this.orderForm.value.delivery_option === 'Entrega a Domicilio' ? this.orderForm.value.address_id : undefined,
+      coupon_code: this.orderForm.value.coupon_code || undefined,
       item: this.buyNowItem ? {
         product_id: this.buyNowItem.product_id,
         variant_id: this.buyNowItem.variant_id,
         quantity: this.buyNowItem.quantity,
-        option_id: this.buyNowItem.customization?.option_id || null,
-        is_urgent: this.buyNowItem.is_urgent,
-        unit_price: this.buyNowItem.unit_price
-      } : undefined,
-      items: this.buyNowItem ? undefined : this.cart.items
+        option_id: this.buyNowItem.customization?.option_id || undefined,
+        is_urgent: this.buyNowItem.is_urgent
+      } : undefined
     };
 
-    // Log payload for debugging
-    console.log('Order Data Payload:', JSON.stringify(orderData, null, 2));
-
     this.orderService.createOrder(orderData).subscribe({
-      next: (response) => {
+      next: (response: CreateOrderResponse) => {
         this.isLoading = false;
-        if (response.success && response.data.payment_instructions?.payment_url) {
+        if (response.data.payment_instructions?.payment_url) {
           this.toastService.showToast('Redirigiendo a Mercado Pago...', 'success');
           window.location.href = response.data.payment_instructions.payment_url;
         } else {
@@ -167,7 +178,7 @@ export class CheckoutComponent implements OnInit {
       },
       error: (error) => {
         this.isLoading = false;
-        const errorMessage = error?.error?.message || 'Error al crear la orden';
+        const errorMessage = error.message || 'Error al crear la orden';
         console.error('Order creation error:', error);
         this.toastService.showToast(errorMessage, 'error');
       }
@@ -176,15 +187,15 @@ export class CheckoutComponent implements OnInit {
 
   calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
     const subtotal = this.cart.total;
-    const discount = this.cart.promotions.reduce((totalDiscount: number, promo: Promotion) => {
+    const discount = this.cart.promotions.reduce((totalDiscount: number, promo: CartPromotion) => {
       if (promo.is_applicable) {
         return totalDiscount + (parseFloat(promo.discount_value) * subtotal / 100);
       }
       return totalDiscount;
     }, 0);
-    const total_urgent_cost = this.cart.total_urgent_delivery_fee || 0;
     const shipping_cost = this.shippingOptions.find(option => option.name === this.orderForm.get('delivery_option')?.value)?.cost || 0;
     this.shippingCost = shipping_cost;
+    const total_urgent_cost = this.cart.total_urgent_delivery_fee || 0;
     const total = Math.max(0, subtotal + shipping_cost + total_urgent_cost - discount);
     return { subtotal, discount, total_urgent_cost, shipping_cost, total };
   }

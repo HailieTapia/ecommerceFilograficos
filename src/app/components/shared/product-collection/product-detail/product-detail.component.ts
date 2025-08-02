@@ -12,10 +12,11 @@ import { ProductReviewsComponent } from './product-reviews/product-reviews.compo
 import { takeUntil } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
 import { RecommendationComponent } from '../../recommendation/recommendation.component';
+
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [RecommendationComponent,CommonModule, FormsModule, RouterModule, SpinnerComponent, ProductReviewsComponent],
+  imports: [RecommendationComponent, CommonModule, FormsModule, RouterModule, SpinnerComponent, ProductReviewsComponent],
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css']
 })
@@ -87,6 +88,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.breadcrumb = productResponse.product.breadcrumb || [];
         this.relatedProducts = relatedResponse.products.filter(p => p.product_id !== productId).slice(0, 4);
         this.reviewSummary = reviewSummary;
+        
         if (this.product.variants && this.product.variants.length > 0) {
           const matchingVariant = this.variantSku
             ? this.product.variants.find(v => v.sku === this.variantSku) || this.product.variants[0]
@@ -202,11 +204,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     this.cartService.addToCart(cartItem).subscribe({
       next: (response) => {
         this.isAddingToCart = false;
-        if (response.error) {
-          this.toastService.showToast(response.error, 'error');
-        } else {
-          this.toastService.showToast('Producto añadido al carrito exitosamente', 'success');
-        }
+        this.toastService.showToast('Producto añadido al carrito exitosamente', 'success');
       },
       error: (error) => {
         this.isAddingToCart = false;
@@ -246,6 +244,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       quantity: this.quantity,
       unit_price: this.selectedVariant.calculated_price,
       urgent_delivery_fee: this.isUrgent && this.product?.urgent_delivery_enabled ? this.product.urgent_delivery_cost : 0,
+      discount_applied: 0,
       subtotal: this.quantity * this.selectedVariant.calculated_price,
       unit_measure: 'unidad',
       category_id: this.product!.category?.category_id || 0,
@@ -262,8 +261,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       images: this.selectedVariant.images || [],
       applicable_promotions: []
     };
-
-    console.log('Buy Now Item:', JSON.stringify(buyNowItem, null, 2)); // Log for debugging
 
     this.router.navigate(['/checkout'], {
       state: { buyNowItem }

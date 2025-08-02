@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe, registerLocaleData } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { PromotionService, Promotion, PromotionQueryParams, Variant, VariantQueryParams, PromotionData } from '../../../services/promotion.service';
+import { PromotionService, Promotion, PromotionQueryParams, Variant, VariantQueryParams, PromotionData, ApplyPromotionRequest } from '../../../services/promotion.service';
 import { CategorieService } from '../../../services/categorieService';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';
@@ -57,10 +57,11 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
   confirmModalTitle: string = '';
   confirmModalMessage: string = '';
   confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
+  applyCouponCode: string = '';
 
   private subscriptions: Subscription = new Subscription();
 
-  promotionTypeLabels = {
+  couponTypeLabels = {
     quantity_discount: 'Descuento por Cantidad',
     order_count_discount: 'Descuento por Conteo de Órdenes',
     unit_discount: 'Descuento por Unidad'
@@ -79,22 +80,27 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
 
     this.promotionForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      promotion_type: ['', Validators.required],
+      coupon_type: ['', Validators.required],
       discount_value: ['', [Validators.required, Validators.min(1), Validators.max(100), Validators.pattern('^[0-9]*$')]],
       min_quantity: [{ value: null, disabled: true }, Validators.min(1)],
       min_order_count: [{ value: null, disabled: true }, Validators.min(1)],
       min_unit_measure: [{ value: null, disabled: true }, Validators.min(0)],
+      max_uses: [null, Validators.min(1)],
+      max_uses_per_user: [null, Validators.min(1)],
+      min_order_value: [null, Validators.min(0)],
+      free_shipping_enabled: [false],
       applies_to: ['', Validators.required],
       is_exclusive: [true],
       start_date: ['', [Validators.required, this.dateNotBeforeToday.bind(this)]],
       end_date: ['', Validators.required],
+      coupon_code: ['', [Validators.minLength(3), Validators.maxLength(50)]],
       variantIds: [[]],
       categoryIds: [[]]
     }, {
       validators: this.dateRangeValidator
     });
 
-    this.promotionForm.get('promotion_type')?.valueChanges.subscribe(type => {
+    this.promotionForm.get('coupon_type')?.valueChanges.subscribe(type => {
       this.toggleFieldsBasedOnType(type);
     });
 
@@ -309,7 +315,6 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     this.subscriptions.add(
       this.promotionService.getAllPromotions(params).subscribe({
         next: (response) => {
-          console.log(response)
           this.promotions = response.promotions;
           this.totalPromotions = response.total;
           this.totalPages = Math.ceil(response.total / this.itemsPerPage);
@@ -370,9 +375,14 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
       this.categorySearchTerm = '';
       this.promotionForm.reset({
         is_exclusive: true,
+        free_shipping_enabled: false,
         min_quantity: null,
         min_order_count: null,
         min_unit_measure: null,
+        max_uses: null,
+        max_uses_per_user: null,
+        min_order_value: null,
+        coupon_code: '',
         variantIds: [],
         categoryIds: []
       });
@@ -388,27 +398,30 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
         this.promotionService.getPromotionById(promotion.promotion_id).subscribe({
           next: (response) => {
             const promo = response.promotion;
-            this.selectedVariantIds = (promo as any).variantIds?.map((v: any) => v.variant_id) || 
-                                     promo.ProductVariants?.map(v => v.variant_id) || [];
-            this.selectedCategoryIds = (promo as any).categoryIds?.map((c: any) => c.category_id) || 
-                                      promo.Categories?.map(c => c.category_id) || [];
+            this.selectedVariantIds = promo.ProductVariants?.map(v => v.variant_id) || [];
+            this.selectedCategoryIds = promo.Categories?.map(c => c.category_id) || [];
             this.variantSearchTerm = '';
             this.categorySearchTerm = '';
             this.promotionForm.patchValue({
               name: promo.name,
-              promotion_type: promo.promotion_type,
+              coupon_type: promo.coupon_type,
               discount_value: promo.discount_value,
               min_quantity: promo.min_quantity,
               min_order_count: promo.min_order_count,
               min_unit_measure: promo.min_unit_measure,
+              max_uses: promo.max_uses,
+              max_uses_per_user: promo.max_uses_per_user,
+              min_order_value: promo.min_order_value,
+              free_shipping_enabled: promo.free_shipping_enabled,
               applies_to: promo.applies_to,
               is_exclusive: promo.is_exclusive,
               start_date: this.formatDateForInput(promo.start_date),
               end_date: this.formatDateForInput(promo.end_date),
+              coupon_code: promo.coupon_code || '',
               variantIds: this.selectedVariantIds,
               categoryIds: this.selectedCategoryIds
             });
-            this.toggleFieldsBasedOnType(promo.promotion_type);
+            this.toggleFieldsBasedOnType(promo.coupon_type);
             this.filterVariants('');
             this.filterCategories('');
             this.promotionModal.title = 'Editar Promoción';
@@ -440,21 +453,26 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
 
     const promotionData: PromotionData = {
       name: this.promotionForm.value.name,
-      promotion_type: this.promotionForm.value.promotion_type,
+      coupon_type: this.promotionForm.value.coupon_type,
       discount_value: this.promotionForm.value.discount_value,
+      max_uses: this.promotionForm.value.max_uses,
+      max_uses_per_user: this.promotionForm.value.max_uses_per_user,
+      min_order_value: this.promotionForm.value.min_order_value,
+      free_shipping_enabled: this.promotionForm.value.free_shipping_enabled,
       applies_to: this.promotionForm.value.applies_to,
       is_exclusive: this.promotionForm.value.is_exclusive,
       start_date: this.promotionForm.value.start_date,
       end_date: this.promotionForm.value.end_date,
+      coupon_code: this.promotionForm.value.coupon_code || null
     };
 
-    if (this.promotionForm.value.promotion_type === 'quantity_discount') {
+    if (this.promotionForm.value.coupon_type === 'quantity_discount') {
       promotionData.min_quantity = this.promotionForm.value.min_quantity;
     }
-    if (this.promotionForm.value.promotion_type === 'order_count_discount') {
+    if (this.promotionForm.value.coupon_type === 'order_count_discount') {
       promotionData.min_order_count = this.promotionForm.value.min_order_count;
     }
-    if (this.promotionForm.value.promotion_type === 'unit_discount') {
+    if (this.promotionForm.value.coupon_type === 'unit_discount') {
       promotionData.min_unit_measure = this.promotionForm.value.min_unit_measure;
     }
 
@@ -484,6 +502,35 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
         },
         error: (err) => {
           const errorMessage = err?.error?.message || 'Error al guardar la promoción';
+          this.toastService.showToast(errorMessage, 'error');
+        }
+      })
+    );
+  }
+
+  applyPromotionToCart(promotionId: number | null, couponCode: string) {
+    if (!promotionId && !couponCode) {
+      this.toastService.showToast('Debe proporcionar un ID de promoción o un código de cupón', 'error');
+      return;
+    }
+
+    const request: ApplyPromotionRequest = {
+      promotion_id: promotionId || undefined,
+      coupon_code: couponCode || undefined
+    };
+
+    this.subscriptions.add(
+      this.promotionService.applyPromotion(request).subscribe({
+        next: (response) => {
+          this.toastService.showToast(
+            `Promoción aplicada al carrito: ${response.coupon_code || 'Promoción sin código'}. Descuento: ${response.total_discount}`,
+            'success'
+          );
+          this.applyCouponCode = '';
+          this.loadPromotions();
+        },
+        error: (err) => {
+          const errorMessage = err?.error?.message || 'Error al aplicar la promoción';
           this.toastService.showToast(errorMessage, 'error');
         }
       })
@@ -545,9 +592,14 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     this.categorySearchTerm = '';
     this.promotionForm.reset({
       is_exclusive: true,
+      free_shipping_enabled: false,
       min_quantity: null,
       min_order_count: null,
       min_unit_measure: null,
+      max_uses: null,
+      max_uses_per_user: null,
+      min_order_value: null,
+      coupon_code: '',
       variantIds: [],
       categoryIds: []
     });

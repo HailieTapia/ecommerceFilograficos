@@ -20,8 +20,7 @@
         <!-- Left Column - Product Images -->
         <div class="space-y-4">
           <!-- Main Product Image -->
-          <div
-            class="relative bg-gradient-to-br from-green-50 to-amber-50 dark:from-green-900 dark:to-amber-900 rounded-lg p-4 aspect-square">
+          <div class="relative bg-gradient-to-br from-green-50 to-amber-50 dark:from-green-900 dark:to-amber-900 rounded-lg p-4 aspect-square">
             <div class="absolute inset-0 flex items-center justify-center">
               <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'"
                 alt="{{ product.name }}" class="w-full h-full object-contain opt-contain">
@@ -51,8 +50,7 @@
         <div class="space-y-6">
           <!-- Product Title, Stock, and Review Summary -->
           <div>
-            <p class="text-sm text-gray-600 dark:text-dark-secondary mb-2">{{ product.category?.name || 'Sin categoría'
-              }}</p>
+            <p class="text-sm text-gray-600 dark:text-dark-secondary mb-2">{{ product.category?.name || 'Sin categoría' }}</p>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text mb-2">
               {{ product.name || 'Producto sin nombre' }}
               <span *ngIf="selectedVariant" class="ml-2 bg-green-100 dark:bg-green-900 text-xs px-2 py-1 rounded"
@@ -145,8 +143,7 @@
               <label class="flex items-center gap-2" *ngIf="product.urgent_delivery_enabled">
                 <input type="checkbox" [(ngModel)]="isUrgent" [value]="true" (change)="selectVariant(selectedVariant!)"
                   class="text-green-700 dark:text-green-600 focus:ring-green-500 dark:focus:ring-green-400">
-                Urgente: {{ product.urgent_delivery_days || 0 }} días naturales, +${{
-                formatPrice(product.urgent_delivery_cost || 0) }}
+                Urgente: {{ product.urgent_delivery_days || 0 }} días naturales, +${{ formatPrice(product.urgent_delivery_cost || 0) }}
               </label>
             </div>
             <p class="text-sm text-gray-600 dark:text-dark-secondary mt-2">
@@ -237,17 +234,16 @@
         <div *ngIf="activeTab === 'additional' && selectedVariant">
           <div class="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden">
             <div class="grid grid-cols-2 gap-0">
-              <div
-                class="bg-light-table-header dark:bg-dark-table-header text-light-text dark:text-dark-text p-3 font-semibold">
-                Atributo</div>
-              <div
-                class="bg-light-table-header dark:bg-dark-table-header text-light-text dark:text-dark-text p-3 font-semibold">
-                Detalles</div>
+              <div class="bg-light-table-header dark:bg-dark-table-header text-light-text dark:text-dark-text p-3 font-semibold">
+                Atributo
+              </div>
+              <div class="bg-light-table-header dark:bg-dark-table-header text-light-text dark:text-dark-text p-3 font-semibold">
+                Detalles
+              </div>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-600">
               <div class="grid grid-cols-2 gap-0" *ngFor="let attr of selectedVariant.attributes">
-                <div class="p-3 bg-gray-100 dark:bg-gray-600 font-medium text-light-text dark:text-dark-text">{{
-                  attr.attribute_name }}</div>
+                <div class="p-3 bg-gray-100 dark:bg-gray-600 font-medium text-light-text dark:text-dark-text">{{ attr.attribute_name }}</div>
                 <div class="p-3 text-light-text dark:text-dark-text">{{ attr.value }}</div>
               </div>
             </div>
@@ -257,8 +253,7 @@
     </div>
 
     <!-- Reviews Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mx-4 p-6"
-      *ngIf="reviewSummary && reviewSummary.totalReviews > 0">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mx-4 p-6" *ngIf="reviewSummary && reviewSummary.totalReviews > 0">
       <h2 class="text-xl font-bold text-gray-900 dark:text-dark-text mb-4">Opiniones del producto</h2>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Rating Summary (1/4 width on md and up) -->
@@ -271,8 +266,7 @@
               <div class="flex items-center gap-1">
                 <i *ngFor="let i of [1,2,3,4,5]" class="fas fa-star text-yellow-400"></i>
               </div>
-              <p class="text-sm text-gray-600 dark:text-dark-secondary">{{ reviewSummary.totalReviews }} calificaciones
-              </p>
+              <p class="text-sm text-gray-600 dark:text-dark-secondary">{{ reviewSummary.totalReviews }} calificaciones</p>
             </div>
           </div>
           <!-- Rating Distribution -->
@@ -280,8 +274,7 @@
             <div *ngFor="let rating of [5, 4, 3, 2, 1]; let i = index" class="flex items-center gap-2 mb-2">
               <span class="text-sm text-gray-600 dark:text-dark-secondary">{{ rating }} ★</span>
               <div class="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
-                <div class="bg-light-primary dark:bg-dark-primary h-2.5 rounded-full"
-                  [style.width]="getRatingDistributionWidths()[i] + '%'"></div>
+                <div class="bg-light-primary dark:bg-dark-primary h-2.5 rounded-full" [style.width]="getRatingDistributionWidths()[i] + '%'"></div>
               </div>
             </div>
           </div>

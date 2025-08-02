@@ -13,6 +13,7 @@ export interface PaymentInstructions {
   clabe?: string;
   amount: number;
   instructions: string;
+  payment_url?: string;
 }
 
 // Interfaz para los detalles de personalización
@@ -76,12 +77,14 @@ export interface OrderResponse {
       created_at: string;
       estimated_delivery_date: string;
       delivery_days: number;
-      delivery_option: 'home_delivery' | 'pickup_point' | 'store_pickup' | null;
+      delivery_option: 'Entrega a Domicilio' | 'Puntos de Entrega' | 'Recoger en Tienda' | null;
       total: number;
       subtotal: number;
       discount: number;
+      total_discount: number;
       shipping_cost: number;
       total_urgent_cost: number;
+      coupon_code: string | null;
     };
     items: OrderDetail[];
     address: Address | null;
@@ -98,14 +101,16 @@ export interface OrdersResponse {
     orders: {
       order_id: number;
       total: number;
+      total_discount: number;
       order_status: 'pending' | 'processing' | 'shipped' | 'delivered';
       payment_status: 'pending' | 'validated' | 'failed';
       created_at: string;
       estimated_delivery_date: string;
       delivery_days: number;
-      delivery_option: 'home_delivery' | 'pickup_point' | 'store_pickup' | null;
+      delivery_option: 'Entrega a Domicilio' | 'Puntos de Entrega' | 'Recoger en Tienda' | null;
       total_items: number;
       order_details: OrderDetail[];
+      coupon_code: string | null;
     }[];
     pagination: {
       totalOrders: number;
@@ -116,6 +121,45 @@ export interface OrdersResponse {
   };
 }
 
+// Interfaz para la solicitud de creación de orden
+export interface CreateOrderRequest {
+  payment_method: string;
+  delivery_option: 'Entrega a Domicilio' | 'Puntos de Entrega' | 'Recoger en Tienda';
+  address_id?: number;
+  coupon_code?: string;
+  item?: {
+    product_id: number;
+    variant_id: number;
+    quantity: number;
+    option_id?: number;
+    is_urgent: boolean;
+  };
+}
+
+// Interfaz para la respuesta de creación de orden
+export interface CreateOrderResponse {
+  success: boolean;
+  message: string;
+  data: {
+    order_id: number;
+    total: number;
+    total_urgent_cost: number;
+    discount: number;
+    shipping_cost: number;
+    estimated_delivery_date: string;
+    payment_instructions: PaymentInstructions;
+    status: string;
+    coupon_code: string | null;
+  };
+}
+
+// Interfaz para las opciones de envío
+export interface ShippingOption {
+  id: string;
+  name: string;
+  cost: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -124,7 +168,6 @@ export class OrderService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-  // Manejo de errores
   private handleError(error: HttpErrorResponse): Observable<never> {
     let message = 'Error en la comunicación con el servidor';
     if (error.status === 400) {
@@ -138,31 +181,33 @@ export class OrderService {
     return throwError(() => new Error(message));
   }
 
-  // Crear una nueva orden
-  createOrder(data: any, item?: any): Observable<any> {
-    const payload = item ? { ...data, item } : data;
+  createOrder(data: CreateOrderRequest): Observable<CreateOrderResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post(`${this.apiUrl}/create`, payload, { headers, withCredentials: true });
-      })
+        return this.http.post<CreateOrderResponse>(
+          `${this.apiUrl}/create`,
+          data,
+          { headers, withCredentials: true }
+        );
+      }),
+      catchError(this.handleError)
     );
   }
 
-  // Obtener los detalles de una orden específica por ID
-  getOrderById(orderId: number): Observable<any> {
+  getOrderById(orderId: number): Observable<OrderResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<any>(
+        return this.http.get<OrderResponse>(
           `${this.apiUrl}/${orderId}`,
           { headers, withCredentials: true }
         );
       }),
-    )
+      catchError(this.handleError)
+    );
   }
 
-  // Obtener la lista paginada de órdenes con filtros opcionales
   getOrders(
     page: number = 1,
     pageSize: number = 10,
@@ -192,13 +237,17 @@ export class OrderService {
       catchError(this.handleError)
     );
   }
-  // Función para obtener el perfil del usuario autenticado
-  getShippingOptions(): Observable<any> {
+
+  getShippingOptions(): Observable<{ success: boolean; data: ShippingOption[] }> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get(`${this.apiUrl}/shippingOptions`, { headers, withCredentials: true });
-      })
+        return this.http.get<{ success: boolean; data: ShippingOption[] }>(
+          `${this.apiUrl}/shippingOptions`,
+          { headers, withCredentials: true }
+        );
+      }),
+      catchError(this.handleError)
     );
   }
 }

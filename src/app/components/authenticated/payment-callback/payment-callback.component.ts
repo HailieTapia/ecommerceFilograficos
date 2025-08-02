@@ -1,47 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { OrderService } from '../../../services/order.service';
+import { OrderService, OrderResponse } from '../../../services/order.service';
+import { PromotionService, Promotion } from '../../../services/promotion.service';
 import { ToastService } from '../../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { CommonModule } from '@angular/common';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-payment-callback',
   standalone: true,
   imports: [CommonModule, SpinnerComponent],
-  template: `
-    <app-spinner [isLoading]="isLoading"></app-spinner>
-    <div *ngIf="!isLoading" class="max-w-5xl mx-auto py-10 px-5 bg-light-background dark:bg-dark-background min-h-screen font-sans">
-      <div *ngIf="paymentStatus === 'success'" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-        <h1 class="text-2xl font-bold text-light-text dark:text-dark-text">¡Pago exitoso!</h1>
-        <p class="text-light-secondary dark:text-dark-secondary mt-4">Tu orden está siendo procesada. Serás redirigido a la confirmación.</p>
-      </div>
-      <div *ngIf="paymentStatus === 'pending'" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-        <h1 class="text-2xl font-bold text-light-text dark:text-dark-text">Pago pendiente</h1>
-        <p class="text-light-secondary dark:text-dark-secondary mt-4">Tu pago está en proceso. Por favor, verifica más tarde.</p>
-        <button (click)="goToOrders()" class="mt-4 bg-light-primary dark:bg-dark-primary text-white py-2 px-4 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
-          Ver Mis Órdenes
-        </button>
-      </div>
-      <div *ngIf="paymentStatus === 'failure'" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center">
-        <h1 class="text-2xl font-bold text-light-text dark:text-dark-text">Pago fallido</h1>
-        <p class="text-light-secondary dark:text-dark-secondary mt-4">Hubo un problema con tu pago. Intenta de nuevo.</p>
-        <button (click)="goToCheckout()" class="mt-4 bg-light-primary dark:bg-dark-primary text-white py-2 px-4 rounded-full hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
-          Volver a Pagar
-        </button>
-      </div>
-    </div>
-  `,
+  templateUrl: './payment-callback.component.html',
   styleUrls: ['./payment-callback.component.css']
 })
-export class PaymentCallbackComponent implements OnInit {
+export class PaymentCallbackComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   isLoading: boolean = true;
   paymentStatus: 'success' | 'pending' | 'failure' | null = null;
   orderId: number | null = null;
+  orderDetails: OrderResponse['data'] | null = null;
+  appliedPromotion: Promotion | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private orderService: OrderService,
+    private promotionService: PromotionService,
     private toastService: ToastService,
     private router: Router
   ) { }
@@ -50,31 +35,37 @@ export class PaymentCallbackComponent implements OnInit {
     const status = this.route.snapshot.queryParams['status'];
     this.orderId = this.route.snapshot.queryParams['external_reference'] ? +this.route.snapshot.queryParams['external_reference'] : null;
 
-    if (!status || !this.orderId) {
+    if (!status || !this.orderId || isNaN(this.orderId)) {
       this.toastService.showToast('Datos de pago no válidos.', 'error');
       this.router.navigate(['/orders']);
       return;
     }
 
     this.isLoading = true;
-    this.orderService.getOrderById(this.orderId).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        const orderPaymentStatus = response.data.order?.payment_status;
+    this.orderService.getOrderById(this.orderId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response: OrderResponse) => {
+        this.orderDetails = response.data;
         const paymentStatus = response.data.payment?.status;
 
-        this.paymentStatus = orderPaymentStatus === 'approved' ? 'success' :
-          ['pending', 'in_process'].includes(orderPaymentStatus) ? 'pending' :
-            ['rejected', 'failed'].includes(orderPaymentStatus) ? 'failure' : null;
+        // Map payment status to component state
+        this.paymentStatus = paymentStatus === 'approved' ? 'success' :
+          ['pending', 'in_process'].includes(paymentStatus) ? 'pending' :
+            ['rejected', 'failed'].includes(paymentStatus) ? 'failure' : 'pending';
 
-        if (!this.paymentStatus && status === 'approved') {
-          this.paymentStatus = 'success';
-        } else if (!this.paymentStatus) {
-          this.paymentStatus = 'pending';
-        }
-
-        if (this.paymentStatus === 'success') {
-          this.router.navigate(['/order-confirmation', this.orderId]);
+        // If a coupon was applied, fetch promotion details
+        if (response.data.order.coupon_code) {
+          this.promotionService.getAvailablePromotions().pipe(takeUntil(this.destroy$)).subscribe({
+            next: (promotionResponse) => {
+              this.appliedPromotion = promotionResponse.promotions.find(p => p.coupon_code === response.data.order.coupon_code) || null;
+              this.completePaymentProcessing();
+            },
+            error: (error) => {
+              console.error('Error fetching promotion details:', error);
+              this.completePaymentProcessing();
+            }
+          });
+        } else {
+          this.completePaymentProcessing();
         }
       },
       error: (error) => {
@@ -85,11 +76,45 @@ export class PaymentCallbackComponent implements OnInit {
     });
   }
 
+  private completePaymentProcessing(): void {
+    this.isLoading = false;
+    if (this.paymentStatus === 'success') {
+      this.toastService.showToast('¡Pago procesado exitosamente!', 'success');
+      setTimeout(() => {
+        this.router.navigate(['/order-confirmation', this.orderId]);
+      }, 3000);
+    } else if (this.paymentStatus === 'pending') {
+      this.toastService.showToast('Tu pago está en proceso. Verifica el estado en tus órdenes.', 'info');
+    } else if (this.paymentStatus === 'failure') {
+      this.toastService.showToast('Hubo un problema con tu pago. Intenta de nuevo.', 'error');
+    }
+  }
+
+  // Helper method to safely access order total
+  getOrderTotal(): string {
+    return this.orderDetails?.order?.total ? this.orderDetails.order.total.toFixed(2) : 'N/A';
+  }
+
+  // Helper method to safely access order discount
+  getOrderDiscount(): string {
+    return this.orderDetails?.order?.total_discount ? this.orderDetails.order.total_discount.toFixed(2) : '0.00';
+  }
+
+  // Helper method to check if discount is applied
+  hasDiscount(): boolean {
+    return this.orderDetails?.order?.total_discount ? this.orderDetails.order.total_discount > 0 : false;
+  }
+
   goToOrders(): void {
     this.router.navigate(['/orders']);
   }
 
   goToCheckout(): void {
-    this.router.navigate(['/checkout']);
+    this.router.navigate(['/checkout'], { state: { orderId: this.orderId } });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, of, throwError} from 'rxjs';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
-import { CsrfService } from '../services/csrf.service';
+import { CsrfService } from './csrf.service';
 import { AuthService } from './auth.service';
 import { environment } from '../environments/config';
 
@@ -17,12 +17,13 @@ export interface CartItem {
   quantity: number;
   unit_price: number;
   urgent_delivery_fee: number;
+  discount_applied: number;
   subtotal: number;
   unit_measure: string;
   category_id: number;
   is_urgent: boolean;
   urgent_delivery_cost: number;
-  urgent_delivery_enabled: boolean; // Nuevo campo
+  urgent_delivery_enabled: boolean;
   standard_delivery_days: number;
   urgent_delivery_days: number | null;
   customization: { option_id: number; option_type: string; description: string } | null;
@@ -31,27 +32,31 @@ export interface CartItem {
     promotion_id: number;
     name: string;
     discount_value: number;
-    promotion_type: string;
+    coupon_type: string;
+    coupon_code: string | null;
   }[];
   isUpdating?: boolean;
   updateError?: string | null;
 }
 
-export interface Promotion {
+export interface CartPromotion {
   promotion_id: number;
   name: string;
-  promotion_type: string;
+  coupon_type: string;
   discount_value: string;
   is_applicable: boolean;
   progress_message: string;
+  coupon_code: string | null;
 }
 
 export interface CartResponse {
   items: CartItem[];
   total: number;
+  total_discount: number;
   total_urgent_delivery_fee: number;
   estimated_delivery_days: number;
-  promotions: Promotion[];
+  coupon_code: string | null;
+  promotions: CartPromotion[];
 }
 
 export interface AddToCartRequest {
@@ -60,12 +65,14 @@ export interface AddToCartRequest {
   quantity: number;
   option_id?: number;
   is_urgent: boolean;
+  coupon_code?: string;
 }
 
 export interface UpdateQuantityRequest {
   cart_detail_id: number;
   quantity: number;
   is_urgent: boolean;
+  coupon_code?: string;
 }
 
 @Injectable({
@@ -81,10 +88,8 @@ export class CartService {
     private http: HttpClient,
     private authService: AuthService
   ) {
-    // Escuchar eventos de login y logout para actualizar el carrito
     this.authService.onLogin().subscribe(() => this.loadInitialCartCount());
     this.authService.onLogout().subscribe(() => this.resetCartCount());
-    // Cargar el conteo inicial solo si está autenticado
     if (this.authService.isLoggedIn()) {
       this.loadInitialCartCount();
     } else {
@@ -92,12 +97,10 @@ export class CartService {
     }
   }
 
-  // Reiniciar el conteo del carrito a 0 (usado en logout o no autenticado)
   private resetCartCount(): void {
     this.cartItemCountSubject.next(0);
   }
 
-  // Cargar el número inicial de ítems en el carrito
   private loadInitialCartCount(): void {
     this.loadCart().subscribe({
       next: (response: CartResponse) => {
@@ -111,33 +114,43 @@ export class CartService {
     });
   }
 
-  // Añadir producto al carrito
-  addToCart(data: AddToCartRequest): Observable<any> {
+  addToCart(data: AddToCartRequest): Observable<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }> {
     if (!this.authService.isLoggedIn()) {
-      return of({ error: 'Usuario no autenticado' });
+      return throwError(() => new Error('Usuario no autenticado'));
     }
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post<any>(`${this.apiUrl}/add`, data, { headers, withCredentials: true }).pipe(
-          tap(() => {
+        return this.http.post<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }>(
+          `${this.apiUrl}/add`,
+          data,
+          { headers, withCredentials: true }
+        ).pipe(
+          tap(response => {
             const quantity = data.quantity || 1;
             const currentCount = this.cartItemCountSubject.getValue();
             this.cartItemCountSubject.next(currentCount + quantity);
           }),
           catchError(error => {
             console.error('Error al añadir al carrito:', error);
-            return of({ error: error.error?.message || 'No se pudo añadir al carrito' });
+            return throwError(() => new Error(error.error?.message || 'No se pudo añadir al carrito'));
           })
         );
       })
     );
   }
 
-  // Obtener detalles del carrito
   loadCart(): Observable<CartResponse> {
     if (!this.authService.isLoggedIn()) {
-      return of({ items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] });
+      return of({
+        items: [],
+        total: 0,
+        total_discount: 0,
+        total_urgent_delivery_fee: 0,
+        estimated_delivery_days: 0,
+        coupon_code: null,
+        promotions: []
+      });
     }
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -149,60 +162,67 @@ export class CartService {
           }),
           catchError(error => {
             console.error('Error al cargar el carrito:', error);
-            return of({ items: [], total: 0, total_urgent_delivery_fee: 0, estimated_delivery_days: 0, promotions: [] });
+            return of({
+              items: [],
+              total: 0,
+              total_discount: 0,
+              total_urgent_delivery_fee: 0,
+              estimated_delivery_days: 0,
+              coupon_code: null,
+              promotions: []
+            });
           })
         );
       })
     );
   }
 
-  // Actualizar cantidad de un ítem
-updateQuantity(data: UpdateQuantityRequest, oldQuantity: number): Observable<any> {
-  if (!this.authService.isLoggedIn()) {
-    return throwError(() => new Error('Usuario no autenticado'));
-  }
-  
-  return this.csrfService.getCsrfToken().pipe(
-    switchMap(csrfToken => {
-      const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-      return this.http.put<any>(`${this.apiUrl}/update`, data, { headers, withCredentials: true }).pipe(
-        tap(() => {
-          const newQuantity = data.quantity || 0;
-          const quantityChange = newQuantity - oldQuantity;
-          const currentCount = this.cartItemCountSubject.getValue();
-          this.cartItemCountSubject.next(currentCount + quantityChange);
-        }),
-        catchError(error => {
-          console.error('Error al actualizar la cantidad:', error);
-          return throwError(() => ({
-            error: error.error?.message || error.message || 'No se pudo actualizar la cantidad',
-            status: error.status
-          }));
-        })
-      );
-    }),
-    catchError(error => {
-      return throwError(() => error);
-    })
-  );
-}
-
-  // Eliminar un ítem del carrito
-  removeItem(cartDetailId: number, quantityToRemove: number): Observable<any> {
+  updateQuantity(data: UpdateQuantityRequest, oldQuantity: number): Observable<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }> {
     if (!this.authService.isLoggedIn()) {
-      return of({ error: 'Usuario no autenticado' });
+      return throwError(() => new Error('Usuario no autenticado'));
+    }
+    
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.put<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }>(
+          `${this.apiUrl}/update`,
+          data,
+          { headers, withCredentials: true }
+        ).pipe(
+          tap(response => {
+            const newQuantity = data.quantity || 0;
+            const quantityChange = newQuantity - oldQuantity;
+            const currentCount = this.cartItemCountSubject.getValue();
+            this.cartItemCountSubject.next(currentCount + quantityChange);
+          }),
+          catchError(error => {
+            console.error('Error al actualizar la cantidad:', error);
+            return throwError(() => new Error(error.error?.message || 'No se pudo actualizar la cantidad'));
+          })
+        );
+      })
+    );
+  }
+
+  removeItem(cartDetailId: number, quantityToRemove: number): Observable<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }> {
+    if (!this.authService.isLoggedIn()) {
+      return throwError(() => new Error('Usuario no autenticado'));
     }
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.delete<any>(`${this.apiUrl}/remove/${cartDetailId}`, { headers, withCredentials: true }).pipe(
-          tap(() => {
+        return this.http.delete<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }>(
+          `${this.apiUrl}/remove/${cartDetailId}`,
+          { headers, withCredentials: true }
+        ).pipe(
+          tap(response => {
             const currentCount = this.cartItemCountSubject.getValue();
             this.cartItemCountSubject.next(currentCount - quantityToRemove);
           }),
           catchError(error => {
             console.error('Error al eliminar el ítem:', error);
-            return of({ error: error.error?.message || 'No se pudo eliminar el ítem' });
+            return throwError(() => new Error(error.error?.message || 'No se pudo eliminar el ítem'));
           })
         );
       })

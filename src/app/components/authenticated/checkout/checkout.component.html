@@ -92,15 +92,25 @@
             </div>
           </div>
 
+          <!-- Cupón -->
+          <div class="mb-5">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Código de cupón
+            </label>
+            <input formControlName="coupon_code" placeholder="Ingresa tu código de cupón"
+                   class="w-full p-3 border border-gray-300 dark:border-[#3d3d3d] rounded-lg bg-white dark:bg-[#3d3d3d] text-gray-800 dark:text-gray-200"
+                   aria-label="Código de cupón">
+          </div>
+
           <!-- Botones -->
           <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-[#3d3d3d]">
             <button (click)="goBackToCart()"
-              class="flex-1 bg-gray-100 dark:bg-[#3d3d3d] text-gray-700 dark:text-gray-300 py-3 px-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 font-ligth"
+              class="flex-1 bg-gray-100 dark:bg-[#3d3d3d] text-gray-700 dark:text-gray-300 py-3 px-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 font-light"
               aria-label="Volver al carrito">
               Volver al carrito
             </button>
             <button type="button" (click)="createOrder()" 
-              class="flex-1 bg-light-primary dark:bg-dark-primary text-white py-3 px-6 rounded-full transition-all duration-200 font-ligth shadow-md hover:shadow-lg transform hover:scale-105"
+              class="flex-1 bg-light-primary dark:bg-dark-primary text-white py-3 px-6 rounded-full transition-all duration-200 font-light shadow-md hover:shadow-lg transform hover:scale-105"
               aria-label="Confirmar orden">
               Confirmar Orden
             </button>
@@ -140,6 +150,14 @@
                 <p *ngIf="item.customization" class="text-xs text-gray-600 dark:text-gray-400">
                   Personalización: {{ item.customization.description }}
                 </p>
+                <div *ngIf="item.applicable_promotions.length > 0" class="mt-1">
+                  <p class="text-xs font-medium text-green-600 dark:text-green-400">Promociones aplicadas:</p>
+                  <ul class="list-disc list-inside text-xs text-green-600 dark:text-green-400">
+                    <li *ngFor="let promo of item.applicable_promotions">
+                      {{ promo.name }} ({{ promo.discount_value }}% descuento, Código: {{ promo.coupon_code || 'Sin código' }})
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -152,28 +170,30 @@
                 ${{ calculateTotals().subtotal.toFixed(2) }}
               </span>
             </div>
-            
+            <div *ngIf="cart.coupon_code" class="flex justify-between items-center">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Cupón aplicado</span>
+              <span class="text-sm font-medium text-green-600 dark:text-green-400">
+                {{ cart.coupon_code }}
+              </span>
+            </div>
             <div *ngIf="calculateTotals().discount > 0" class="flex justify-between items-center">
               <span class="text-sm text-gray-600 dark:text-gray-400">Descuento</span>
               <span class="text-sm font-medium text-green-600 dark:text-green-400">
                 -${{ calculateTotals().discount.toFixed(2) }}
               </span>
             </div>
-            
             <div *ngIf="calculateTotals().total_urgent_cost > 0" class="flex justify-between items-center">
               <span class="text-sm text-gray-600 dark:text-gray-400">Costo urgente</span>
               <span class="text-sm font-medium text-red-600 dark:text-red-400">
                 +${{ calculateTotals().total_urgent_cost.toFixed(2) }}
               </span>
             </div>
-            
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-600 dark:text-gray-400">Envío</span>
               <span class="text-sm font-medium text-gray-800 dark:text-gray-200">
                 ${{ calculateTotals().shipping_cost.toFixed(2) }}
               </span>
             </div>
-            
             <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-[#3d3d3d]">
               <span class="text-lg font-bold text-gray-800 dark:text-gray-200">Total</span>
               <span class="text-xl font-bold text-gray-900 dark:text-white">

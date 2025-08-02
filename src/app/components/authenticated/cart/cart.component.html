@@ -36,7 +36,7 @@
           <div *ngIf="orderCountPromotion" class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900 dark:to-orange-900 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-center gap-2 text-sm">
             <i class="fas fa-gift text-amber-600 dark:text-amber-400 text-sm"></i>
             <p class="text-amber-800 dark:text-amber-200 flex-1" [ngClass]="{'text-green-600 dark:text-green-400': orderCountPromotion.is_applicable}">
-              {{ orderCountPromotion.progress_message }}
+              {{ orderCountPromotion.progress_message }} (Código: {{ orderCountPromotion.coupon_code || 'Sin código' }})
             </p>
             <i class="fas fa-tag text-amber-600 dark:text-amber-400 text-sm"></i>
           </div>
@@ -79,7 +79,7 @@
                   <p class="text-xs font-medium text-green-600 dark:text-green-400">Promociones aplicadas:</p>
                   <ul class="list-disc list-inside text-xs text-green-600 dark:text-green-400">
                     <li *ngFor="let promo of item.applicable_promotions">
-                      {{ promo.name }} ({{ promo.discount_value }}% descuento)
+                      {{ promo.name }} ({{ promo.discount_value }}% descuento, Código: {{ promo.coupon_code || 'Sin código' }})
                     </li>
                   </ul>
                 </div>
