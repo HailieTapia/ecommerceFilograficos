@@ -67,13 +67,29 @@ export interface Payment {
 }
 
 // Interfaz para los totales precalculados
+export interface ApplyCouponResponse {
+  success: boolean;
+  message: string;
+  data: PrecalculatedTotals;
+}
+
 export interface PrecalculatedTotals {
+  subtotal: number; // Add subtotal
   total: number;
   total_discount: number;
   shipping_cost: number;
   total_urgent_delivery_fee: number;
   estimated_delivery_days: number;
-  applied_promotions: { name: string; discount_value: number; coupon_code?: string }[];
+  applied_promotions: { 
+    name: string; 
+    discount_value: number; 
+    coupon_code?: string;
+    coupon_id?: number; // Add if needed
+    promotion_id?: number; // Add if needed
+    coupon_type?: string; // Add if needed
+    is_applicable?: boolean; // Add if needed
+    progress_message?: string; // Add if needed
+  }[];
 }
 
 // Interfaz para la respuesta de los detalles de una orden (getOrderById)

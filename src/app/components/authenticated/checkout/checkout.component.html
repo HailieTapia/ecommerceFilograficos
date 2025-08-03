@@ -185,19 +185,13 @@
           <!-- Totales -->
           <div class="border-t border-gray-200 dark:border-[#3d3d3d] pt-4 space-y-3">
             <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal</span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">Subtotal original</span>
               <span class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                ${{ calculateTotals().subtotal.toFixed(2) }}
+                ${{ calculateTotals().originalSubtotal.toFixed(2) }}
               </span>
             </div>
-            <div *ngIf="cart.coupon_code && couponApplied" class="flex justify-between items-center">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Cupón aplicado</span>
-              <span class="text-sm font-medium text-green-600 dark:text-green-400">
-                {{ cart.coupon_code }}
-              </span>
-            </div>
-            <div *ngIf="calculateTotals().discount > 0" class="flex justify-between items-center">
-              <span class="text-sm text-gray-600 dark:text-gray-400">Descuento</span>
+            <div *ngIf="couponApplied && calculateTotals().discount > 0" class="flex justify-between items-center">
+              <span class="text-sm text-gray-600 dark:text-gray-400">Descuento ({{cart.coupon_code}})</span>
               <span class="text-sm font-medium text-green-600 dark:text-green-400">
                 -${{ calculateTotals().discount.toFixed(2) }}
               </span>
@@ -218,6 +212,11 @@
               <span class="text-lg font-bold text-gray-800 dark:text-gray-200">Total</span>
               <span class="text-xl font-bold text-gray-900 dark:text-white">
                 ${{ calculateTotals().total.toFixed(2) }}
+              </span>
+            </div>
+            <div *ngIf="couponApplied && calculateTotals().discount > 0" class="text-center">
+              <span class="text-sm font-medium text-green-600 dark:text-green-400">
+                ¡Ahorraste ${{ calculateTotals().discount.toFixed(2) }} con el cupón!
               </span>
             </div>
           </div>

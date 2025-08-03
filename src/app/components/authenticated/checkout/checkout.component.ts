@@ -34,6 +34,7 @@ export class CheckoutComponent implements OnInit {
   shippingOptions: ShippingOption[] = [];
   precalculatedTotals: PrecalculatedTotals | null = null;
   couponApplied: boolean = false;
+  originalSubtotal: number = 0;
 
   constructor(
     private userService: UserService,
@@ -57,7 +58,6 @@ export class CheckoutComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.buyNowItem) {
-      // Modo "Comprar Ahora"
       this.cart = {
         items: [this.buyNowItem],
         total: this.buyNowItem.subtotal,
@@ -67,16 +67,15 @@ export class CheckoutComponent implements OnInit {
         total_discount: 0,
         coupon_code: null
       };
+      this.originalSubtotal = this.cart.total;
       this.loadAddresses();
       this.loadShippingOptions();
     } else {
-      // Modo carrito normal
       this.loadCart();
       this.loadAddresses();
       this.loadShippingOptions();
     }
 
-    // Actualizar validación de address_id según delivery_option
     this.orderForm.get('delivery_option')?.valueChanges.subscribe(value => {
       if (value === 'Entrega a Domicilio') {
         this.orderForm.get('address_id')?.setValidators(Validators.required);
@@ -93,7 +92,6 @@ export class CheckoutComponent implements OnInit {
       next: (response) => {
         console.log('Shipping options response:', response);
         this.shippingOptions = response.data || [];
-        // Ensure default delivery_option is valid
         if (this.shippingOptions.length > 0 && !this.shippingOptions.some(option => option.name === this.orderForm.get('delivery_option')?.value)) {
           this.orderForm.patchValue({ delivery_option: this.shippingOptions[0].name });
         }
@@ -111,6 +109,7 @@ export class CheckoutComponent implements OnInit {
     this.cartService.loadCart().subscribe({
       next: (response) => {
         this.cart = response;
+        this.originalSubtotal = this.cart.total;
         this.orderForm.patchValue({
           coupon_code: this.cart.coupon_code || ''
         });
@@ -145,86 +144,96 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
-applyCoupon(): void {
-  const couponCode = this.orderForm.get('coupon_code')?.value;
-  if (!couponCode) {
-    this.toastService.showToast('Por favor, ingresa un código de cupón.', 'error');
-    return;
-  }
-
-  this.isLoading = true;
-  const deliveryOption = this.orderForm.get('delivery_option')?.value;
-
-  // Prepare cart or item for the request
-  let requestBody: any = { coupon_code: couponCode, delivery_option: deliveryOption };
-
-  if (this.buyNowItem) {
-    // Buy Now mode: Send item
-    requestBody.item = {
-      product_id: this.buyNowItem.product_id,
-      variant_id: this.buyNowItem.variant_id,
-      quantity: this.buyNowItem.quantity,
-      option_id: this.buyNowItem.customization?.option_id || undefined,
-      is_urgent: this.buyNowItem.is_urgent
-    };
-  } else {
-    // Normal cart mode: Send cart
-    if (this.cart.items.length === 0) {
-      this.isLoading = false;
-      this.toastService.showToast('El carrito está vacío. Por favor, añade productos.', 'error');
+  applyCoupon(): void {
+    const couponCode = this.orderForm.get('coupon_code')?.value;
+    if (!couponCode) {
+      this.toastService.showToast('Por favor, ingresa un código de cupón.', 'error');
       return;
     }
-    requestBody.cart = {
-      items: this.cart.items.map(item => ({
-        product_id: item.product_id,
-        variant_id: item.variant_id,
-        quantity: item.quantity,
-        option_id: item.customization?.option_id || undefined,
-        is_urgent: item.is_urgent
-      }))
-    };
-  }
 
-  this.orderService.applyCoupon(couponCode, deliveryOption, requestBody.item, requestBody.cart).subscribe({
-    next: (response: ApplyCouponResponse) => {
-      this.isLoading = false;
-      if (response.success) {
-        this.precalculatedTotals = response.data;
-        this.couponApplied = true;
-        this.cart.coupon_code = couponCode;
-        this.cart.total_discount = response.data.total_discount;
-        this.cart.total = response.data.total;
-        this.cart.total_urgent_delivery_fee = response.data.total_urgent_delivery_fee;
-        this.cart.estimated_delivery_days = response.data.estimated_delivery_days;
-        this.shippingCost = response.data.shipping_cost;
-        this.cart.promotions = response.data.applied_promotions.map(promo => ({
-          promotion_id: 0, // Placeholder: Update if backend provides promotion_id
-          name: promo.name,
-          coupon_type: 'percentage', // Placeholder: Update based on actual coupon type
-          discount_value: promo.discount_value.toString(), // Convert to string to match CartPromotion
-          is_applicable: true,
-          progress_message: 'Cupón aplicado exitosamente', // Placeholder message
-          coupon_code: promo.coupon_code || null
-        }));
-        this.toastService.showToast('Cupón aplicado exitosamente.', 'success');
-      } else {
+    this.isLoading = true;
+    const deliveryOption = this.orderForm.get('delivery_option')?.value;
+
+    let requestBody: any = { 
+      coupon_code: couponCode, 
+      delivery_option: deliveryOption,
+      estimated_delivery_days: this.cart.estimated_delivery_days // Enviar los días estimados actuales
+    };
+
+    if (this.buyNowItem) {
+      requestBody.item = {
+        product_id: this.buyNowItem.product_id,
+        variant_id: this.buyNowItem.variant_id,
+        quantity: this.buyNowItem.quantity,
+        option_id: this.buyNowItem.customization?.option_id || undefined,
+        is_urgent: this.buyNowItem.is_urgent
+      };
+    } else {
+      if (this.cart.items.length === 0) {
+        this.isLoading = false;
+        this.toastService.showToast('El carrito está vacío. Por favor, añade productos.', 'error');
+        return;
+      }
+      requestBody.cart = {
+        items: this.cart.items.map(item => ({
+          product_id: item.product_id,
+          variant_id: item.variant_id,
+          quantity: item.quantity,
+          option_id: item.customization?.option_id || undefined,
+          is_urgent: item.is_urgent
+        }))
+      };
+    }
+
+    console.log('Data sent to applyCoupon:', JSON.stringify(requestBody, null, 2));
+
+    this.orderService.applyCoupon(couponCode, deliveryOption, requestBody.item, requestBody.cart).subscribe({
+      next: (response: ApplyCouponResponse) => {
+        console.log('Response from applyCoupon:', JSON.stringify(response, null, 2));
+        this.isLoading = false;
+        if (response.success) {
+          this.precalculatedTotals = response.data;
+          this.originalSubtotal = response.data.subtotal;
+          this.couponApplied = true;
+          this.cart.coupon_code = couponCode;
+          this.cart.total_discount = response.data.total_discount;
+          this.cart.total = response.data.total;
+          this.cart.total_urgent_delivery_fee = response.data.total_urgent_delivery_fee;
+          this.cart.estimated_delivery_days = response.data.estimated_delivery_days;
+          this.shippingCost = response.data.shipping_cost;
+          this.cart.promotions = response.data.applied_promotions.map(promo => ({
+            promotion_id: promo.promotion_id || 0,
+            name: promo.name,
+            coupon_type: promo.coupon_type || 'percentage',
+            discount_value: promo.discount_value.toString(),
+            is_applicable: true,
+            progress_message: promo.progress_message || 'Cupón aplicado exitosamente',
+            coupon_code: promo.coupon_code || null
+          }));
+          this.toastService.showToast('Cupón aplicado exitosamente.', 'success');
+        } else {
+          this.precalculatedTotals = null;
+          this.couponApplied = false;
+          this.cart.coupon_code = null;
+          this.cart.total = this.originalSubtotal;
+          this.cart.total_discount = 0;
+          this.loadCart();
+          this.toastService.showToast(response.message || 'Error al aplicar el cupón.', 'error');
+        }
+      },
+      error: (error) => {
+        console.error('Error from applyCoupon:', error);
+        this.isLoading = false;
         this.precalculatedTotals = null;
         this.couponApplied = false;
         this.cart.coupon_code = null;
-        this.loadCart(); // Reset cart to original state
-        this.toastService.showToast(response.message || 'Error al aplicar el cupón.', 'error');
+        this.cart.total = this.originalSubtotal;
+        this.cart.total_discount = 0;
+        this.loadCart();
+        this.toastService.showToast(error.message || 'Error al aplicar el cupón.', 'error');
       }
-    },
-    error: (error) => {
-      this.isLoading = false;
-      this.precalculatedTotals = null;
-      this.couponApplied = false;
-      this.cart.coupon_code = null;
-      this.loadCart(); // Reset cart to original state
-      this.toastService.showToast(error.message || 'Error al aplicar el cupón.', 'error');
-    }
-  });
-}
+    });
+  }
 
   createOrder(): void {
     if (this.orderForm.invalid) {
@@ -268,10 +277,11 @@ applyCoupon(): void {
     });
   }
 
-  calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
+  calculateTotals(): { subtotal: number; originalSubtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
     if (this.precalculatedTotals && this.couponApplied) {
       return {
         subtotal: this.cart.total,
+        originalSubtotal: this.originalSubtotal,
         discount: this.precalculatedTotals.total_discount,
         total_urgent_cost: this.precalculatedTotals.total_urgent_delivery_fee,
         shipping_cost: this.precalculatedTotals.shipping_cost,
@@ -290,7 +300,14 @@ applyCoupon(): void {
     this.shippingCost = shipping_cost;
     const total_urgent_cost = this.cart.total_urgent_delivery_fee || 0;
     const total = Math.max(0, subtotal + shipping_cost + total_urgent_cost - discount);
-    return { subtotal, discount, total_urgent_cost, shipping_cost, total };
+    return { 
+      subtotal, 
+      originalSubtotal: this.originalSubtotal,
+      discount, 
+      total_urgent_cost, 
+      shipping_cost, 
+      total 
+    };
   }
 
   isAnyItemUrgent(): boolean {
