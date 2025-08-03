@@ -89,9 +89,9 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
       name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       coupon_type: ['', Validators.required],
       discount_value: ['', [Validators.required, Validators.min(0)]],
-      max_uses: [null, Validators.min(1)],
-      max_uses_per_user: [null, Validators.min(1)],
-      min_order_value: [null, Validators.min(0)],
+      max_uses: [null],
+      max_uses_per_user: [null],
+      min_order_value: [null],
       free_shipping_enabled: [{ value: false, disabled: true }],
       applies_to: ['', Validators.required],
       is_exclusive: [true],
@@ -191,12 +191,14 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     );
   }
 
-  getVariantName(variantId: number): string | undefined {
-    return this.availableVariants.find(v => v.variant_id === variantId)?.product_name;
+  getVariantName(variantId: number): string {
+    const variant = this.availableVariants.find(v => v.variant_id === variantId);
+    return variant ? variant.product_name : `Variante ${variantId} (No disponible)`;
   }
 
-  getVariantImage(variantId: number): string | null | undefined {
-    return this.availableVariants.find(v => v.variant_id === variantId)?.image_url;
+  getVariantImage(variantId: number): string {
+    const variant = this.availableVariants.find(v => v.variant_id === variantId);
+    return variant?.image_url || 'assets/default-image.jpg';
   }
 
   getCategoryName(categoryId: number): string | undefined {
@@ -234,10 +236,16 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
       this.filteredVariants = [...this.availableVariants];
     } else {
       const lowerTerm = searchTerm.toLowerCase();
-      this.filteredVariants = this.availableVariants.filter(variant =>
-        variant.product_name.toLowerCase().includes(lowerTerm) || 
-        variant.sku.toLowerCase().includes(lowerTerm)
-      );
+      this.filteredVariants = [
+        ...this.availableVariants.filter(variant =>
+          this.selectedVariantIds.includes(variant.variant_id) ||
+          variant.product_name.toLowerCase().includes(lowerTerm) ||
+          variant.sku.toLowerCase().includes(lowerTerm)
+        )
+      ];
+      this.filteredVariants = Array.from(new Set(this.filteredVariants.map(v => v.variant_id)))
+        .map(id => this.availableVariants.find(v => v.variant_id === id)!)
+        .filter(v => v !== undefined);
     }
   }
 
@@ -392,6 +400,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
       this.toastService.showToast('Error: Modal de promoción no inicializado', 'error');
       return;
     }
+
     if (mode === 'create') {
       this.selectedPromotionId = null;
       this.selectedVariantIds = [];
@@ -428,11 +437,28 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
         this.promotionService.getPromotionById(promotion.promotion_id).subscribe({
           next: (response) => {
             const promo = response.promotion;
-            this.selectedVariantIds = promo.ProductVariants?.map(v => v.variant_id) || [];
-            this.selectedCategoryIds = promo.Categories?.map(c => c.category_id) || [];
-            this.variantSearchTerm = '';
-            this.categorySearchTerm = '';
+            this.selectedVariantIds = (promo.variantIds as any[])?.map((v: { variant_id: number }) => v.variant_id) || [];
+            this.selectedCategoryIds = promo.categoryIds || [];
             this.associateCoupon = !!promo.coupon_code;
+
+            const missingVariants = this.selectedVariantIds.filter(
+              id => !this.availableVariants.some(v => v.variant_id === id)
+            );
+
+            if (missingVariants.length > 0) {
+              this.subscriptions.add(
+                this.promotionService.getAllVariants({ search: missingVariants.join(',') }).subscribe({
+                  next: (response) => {
+                    this.availableVariants = [...this.availableVariants, ...response.variants];
+                    this.filterVariants(this.variantSearchTerm);
+                  },
+                  error: (err) => {
+                    this.toastService.showToast('Error al cargar variantes adicionales', 'error');
+                  }
+                })
+              );
+            }
+
             this.promotionForm.patchValue({
               name: promo.name,
               coupon_type: promo.coupon_type,
@@ -449,14 +475,17 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
               variantIds: this.selectedVariantIds,
               categoryIds: this.selectedCategoryIds
             });
-            this.toggleFieldsBasedOnType(promo.coupon_type);
+
             if (this.associateCoupon) {
               this.promotionForm.get('coupon_code')?.enable();
             } else {
               this.promotionForm.get('coupon_code')?.disable();
             }
-            this.filterVariants('');
-            this.filterCategories('');
+
+            this.toggleFieldsBasedOnType(promo.coupon_type);
+            this.filterVariants(this.variantSearchTerm);
+            this.filterCategories(this.categorySearchTerm);
+
             this.promotionModal.title = 'Editar Promoción';
             this.promotionModal.modalType = 'info';
             this.promotionModal.isConfirmModal = false;
@@ -486,22 +515,35 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
       return;
     }
 
+    // Construir promotionData dinámicamente, excluyendo campos vacíos
     const promotionData: PromotionData = {
       name: this.promotionForm.value.name,
       coupon_type: this.promotionForm.value.coupon_type,
       discount_value: parseFloat(this.promotionForm.value.discount_value) || 0,
-      max_uses: this.promotionForm.value.max_uses ? parseInt(this.promotionForm.value.max_uses) : null,
-      max_uses_per_user: this.promotionForm.value.max_uses_per_user ? parseInt(this.promotionForm.value.max_uses_per_user) : null,
-      min_order_value: this.promotionForm.value.min_order_value ? parseFloat(this.promotionForm.value.min_order_value) : null,
       free_shipping_enabled: this.promotionForm.value.coupon_type === 'free_shipping' ? this.promotionForm.value.free_shipping_enabled : false,
       applies_to: this.promotionForm.value.applies_to,
       is_exclusive: this.promotionForm.value.is_exclusive,
       start_date: new Date(this.promotionForm.value.start_date).toISOString(),
       end_date: new Date(this.promotionForm.value.end_date).toISOString(),
-      coupon_code: this.associateCoupon ? this.promotionForm.value.coupon_code || null : null,
       variantIds: this.promotionForm.value.applies_to === 'specific_products' ? this.selectedVariantIds : [],
       categoryIds: this.promotionForm.value.applies_to === 'specific_categories' ? this.selectedCategoryIds : []
     };
+
+    // Incluir solo los campos que tienen valores válidos
+    if (this.promotionForm.value.max_uses) {
+      promotionData.max_uses = parseInt(this.promotionForm.value.max_uses, 10);
+    }
+    if (this.promotionForm.value.max_uses_per_user) {
+      promotionData.max_uses_per_user = parseInt(this.promotionForm.value.max_uses_per_user, 10);
+    }
+    if (this.promotionForm.value.min_order_value) {
+      promotionData.min_order_value = parseFloat(this.promotionForm.value.min_order_value);
+    }
+    if (this.associateCoupon && this.promotionForm.value.coupon_code) {
+      promotionData.coupon_code = this.promotionForm.value.coupon_code;
+    }
+
+    console.log('Saving promotion with data:', promotionData);
 
     this.subscriptions.add(
       (this.selectedPromotionId
@@ -519,6 +561,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
         },
         error: (err) => {
           const errorMessage = err?.error?.message || 'Error al guardar la promoción';
+          console.error('Error saving promotion:', errorMessage);
           this.toastService.showToast(errorMessage, 'error');
         }
       })

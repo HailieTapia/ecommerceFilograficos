@@ -3,7 +3,7 @@ import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService, CartResponse, CartItem, CartPromotion } from '../../../services/cart.service';
-import { OrderService, CreateOrderRequest, CreateOrderResponse, ShippingOption } from '../../../services/order.service';
+import { OrderService, CreateOrderRequest, CreateOrderResponse, ShippingOption, PrecalculatedTotals, ApplyCouponResponse } from '../../../services/order.service';
 import { ToastService } from '../../../services/toastService';
 import { SpinnerComponent } from '../../reusable/spinner/spinner.component';
 import { UserService } from '../../../services/user.service';
@@ -32,6 +32,8 @@ export class CheckoutComponent implements OnInit {
   orderForm: FormGroup;
   address: any;
   shippingOptions: ShippingOption[] = [];
+  precalculatedTotals: PrecalculatedTotals | null = null;
+  couponApplied: boolean = false;
 
   constructor(
     private userService: UserService,
@@ -143,6 +145,87 @@ export class CheckoutComponent implements OnInit {
     });
   }
 
+applyCoupon(): void {
+  const couponCode = this.orderForm.get('coupon_code')?.value;
+  if (!couponCode) {
+    this.toastService.showToast('Por favor, ingresa un código de cupón.', 'error');
+    return;
+  }
+
+  this.isLoading = true;
+  const deliveryOption = this.orderForm.get('delivery_option')?.value;
+
+  // Prepare cart or item for the request
+  let requestBody: any = { coupon_code: couponCode, delivery_option: deliveryOption };
+
+  if (this.buyNowItem) {
+    // Buy Now mode: Send item
+    requestBody.item = {
+      product_id: this.buyNowItem.product_id,
+      variant_id: this.buyNowItem.variant_id,
+      quantity: this.buyNowItem.quantity,
+      option_id: this.buyNowItem.customization?.option_id || undefined,
+      is_urgent: this.buyNowItem.is_urgent
+    };
+  } else {
+    // Normal cart mode: Send cart
+    if (this.cart.items.length === 0) {
+      this.isLoading = false;
+      this.toastService.showToast('El carrito está vacío. Por favor, añade productos.', 'error');
+      return;
+    }
+    requestBody.cart = {
+      items: this.cart.items.map(item => ({
+        product_id: item.product_id,
+        variant_id: item.variant_id,
+        quantity: item.quantity,
+        option_id: item.customization?.option_id || undefined,
+        is_urgent: item.is_urgent
+      }))
+    };
+  }
+
+  this.orderService.applyCoupon(couponCode, deliveryOption, requestBody.item, requestBody.cart).subscribe({
+    next: (response: ApplyCouponResponse) => {
+      this.isLoading = false;
+      if (response.success) {
+        this.precalculatedTotals = response.data;
+        this.couponApplied = true;
+        this.cart.coupon_code = couponCode;
+        this.cart.total_discount = response.data.total_discount;
+        this.cart.total = response.data.total;
+        this.cart.total_urgent_delivery_fee = response.data.total_urgent_delivery_fee;
+        this.cart.estimated_delivery_days = response.data.estimated_delivery_days;
+        this.shippingCost = response.data.shipping_cost;
+        this.cart.promotions = response.data.applied_promotions.map(promo => ({
+          promotion_id: 0, // Placeholder: Update if backend provides promotion_id
+          name: promo.name,
+          coupon_type: 'percentage', // Placeholder: Update based on actual coupon type
+          discount_value: promo.discount_value.toString(), // Convert to string to match CartPromotion
+          is_applicable: true,
+          progress_message: 'Cupón aplicado exitosamente', // Placeholder message
+          coupon_code: promo.coupon_code || null
+        }));
+        this.toastService.showToast('Cupón aplicado exitosamente.', 'success');
+      } else {
+        this.precalculatedTotals = null;
+        this.couponApplied = false;
+        this.cart.coupon_code = null;
+        this.loadCart(); // Reset cart to original state
+        this.toastService.showToast(response.message || 'Error al aplicar el cupón.', 'error');
+      }
+    },
+    error: (error) => {
+      this.isLoading = false;
+      this.precalculatedTotals = null;
+      this.couponApplied = false;
+      this.cart.coupon_code = null;
+      this.loadCart(); // Reset cart to original state
+      this.toastService.showToast(error.message || 'Error al aplicar el cupón.', 'error');
+    }
+  });
+}
+
   createOrder(): void {
     if (this.orderForm.invalid) {
       this.orderForm.markAllAsTouched();
@@ -151,7 +234,6 @@ export class CheckoutComponent implements OnInit {
     }
 
     this.isLoading = true;
-    const totals = this.calculateTotals();
     const orderData: CreateOrderRequest = {
       payment_method: this.orderForm.value.payment_method,
       delivery_option: this.orderForm.value.delivery_option,
@@ -163,7 +245,8 @@ export class CheckoutComponent implements OnInit {
         quantity: this.buyNowItem.quantity,
         option_id: this.buyNowItem.customization?.option_id || undefined,
         is_urgent: this.buyNowItem.is_urgent
-      } : undefined
+      } : undefined,
+      precalculatedTotals: this.precalculatedTotals || undefined
     };
 
     this.orderService.createOrder(orderData).subscribe({
@@ -186,6 +269,16 @@ export class CheckoutComponent implements OnInit {
   }
 
   calculateTotals(): { subtotal: number; discount: number; total_urgent_cost: number; shipping_cost: number; total: number } {
+    if (this.precalculatedTotals && this.couponApplied) {
+      return {
+        subtotal: this.cart.total,
+        discount: this.precalculatedTotals.total_discount,
+        total_urgent_cost: this.precalculatedTotals.total_urgent_delivery_fee,
+        shipping_cost: this.precalculatedTotals.shipping_cost,
+        total: this.precalculatedTotals.total
+      };
+    }
+
     const subtotal = this.cart.total;
     const discount = this.cart.promotions.reduce((totalDiscount: number, promo: CartPromotion) => {
       if (promo.is_applicable) {

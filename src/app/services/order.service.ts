@@ -66,6 +66,16 @@ export interface Payment {
   instructions: PaymentInstructions;
 }
 
+// Interfaz para los totales precalculados
+export interface PrecalculatedTotals {
+  total: number;
+  total_discount: number;
+  shipping_cost: number;
+  total_urgent_delivery_fee: number;
+  estimated_delivery_days: number;
+  applied_promotions: { name: string; discount_value: number; coupon_code?: string }[];
+}
+
 // Interfaz para la respuesta de los detalles de una orden (getOrderById)
 export interface OrderResponse {
   success: boolean;
@@ -85,6 +95,7 @@ export interface OrderResponse {
       shipping_cost: number;
       total_urgent_cost: number;
       coupon_code: string | null;
+      applied_promotions: { name: string; discount_value: number; coupon_code?: string }[];
     };
     items: OrderDetail[];
     address: Address | null;
@@ -134,6 +145,7 @@ export interface CreateOrderRequest {
     option_id?: number;
     is_urgent: boolean;
   };
+  precalculatedTotals?: PrecalculatedTotals;
 }
 
 // Interfaz para la respuesta de creación de orden
@@ -150,7 +162,15 @@ export interface CreateOrderResponse {
     payment_instructions: PaymentInstructions;
     status: string;
     coupon_code: string | null;
+    applied_promotions: { name: string; discount_value: number; coupon_code?: string }[];
   };
+}
+
+// Interfaz para la respuesta de aplicar cupón
+export interface ApplyCouponResponse {
+  success: boolean;
+  message: string;
+  data: PrecalculatedTotals;
 }
 
 // Interfaz para las opciones de envío
@@ -165,6 +185,7 @@ export interface ShippingOption {
 })
 export class OrderService {
   private apiUrl = `${environment.baseUrl}/order`;
+  private couponApiUrl = `${environment.baseUrl}/order/coupons`;
 
   constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
@@ -179,6 +200,21 @@ export class OrderService {
     }
     console.error('Error en la solicitud:', error);
     return throwError(() => new Error(message));
+  }
+
+  applyCoupon(coupon_code: string, delivery_option: string, item?: CreateOrderRequest['item'], cart?: any): Observable<ApplyCouponResponse> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        const body = { coupon_code, delivery_option, item, cart };
+        return this.http.post<ApplyCouponResponse>(
+          `${this.couponApiUrl}/apply`,
+          body,
+          { headers, withCredentials: true }
+        );
+      }),
+      catchError(this.handleError)
+    );
   }
 
   createOrder(data: CreateOrderRequest): Observable<CreateOrderResponse> {

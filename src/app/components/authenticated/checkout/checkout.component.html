@@ -82,7 +82,8 @@
             </label>
             <select formControlName="delivery_option" 
                     class="w-full p-3 border border-gray-300 dark:border-[#3d3d3d] rounded-lg bg-white dark:bg-[#3d3d3d] text-gray-800 dark:text-gray-200"
-                    aria-label="Método de envío">
+                    aria-label="Método de envío"
+                    (change)="precalculatedTotals = null; couponApplied = false; loadCart()">
               <option *ngFor="let option of shippingOptions" [value]="option.name">
                 {{option.name}} ({{option.cost | currency:'MXN'}})
               </option>
@@ -97,9 +98,19 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Código de cupón
             </label>
-            <input formControlName="coupon_code" placeholder="Ingresa tu código de cupón"
-                   class="w-full p-3 border border-gray-300 dark:border-[#3d3d3d] rounded-lg bg-white dark:bg-[#3d3d3d] text-gray-800 dark:text-gray-200"
-                   aria-label="Código de cupón">
+            <div class="flex gap-2">
+              <input formControlName="coupon_code" placeholder="Ingresa tu código de cupón"
+                     class="flex-1 p-3 border border-gray-300 dark:border-[#3d3d3d] rounded-lg bg-white dark:bg-[#3d3d3d] text-gray-800 dark:text-gray-200"
+                     aria-label="Código de cupón">
+              <button type="button" (click)="applyCoupon()"
+                      class="bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg transition-all duration-200 font-light shadow-md hover:shadow-lg transform hover:scale-105"
+                      aria-label="Aplicar cupón">
+                Aplicar
+              </button>
+            </div>
+            <div *ngIf="couponApplied && cart.coupon_code" class="text-green-500 text-xs mt-1">
+              Cupón aplicado: {{cart.coupon_code}}
+            </div>
           </div>
 
           <!-- Botones -->
@@ -150,12 +161,21 @@
                 <p *ngIf="item.customization" class="text-xs text-gray-600 dark:text-gray-400">
                   Personalización: {{ item.customization.description }}
                 </p>
-                <div *ngIf="item.applicable_promotions.length > 0" class="mt-1">
+                <div *ngIf="(item.applicable_promotions && item.applicable_promotions.length > 0) || (couponApplied && precalculatedTotals && precalculatedTotals.applied_promotions && precalculatedTotals.applied_promotions.length > 0)" class="mt-1">
                   <p class="text-xs font-medium text-green-600 dark:text-green-400">Promociones aplicadas:</p>
                   <ul class="list-disc list-inside text-xs text-green-600 dark:text-green-400">
-                    <li *ngFor="let promo of item.applicable_promotions">
-                      {{ promo.name }} ({{ promo.discount_value }}% descuento, Código: {{ promo.coupon_code || 'Sin código' }})
-                    </li>
+                    <ng-container *ngIf="couponApplied && precalculatedTotals && precalculatedTotals.applied_promotions && precalculatedTotals.applied_promotions.length > 0; else itemPromotions">
+                      <li *ngFor="let promo of precalculatedTotals.applied_promotions">
+                        {{ promo.name }} ({{ promo.discount_value }}% descuento, Código: {{ promo.coupon_code || 'Sin código' }})
+                      </li>
+                    </ng-container>
+                    <ng-template #itemPromotions>
+                      <ng-container *ngIf="item.applicable_promotions && item.applicable_promotions.length > 0">
+                        <li *ngFor="let promo of item.applicable_promotions">
+                          {{ promo.name }} ({{ promo.discount_value }}% descuento, Código: {{ promo.coupon_code || 'Sin código' }})
+                        </li>
+                      </ng-container>
+                    </ng-template>
                   </ul>
                 </div>
               </div>
@@ -170,7 +190,7 @@
                 ${{ calculateTotals().subtotal.toFixed(2) }}
               </span>
             </div>
-            <div *ngIf="cart.coupon_code" class="flex justify-between items-center">
+            <div *ngIf="cart.coupon_code && couponApplied" class="flex justify-between items-center">
               <span class="text-sm text-gray-600 dark:text-gray-400">Cupón aplicado</span>
               <span class="text-sm font-medium text-green-600 dark:text-green-400">
                 {{ cart.coupon_code }}
