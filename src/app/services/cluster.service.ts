@@ -5,6 +5,13 @@ import { switchMap } from 'rxjs/operators';
 import { environment } from '../environments/config';
 import { CsrfService } from './csrf.service';
 
+export interface ClientCluster {
+    user_id: number;
+    cluster: number;
+    created_at: string;
+    updated_at: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -14,31 +21,29 @@ export class ClusterService {
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
     //  Asignar o actualizar el cluster de un cliente
-    setClientCluster(data: FormData): Observable<any> {
+    setClientCluster(data: FormData): Observable<ClientCluster> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.post<any>(`${this.apiUrl}/`, data, { headers, withCredentials: true });
+                return this.http.post<ClientCluster>(`${this.apiUrl}/`, data, { headers, withCredentials: true });
             })
         );
     }
 
-    //  Obtener todos los registros de clústeres
-    getAllClientClusters(): Observable<any> {
+    getAllClientClusters(): Observable<ClientCluster[]> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/`, { headers, withCredentials: true });
+                return this.http.get<ClientCluster[]>(`${this.apiUrl}/`, { headers, withCredentials: true });
             })
         );
     }
 
-    // Obtener un clúster por user_id
-    getClusterByUserId(id: number): Observable<any> {
+    getClusterByUserId(id: number): Observable<ClientCluster> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get(`${this.apiUrl}/${id}`, { headers, withCredentials: true });
+                return this.http.get<ClientCluster>(`${this.apiUrl}/${id}`, { headers, withCredentials: true });
             })
         );
     }
