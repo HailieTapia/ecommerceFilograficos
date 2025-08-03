@@ -5,82 +5,94 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { CsrfService } from './csrf.service';
 import { environment } from '../environments/config';
 
-// Interfaz para tipar las promociones
 export interface Promotion {
   promotion_id: number;
   name: string;
-  coupon_type: 'quantity_discount' | 'order_count_discount' | 'unit_discount';
+  coupon_type: 'percentage_discount' | 'fixed_discount' | 'free_shipping';
   discount_value: number;
-  min_quantity?: number | null;
-  min_order_count?: number | null;
-  min_unit_measure?: number | null;
   max_uses?: number | null;
   max_uses_per_user?: number | null;
   min_order_value?: number | null;
-  free_shipping_enabled?: boolean;
+  free_shipping_enabled: boolean;
   applies_to: 'specific_products' | 'specific_categories' | 'all';
   is_exclusive: boolean;
   start_date: string;
   end_date: string;
-  status: 'active' | 'inactive';
-  created_by?: number;
-  created_at?: string;
-  updated_by?: number | null;
-  updated_at?: string | null;
   coupon_code?: string | null;
-  ProductVariants?: { variant_id: number; sku: string; product_name?: string }[];
-  Categories?: { category_id: number; name: string }[];
+  status_type?: 'current' | 'future' | 'expired';
+  created_by?: number;
+  variantIds?: number[];
+  categoryIds?: number[];
   product_variants_count?: number;
   category_count?: number;
+  created_at?: string;
+  updated_at?: string | null;
+  ProductVariants?: Variant[];
+  Categories?: { category_id: number; name: string }[];
 }
 
-// Interfaz para los parámetros de consulta de getAllPromotions
+export interface PromotionData {
+  name: string;
+  coupon_type: 'percentage_discount' | 'fixed_discount' | 'free_shipping';
+  discount_value: number;
+  max_uses?: number | null;
+  max_uses_per_user?: number | null;
+  min_order_value?: number | null;
+  free_shipping_enabled: boolean;
+  applies_to: 'specific_products' | 'specific_categories' | 'all';
+  is_exclusive: boolean;
+  start_date: string;
+  end_date: string;
+  coupon_code?: string | null;
+  variantIds?: number[];
+  categoryIds?: number[];
+}
+
+export interface Variant {
+  variant_id: number;
+  product_name: string;
+  sku: string;
+  image_url?: string | null;
+}
+
 export interface PromotionQueryParams {
-  search?: string;
   page?: number;
   pageSize?: number;
   sort?: string;
+  search?: string;
+  statusFilter?: 'current' | 'future' | 'expired' | 'all';
 }
 
-// Interfaz para tipar las variantes
-export interface Variant {
-  variant_id: number;
-  sku: string;
-  product_name: string;
-  image_url: string | null;
-}
-
-// Interfaz para los parámetros de consulta de getAllVariants
 export interface VariantQueryParams {
+  page?: number;
+  pageSize?: number;
   search?: string;
 }
 
-// Interfaz para los datos de creación/actualización de una promoción
-export interface PromotionData {
-  name: string;
-  coupon_type: 'quantity_discount' | 'order_count_discount' | 'unit_discount';
-  discount_value: number;
-  min_quantity?: number | null;
-  min_order_count?: number | null;
-  min_unit_measure?: number | null;
-  max_uses?: number | null;
-  max_uses_per_user?: number | null;
-  min_order_value?: number | null;
-  free_shipping_enabled?: boolean;
-  applies_to: 'specific_products' | 'specific_categories' | 'all';
-  is_exclusive: boolean;
-  start_date: string;
-  end_date: string;
-  status?: 'active' | 'inactive';
-  variantIds?: number[];
-  categoryIds?: number[];
-  coupon_code?: string | null;
-}
-
-// Interfaz para aplicar promoción/cupón
 export interface ApplyPromotionRequest {
   promotion_id?: number;
   coupon_code?: string;
+}
+
+export interface ApplyPromotionResponse {
+  message: string;
+  cart: {
+    cart_id: number;
+    total: number;
+    total_discount: number;
+    coupon_code: string | null;
+  };
+  promotion: {
+    promotion_id: number;
+    name: string;
+    coupon_type: 'percentage_discount' | 'fixed_discount' | 'free_shipping';
+    discount_value: number;
+    coupon_code: string | null;
+    promotion_progress: {
+      message: string;
+      is_eligible: boolean;
+    };
+  };
 }
 
 @Injectable({
@@ -140,6 +152,7 @@ export class PromotionService {
         if (params.page) queryParams.set('page', params.page.toString());
         if (params.pageSize) queryParams.set('pageSize', params.pageSize.toString());
         if (params.sort) queryParams.set('sort', params.sort);
+        if (params.statusFilter) queryParams.set('statusFilter', params.statusFilter);
 
         const url = `${this.apiUrl}/?${queryParams.toString()}`;
         return this.http.get<{
@@ -220,11 +233,11 @@ export class PromotionService {
     );
   }
 
-  applyPromotion(data: ApplyPromotionRequest): Observable<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }> {
+  applyPromotion(data: ApplyPromotionRequest): Observable<ApplyPromotionResponse> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.post<{ message: string; cart_id: number; total: number; total_discount: number; coupon_code: string | null }>(
+        return this.http.post<ApplyPromotionResponse>(
           `${this.apiUrl}/apply`,
           data,
           { headers, withCredentials: true }
@@ -234,11 +247,35 @@ export class PromotionService {
     );
   }
 
-  getAvailablePromotions(): Observable<{ message: string; promotions: Promotion[] }> {
+  getAvailablePromotions(): Observable<{
+    message: string;
+    promotions: Promotion[];
+    promotionProgress: {
+      promotion_id: number;
+      name: string;
+      coupon_type: 'percentage_discount' | 'fixed_discount' | 'free_shipping';
+      discount_value: number;
+      is_applicable: boolean;
+      coupon_code: string | null;
+      progress_message: string;
+    }[];
+  }> {
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
         const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-        return this.http.get<{ message: string; promotions: Promotion[] }>(
+        return this.http.get<{
+          message: string;
+          promotions: Promotion[];
+          promotionProgress: {
+            promotion_id: number;
+            name: string;
+            coupon_type: 'percentage_discount' | 'fixed_discount' | 'free_shipping';
+            discount_value: number;
+            is_applicable: boolean;
+            coupon_code: string | null;
+            progress_message: string;
+          }[];
+        }>(
           `${this.apiUrl}/available`,
           { headers, withCredentials: true }
         );
