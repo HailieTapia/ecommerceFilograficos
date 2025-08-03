@@ -1,19 +1,35 @@
 <div class="p-6 bg-gray-50 min-h-screen">
   <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Gestión de Segmentación de Clientes</h1>
 
+  <!-- Select para elegir un clúster -->
+  <div class="mb-6 flex justify-center items-center space-x-4">
+    <select [(ngModel)]="selectedClusterId" (ngModelChange)="onClusterSelect($event)"
+      class="border border-gray-300 rounded-lg p-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option [ngValue]="null">Selecciona un clúster</option>
+      <option *ngFor="let cluster of clusters" [ngValue]="cluster.clusterId">
+        Clúster {{ cluster.clusterId }} ({{ cluster.count }} usuarios)
+      </option>
+    </select>
+    <button (click)="applyActionToCluster()"
+      class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+      [disabled]="selectedClusterId === null">
+      Aplicar acción
+    </button>
+  </div>
+
   <div *ngIf="loading" class="text-center text-gray-600">Cargando clústeres...</div>
   <div *ngIf="error" class="text-center text-red-500">{{ error }}</div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6" *ngIf="!loading && !error">
-    <div *ngFor="let clusterId of [0, 1, 2]">
+    <div *ngFor="let cluster of clusters">
       <div class="bg-white shadow-lg rounded-2xl p-4 border border-gray-200">
         <h2 class="text-xl font-semibold text-gray-700 mb-2">
-          Clúster {{ clusterId }}
+          Clúster {{ cluster.clusterId }}
         </h2>
-        <p class="text-gray-600 mb-4">Total de usuarios: {{ clusterCounts[clusterId] }}</p>
-        <div *ngIf="clusters[clusterId].length > 0; else emptyCluster">
+        <p class="text-gray-600 mb-4">Total de usuarios: {{ cluster.count }}</p>
+        <div *ngIf="cluster.clients.length > 0; else emptyCluster">
           <ul class="divide-y divide-gray-100 max-h-96 overflow-y-auto pr-2">
-            <li *ngFor="let client of clusters[clusterId]" class="py-2 flex justify-between items-center">
+            <li *ngFor="let client of cluster.clients" class="py-2 flex justify-between items-center">
               <span class="text-gray-800 font-medium">ID: {{ client.user_id }}</span>
               <span class="text-sm text-gray-500">{{ client.created_at | date:'short' }}</span>
             </li>

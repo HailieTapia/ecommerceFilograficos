@@ -11,6 +11,11 @@ export interface ClientCluster {
     created_at: string;
     updated_at: string;
 }
+export interface ClusterGroup {
+  clusterId: number;
+  count: number;
+  clients: ClientCluster[];
+}
 
 @Injectable({
     providedIn: 'root'
@@ -20,7 +25,6 @@ export class ClusterService {
 
     constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
-    //  Asignar o actualizar el cluster de un cliente
     setClientCluster(data: FormData): Observable<ClientCluster> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
@@ -30,11 +34,11 @@ export class ClusterService {
         );
     }
 
-    getAllClientClusters(): Observable<ClientCluster[]> {
+    getAllClientClusters(): Observable<ClusterGroup[]> {
         return this.csrfService.getCsrfToken().pipe(
             switchMap(csrfToken => {
                 const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-                return this.http.get<ClientCluster[]>(`${this.apiUrl}/`, { headers, withCredentials: true });
+                return this.http.get<ClusterGroup[]>(`${this.apiUrl}/`, { headers, withCredentials: true });
             })
         );
     }
