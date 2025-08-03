@@ -53,7 +53,8 @@ export class SidebarComponent implements OnInit {
         { path: '/product-catalog', icon: 'fa-box', label: 'Catálogo de productos', badge: null },
         { path: '/product-stock', icon: 'fa-warehouse', label: 'Inventario de productos', badge: null },
         { path: '/price-management', icon: 'fa-dollar-sign', label: 'Gestión de precios de productos', badge: null },
-        { path: '/promotion-management', icon: 'fa-tag', label: 'Gestión de promociones', badge: null }
+        { path: '/promotion-management', icon: 'fa-tag', label: 'Gestión de promociones', badge: null },
+        { path: '/clusters', icon: 'fa-tag', label: 'Gestión de cupones', badge: null }
       ]
     },
     {

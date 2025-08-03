@@ -1,0 +1,24 @@
+<div *ngIf="loading">Cargando clústeres...</div>
+<div *ngIf="error">{{ error }}</div>
+
+<div *ngIf="!loading && !error">
+  <h2>Clientes y sus Clústeres</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ID de Usuario</th>
+        <th>Clúster</th>
+        <th>Creado</th>
+        <th>Actualizado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of clientClusters">
+        <td>{{ item.user_id }}</td>
+        <td>{{ item.cluster }}</td>
+        <td>{{ item.created_at | date:'medium' }}</td>
+        <td>{{ item.updated_at | date:'medium' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

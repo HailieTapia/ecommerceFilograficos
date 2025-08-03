@@ -46,6 +46,7 @@ import { PriceManagementComponent } from './components/administrator/price-manag
 import { PromotionManagementComponent } from './components/administrator/promotion-management/promotion-management.component';
 import { BackupManagementComponent } from './components/administrator/backup-management/backup-management.component';
 import { AdminOrderComponent } from './components/administrator/admin-order/admin-order.component';
+import { ClusterComponent } from './components/administrator/cluster/cluster.component';
 
 // Errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -75,6 +76,7 @@ export const routes: Routes = [
   { path: 'promotion-management', component: PromotionManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de promociones' } },
   { path: 'backup-management', component: BackupManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de respaldos' } },
   { path: 'dashboard-orders', component: AdminOrderComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de ordenes' } },
+  { path: 'clusters', component: ClusterComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Clustering' } },
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
