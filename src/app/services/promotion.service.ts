@@ -23,6 +23,7 @@ export interface Promotion {
   created_by?: number;
   variantIds?: number[];
   categoryIds?: number[];
+  restrict_to_cluster: boolean;
   cluster_id?: number;
   product_variants_count?: number;
   category_count?: number;
@@ -47,6 +48,7 @@ export interface PromotionData {
   coupon_code?: string | null;
   variantIds?: number[];
   categoryIds?: number[];
+  restrict_to_cluster: boolean;
   cluster_id?: number;
 }
 
