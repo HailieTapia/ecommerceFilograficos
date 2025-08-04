@@ -140,7 +140,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
         this.clusters = res;
       },
       error: (err) => {
-        const errorMessage = err?.error?.message || 'Error al cargar los clústeres';
+        const errorMessage = err?.error?.message || 'Error al cargar los grupos de clientes';
         this.toastService.showToast(errorMessage, 'error');
       }
     });
