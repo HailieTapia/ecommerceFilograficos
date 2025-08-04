@@ -23,6 +23,7 @@ export interface Promotion {
   created_by?: number;
   variantIds?: number[];
   categoryIds?: number[];
+  cluster_id?: number;
   product_variants_count?: number;
   category_count?: number;
   created_at?: string;
@@ -46,6 +47,7 @@ export interface PromotionData {
   coupon_code?: string | null;
   variantIds?: number[];
   categoryIds?: number[];
+  cluster_id?: number;
 }
 
 export interface Variant {
@@ -101,7 +103,7 @@ export interface ApplyPromotionResponse {
 export class PromotionService {
   private apiUrl = `${environment.baseUrl}/promotions`;
 
-  constructor(private csrfService: CsrfService, private http: HttpClient) {}
+  constructor(private csrfService: CsrfService, private http: HttpClient) { }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
     const message = error.error?.message || 'Error en la comunicación con el servidor';

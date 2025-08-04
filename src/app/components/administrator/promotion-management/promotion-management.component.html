@@ -1,33 +1,33 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
+  <div
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
     <div>
-      <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+      <h1
+        class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
         <i class="fas fa-tags text-blue-600 dark:text-blue-400 text-lg sm:text-xl"></i> Gestión de Promociones
       </h1>
-      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administra las promociones y cupones de la tienda</p>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administra las promociones y cupones de la
+        tienda</p>
     </div>
-    <button
-      (click)="openPromotionModal('create')"
-      class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-blue-500 dark:bg-blue-400 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-300 transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md"
-    >
+    <button (click)="openPromotionModal('create')"
+      class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-blue-500 dark:bg-blue-400 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-300 transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md">
       <i class="fas fa-plus"></i> Crear Promoción
     </button>
   </div>
 
   <!-- Table -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+  <div
+    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div
+      class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
       <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Promociones</h2>
       <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
         <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
-          <label for="statusFilter" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Filtro de Estado:</label>
-          <select
-            id="statusFilter"
-            [(ngModel)]="statusFilter"
-            (change)="onStatusFilterChange()"
-            class="w-full sm:w-40 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-          >
+          <label for="statusFilter" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Filtro
+            de Estado:</label>
+          <select id="statusFilter" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()"
+            class="w-full sm:w-40 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm">
             <option value="all">Todas las Promociones</option>
             <option value="current">Promociones Actuales</option>
             <option value="future">Promociones Futuras</option>
@@ -35,13 +35,10 @@
           </select>
         </div>
         <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
-          <label for="itemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Elementos por página:</label>
-          <select
-            id="itemsPerPage"
-            [(ngModel)]="itemsPerPage"
-            (change)="onItemsPerPageChange()"
-            class="w-full sm:w-24 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-          >
+          <label for="itemsPerPage"
+            class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Elementos por página:</label>
+          <select id="itemsPerPage" [(ngModel)]="itemsPerPage" (change)="onItemsPerPageChange()"
+            class="w-full sm:w-24 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm">
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -54,86 +51,134 @@
       <table class="w-full table-auto border-collapse">
         <thead class="bg-gray-100 dark:bg-gray-700">
           <tr>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words cursor-pointer" (click)="sort('promotion_id')">
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words cursor-pointer"
+              (click)="sort('promotion_id')">
               ID
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'promotion_id', 'text-gray-500 dark:text-gray-400': sortBy !== 'promotion_id'}" aria-hidden="true"></i>
+              <i class="fas fa-arrows-up-down ml-1"
+                [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'promotion_id', 'text-gray-500 dark:text-gray-400': sortBy !== 'promotion_id'}"
+                aria-hidden="true"></i>
               <span *ngIf="sortBy === 'promotion_id'" class="ml-1">
                 <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words">Nombre</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">Código</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">Tipo</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell cursor-pointer" (click)="sort('discount_value')">
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words">
+              Nombre</th>
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">
+              Código</th>
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">
+              Tipo</th>
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell cursor-pointer"
+              (click)="sort('discount_value')">
               Descuento
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'discount_value', 'text-gray-500 dark:text-gray-400': sortBy !== 'discount_value'}" aria-hidden="true"></i>
+              <i class="fas fa-arrows-up-down ml-1"
+                [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'discount_value', 'text-gray-500 dark:text-gray-400': sortBy !== 'discount_value'}"
+                aria-hidden="true"></i>
               <span *ngIf="sortBy === 'discount_value'" class="ml-1">
                 <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">Estado</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words cursor-pointer" (click)="sort('start_date')">
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">
+              Estado</th>
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words cursor-pointer"
+              (click)="sort('start_date')">
               Fecha Inicio
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'start_date', 'text-gray-500 dark:text-gray-400': sortBy !== 'start_date'}" aria-hidden="true"></i>
+              <i class="fas fa-arrows-up-down ml-1"
+                [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'start_date', 'text-gray-500 dark:text-gray-400': sortBy !== 'start_date'}"
+                aria-hidden="true"></i>
               <span *ngIf="sortBy === 'start_date'" class="ml-1">
                 <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words cursor-pointer" (click)="sort('end_date')">
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words cursor-pointer"
+              (click)="sort('end_date')">
               Fecha Fin
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'end_date', 'text-gray-500 dark:text-gray-400': sortBy !== 'end_date'}" aria-hidden="true"></i>
+              <i class="fas fa-arrows-up-down ml-1"
+                [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'end_date', 'text-gray-500 dark:text-gray-400': sortBy !== 'end_date'}"
+                aria-hidden="true"></i>
               <span *ngIf="sortBy === 'end_date'" class="ml-1">
                 <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">Productos/Categorías</th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell cursor-pointer" (click)="sort('created_at')">
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell">
+              Productos/Categorías</th>
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words hidden sm:table-cell cursor-pointer"
+              (click)="sort('created_at')">
               Creado
-              <i class="fas fa-arrows-up-down ml-1" [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'created_at', 'text-gray-500 dark:text-gray-400': sortBy !== 'created_at'}" aria-hidden="true"></i>
+              <i class="fas fa-arrows-up-down ml-1"
+                [ngClass]="{'text-blue-600 dark:text-blue-400': sortBy === 'created_at', 'text-gray-500 dark:text-gray-400': sortBy !== 'created_at'}"
+                aria-hidden="true"></i>
               <span *ngIf="sortBy === 'created_at'" class="ml-1">
                 <i class="fas" [ngClass]="sortOrder === 'ASC' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
               </span>
             </th>
-            <th class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words">Acciones</th>
+            <th
+              class="p-2 sm:p-3 text-left text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-normal break-words">
+              Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-          <tr *ngFor="let promotion of promotions" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words">{{ promotion.promotion_id }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[120px] sm:max-w-[200px] md:max-w-[250px]">{{ promotion.name }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">{{ promotion.coupon_code || 'Sin código' }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">{{ couponTypeLabels[promotion.coupon_type] }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
-              {{ promotion.coupon_type === 'percentage_discount' ? promotion.discount_value + '%' : 
-                 promotion.coupon_type === 'fixed_discount' ? '$' + promotion.discount_value : 'N/A' }}
+          <tr *ngFor="let promotion of promotions"
+            class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words">{{
+              promotion.promotion_id }}</td>
+            <td
+              class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[120px] sm:max-w-[200px] md:max-w-[250px]">
+              {{ promotion.name }}</td>
+            <td
+              class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
+              {{ promotion.coupon_code || 'Sin código' }}</td>
+            <td
+              class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
+              {{ couponTypeLabels[promotion.coupon_type] }}</td>
+            <td
+              class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
+              {{ promotion.coupon_type === 'percentage_discount' ? promotion.discount_value + '%' :
+              promotion.coupon_type === 'fixed_discount' ? '$' + promotion.discount_value : 'N/A' }}
             </td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
+            <td
+              class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
               {{ statusTypeLabels[promotion.status_type || 'current'] }}
             </td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words">{{ formatDate(promotion.start_date) }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium whitespace-normal break-words">{{ formatDateTime(promotion.end_date) }}</td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
-              <span class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full">
-                {{ promotion.applies_to === 'specific_categories' ? (promotion.category_count || 0) : (promotion.product_variants_count || 0) }}
+            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words">{{
+              formatDate(promotion.start_date) }}</td>
+            <td
+              class="p-2 sm:p-3 text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium whitespace-normal break-words">
+              {{ formatDateTime(promotion.end_date) }}</td>
+            <td
+              class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
+              <span
+                class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full">
+                {{ promotion.applies_to === 'specific_categories' ? (promotion.category_count || 0) :
+                (promotion.product_variants_count || 0) }}
                 {{ promotion.applies_to === 'specific_categories' ? 'Categorías' : 'Productos' }}
               </span>
             </td>
-            <td class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">{{ formatDateTime(promotion.created_at) }}</td>
+            <td
+              class="p-2 sm:p-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-normal break-words hidden sm:table-cell">
+              {{ formatDateTime(promotion.created_at) }}</td>
             <td class="p-2 sm:p-3 text-center">
               <div class="flex justify-center items-center gap-2">
-                <button
-                  (click)="openPromotionModal('edit', promotion)"
-                  class="group text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-300 relative"
-                >
+                <button (click)="openPromotionModal('edit', promotion)"
+                  class="group text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-all duration-300 relative">
                   <i class="fas fa-edit text-xs sm:text-sm"></i>
-                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
+                  <span
+                    class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Editar</span>
                 </button>
-                <button
-                  (click)="deletePromotion(promotion)"
-                  class="group text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all duration-300 relative"
-                >
+                <button (click)="deletePromotion(promotion)"
+                  class="group text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all duration-300 relative">
                   <i class="fas fa-trash text-xs sm:text-sm"></i>
-                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
+                  <span
+                    class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-gray-100 text-xs rounded px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">Eliminar</span>
                 </button>
               </div>
             </td>
@@ -147,167 +192,219 @@
         </tbody>
       </table>
     </div>
-    <app-pagination
-      [currentPage]="currentPage"
-      [totalItems]="totalPromotions"
-      [itemsPerPage]="itemsPerPage"
+    <app-pagination [currentPage]="currentPage" [totalItems]="totalPromotions" [itemsPerPage]="itemsPerPage"
       (pageChange)="onPageChange($event)"
-      class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"
-    ></app-pagination>
+      class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"></app-pagination>
   </div>
 
   <!-- Modal para Crear/Editar Promoción -->
-  <app-modal
-    #promotionModal
-    [title]="selectedPromotionId ? 'Editar Promoción' : 'Crear Promoción'"
-    [modalType]="selectedPromotionId ? 'info' : 'success'"
-    [isConfirmModal]="false"
-  >
+  <app-modal #promotionModal [title]="selectedPromotionId ? 'Editar Promoción' : 'Crear Promoción'"
+    [modalType]="selectedPromotionId ? 'info' : 'success'" [isConfirmModal]="false">
     <ng-container slot="body">
-      <form [formGroup]="promotionForm" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto space-y-4 sm:space-y-6">
+      <form [formGroup]="promotionForm"
+        class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto space-y-4 sm:space-y-6">
         <!-- Sección: Detalles de la Promoción -->
         <div class="border-b border-gray-200 dark:border-gray-600 pb-2 mb-4">
           <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Detalles de la Promoción</h3>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="relative">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Nombre <span class="text-red-500 dark:text-red-400">*</span></label>
-            <i class="fas fa-tag absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              formControlName="name"
-              type="text"
-              placeholder="Ej. Descuento de Verano"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Nombre <span
+                class="text-red-500 dark:text-red-400">*</span></label>
+            <i
+              class="fas fa-tag absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input formControlName="name" type="text" placeholder="Ej. Descuento de Verano"
               class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('name')?.touched && promotionForm.get('name')?.invalid}"
-            />
-            <div *ngIf="promotionForm.get('name')?.touched && promotionForm.get('name')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('name')?.touched && promotionForm.get('name')?.invalid}" />
+            <div *ngIf="promotionForm.get('name')?.touched && promotionForm.get('name')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
               <div *ngIf="promotionForm.get('name')?.errors?.['required']">El nombre es obligatorio.</div>
               <div *ngIf="promotionForm.get('name')?.errors?.['minlength']">Debe tener al menos 3 caracteres.</div>
               <div *ngIf="promotionForm.get('name')?.errors?.['maxlength']">No puede exceder 100 caracteres.</div>
             </div>
           </div>
           <div class="relative">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Tipo de Promoción <span class="text-red-500 dark:text-red-400">*</span></label>
-            <i class="fas fa-list absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <select
-              formControlName="coupon_type"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Tipo de Promoción
+              <span class="text-red-500 dark:text-red-400">*</span></label>
+            <i
+              class="fas fa-list absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <select formControlName="coupon_type"
               class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('coupon_type')?.touched && promotionForm.get('coupon_type')?.invalid}"
-            >
+              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('coupon_type')?.touched && promotionForm.get('coupon_type')?.invalid}">
               <option value="">Seleccionar Tipo</option>
               <option value="percentage_discount">Descuento Porcentual</option>
               <option value="fixed_discount">Descuento Fijo</option>
               <option value="free_shipping">Envío Gratis</option>
             </select>
-            <div *ngIf="promotionForm.get('coupon_type')?.touched && promotionForm.get('coupon_type')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+            <div *ngIf="promotionForm.get('coupon_type')?.touched && promotionForm.get('coupon_type')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
               El tipo de promoción es obligatorio.
             </div>
           </div>
           <div class="relative" *ngIf="promotionForm.get('coupon_type')?.value !== 'free_shipping'">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Valor de Descuento <span class="text-red-500 dark:text-red-400">*</span></label>
-            <i class="fas fa-percentage absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              formControlName="discount_value"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="Ej. 20"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Valor de Descuento
+              <span class="text-red-500 dark:text-red-400">*</span></label>
+            <i
+              class="fas fa-percentage absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input formControlName="discount_value" type="number" min="0" step="0.01" placeholder="Ej. 20"
               class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('discount_value')?.touched && promotionForm.get('discount_value')?.invalid}"
-            />
-            <div *ngIf="promotionForm.get('discount_value')?.touched && promotionForm.get('discount_value')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
-              <div *ngIf="promotionForm.get('discount_value')?.errors?.['required']">El valor de descuento es obligatorio.</div>
+              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('discount_value')?.touched && promotionForm.get('discount_value')?.invalid}" />
+            <div *ngIf="promotionForm.get('discount_value')?.touched && promotionForm.get('discount_value')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+              <div *ngIf="promotionForm.get('discount_value')?.errors?.['required']">El valor de descuento es
+                obligatorio.</div>
               <div *ngIf="promotionForm.get('discount_value')?.errors?.['min']">Debe ser mayor o igual a 0.</div>
             </div>
           </div>
           <div class="relative">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Aplica a <span class="text-red-500 dark:text-red-400">*</span></label>
-            <i class="fas fa-filter absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <select
-              formControlName="applies_to"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Aplica a <span
+                class="text-red-500 dark:text-red-400">*</span></label>
+            <i
+              class="fas fa-filter absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <select formControlName="applies_to"
               class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('applies_to')?.touched && promotionForm.get('applies_to')?.invalid}"
-            >
+              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('applies_to')?.touched && promotionForm.get('applies_to')?.invalid}">
               <option value="">Seleccionar</option>
               <option value="specific_products">Productos Específicos</option>
               <option value="specific_categories">Categorías Específicas</option>
               <option value="all">Todos</option>
             </select>
-            <div *ngIf="promotionForm.get('applies_to')?.touched && promotionForm.get('applies_to')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+            <div *ngIf="promotionForm.get('applies_to')?.touched && promotionForm.get('applies_to')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
               Este campo es obligatorio.
             </div>
           </div>
           <div *ngIf="promotionForm.get('coupon_type')?.value === 'free_shipping'">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1 flex items-center gap-2">
-              <input
-                formControlName="free_shipping_enabled"
-                type="checkbox"
-                class="h-4 sm:h-5 w-4 sm:w-5 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
-              />
+            <label
+              class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1 flex items-center gap-2">
+              <input formControlName="free_shipping_enabled" type="checkbox"
+                class="h-4 sm:h-5 w-4 sm:w-5 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded" />
               Envío Gratuito
             </label>
           </div>
           <div>
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1 flex items-center gap-2">
-              <input
-                formControlName="is_exclusive"
-                type="checkbox"
-                class="h-4 sm:h-5 w-4 sm:w-5 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
-              />
+            <label
+              class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1 flex items-center gap-2">
+              <input formControlName="is_exclusive" type="checkbox"
+                class="h-4 sm:h-5 w-4 sm:w-5 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded" />
               ¿Es exclusiva? (No acumulable con otras promociones)
             </label>
           </div>
         </div>
-
         <!-- Sección: Restricciones -->
         <div class="border-b border-gray-200 dark:border-gray-600 pb-2 mb-4">
           <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Restricciones</h3>
         </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Máximo de usos -->
           <div class="relative">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Máximo de Usos (Opcional)</label>
-            <i class="fas fa-redo absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              formControlName="max_uses"
-              type="number"
-              min="1"
-              placeholder="Ej. 100 (dejar vacío si no aplica)"
-              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('max_uses')?.touched && promotionForm.get('max_uses')?.invalid}"
-            />
-            <div *ngIf="promotionForm.get('max_uses')?.touched && promotionForm.get('max_uses')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
-              <div *ngIf="promotionForm.get('max_uses')?.errors?.['min']">El valor debe ser mayor o igual a 1 si se especifica.</div>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">
+              Máximo de Usos (Opcional)
+            </label>
+            <i
+              class="fas fa-redo absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input formControlName="max_uses" type="number" min="1" placeholder="Ej. 100 (dejar vacío si no aplica)"
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400':promotionForm.get('max_uses')?.touched && promotionForm.get('max_uses')?.invalid}" />
+            <div *ngIf="promotionForm.get('max_uses')?.touched && promotionForm.get('max_uses')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+              <div *ngIf="promotionForm.get('max_uses')?.errors?.['min']">
+                El valor debe ser mayor o igual a 1 si se especifica.
+              </div>
             </div>
           </div>
+
+          <!-- Máximo de usos por usuario -->
           <div class="relative">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Máximo de Usos por Usuario (Opcional)</label>
-            <i class="fas fa-user absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              formControlName="max_uses_per_user"
-              type="number"
-              min="1"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">
+              Límite por usuario (opcional)
+            </label>
+            <i
+              class="fas fa-user absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input formControlName="max_uses_per_user" type="number" min="1"
               placeholder="Ej. 1 (dejar vacío si no aplica)"
-              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('max_uses_per_user')?.touched && promotionForm.get('max_uses_per_user')?.invalid}"
-            />
-            <div *ngIf="promotionForm.get('max_uses_per_user')?.touched && promotionForm.get('max_uses_per_user')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
-              <div *ngIf="promotionForm.get('max_uses_per_user')?.errors?.['min']">El valor debe ser mayor o igual a 1 si se especifica.</div>
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('max_uses_per_user')?.touched && promotionForm.get('max_uses_per_user')?.invalid}" />
+            <div
+              *ngIf="promotionForm.get('max_uses_per_user')?.touched && promotionForm.get('max_uses_per_user')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+              <div *ngIf="promotionForm.get('max_uses_per_user')?.errors?.['min']">
+                El valor debe ser mayor o igual a 1 si se especifica.
+              </div>
             </div>
           </div>
+          <!-- Valor mínimo de orden -->
           <div class="relative">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Valor Mínimo de Orden (Opcional)</label>
-            <i class="fas fa-dollar-sign absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              formControlName="min_order_value"
-              type="number"
-              min="0"
-              step="0.01"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">
+              Orden Mínima (Opcional)
+            </label>
+            <i
+              class="fas fa-dollar-sign absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input formControlName="min_order_value" type="number" min="0" step="0.01"
               placeholder="Ej. 50.00 (dejar vacío si no aplica)"
-              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('min_order_value')?.touched && promotionForm.get('min_order_value')?.invalid}"
-            />
-            <div *ngIf="promotionForm.get('min_order_value')?.touched && promotionForm.get('min_order_value')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
-              <div *ngIf="promotionForm.get('min_order_value')?.errors?.['min']">El valor debe ser mayor o igual a 0 si se especifica.</div>
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('min_order_value')?.touched && promotionForm.get('min_order_value')?.invalid}" />
+            <div *ngIf="promotionForm.get('min_order_value')?.touched && promotionForm.get('min_order_value')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+              <div *ngIf="promotionForm.get('min_order_value')?.errors?.['min']">
+                El valor debe ser mayor o igual a 0 si se especifica.
+              </div>
+            </div>
+          </div>
+          <div class="sm:col-span-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <i class="fas fa-users text-gray-600 dark:text-gray-400 text-sm"></i>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900 dark:text-white">Segmentación de Usuarios</h4>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    Restringe la promoción a un grupo específico de clientes.
+                  </p>
+                </div>
+              </div>
+              <!-- Toggle -->
+              <div class="relative">
+                <input type="checkbox" [(ngModel)]="applyUserSegmentation" (ngModelChange)="toggleUserSegmentation()"
+                  [ngModelOptions]="{ standalone: true }" class="sr-only" id="segmentation-toggle" />
+                <label for="segmentation-toggle" class="flex items-center cursor-pointer">
+                  <div class="relative">
+                    <div
+                      class="w-12 h-6 bg-gray-300 dark:bg-gray-600 rounded-full shadow-inner transition-colors duration-300"
+                      [ngClass]="{ 'bg-blue-500 dark:bg-blue-400': applyUserSegmentation }"></div>
+                    <div
+                      class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow transition-transform duration-300"
+                      [ngClass]="{ 'translate-x-6': applyUserSegmentation }"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <!-- Clúster -->
+            <div *ngIf="applyUserSegmentation"
+              class="sm:col-span-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-4">
+              <div class="relative">
+                <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">
+                  Clúster <span class="text-red-500 dark:text-red-400" *ngIf="applyUserSegmentation">*</span>
+                </label>
+                <i
+                  class="fas fa-layer-group absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+                <select formControlName="cluster_id"
+                  class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+                  [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('cluster_id')?.touched && promotionForm.get('cluster_id')?.invalid && applyUserSegmentation}">
+                  <option value="">Seleccionar Clúster</option>
+                  <option *ngFor="let cluster of clusters" [value]="cluster.clusterId">
+                    Clúster {{ cluster.clusterId }} ({{ cluster.count }} usuarios)
+                  </option>
+                </select>
+                <div
+                  *ngIf="promotionForm.get('cluster_id')?.touched && promotionForm.get('cluster_id')?.invalid && applyUserSegmentation"
+                  class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+                  Debes seleccionar un clúster.
+                </div>
+                <div *ngIf="clusters.length === 0" class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-2">
+                  No se encontraron clústeres disponibles.
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -318,127 +415,116 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="relative">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Fecha de Inicio <span class="text-red-500 dark:text-red-400">*</span></label>
-            <i class="fas fa-calendar absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              formControlName="start_date"
-              type="datetime-local"
-              [min]="minStartDate"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Fecha de
+              Inicio <span class="text-red-500 dark:text-red-400">*</span></label>
+            <i
+              class="fas fa-calendar absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input formControlName="start_date" type="datetime-local" [min]="minStartDate"
               class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('start_date')?.touched && promotionForm.get('start_date')?.invalid}"
-            />
-            <div *ngIf="promotionForm.get('start_date')?.touched && promotionForm.get('start_date')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
-              <div *ngIf="promotionForm.get('start_date')?.errors?.['required']">La fecha de inicio es obligatoria.</div>
-              <div *ngIf="promotionForm.get('start_date')?.errors?.['dateBeforeToday']">No puede ser anterior a la fecha actual.</div>
+              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('start_date')?.touched && promotionForm.get('start_date')?.invalid}" />
+            <div *ngIf="promotionForm.get('start_date')?.touched && promotionForm.get('start_date')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+              <div *ngIf="promotionForm.get('start_date')?.errors?.['required']">La fecha de inicio es obligatoria.
+              </div>
+              <div *ngIf="promotionForm.get('start_date')?.errors?.['dateBeforeToday']">No puede ser anterior a la
+                fecha actual.</div>
             </div>
           </div>
           <div class="relative">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Fecha de Fin <span class="text-red-500 dark:text-red-400">*</span></label>
-            <i class="fas fa-calendar absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              formControlName="end_date"
-              type="datetime-local"
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Fecha de Fin
+              <span class="text-red-500 dark:text-red-400">*</span></label>
+            <i
+              class="fas fa-calendar absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input formControlName="end_date" type="datetime-local"
               [min]="promotionForm.get('start_date')?.value || minStartDate"
               class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('end_date')?.touched && promotionForm.get('end_date')?.invalid}"
-            />
-            <div *ngIf="promotionForm.get('end_date')?.touched && promotionForm.get('end_date')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+              [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('end_date')?.touched && promotionForm.get('end_date')?.invalid}" />
+            <div *ngIf="promotionForm.get('end_date')?.touched && promotionForm.get('end_date')?.invalid"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
               <div *ngIf="promotionForm.get('end_date')?.errors?.['required']">La fecha de fin es obligatoria.</div>
             </div>
-            <div *ngIf="promotionForm.errors?.['invalidDateRange'] && promotionForm.get('end_date')?.touched" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+            <div *ngIf="promotionForm.errors?.['invalidDateRange'] && promotionForm.get('end_date')?.touched"
+              class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
               La fecha de fin debe ser posterior a la fecha de inicio.
             </div>
           </div>
         </div>
-
         <!-- Sección: Cupón -->
         <div class="border-b border-gray-200 dark:border-gray-600 pb-2 mb-4">
           <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Cupón</h3>
         </div>
         <div>
-          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1 flex items-center gap-2">
-            <input
-              type="checkbox"
-              [(ngModel)]="associateCoupon"
-              (ngModelChange)="toggleAssociateCoupon()"
+          <label
+            class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1 flex items-center gap-2">
+            <input type="checkbox" [(ngModel)]="associateCoupon" (ngModelChange)="toggleAssociateCoupon()"
               [ngModelOptions]="{standalone: true}"
-              class="h-4 sm:h-5 w-4 sm:w-5 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
-            />
+              class="h-4 sm:h-5 w-4 sm:w-5 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded" />
             Asociar Cupón
           </label>
         </div>
         <div class="relative" *ngIf="associateCoupon">
-          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Código de Cupón</label>
-          <i class="fas fa-ticket-alt absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-          <input
-            formControlName="coupon_code"
-            type="text"
-            placeholder="Ej. VERANO25"
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Código de
+            Cupón</label>
+          <i
+            class="fas fa-ticket-alt absolute left-3 top-10 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+          <input formControlName="coupon_code" type="text" placeholder="Ej. VERANO25"
             class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-            [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('coupon_code')?.touched && promotionForm.get('coupon_code')?.invalid}"
-          />
-          <div *ngIf="promotionForm.get('coupon_code')?.touched && promotionForm.get('coupon_code')?.invalid" class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
-            <div *ngIf="promotionForm.get('coupon_code')?.errors?.['minlength']">Debe tener al menos 3 caracteres.</div>
-            <div *ngIf="promotionForm.get('coupon_code')?.errors?.['maxlength']">No puede exceder 50 caracteres.</div>
+            [ngClass]="{'border-red-500 dark:border-red-400': promotionForm.get('coupon_code')?.touched && promotionForm.get('coupon_code')?.invalid}" />
+          <div *ngIf="promotionForm.get('coupon_code')?.touched && promotionForm.get('coupon_code')?.invalid"
+            class="text-red-500 dark:text-red-400 text-xs sm:text-sm mt-1">
+            <div *ngIf="promotionForm.get('coupon_code')?.errors?.['minlength']">Debe tener al menos 3 caracteres.
+            </div>
+            <div *ngIf="promotionForm.get('coupon_code')?.errors?.['maxlength']">No puede exceder 50 caracteres.
+            </div>
           </div>
         </div>
 
         <!-- Sección: Productos Específicos -->
         <div *ngIf="promotionForm.get('applies_to')?.value === 'specific_products'" class="space-y-2">
           <div class="border-b border-gray-200 dark:border-gray-600 pb-2 mb-4">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Productos Específicos</h3>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Productos Específicos
+            </h3>
           </div>
           <div class="relative">
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              [(ngModel)]="variantSearchTerm"
-              (ngModelChange)="onVariantSearchChange()"
-              [ngModelOptions]="{standalone: true}"
-              placeholder="Buscar productos por nombre o SKU..."
-              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-            />
+            <i
+              class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input [(ngModel)]="variantSearchTerm" (ngModelChange)="onVariantSearchChange()"
+              [ngModelOptions]="{standalone: true}" placeholder="Buscar productos por nombre o SKU..."
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm" />
           </div>
-          <div class="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+          <div
+            class="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
             <div *ngIf="filteredVariants.length === 0" class="p-2 text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
               No se encontraron productos.
             </div>
-            <div
-              *ngFor="let variant of filteredVariants"
+            <div *ngFor="let variant of filteredVariants"
               class="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
               [ngClass]="{'bg-gray-200 dark:bg-gray-600': selectedVariantIds.includes(variant.variant_id)}"
-              (click)="toggleVariant(variant.variant_id)"
-            >
-              <img
-                [src]="variant.image_url || 'assets/default-image.jpg'"
-                alt="{{ variant.product_name }}"
-                class="w-6 sm:w-8 h-6 sm:h-8 object-cover rounded"
-              />
-              <span class="text-gray-900 dark:text-gray-100 flex-1 text-xs sm:text-sm">{{ variant.product_name }} (SKU: {{ variant.sku }})</span>
-              <i class="fas fa-check text-blue-600 dark:text-blue-400" *ngIf="selectedVariantIds.includes(variant.variant_id)"></i>
+              (click)="toggleVariant(variant.variant_id)">
+              <img [src]="variant.image_url || 'assets/default-image.jpg'" alt="{{ variant.product_name }}"
+                class="w-6 sm:w-8 h-6 sm:h-8 object-cover rounded" />
+              <span class="text-gray-900 dark:text-gray-100 flex-1 text-xs sm:text-sm">{{ variant.product_name }}
+                (SKU: {{ variant.sku }})</span>
+              <i class="fas fa-check text-blue-600 dark:text-blue-400"
+                *ngIf="selectedVariantIds.includes(variant.variant_id)"></i>
             </div>
           </div>
           <div class="mt-2">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Productos Seleccionados</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Productos
+              Seleccionados</label>
             <div class="flex flex-wrap gap-2">
-              <span
-                *ngFor="let variantId of selectedVariantIds"
-                class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full flex items-center gap-1 sm:gap-2"
-              >
-                <img
-                  [src]="getVariantImage(variantId) || 'assets/default-image.jpg'"
-                  alt="{{ getVariantName(variantId) }}"
-                  class="w-5 sm:w-6 h-5 sm:h-6 object-cover rounded"
-                />
+              <span *ngFor="let variantId of selectedVariantIds"
+                class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full flex items-center gap-1 sm:gap-2">
+                <img [src]="getVariantImage(variantId) || 'assets/default-image.jpg'"
+                  alt="{{ getVariantName(variantId) }}" class="w-5 sm:w-6 h-5 sm:h-6 object-cover rounded" />
                 {{ getVariantName(variantId) }}
-                <button
-                  type="button"
-                  (click)="removeVariant(variantId)"
-                  class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                >
+                <button type="button" (click)="removeVariant(variantId)"
+                  class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                   &times;
                 </button>
               </span>
-              <span *ngIf="selectedVariantIds.length === 0" class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Ningún producto seleccionado.</span>
+              <span *ngIf="selectedVariantIds.length === 0"
+                class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Ningún producto seleccionado.</span>
             </div>
           </div>
         </div>
@@ -446,49 +532,45 @@
         <!-- Sección: Categorías Específicas -->
         <div *ngIf="promotionForm.get('applies_to')?.value === 'specific_categories'" class="space-y-2">
           <div class="border-b border-gray-200 dark:border-gray-600 pb-2 mb-4">
-            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Categorías Específicas</h3>
+            <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Categorías Específicas
+            </h3>
           </div>
           <div class="relative">
-            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
-            <input
-              [(ngModel)]="categorySearchTerm"
-              (ngModelChange)="onCategorySearchChange()"
-              [ngModelOptions]="{standalone: true}"
-              placeholder="Buscar categorías por nombre..."
-              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-            />
+            <i
+              class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+            <input [(ngModel)]="categorySearchTerm" (ngModelChange)="onCategorySearchChange()"
+              [ngModelOptions]="{standalone: true}" placeholder="Buscar categorías por nombre..."
+              class="w-full p-2 pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm" />
           </div>
-          <div class="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
-            <div *ngIf="filteredCategories.length === 0" class="p-2 text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
+          <div
+            class="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700">
+            <div *ngIf="filteredCategories.length === 0"
+              class="p-2 text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
               No se encontraron categorías.
             </div>
-            <div
-              *ngFor="let category of filteredCategories"
+            <div *ngFor="let category of filteredCategories"
               class="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer flex items-center gap-2"
               [ngClass]="{'bg-gray-200 dark:bg-gray-600': selectedCategoryIds.includes(category.category_id)}"
-              (click)="toggleCategory(category.category_id)"
-            >
+              (click)="toggleCategory(category.category_id)">
               <span class="text-gray-900 dark:text-gray-100 flex-1 text-xs sm:text-sm">{{ category.name }}</span>
-              <i class="fas fa-check text-blue-600 dark:text-blue-400" *ngIf="selectedCategoryIds.includes(category.category_id)"></i>
+              <i class="fas fa-check text-blue-600 dark:text-blue-400"
+                *ngIf="selectedCategoryIds.includes(category.category_id)"></i>
             </div>
           </div>
           <div class="mt-2">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Categorías Seleccionadas</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-1">Categorías
+              Seleccionadas</label>
             <div class="flex flex-wrap gap-2">
-              <span
-                *ngFor="let categoryId of selectedCategoryIds"
-                class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full flex items-center gap-1 sm:gap-2"
-              >
+              <span *ngFor="let categoryId of selectedCategoryIds"
+                class="inline-block px-2 sm:px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100 text-xs rounded-full flex items-center gap-1 sm:gap-2">
                 {{ getCategoryName(categoryId) }}
-                <button
-                  type="button"
-                  (click)="removeCategory(categoryId)"
-                  class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                >
+                <button type="button" (click)="removeCategory(categoryId)"
+                  class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                   &times;
                 </button>
               </span>
-              <span *ngIf="selectedCategoryIds.length === 0" class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Ninguna categoría seleccionada.</span>
+              <span *ngIf="selectedCategoryIds.length === 0"
+                class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">Ninguna categoría seleccionada.</span>
             </div>
           </div>
         </div>
@@ -496,17 +578,13 @@
     </ng-container>
     <ng-container slot="actions">
       <div class="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 p-3 sm:p-4">
-        <button
-          (click)="resetForm(); promotionModal.close()"
-          class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 text-xs sm:text-sm"
-        >
+        <button (click)="resetForm(); promotionModal.close()"
+          class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-300 text-xs sm:text-sm">
           Cancelar
         </button>
-        <button
-          (click)="savePromotion()"
-          [disabled]="promotionForm.invalid || (promotionForm.value.applies_to === 'specific_products' && selectedVariantIds.length === 0) || (promotionForm.value.applies_to === 'specific_categories' && selectedCategoryIds.length === 0)"
-          class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-blue-500 dark:bg-blue-400 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-xs sm:text-sm"
-        >
+        <button (click)="savePromotion()"
+          [disabled]="promotionForm.invalid || (promotionForm.value.applies_to === 'specific_products' && selectedVariantIds.length === 0) || (promotionForm.value.applies_to === 'specific_categories' && selectedCategoryIds.length === 0) || (applyUserSegmentation && !promotionForm.value.cluster_id)"
+          class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-blue-500 dark:bg-blue-400 text-white rounded-md hover:bg-blue-600 dark:hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 transition-all duration-300 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-xs sm:text-sm">
           {{ selectedPromotionId ? 'Actualizar' : 'Crear' }}
         </button>
       </div>
@@ -514,15 +592,8 @@
   </app-modal>
 
   <!-- Modal de Confirmación -->
-  <app-modal
-    #confirmModal
-    [title]="confirmModalTitle"
-    [modalType]="confirmModalType"
-    [isConfirmModal]="true"
-    [confirmText]="'Confirmar'"
-    [cancelText]="'Cancelar'"
-    (confirm)="handleConfirm()"
-  >
+  <app-modal #confirmModal [title]="confirmModalTitle" [modalType]="confirmModalType" [isConfirmModal]="true"
+    [confirmText]="'Confirmar'" [cancelText]="'Cancelar'" (confirm)="handleConfirm()">
     <ng-container slot="body">
       <p class="text-xs sm:text-sm text-gray-900 dark:text-gray-100">{{ confirmModalMessage }}</p>
     </ng-container>
