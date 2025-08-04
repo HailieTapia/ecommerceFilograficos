@@ -115,13 +115,8 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     this.promotionForm.get('applies_to')?.valueChanges.subscribe(appliesTo => {
       this.toggleSelection(appliesTo);
     });
-
-    this.promotionForm.get('coupon_code')?.valueChanges.subscribe(value => {
-      if (!this.associateCoupon) {
-        this.promotionForm.patchValue({ coupon_code: '' });
-      }
-    });
   }
+
   ngOnInit() {
     this.loadClusters();
     this.loadPromotions();
@@ -130,6 +125,17 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     this.setupVariantSearch();
     this.setupCategorySearch();
   }
+
+  ngAfterViewInit(): void {
+    if (!this.promotionModal || !this.confirmModal) {
+      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
   loadClusters(): void {
     this.clusterService.getAllClientClusters().subscribe({
       next: (res: ClusterGroup[]) => {
@@ -141,29 +147,46 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
       }
     });
   }
+
   toggleUserSegmentation() {
     if (this.applyUserSegmentation) {
       this.promotionForm.get('cluster_id')?.setValidators([Validators.required]);
     } else {
-      this.promotionForm.get('cluster_id')?.setValue(null);
+      this.promotionForm.get('cluster_id')?.setValue(null, { emitEvent: false });
       this.promotionForm.get('cluster_id')?.clearValidators();
     }
-    this.promotionForm.get('cluster_id')?.updateValueAndValidity();
+    this.promotionForm.get('cluster_id')?.updateValueAndValidity({ emitEvent: false });
   }
+
   toggleFieldsBasedOnType(type: string) {
     const controls = this.promotionForm.controls;
     if (type === 'free_shipping') {
-      controls['free_shipping_enabled'].enable();
-      controls['discount_value'].disable();
-      controls['discount_value'].setValue(null);
+      controls['free_shipping_enabled'].enable({ emitEvent: false });
+      controls['discount_value'].disable({ emitEvent: false });
+      controls['discount_value'].setValue(null, { emitEvent: false });
       controls['discount_value'].clearValidators();
     } else {
-      controls['free_shipping_enabled'].disable();
-      controls['free_shipping_enabled'].setValue(false);
-      controls['discount_value'].enable();
+      controls['free_shipping_enabled'].disable({ emitEvent: false });
+      controls['free_shipping_enabled'].setValue(false, { emitEvent: false });
+      controls['discount_value'].enable({ emitEvent: false });
       controls['discount_value'].setValidators([Validators.required, Validators.min(0)]);
     }
-    controls['discount_value'].updateValueAndValidity();
+    controls['discount_value'].updateValueAndValidity({ emitEvent: false });
+  }
+
+  toggleAssociateCoupon() {
+    this.associateCoupon = !this.associateCoupon;
+    const couponControl = this.promotionForm.get('coupon_code');
+    if (this.associateCoupon) {
+      couponControl?.enable();
+      couponControl?.setValidators([Validators.required, Validators.minLength(3), Validators.maxLength(50)]);
+      couponControl?.setValue('', { emitEvent: true });
+    } else {
+      couponControl?.disable();
+      couponControl?.setValue('', { emitEvent: true });
+      couponControl?.clearValidators();
+    }
+    couponControl?.updateValueAndValidity();
   }
 
   openPromotionModal(mode: 'create' | 'edit', promotion?: Promotion) {
@@ -191,15 +214,15 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
         is_exclusive: true,
         start_date: '',
         end_date: '',
-        coupon_code: null,
+        coupon_code: '',
         variantIds: [],
         categoryIds: [],
         cluster_id: null
-      });
-      this.promotionForm.get('coupon_code')?.disable();
-      this.promotionForm.get('free_shipping_enabled')?.disable();
+      }, { emitEvent: false });
+      this.promotionForm.get('coupon_code')?.disable({ emitEvent: false });
+      this.promotionForm.get('free_shipping_enabled')?.disable({ emitEvent: false });
       this.promotionForm.get('cluster_id')?.clearValidators();
-      this.promotionForm.get('cluster_id')?.updateValueAndValidity();
+      this.promotionForm.get('cluster_id')?.updateValueAndValidity({ emitEvent: false });
       this.promotionModal.title = 'Crear Nueva Promoción';
       this.promotionModal.modalType = 'success';
       this.promotionModal.isConfirmModal = false;
@@ -215,7 +238,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
             this.selectedVariantIds = (promo.variantIds as any[])?.map((v: { variant_id: number }) => v.variant_id) || [];
             this.selectedCategoryIds = promo.categoryIds || [];
             this.associateCoupon = !!promo.coupon_code;
-            this.applyUserSegmentation = !!promo.cluster_id; // Activamos Toggle si hay cluster_id
+            this.applyUserSegmentation = !!promo.cluster_id;
 
             const missingVariants = this.selectedVariantIds.filter(
               id => !this.availableVariants.some(v => v.variant_id === id)
@@ -247,24 +270,27 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
               is_exclusive: promo.is_exclusive,
               start_date: this.formatDateForInput(promo.start_date),
               end_date: this.formatDateForInput(promo.end_date),
-              coupon_code: promo.coupon_code || null,
+              coupon_code: promo.coupon_code || '',
               variantIds: this.selectedVariantIds,
               categoryIds: this.selectedCategoryIds,
               cluster_id: promo.cluster_id || null
-            });
+            }, { emitEvent: false });
 
             if (this.applyUserSegmentation) {
               this.promotionForm.get('cluster_id')?.setValidators([Validators.required]);
             } else {
               this.promotionForm.get('cluster_id')?.clearValidators();
             }
-            this.promotionForm.get('cluster_id')?.updateValueAndValidity();
+            this.promotionForm.get('cluster_id')?.updateValueAndValidity({ emitEvent: false });
 
             if (this.associateCoupon) {
               this.promotionForm.get('coupon_code')?.enable();
+              this.promotionForm.get('coupon_code')?.setValidators([Validators.required, Validators.minLength(3), Validators.maxLength(50)]);
             } else {
               this.promotionForm.get('coupon_code')?.disable();
+              this.promotionForm.get('coupon_code')?.clearValidators();
             }
+            this.promotionForm.get('coupon_code')?.updateValueAndValidity();
             this.toggleFieldsBasedOnType(promo.coupon_type);
             this.filterVariants(this.variantSearchTerm);
             this.filterCategories(this.categorySearchTerm);
@@ -311,8 +337,6 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     this.promotionForm.get('free_shipping_enabled')?.disable();
     this.promotionForm.get('cluster_id')?.clearValidators();
     this.promotionForm.get('cluster_id')?.updateValueAndValidity();
-    this.filterVariants('');
-    this.filterCategories('');
   }
 
   savePromotion() {
@@ -342,7 +366,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
       coupon_type: this.promotionForm.value.coupon_type,
       discount_value: parseFloat(this.promotionForm.value.discount_value) || 0,
       free_shipping_enabled: this.promotionForm.value.coupon_type === 'free_shipping' ? this.promotionForm.value.free_shipping_enabled : false,
-      applies_to: this.applyUserSegmentation ? 'cluster' : this.promotionForm.value.applies_to, // Temporal para compatibilidad
+      applies_to: this.applyUserSegmentation ? 'cluster' : this.promotionForm.value.applies_to,
       is_exclusive: this.promotionForm.value.is_exclusive,
       start_date: new Date(this.promotionForm.value.start_date).toISOString(),
       end_date: new Date(this.promotionForm.value.end_date).toISOString(),
@@ -386,18 +410,6 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     );
   }
 
-
-
-
-  //aqui no mover
-  ngAfterViewInit(): void {
-    if (!this.promotionModal || !this.confirmModal) {
-      this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
-    }
-  }
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
   applyPromotionToCart(promotionId: number | null, couponCode: string) {
     if (!promotionId && !couponCode) {
       this.toastService.showToast('Debe proporcionar un ID de promoción o un código de cupón', 'error');
@@ -492,6 +504,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     const d = new Date(date);
     return d.toISOString().slice(0, 16);
   }
+
   sort(column: 'promotion_id' | 'start_date' | 'end_date' | 'discount_value' | 'created_at') {
     if (this.sortBy === column) {
       this.sortOrder = this.sortOrder === 'ASC' ? 'DESC' : 'ASC';
@@ -501,16 +514,19 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     }
     this.loadPromotions();
   }
+
   onSearchChange() {
     this.currentPage = 1;
     this.subscriptions.add(
       this.debounceSearch().subscribe(() => this.loadPromotions())
     );
   }
+
   onStatusFilterChange() {
     this.currentPage = 1;
     this.loadPromotions();
   }
+
   debounceSearch() {
     return of(this.searchTerm).pipe(
       debounceTime(300),
@@ -518,10 +534,12 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
       switchMap(() => of(null))
     );
   }
+
   removeCategory(categoryId: number) {
     this.selectedCategoryIds = this.selectedCategoryIds.filter(id => id !== categoryId);
     this.promotionForm.patchValue({ categoryIds: this.selectedCategoryIds });
   }
+
   onPageChange(newPage: number) {
     this.currentPage = newPage;
     this.loadPromotions();
@@ -531,6 +549,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     this.currentPage = 1;
     this.loadPromotions();
   }
+
   getVariantImage(variantId: number): string {
     const variant = this.availableVariants.find(v => v.variant_id === variantId);
     return variant?.image_url || 'assets/default-image.jpg';
@@ -627,28 +646,17 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     );
   }
 
-  toggleAssociateCoupon() {
-    this.associateCoupon = !this.associateCoupon;
-    const couponControl = this.promotionForm.get('coupon_code');
-    if (this.associateCoupon) {
-      couponControl?.enable();
-    } else {
-      couponControl?.disable();
-      couponControl?.setValue('');
-    }
-  }
-
   toggleSelection(appliesTo: string) {
     if (appliesTo !== 'specific_products') {
       this.selectedVariantIds = [];
-      this.promotionForm.patchValue({ variantIds: [] });
+      this.promotionForm.patchValue({ variantIds: [] }, { emitEvent: false });
     }
     if (appliesTo !== 'specific_categories') {
       this.selectedCategoryIds = [];
-      this.promotionForm.patchValue({ categoryIds: [] });
+      this.promotionForm.patchValue({ categoryIds: [] }, { emitEvent: false });
     }
     if (appliesTo !== 'cluster') {
-      this.promotionForm.patchValue({ cluster_id: '' });
+      this.promotionForm.patchValue({ cluster_id: '' }, { emitEvent: false });
     }
   }
 
@@ -674,6 +682,7 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     }
     this.promotionForm.patchValue({ categoryIds: this.selectedCategoryIds });
   }
+
   dateNotBeforeToday(control: any) {
     const selectedDate = new Date(control.value);
     const today = new Date();
@@ -733,7 +742,3 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     return variant ? variant.product_name : `Variante ${variantId} (No disponible)`;
   }
 }
-
-
-
-
