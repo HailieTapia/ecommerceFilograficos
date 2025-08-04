@@ -392,8 +392,14 @@ export class PromotionManagementComponent implements OnInit, AfterViewInit, OnDe
     );
   }
 
-
-
+  getClusterDescription(clusterId: number): string {
+    switch (clusterId) {
+      case 0: return 'Clientes ocasionales - Bajo valor';
+      case 1: return 'Clientes premium - Leales y frecuentes';
+      case 2: return 'Clientes regulares - Valor medio';
+      default: return `Cluster ${clusterId}`;
+    }
+  }
 
   //aqui no mover
   ngAfterViewInit(): void {
