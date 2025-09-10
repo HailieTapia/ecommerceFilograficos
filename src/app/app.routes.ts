@@ -47,6 +47,7 @@ import { PromotionManagementComponent } from './components/administrator/promoti
 import { BackupManagementComponent } from './components/administrator/backup-management/backup-management.component';
 import { AdminOrderComponent } from './components/administrator/admin-order/admin-order.component';
 import { ClusterComponent } from './components/administrator/cluster/cluster.component';
+import { BadgeCategoryManagementComponent } from './components/administrator/badge-category-management/badge-category-management.component';
 
 // Errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -77,6 +78,7 @@ export const routes: Routes = [
   { path: 'backup-management', component: BackupManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de respaldos' } },
   { path: 'dashboard-orders', component: AdminOrderComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de ordenes' } },
   { path: 'clusters', component: ClusterComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Clustering' } },
+  { path: 'badge-categories', component: BadgeCategoryManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Categorías de Insignias' } },
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
@@ -103,7 +105,7 @@ export const routes: Routes = [
   // Públicos
   { path: 'help', component: FaqComponent, data: { breadcrumb: 'Help' } },
   { path: 'login', component: LoginRedirectComponent, data: { breadcrumb: 'Iniciar sesión' } },
-  { path: 'register', component: LoginRedirectComponent, data: { breadcrumb: 'Registrarse' } }, // Nueva ruta para registro
+  { path: 'register', component: LoginRedirectComponent, data: { breadcrumb: 'Registrarse' } },
   { path: 'alexa-login', component: AlexaLoginComponent, data: { breadcrumb: 'Iniciar sesión con Alexa' } },
   { path: 'recovery', component: RecoverComponent, data: { breadcrumb: 'Recuperar cuenta' } },
   { path: 'mfa-verification', component: MfaVerificationComponent, data: { breadcrumb: 'Verificación MFA' } },

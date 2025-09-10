@@ -1,0 +1,209 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
+    <div>
+      <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+        <i class="fas fa-medal text-blue-600 dark:text-blue-400"></i> Gestión de Categorías de Insignias
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administra las categorías de insignias</p>
+    </div>
+    <div class="flex gap-2 w-full sm:w-auto">
+      <button
+        (click)="openCreateModal()"
+        class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm"
+      >
+        <i class="fas fa-plus"></i> Crear Categoría
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros y Búsqueda -->
+  <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+      <div>
+        <label for="searchTerm" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Buscar:</label>
+        <div class="relative">
+          <i class="fas fa-search absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+          <input
+            id="searchTerm"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange()"
+            placeholder="Buscar por nombre o descripción..."
+            class="w-full p-2 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+            [ngClass]="{'border-red-500 dark:border-red-400': searchTerm && searchTerm.length > 100}"
+          />
+        </div>
+      </div>
+      <div>
+        <label for="statusFilter" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Estado:</label>
+        <select
+          id="statusFilter"
+          [(ngModel)]="statusFilter"
+          (change)="onStatusFilterChange()"
+          class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+        >
+          <option value="active">Activas</option>
+          <option value="inactive">Inactivas</option>
+          <option value="all">Todas</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+      <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Categorías de Insignias</h2>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <label for="itemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Por página:</label>
+        <select
+          id="itemsPerPage"
+          [(ngModel)]="itemsPerPage"
+          (change)="onItemsPerPageChange()"
+          class="w-full sm:w-20 md:w-24 p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto border-collapse">
+        <thead class="bg-gray-100 dark:bg-gray-700">
+          <tr>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">ID</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Nombre</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Descripción</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Estado</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Creado</th>
+            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+          <tr *ngIf="badgeCategories.length === 0 && !isLoading" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+            <td colspan="6" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              <i class="fas fa-box-open w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+              <p>No hay categorías disponibles</p>
+            </td>
+          </tr>
+          <tr *ngIf="isLoading" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+            <td colspan="6" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              <i class="fas fa-spinner animate-spin w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2"></i>
+              <p>Cargando categorías...</p>
+            </td>
+          </tr>
+          <tr *ngFor="let category of badgeCategories" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ category.badge_category_id }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[80px] sm:max-w-[120px] md:max-w-[150px]">{{ category.name }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[100px] sm:max-w-[150px] md:max-w-[200px] hidden sm:table-cell">{{ category.description || '-' }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">{{ category.is_active ? 'Activa' : 'Inactiva' }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">{{ formatDate(category.created_at) }}</td>
+            <td class="p-1 sm:p-2 md:p-3 text-center">
+              <div *ngIf="category.is_active" class="flex justify-center items-center gap-1 sm:gap-2">
+                <button (click)="openEditModal(category)" class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                  <i class="fas fa-edit"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Editar
+                  </span>
+                </button>
+                <button (click)="deleteCategory(category)" class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                  <i class="fas fa-trash"></i>
+                  <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    Eliminar
+                  </span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalItems]="totalCategories"
+      [itemsPerPage]="itemsPerPage"
+      (pageChange)="onPageChange($event)"
+      class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"
+    ></app-pagination>
+  </div>
+
+  <!-- Modal para Crear/Editar Categoría -->
+  <app-modal
+    #createEditModal
+    [title]="selectedCategoryId ? 'Editar Categoría de Insignias' : 'Crear Categoría de Insignias'"
+    [modalType]="selectedCategoryId ? 'info' : 'success'"
+    [isConfirmModal]="false"
+  >
+    <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto space-y-4 sm:space-y-6">
+      <form [formGroup]="categoryForm" class="space-y-4">
+        <div>
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Nombre <span class="text-red-500 dark:text-red-400">*</span>
+          </label>
+          <input
+            formControlName="name"
+            type="text"
+            placeholder="Ej. Logros de Compra"
+            class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+            [ngClass]="{'border-red-500 dark:border-red-400': categoryForm.get('name')?.touched && categoryForm.get('name')?.invalid}"
+          />
+          <div *ngIf="categoryForm.get('name')?.touched && categoryForm.get('name')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+            <p *ngIf="categoryForm.get('name')?.errors?.['required']">El nombre es obligatorio.</p>
+            <p *ngIf="categoryForm.get('name')?.errors?.['minlength']">Debe tener al menos 3 caracteres.</p>
+            <p *ngIf="categoryForm.get('name')?.errors?.['maxlength']">No puede exceder 100 caracteres.</p>
+            <p *ngIf="categoryForm.get('name')?.errors?.['invalidContent']">No se permiten caracteres especiales ni palabras SQL.</p>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+            Descripción
+          </label>
+          <textarea
+            formControlName="description"
+            placeholder="Ej. Categoría para insignias relacionadas con compras"
+            class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+            rows="4"
+            [ngClass]="{'border-red-500 dark:border-red-400': categoryForm.get('description')?.touched && categoryForm.get('description')?.invalid}"
+          ></textarea>
+          <div *ngIf="categoryForm.get('description')?.touched && categoryForm.get('description')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+            <p *ngIf="categoryForm.get('description')?.errors?.['maxlength']">No puede exceder 500 caracteres.</p>
+            <p *ngIf="categoryForm.get('description')?.errors?.['invalidContent']">No se permiten caracteres especiales ni palabras SQL.</p>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div slot="actions" class="p-3 sm:p-4 flex justify-end gap-2 sm:gap-4">
+      <button
+        (click)="createEditModal.close()"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
+      >
+        Cancelar
+      </button>
+      <button
+        (click)="saveCategory()"
+        [disabled]="categoryForm.invalid && categoryForm.touched"
+        class="px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition duration-300 text-xs sm:text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+      >
+        {{ selectedCategoryId ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
+  </app-modal>
+
+  <!-- Modal para Confirmaciones -->
+  <app-modal
+    #confirmModal
+    [title]="confirmModalTitle"
+    [modalType]="confirmModalType"
+    [isConfirmModal]="true"
+    confirmText="Confirmar"
+    cancelText="Cancelar"
+    (confirm)="handleConfirm()"
+    (cancel)="confirmModal.close()"
+  >
+    <div slot="body" class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+      <p class="text-xs sm:text-sm">{{ confirmModalMessage }}</p>
+    </div>
+  </app-modal>
+</div>
