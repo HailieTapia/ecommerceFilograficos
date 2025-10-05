@@ -1,0 +1,39 @@
+.min-h-screen {
+  min-height: calc(100vh - 64px); /* Ajustar según la altura del header/footer */
+}
+
+/* Ajustes para la tabla responsiva */
+@media (max-width: 640px) {
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Estilo para el ícono en la tabla */
+img {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Ajustes para el modal */
+app-modal {
+  display: block;
+}
+
+/* Asegurar que los botones de acción tengan un tamaño consistente */
+button i {
+  font-size: 1rem;
+}
+
+/* Ajustes para tooltips */
+.group:hover .group-hover\:block {
+  display: block;
+}
+
+/* Estilos para el estado deshabilitado */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

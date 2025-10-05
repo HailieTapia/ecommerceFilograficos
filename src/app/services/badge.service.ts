@@ -1,0 +1,253 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { CsrfService } from '../services/csrf.service';
+import { environment } from '../environments/config';
+
+// Interfaz para insignias
+export interface Badge {
+  badge_id: number;
+  name: string;
+  description?: string;
+  icon_url: string;
+  public_id: string;
+  badge_category_id: number;
+  category_name?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Interfaz para el historial de insignias otorgadas (NUEVA)
+export interface GrantedBadgeHistoryItem {
+  user_badge_id: number;
+  user_id: number;
+  user_email: string;
+  user_name: string;
+  badge_id: number;
+  badge_name: string;
+  badge_category: string;
+  icon_url: string;
+  obtained_at: string;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class BadgeService {
+  private apiUrl = `${environment.baseUrl}/badges`;
+
+  constructor(private csrfService: CsrfService, private http: HttpClient) {}
+
+  /**
+   * Obtiene todas las insignias con paginación y búsqueda (admin)
+   * @param page Número de página
+   * @param pageSize Tamaño de página
+   * @param search Término de búsqueda
+   * @param statusFilter Filtro de estado (active, inactive, all)
+   * @returns Observable con la lista de insignias y metadatos
+   */
+  getAllBadges(page?: number, pageSize?: number, search?: string, statusFilter: 'active' | 'inactive' | 'all' = 'active'): Observable<any> {
+    const pageValue = page ?? 1;
+    const pageSizeValue = pageSize ?? 10;
+    const searchValue = search ?? '';
+
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        let params = new HttpParams()
+          .set('page', pageValue.toString())
+          .set('pageSize', pageSizeValue.toString())
+          .set('statusFilter', statusFilter);
+
+        if (searchValue) {
+          params = params.set('search', searchValue);
+        }
+
+        return this.http.get(`${this.apiUrl}/`, {
+          headers,
+          params,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  // ... (Resto de métodos existentes: getBadgeById, createBadge, updateBadge, deleteBadge, getBadgeCategoriesWithCount) ...
+
+  /**
+   * Obtiene una insignia por ID
+   * @param id ID de la insignia
+   * @returns Observable con la insignia
+   */
+  getBadgeById(id: string): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get(`${this.apiUrl}/${id}`, { headers, withCredentials: true });
+      })
+    );
+  }
+
+  /**
+   * Crea una nueva insignia
+   * @param badgeData Datos de la insignia
+   * @param file Imagen de la insignia
+   * @returns Observable con la respuesta del servidor
+   */
+  createBadge(badgeData: { name: string; description?: string; badge_category_id: number }, file: File): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        const formData = new FormData();
+        formData.append('name', badgeData.name);
+        if (badgeData.description) {
+          formData.append('description', badgeData.description);
+        }
+        formData.append('badge_category_id', badgeData.badge_category_id.toString());
+        formData.append('badgeIcon', file);
+
+        return this.http.post(`${this.apiUrl}/`, formData, { headers, withCredentials: true });
+      })
+    );
+  }
+
+  /**
+   * Actualiza una insignia existente
+   * @param id ID de la insignia
+   * @param updatedData Datos actualizados
+   * @param file Imagen de la insignia (opcional)
+   * @returns Observable con la respuesta del servidor
+   */
+  updateBadge(id: string, updatedData: { name?: string; description?: string; badge_category_id?: number }, file?: File): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        const formData = new FormData();
+        if (updatedData.name) {
+          formData.append('name', updatedData.name);
+        }
+        if (updatedData.description !== undefined) {
+          formData.append('description', updatedData.description);
+        }
+        if (updatedData.badge_category_id) {
+          formData.append('badge_category_id', updatedData.badge_category_id.toString());
+        }
+        if (file) {
+          formData.append('badgeIcon', file);
+        }
+
+        return this.http.put(`${this.apiUrl}/${id}`, formData, { headers, withCredentials: true });
+      })
+    );
+  }
+
+  /**
+   * Elimina (lógicamente) una insignia
+   * @param id ID de la insignia
+   * @returns Observable con la respuesta del servidor
+   */
+  deleteBadge(id: string): Observable<any> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.delete(`${this.apiUrl}/${id}`, { headers, withCredentials: true });
+      })
+    );
+  }
+
+  /**
+   * Obtiene categorías de insignias con conteo de insignias
+   * @param page Número de página
+   * @param pageSize Tamaño de página
+   * @param search Término de búsqueda
+   * @param statusFilter Filtro de estado (active, inactive, all)
+   * @returns Observable con la lista de categorías y conteo
+   */
+  getBadgeCategoriesWithCount(page?: number, pageSize?: number, search?: string, statusFilter: 'active' | 'inactive' | 'all' = 'active'): Observable<any> {
+    const pageValue = page ?? 1;
+    const pageSizeValue = pageSize ?? 10;
+    const searchValue = search ?? '';
+
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        let params = new HttpParams()
+          .set('page', pageValue.toString())
+          .set('pageSize', pageSizeValue.toString())
+          .set('statusFilter', statusFilter);
+
+        if (searchValue) {
+          params = params.set('search', searchValue);
+        }
+
+        return this.http.get(`${this.apiUrl}/categories`, {
+          headers,
+          params,
+          withCredentials: true
+        });
+      })
+    );
+  }
+  
+  // =======================================================================
+  // NUEVO MÉTODO: Historial de Insignias Otorgadas (Administración)
+  // =======================================================================
+
+  /**
+   * Obtiene el historial de insignias otorgadas con paginación y filtros.
+   * Endpoint: GET /api/badges/history
+   * @param page Número de página
+   * @param pageSize Tamaño de página
+   * @param userId Filtro opcional por ID de usuario
+   * @param badgeId Filtro opcional por ID de insignia
+   * @param startDate Filtro opcional por fecha de inicio (formato ISO 8601: YYYY-MM-DD)
+   * @param endDate Filtro opcional por fecha de fin (formato ISO 8601: YYYY-MM-DD)
+   * @returns Observable con la lista de historial y metadatos
+   */
+  getGrantedBadgesHistory(
+    page?: number, 
+    pageSize?: number, 
+    userId?: number, 
+    badgeId?: number, 
+    startDate?: string, 
+    endDate?: string,
+    sort?: string 
+  ): Observable<{ message: string, history: GrantedBadgeHistoryItem[], total: number, page: number, pageSize: number }> {
+    
+    const pageValue = page ?? 1;
+    const pageSizeValue = pageSize ?? 10;
+
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        let params = new HttpParams()
+          .set('page', pageValue.toString())
+          .set('pageSize', pageSizeValue.toString());
+
+        if (userId) {
+          params = params.set('userId', userId.toString());
+        }
+        if (badgeId) {
+          params = params.set('badgeId', badgeId.toString());
+        }
+        if (startDate) {
+          params = params.set('startDate', startDate);
+        }
+        if (endDate) {
+          params = params.set('endDate', endDate);
+        }
+        if (sort) {
+          params = params.set('sort', sort);
+        }
+
+        return this.http.get<any>(`${this.apiUrl}/history`, {
+          headers,
+          params,
+          withCredentials: true
+        });
+      })
+    );
+  }
+}

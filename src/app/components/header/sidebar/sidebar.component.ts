@@ -42,7 +42,8 @@ export class SidebarComponent implements OnInit {
         { path: '/banners', icon: 'fa-images', label: 'Banners', badge: null },
         { path: '/faqs', icon: 'fa-question-circle', label: 'FAQs', badge: null },
         { path: '/faq-categories', icon: 'fa-clipboard-question', label: 'Categorías FAQ', badge: null },
-        { path: '/badge-categories', icon: 'fa-clipboard-question', label: 'Categorías de Insignias', badge: null },
+        { path: '/badge-categories', icon: 'fa-medal', label: 'Categorías de Insignias', badge: null },
+        { path: '/badges', icon: 'fa-medal', label: 'Insignias', badge: null },
       ]
     },
     {
