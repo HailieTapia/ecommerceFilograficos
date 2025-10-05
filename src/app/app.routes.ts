@@ -48,6 +48,7 @@ import { BackupManagementComponent } from './components/administrator/backup-man
 import { AdminOrderComponent } from './components/administrator/admin-order/admin-order.component';
 import { ClusterComponent } from './components/administrator/cluster/cluster.component';
 import { BadgeCategoryManagementComponent } from './components/administrator/badge-category-management/badge-category-management.component';
+import { BadgeManagementComponent } from './components/administrator/badge-management//badge-management.component';
 
 // Errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -79,6 +80,7 @@ export const routes: Routes = [
   { path: 'dashboard-orders', component: AdminOrderComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Gestión de ordenes' } },
   { path: 'clusters', component: ClusterComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Clustering' } },
   { path: 'badge-categories', component: BadgeCategoryManagementComponent, canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Categorías de Insignias' } },
+  { path: 'badges', component: BadgeManagementComponent , canActivate: [AuthGuard], data: { role: 'administrador', breadcrumb: 'Insignias' } },
 
   // Autenticados
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard], data: { role: 'cliente', breadcrumb: 'Perfil' } },
