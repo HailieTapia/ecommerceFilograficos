@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { BadgeCategoryService, BadgeCategory } from '../../../services/badge-category.service';
+import { BadgeCategoryService, BadgeCategory, BadgeDistributionReportItem } from '../../../services/badge-category.service'; // Importar BadgeDistributionReportItem
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';
 import { ToastService } from '../../../services/toastService';
@@ -31,9 +31,10 @@ registerLocaleData(localeEs);
     { provide: 'LOCALE_ID', useValue: 'es' }
   ]
 })
-export class BadgeCategoryManagementComponent implements OnInit, OnDestroy {
+export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, OnDestroy { // Añadido AfterViewInit
   @ViewChild('createEditModal') createEditModal!: ModalComponent;
   @ViewChild('confirmModal') confirmModal!: ModalComponent;
+  @ViewChild('reportModal') reportModal!: ModalComponent; // NUEVO: Modal para reportes
 
   badgeCategories: BadgeCategory[] = [];
   totalCategories = 0;
@@ -42,6 +43,15 @@ export class BadgeCategoryManagementComponent implements OnInit, OnDestroy {
   totalPages = 1;
   searchTerm = '';
   statusFilter: 'active' | 'inactive' | 'all' = 'active';
+
+  // --- NUEVAS PROPIEDADES DE FILTRO Y REPORTE ---
+  badgeNameFilter = ''; // Filtro por nombre de insignia
+  sortColumn = 'badge_category_id'; // Columna para ordenar
+  sortDirection: 'ASC' | 'DESC' = 'ASC'; // Dirección de ordenamiento
+  badgeDistributionReport: BadgeDistributionReportItem[] = [];
+  isReportLoading: boolean = false;
+  // ---------------------------------------------
+
   categoryForm!: FormGroup;
   selectedCategoryId: string | null = null;
   private subscriptions: Subscription = new Subscription();
@@ -74,11 +84,12 @@ export class BadgeCategoryManagementComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadBadgeCategories();
+    // Inicializar la carga con un debounce para el término de búsqueda principal
+    this.debounceSearch().subscribe(() => this.loadBadgeCategories());
   }
 
   ngAfterViewInit(): void {
-    if (!this.createEditModal || !this.confirmModal) {
+    if (!this.createEditModal || !this.confirmModal || !this.reportModal) {
       this.toastService.showToast('Uno o más modales no están inicializados correctamente.', 'error');
     }
   }
@@ -87,25 +98,36 @@ export class BadgeCategoryManagementComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  // --- LÓGICA PRINCIPAL DE CONSULTA (ACTUALIZADA) ---
   loadBadgeCategories(): void {
-    this.isLoading = true; // Set loading to true
+    this.isLoading = true; 
+    const sort = `${this.sortColumn}:${this.sortDirection}`;
+
     this.subscriptions.add(
-      this.badgeCategoryService.getAllBadgeCategories(this.currentPage, this.itemsPerPage, this.searchTerm, this.statusFilter).subscribe({
+      this.badgeCategoryService.getAllBadgeCategories(
+        this.currentPage, 
+        this.itemsPerPage, 
+        this.searchTerm, 
+        this.statusFilter,
+        sort, // NUEVO: Ordenamiento
+        this.badgeNameFilter // NUEVO: Filtro por insignia
+      ).subscribe({
         next: (response) => {
           this.badgeCategories = response.badgeCategories;
           this.totalCategories = response.total;
           this.totalPages = Math.ceil(response.total / this.itemsPerPage);
-          this.isLoading = false; // Set loading to false
+          this.isLoading = false; 
         },
         error: (err) => {
           const errorMessage = err?.error?.message || 'Error al cargar las categorías de insignias';
           this.toastService.showToast(errorMessage, 'error');
-          this.isLoading = false; // Set loading to false
+          this.isLoading = false; 
         }
       })
     );
   }
 
+  // --- MANEJADORES DE CAMBIO ---
   onPageChange(newPage: number): void {
     this.currentPage = newPage;
     this.loadBadgeCategories();
@@ -118,12 +140,39 @@ export class BadgeCategoryManagementComponent implements OnInit, OnDestroy {
 
   onSearchChange(): void {
     this.currentPage = 1;
+    // La suscripción se hace en ngOnInit, aquí solo emitimos el valor
+    of(this.searchTerm).pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(() => this.loadBadgeCategories());
+  }
+  
+  onBadgeNameFilterChange(): void {
+    this.currentPage = 1;
     this.debounceSearch().subscribe(() => this.loadBadgeCategories());
   }
 
   onStatusFilterChange(): void {
     this.currentPage = 1;
     this.loadBadgeCategories();
+  }
+  
+  // --- LÓGICA DE ORDENAMIENTO (NUEVA) ---
+  onSortChange(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'ASC';
+    }
+    this.loadBadgeCategories();
+  }
+
+  getSortIcon(column: string): string {
+    if (this.sortColumn !== column) {
+      return 'fas fa-sort text-gray-400';
+    }
+    return this.sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down';
   }
 
   debounceSearch() {
@@ -134,7 +183,37 @@ export class BadgeCategoryManagementComponent implements OnInit, OnDestroy {
     );
   }
 
-  // Validadores personalizados
+  // --- LÓGICA DE REPORTES (NUEVA) ---
+  openReportModal(): void {
+    if (!this.reportModal) {
+      this.toastService.showToast('Error: Modal de reportes no inicializado', 'error');
+      return;
+    }
+    this.badgeDistributionReport = [];
+    this.isReportLoading = true;
+    this.reportModal.title = 'Reporte de Distribución de Insignias';
+    this.reportModal.modalType = 'info';
+    this.reportModal.isConfirmModal = false;
+    this.reportModal.open();
+
+    this.subscriptions.add(
+        this.badgeCategoryService.getBadgeDistributionReport().subscribe({
+            next: (response) => {
+                this.badgeDistributionReport = response.report;
+                this.isReportLoading = false;
+            },
+            error: (err) => {
+                const errorMessage = err?.error?.message || 'Error al generar el reporte de distribución';
+                this.toastService.showToast(errorMessage, 'error');
+                this.isReportLoading = false;
+                this.reportModal.close();
+            }
+        })
+    );
+  }
+  // ---------------------------------
+
+  // Validadores y lógica CRUD (Se mantienen sin cambios)
   noSpecialCharsValidator(control: AbstractControl) {
     const hasDangerousChars = /[<>'"`;]/.test(control.value);
     return hasDangerousChars ? { invalidContent: true } : null;
