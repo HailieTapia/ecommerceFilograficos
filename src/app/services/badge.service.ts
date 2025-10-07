@@ -32,6 +32,15 @@ export interface GrantedBadgeHistoryItem {
   obtained_at: string;
 }
 
+// Interfaz para la respuesta paginada del historial
+export interface GrantedHistoryResponse {
+  message: string;
+  history: GrantedBadgeHistoryItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -73,8 +82,6 @@ export class BadgeService {
       })
     );
   }
-
-  // ... (Resto de métodos existentes: getBadgeById, createBadge, updateBadge, deleteBadge, getBadgeCategoriesWithCount) ...
 
   /**
    * Obtiene una insignia por ID
@@ -190,7 +197,7 @@ export class BadgeService {
       })
     );
   }
-  
+
   // =======================================================================
   // NUEVO MÉTODO: Historial de Insignias Otorgadas (Administración)
   // =======================================================================
@@ -204,18 +211,19 @@ export class BadgeService {
    * @param badgeId Filtro opcional por ID de insignia
    * @param startDate Filtro opcional por fecha de inicio (formato ISO 8601: YYYY-MM-DD)
    * @param endDate Filtro opcional por fecha de fin (formato ISO 8601: YYYY-MM-DD)
+   * @param sort Parámetro de ordenación opcional
    * @returns Observable con la lista de historial y metadatos
    */
   getGrantedBadgesHistory(
-    page?: number, 
-    pageSize?: number, 
-    userId?: number, 
-    badgeId?: number, 
-    startDate?: string, 
+    page?: number,
+    pageSize?: number,
+    userId?: number,
+    badgeId?: number,
+    startDate?: string,
     endDate?: string,
-    sort?: string 
-  ): Observable<{ message: string, history: GrantedBadgeHistoryItem[], total: number, page: number, pageSize: number }> {
-    
+    sort?: string
+  ): Observable<GrantedHistoryResponse> {
+
     const pageValue = page ?? 1;
     const pageSizeValue = pageSize ?? 10;
 
@@ -242,7 +250,7 @@ export class BadgeService {
           params = params.set('sort', sort);
         }
 
-        return this.http.get<any>(`${this.apiUrl}/history`, {
+        return this.http.get<GrantedHistoryResponse>(`${this.apiUrl}/history`, {
           headers,
           params,
           withCredentials: true

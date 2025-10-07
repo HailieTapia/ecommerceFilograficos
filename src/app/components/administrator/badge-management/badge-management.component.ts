@@ -1,3 +1,4 @@
+// badge-management.component.ts (actualizado)
 import { Component, OnInit, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
@@ -10,6 +11,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of, Subscription } from 'rxjs';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
+import { BadgeHistoryComponent } from './badge-history/badge-history.component';
 
 // Registrar localización para español
 registerLocaleData(localeEs);
@@ -23,7 +25,8 @@ registerLocaleData(localeEs);
     ReactiveFormsModule,
     PaginationComponent,
     ModalComponent,
-    DatePipe
+    DatePipe,
+    BadgeHistoryComponent
   ],
   templateUrl: './badge-management.component.html',
   styleUrls: ['./badge-management.component.css'],
@@ -53,15 +56,6 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
   selectedFile: File | null = null;
   imagePreview: string | null = null;
 
-  // Propiedades para historial de insignias
-  historyList: GrantedBadgeHistoryItem[] = [];
-  totalHistoryItems = 0;
-  historyCurrentPage = 1;
-  historyItemsPerPage = 10;
-  historyTotalPages = 1;
-  historyFilterForm!: FormGroup;
-  historySort: 'obtained_at:DESC' | 'obtained_at:ASC' = 'obtained_at:DESC';
-
   // Propiedades comunes
   private subscriptions: Subscription = new Subscription();
   confirmAction: (() => void) | null = null;
@@ -69,7 +63,6 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
   confirmModalMessage = '';
   confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
   isLoading = false;
-  isLoadingHistory = false;
 
   constructor(
     private badgeService: BadgeService,
@@ -98,21 +91,11 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
       ]],
       badgeIcon: [null, this.selectedBadgeId ? [] : [Validators.required]]
     });
-
-    // Formulario para filtros de historial
-    this.historyFilterForm = this.fb.group({
-      userId: ['', [this.idValidator]],
-      badgeId: ['', [this.idValidator]],
-      startDate: [''],
-      endDate: ['']
-    });
   }
 
   ngOnInit(): void {
     this.loadBadgeCategories();
     this.loadBadges();
-    this.loadHistory();
-    this.setupHistoryFormSubscription();
   }
 
   ngAfterViewInit(): void {
@@ -130,8 +113,6 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
     this.activeTab = tab;
     if (tab === 'management') {
       this.loadBadges();
-    } else {
-      this.loadHistory();
     }
   }
 
@@ -304,68 +285,6 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
     );
   }
 
-  // Historial de insignias
-  setupHistoryFormSubscription(): void {
-    this.subscriptions.add(
-      this.historyFilterForm.valueChanges.pipe(
-        debounceTime(500),
-        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
-      ).subscribe(() => {
-        if (this.historyFilterForm.valid) {
-          this.historyCurrentPage = 1;
-          this.loadHistory();
-        }
-      })
-    );
-  }
-
-  loadHistory(): void {
-    if (this.activeTab !== 'history') return;
-    if (this.historyFilterForm.invalid) return;
-
-    this.isLoadingHistory = true;
-    const filters = this.historyFilterForm.value;
-
-    this.subscriptions.add(
-      this.badgeService.getGrantedBadgesHistory(
-        this.historyCurrentPage,
-        this.historyItemsPerPage,
-        filters.userId ? parseInt(filters.userId) : undefined,
-        filters.badgeId ? parseInt(filters.badgeId) : undefined,
-        filters.startDate,
-        filters.endDate,
-        this.historySort
-      ).subscribe({
-        next: (response) => {
-          this.historyList = response.history;
-          this.totalHistoryItems = response.total;
-          this.historyTotalPages = Math.ceil(response.total / this.historyItemsPerPage);
-          this.isLoadingHistory = false;
-        },
-        error: (err) => {
-          const errorMessage = err?.error?.message || 'Error al cargar el historial de insignias';
-          this.toastService.showToast(errorMessage, 'error');
-          this.isLoadingHistory = false;
-        }
-      })
-    );
-  }
-
-  onHistoryPageChange(newPage: number): void {
-    this.historyCurrentPage = newPage;
-    this.loadHistory();
-  }
-
-  onHistoryItemsPerPageChange(): void {
-    this.historyCurrentPage = 1;
-    this.loadHistory();
-  }
-
-  onHistorySortChange(): void {
-    this.historyCurrentPage = 1;
-    this.loadHistory();
-  }
-
   // Validaciones y utilidades
   noSpecialCharsValidator(control: AbstractControl) {
     const hasDangerousChars = /[<>'"`;]/.test(control.value);
@@ -375,13 +294,6 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
   noSQLInjectionValidator(control: AbstractControl) {
     const sqlKeywords = /(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|EXEC|UNION|GRANT|REVOKE)/i;
     return sqlKeywords.test(control.value) ? { invalidContent: true } : null;
-  }
-
-  idValidator(control: AbstractControl) {
-    if (!control.value) return null;
-    const value = control.value;
-    const isValidNumber = /^\d+$/.test(value) && parseInt(value) > 0;
-    return isValidNumber ? null : { invalidId: true };
   }
 
   sanitizeInput(input: string): string {
@@ -456,9 +368,5 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
 
   formatDate(date: string): string {
     return this.datePipe.transform(date, "d 'de' MMMM 'de' yyyy", undefined, 'es') || 'Fecha no disponible';
-  }
-
-  formatDateTime(date: string): string {
-    return this.datePipe.transform(date, "d/MM/yyyy h:mm a", undefined, 'es') || 'Fecha no disponible';
   }
 }
