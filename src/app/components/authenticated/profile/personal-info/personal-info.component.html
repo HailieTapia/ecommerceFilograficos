@@ -25,7 +25,10 @@
         <!-- Correo electrónico -->
         <div class="sm:col-span-6">
           <label for="email" class="block text-sm font-medium text-light-secondary dark:text-dark-secondary">Correo electrónico</label>
-          <p class="mt-1 text-sm text-light-secondary dark:text-dark-secondary">{{ userProfile.email }}</p>
+          <div class="mt-1 p-2 pl-10 bg-light-background dark:bg-dark-background border border-gray-200 dark:border-gray-600 rounded-md shadow-sm text-light-text dark:text-dark-text flex items-center gap-2">
+            <i class="fas fa-envelope text-light-primary dark:text-dark-primary"></i>
+            <span>{{ userProfile.email }}</span>
+          </div>
         </div>
 
         <!-- Teléfono -->
@@ -55,5 +58,39 @@
         </button>
       </div>
     </form>
+  </div>
+
+  <!-- Sección de Insignias -->
+  <div class="mt-10 pt-8 border-t-2 border-light-primary dark:border-dark-primary">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-award text-xl text-yellow-500"></i>
+        <h3 class="text-xl font-semibold text-light-text dark:text-dark-text">Mis Insignias</h3>
+      </div>
+      <span class="text-sm text-light-secondary dark:text-dark-secondary">{{ (userProfile.badges && userProfile.badges.length) || 0 }} insignias obtenidas</span>
+    </div>
+    <div *ngIf="userProfile.badges && userProfile.badges.length > 0; else noBadges"
+         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div *ngFor="let badge of userProfile.badges"
+           class="group relative bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 border-2 border-yellow-200 dark:border-yellow-700 rounded-xl p-4 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105">
+        <div class="flex flex-col items-center text-center">
+          <img [src]="badge.icon_url" [alt]="badge.name" class="w-12 h-12 rounded-full object-cover mb-2">
+          <h4 class="font-semibold text-sm text-light-text dark:text-dark-text mb-1">{{ badge.name }}</h4>
+          <p class="text-xs text-light-secondary dark:text-dark-secondary mb-2">{{ badge.category }}</p>
+          <div class="flex items-center gap-1 text-xs text-light-secondary dark:text-dark-secondary">
+            <i class="fas fa-calendar-alt w-3 h-3"></i>
+            <span>{{ badge.obtained_at | date:'dd MMM yyyy':'es-MX' }}</span>
+          </div>
+        </div>
+        <!-- Tooltip en hover (ahora multilínea) -->
+        <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-800 text-white dark:text-gray-200 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none max-w-48 text-center whitespace-normal z-20">
+          {{ badge.description }}
+          <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800"></div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noBadges>
+      <p class="text-sm text-light-secondary dark:text-dark-secondary italic">No tienes insignias aún.</p>
+    </ng-template>
   </div>
 </div>
