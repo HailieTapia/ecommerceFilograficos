@@ -9,6 +9,27 @@ import { AddressesComponent } from './addresses/addresses.component';
 import { Router } from '@angular/router';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 
+interface Badge {
+  id: number;
+  name: string;
+  icon_url: string;
+  description: string;
+  category: string;
+  obtained_at: string;
+}
+
+interface UserProfile {
+  user_id: number;
+  name: string;
+  email: string;
+  phone: string;
+  status: string;
+  user_type: string;
+  address: any;
+  profile_picture_url: string | null;
+  badges: Badge[]; // Definimos el tipo aquí
+}
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -17,7 +38,7 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
-  userProfile: any = {};
+  userProfile: UserProfile | any = {}; 
   successMessage: string = '';
   errorMessage: string = '';
   activeTab: string = 'info';

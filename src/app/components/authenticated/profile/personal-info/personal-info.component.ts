@@ -4,12 +4,23 @@ import { UserService } from '../../../../services/user.service';
 import { ToastService } from '../../../../services/toastService';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+// Interfaz para tipar Badge
+interface Badge {
+  id: number;
+  name: string;
+  icon_url: string;
+  description: string;
+  category: string;
+  obtained_at: string;
+}
+
 // Interfaz para tipar userProfile
 interface UserProfile {
   name?: string;
   phone?: string;
   email?: string;
-  Addresses?: any[]; // Opcional, ya que puede no estar presente
+  Addresses?: any[];
+  badges?: Badge[]; // Añadimos la propiedad badges
 }
 
 @Component({
