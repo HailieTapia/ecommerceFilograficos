@@ -2,7 +2,7 @@
 import { Component, OnInit, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { BadgeService, Badge, GrantedBadgeHistoryItem } from '../../../services/badge.service';
+import { BadgeService, Badge } from '../../../services/badge.service';
 import { BadgeCategoryService, BadgeCategory } from '../../../services/badge-category.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';

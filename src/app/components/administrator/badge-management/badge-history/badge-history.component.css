@@ -1,0 +1,90 @@
+/* Estilos para las cards y el desplegable */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card .fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+
+.card .fa-chevron-down.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.badge-grid {
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  display: grid;
+  place-items: center; /* Centra los elementos dentro de las celdas de la rejilla */
+}
+
+.badge-item {
+  transition: all 0.3s ease;
+  max-width: 300px;
+  border-radius: 12px;
+}
+
+.badge-item:hover {
+  transform: scale(1.02);
+}
+
+/* Estilos para el gráfico (responsivo) */
+.chart-container {
+  position: relative;
+  width: 100%; /* Asegura que ocupe todo el ancho disponible */
+  /* La altura se gestiona dinámicamente en el HTML: [style.height.px]="..." */
+  /* 'overflow: hidden' fue eliminado del container para permitir que el overflow-x-auto funcione en el padre */
+}
+
+/* Media queries para responsividad de la rejilla de insignias */
+/* Estos estilos son mayormente redundantes si se usa Tailwind, pero se mantienen por claridad */
+@media (max-width: 640px) { /* Mobile (smartphones) */
+  .badge-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) { /* Tablets y laptops pequeñas */
+  .badge-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1025px) { /* Pantallas grandes (monitores) */
+  .badge-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .badge-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Estilos adicionales para tooltips en pantallas pequeñas */
+@media (max-width: 768px) {
+  .chart-container .chartjs-tooltip {
+    font-size: 11px !important; /* Tooltips más pequeños */
+  }
+}
+
+/* Estilos adicionales para el gráfico de tendencias */
+.trend-chart-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Ajustes para tooltips en el gráfico de tendencias */
+.chartjs-tooltip {
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .trend-chart-container .chartjs-tooltip {
+    font-size: 11px !important;
+  }
+}

@@ -1,129 +1,249 @@
-<!-- badge-history.component.html -->
-<div class="bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
-    <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros de Historial</h2>
-    <form [formGroup]="historyFilterForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 items-end">
-        <div>
-            <label for="userId" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">ID Usuario:</label>
-            <input
-                id="userId"
-                formControlName="userId"
-                type="number"
-                placeholder="ID Usuario"
-                class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
-                [ngClass]="{'border-red-500 dark:border-red-400': historyFilterForm.get('userId')?.touched && historyFilterForm.get('userId')?.invalid}"
-            />
-            <div *ngIf="historyFilterForm.get('userId')?.errors?.['invalidId']" class="mt-1 text-xs text-red-500 dark:text-red-400">ID inválido.</div>
-        </div>
-        <div>
-            <label for="badgeId" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">ID Insignia:</label>
-            <input
-                id="badgeId"
-                formControlName="badgeId"
-                type="number"
-                placeholder="ID Insignia"
-                class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
-                [ngClass]="{'border-red-500 dark:border-red-400': historyFilterForm.get('badgeId')?.touched && historyFilterForm.get('badgeId')?.invalid}"
-            />
-            <div *ngIf="historyFilterForm.get('badgeId')?.errors?.['invalidId']" class="mt-1 text-xs text-red-500 dark:text-red-400">ID inválido.</div>
-        </div>
-        <div>
-            <label for="startDate" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Fecha Inicio:</label>
-            <input
-                id="startDate"
-                formControlName="startDate"
-                type="date"
-                class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
-            />
-        </div>
-        <div>
-            <label for="endDate" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Fecha Fin:</label>
-            <input
-                id="endDate"
-                formControlName="endDate"
-                type="date"
-                class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
-            />
-        </div>
-        <div>
-            <label for="historySort" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Ordenar por:</label>
-            <select
-                id="historySort"
-                [(ngModel)]="historySort"
-                (change)="onHistorySortChange()"
-                [ngModelOptions]="{standalone: true}"
-                class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
-            >
-                <option value="obtained_at:DESC">Más Reciente</option>
-                <option value="obtained_at:ASC">Más Antiguo</option>
-            </select>
-        </div>
-    </form>
-</div>
+<div class="p-4 sm:p-6 lg:p-8 bg-gray-100 dark:bg-gray-900 min-h-screen font-inter">
 
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-    <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
-        <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Registros de Historial</h2>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-            <label for="historyItemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Por página:</label>
-            <select
-                id="historyItemsPerPage"
-                [(ngModel)]="historyItemsPerPage"
-                (change)="onHistoryItemsPerPageChange()"
-                [ngModelOptions]="{standalone: true}"
-                class="w-full sm:w-20 md:w-24 p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
-            >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-            </select>
+    <!-- Metrics Section -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 border-t-4 border-blue-600 dark:border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total Insignias Otorgadas</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{{ metrics?.totalBadgesObtained?.toLocaleString() || 0 }}</p>
+                </div>
+                <i class="fas fa-award w-8 h-8 sm:w-10 sm:h-10 text-blue-600 dark:text-blue-500 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-full"></i>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 border-t-4 border-green-600 dark:border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Usuarios Únicos</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{{ metrics?.uniqueUsersCount?.toLocaleString() || 0 }}</p>
+                </div>
+                <i class="fas fa-users w-8 h-8 sm:w-10 sm:h-10 text-green-600 dark:text-green-500 bg-green-50 dark:bg-green-900/20 p-2 rounded-full"></i>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 border-t-4 border-purple-600 dark:border-purple-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Insignia Más Popular</p>
+                    <p class="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{{ metrics?.badgeDistribution?.[0]?.badge_name || 'N/A' }}</p>
+                    <p class="text-sm text-purple-600 dark:text-purple-400">{{ metrics?.badgeDistribution?.[0]?.count?.toLocaleString() || 0 }} otorgadas</p>
+                </div>
+                <i class="fas fa-trophy w-8 h-8 sm:w-10 sm:h-10 text-purple-600 dark:text-purple-500 bg-purple-50 dark:bg-purple-900/20 p-2 rounded-full"></i>
+            </div>
         </div>
     </div>
-    <div class="overflow-x-auto">
-        <table class="w-full table-auto border-collapse">
-            <thead class="bg-gray-100 dark:bg-gray-700">
-                <tr>
-                    <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">ID Reg.</th>
-                    <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Usuario (ID)</th>
-                    <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Insignia (ID)</th>
-                    <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Categoría</th>
-                    <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Obtenida el</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                <tr *ngIf="historyList.length === 0 && !isLoadingHistory" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
-                    <td colspan="5" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                        <i class="fas fa-file-alt w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
-                        <p>No se encontraron registros de historial para los filtros aplicados.</p>
-                    </td>
-                </tr>
-                <tr *ngIf="isLoadingHistory" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
-                    <td colspan="5" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                        <i class="fas fa-spinner animate-spin w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2"></i>
-                        <p>Cargando historial...</p>
-                    </td>
-                </tr>
-                <tr *ngFor="let item of historyList" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
-                    <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ item.user_badge_id }}</td>
-                    <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[150px]">
-                        {{ item.user_name }} (ID: {{ item.user_id }})<br>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ item.user_email }}</span>
-                    </td>
-                    <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[150px]">
-                        <img [src]="item.icon_url" [alt]="item.badge_name" class="w-6 h-6 sm:w-8 sm:h-8 object-cover rounded-full inline mr-2 align-middle">
-                        {{ item.badge_name }} (ID: {{ item.badge_id }})
-                    </td>
-                    <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-nowrap hidden sm:table-cell">{{ item.badge_category || '-' }}</td>
-                    <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDateTime(item.obtained_at) }}</td>
-                </tr>
-            </tbody>
-        </table>
+
+    <!-- Top Badges Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-600">
+            Top Insignias más Otorgadas
+        </h3>
+        <!-- FIX DE RESPONSIVIDAD: Se envuelve el gráfico en un div con 'overflow-x-auto' para que el contenido horizontal (etiquetas largas) no se desborde, permitiendo un scroll interno. -->
+        <div class="relative overflow-x-auto">
+            <!-- La gráfica usa 'min-w-full' para asegurar que la canvas se extienda si es necesario, pero el contenedor exterior la mantiene dentro de los límites visibles. -->
+            <div 
+                class="chart-container min-w-full" 
+                [style.height.px]="barChartData.labels!.length * 50 + 50"
+            >
+                <canvas
+                    *ngIf="barChartData.labels!.length > 0"
+                    baseChart
+                    [data]="barChartData"
+                    [options]="barChartOptions"
+                    [type]="barChartType"
+                ></canvas>
+            </div>
+        </div>
+        <!-- Mensaje de no datos -->
+        <div
+            *ngIf="!(barChartData.labels!.length > 0)"
+            class="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 h-64 flex items-center justify-center"
+        >
+            <i class="fas fa-chart-bar w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+            <p>No hay datos disponibles para mostrar el gráfico.</p>
+        </div>
     </div>
-    <app-pagination
-        [currentPage]="historyCurrentPage"
-        [totalItems]="totalHistoryItems"
-        [itemsPerPage]="historyItemsPerPage"
-        (pageChange)="onHistoryPageChange($event)"
-        class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"
-    ></app-pagination>
+
+    <!-- Daily Acquisition Trend Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-600">
+            Tendencias de Adquisición Diaria
+        </h3>
+        <div class="relative overflow-x-auto">
+            <div 
+                class="chart-container min-w-full" 
+                [style.height.px]="trendData.length * 20 + 100"
+            >
+                <canvas
+                    *ngIf="trendData.length > 0"
+                    baseChart
+                    [data]="trendChartData"
+                    [options]="trendChartOptions"
+                    [type]="trendChartType"
+                ></canvas>
+            </div>
+        </div>
+        <div
+            *ngIf="trendData.length === 0"
+            class="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 h-64 flex items-center justify-center"
+        >
+            <i class="fas fa-chart-line w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+            <p>No hay datos disponibles para mostrar el gráfico de tendencias.</p>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros de Historial</h2>
+        <!-- Rejilla de filtros mejorada para móvil: 2 columnas, que pasan a 3, y finalmente a 5 en md/lg -->
+        <form [formGroup]="historyFilterForm" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 items-end">
+            <div class="md:col-span-1 col-span-1">
+                <label for="badgeId" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Insignia:</label>
+                <select
+                    id="badgeId"
+                    formControlName="badgeId"
+                    class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-xs sm:text-sm"
+                    [ngClass]="{'border-red-500 dark:border-red-400': historyFilterForm.get('badgeId')?.touched && historyFilterForm.get('badgeId')?.invalid}"
+                >
+                    <option value="">Todas las insignias</option>
+                    <option *ngFor="let badge of badgeOptions" [value]="badge.badge_id">{{ badge.badge_name }}</option>
+                </select>
+                <div *ngIf="historyFilterForm.get('badgeId')?.errors?.['invalidId']" class="mt-1 text-xs text-red-500 dark:text-red-400">ID inválido.</div>
+            </div>
+            <div class="md:col-span-1 col-span-1">
+                <label for="badgeCategoryId" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Categoría:</label>
+                <select
+                    id="badgeCategoryId"
+                    formControlName="badgeCategoryId"
+                    class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-xs sm:text-sm"
+                    [ngClass]="{'border-red-500 dark:border-red-400': historyFilterForm.get('badgeCategoryId')?.touched && historyFilterForm.get('badgeCategoryId')?.invalid}"
+                >
+                    <option value="">Todas las categorías</option>
+                    <option *ngFor="let category of badgeCategories" [value]="category.badge_category_id">{{ category.name }}</option>
+                </select>
+                <div *ngIf="historyFilterForm.get('badgeCategoryId')?.errors?.['invalidId']" class="mt-1 text-xs text-red-500 dark:text-red-400">Categoría inválida.</div>
+            </div>
+            <div class="md:col-span-1 col-span-1">
+                <label for="startDate" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Fecha Inicio:</label>
+                <input
+                    id="startDate"
+                    formControlName="startDate"
+                    type="date"
+                    class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-xs sm:text-sm"
+                />
+            </div>
+            <div class="md:col-span-1 col-span-1">
+                <label for="endDate" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Fecha Fin:</label>
+                <input
+                    id="endDate"
+                    formControlName="endDate"
+                    type="date"
+                    class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-xs sm:text-sm"
+                />
+            </div>
+            <div class="md:col-span-1 col-span-2 sm:col-span-3 md:col-span-1">
+                <label for="historySort" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Ordenar por:</label>
+                <select
+                    id="historySort"
+                    [(ngModel)]="historySort"
+                    (change)="onHistorySortChange()"
+                    [ngModelOptions]="{standalone: true}"
+                    class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-xs sm:text-sm"
+                >
+                    <option value="obtained_at:DESC">Más Reciente (Última insignia)</option>
+                    <option value="obtained_at:ASC">Más Antiguo (Última insignia)</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- History List -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Historial por Usuario ({{ totalHistoryItems }} usuarios)</h2>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <label for="historyItemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Usuarios por página:</label>
+                <select
+                    id="historyItemsPerPage"
+                    [(ngModel)]="historyItemsPerPage"
+                    (change)="onHistoryItemsPerPageChange()"
+                    [ngModelOptions]="{standalone: true}"
+                    class="w-full sm:w-20 md:w-24 p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent text-xs sm:text-sm"
+                >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+        <div class="p-3 sm:p-4 space-y-4">
+            <div *ngIf="historyList.length === 0 && !isLoadingHistory" class="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <i class="fas fa-file-alt w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+                <p>No se encontraron registros de historial para los filtros aplicados.</p>
+            </div>
+            <div *ngIf="isLoadingHistory" class="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <i class="fas fa-spinner animate-spin w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2"></i>
+                <p>Cargando historial...</p>
+            </div>
+            <div *ngFor="let user of historyList" class="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-all duration-300">
+                <div 
+                    class="p-3 sm:p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+                    (click)="toggleUserExpansion(user.user_id)"
+                >
+                    <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 dark:bg-gray-600 rounded-full flex items-center justify-center text-white dark:text-gray-300 font-semibold text-sm sm:text-base flex-shrink-0">
+                            {{ user.user_name ? user.user_name.charAt(0).toUpperCase() : 'U' }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+                                {{ user.user_name || 'Usuario' }} (ID: {{ user.user_id }})
+                            </p>
+                            <!-- Diseño responsive para el badge y el email/última fecha -->
+                            <div class="flex flex-col sm:flex-row sm:items-center text-xs text-gray-500 dark:text-gray-400 gap-1 sm:gap-3 mt-0.5">
+                                <span class="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-medium inline-block w-fit">
+                                    {{ user.total_badges }} Insignia(s)
+                                </span>
+                                <span class="truncate">
+                                     {{ user.user_email || 'Sin email' }}
+                                </span>
+                                <span *ngIf="user.last_obtained_at" class="whitespace-nowrap hidden sm:inline">| Última: {{ formatDateTime(user.last_obtained_at) }}</span>
+                            </div>
+                            <span *ngIf="user.last_obtained_at" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap sm:hidden mt-1 block">Última: {{ formatDateTime(user.last_obtained_at) }}</span>
+
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down transition-transform duration-300 flex-shrink-0 ml-3" [ngClass]="{'rotate-180': expandedUserId === user.user_id}"></i>
+                </div>
+                
+                <div *ngIf="expandedUserId === user.user_id" class="p-3 sm:p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600">
+                    <!-- Ajuste de la rejilla para que el mínimo sea 1 columna y crezca bien -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 badge-grid">
+                        <div *ngFor="let badge of user.badges" class="flex items-start gap-3 sm:gap-4 p-3 bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 badge-item w-full shadow-sm hover:shadow-md transition-all">
+                            <div class="relative flex-shrink-0">
+                                <img [src]="badge.icon_url" [alt]="badge.badge_name" class="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded-full border-2 border-white dark:border-gray-700 shadow-lg">
+                                <span class="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white dark:border-gray-700">✓</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ badge.badge_name }}</p>
+                                <div class="flex flex-col gap-1 mt-1">
+                                    <span class="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full font-medium w-fit">{{ badge.badge_category || '-' }}</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDateTime(badge.obtained_at) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="user.badges.length === 0" class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 col-span-full text-center p-4">
+                            No hay insignias otorgadas para este usuario con los filtros aplicados.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <app-pagination
+            [currentPage]="historyCurrentPage"
+            [totalItems]="totalHistoryItems"
+            [itemsPerPage]="historyItemsPerPage"
+            (pageChange)="onHistoryPageChange($event)"
+            class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700 block"
+        ></app-pagination>
+    </div>
 </div>
