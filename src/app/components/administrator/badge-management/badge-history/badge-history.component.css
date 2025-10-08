@@ -1,0 +1,57 @@
+/* Estilos para las cards y el desplegable */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card .fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+
+.card .fa-chevron-down.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.badge-grid {
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  display: grid;
+  place-items: center;
+}
+
+.badge-item {
+  transition: all 0.3s ease;
+  max-width: 300px;
+  border-radius: 12px;
+}
+
+.badge-item:hover {
+  transform: scale(1.02);
+}
+
+/* Ajustes responsivos */
+@media (max-width: 640px) {
+  .badge-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1024px) {
+  .badge-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .badge-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .badge-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

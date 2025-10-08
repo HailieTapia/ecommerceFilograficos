@@ -5,7 +5,7 @@ import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
 import { environment } from '../environments/config';
 
-// Interfaz para insignias
+// Interfaz para insignias (Mantener)
 export interface Badge {
   badge_id: number;
   name: string;
@@ -19,12 +19,22 @@ export interface Badge {
   updated_at: string;
 }
 
-// Interfaz para el historial de insignias otorgadas (NUEVA)
-export interface GrantedBadgeHistoryItem {
+// Interfaz para categorías de insignias (Mantener)
+export interface BadgeCategory {
+  badge_category_id: number;
+  name: string;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  badge_count: number;
+}
+
+// --- NUEVAS INTERFACES PARA LA PAGINACIÓN POR USUARIO ---
+
+// Interfaz para una insignia individual dentro del array de 'badges'
+export interface NestedBadge {
   user_badge_id: number;
-  user_id: number;
-  user_email: string;
-  user_name: string;
   badge_id: number;
   badge_name: string;
   badge_category: string;
@@ -32,13 +42,44 @@ export interface GrantedBadgeHistoryItem {
   obtained_at: string;
 }
 
-// Interfaz para la respuesta paginada del historial
+// Interfaz para la ENTIDAD AGRUPADA POR USUARIO (UserBadgeGroup)
+export interface UserBadgeGroup {
+  user_id: number;
+  user_email: string;
+  user_name: string;
+  total_badges: number; // Total de insignias para este usuario (según filtros)
+  last_obtained_at: string; // Fecha de la insignia más reciente
+  badges: NestedBadge[]; // La lista de insignias obtenidas por este usuario
+}
+
+// Interfaz para la respuesta paginada del historial (ACTUALIZADA)
 export interface GrantedHistoryResponse {
   message: string;
-  history: GrantedBadgeHistoryItem[];
-  total: number;
+  history: UserBadgeGroup[]; // <<-- CAMBIO CLAVE
+  total: number; // Total de usuarios únicos
   page: number;
   pageSize: number;
+}
+// --- FIN NUEVAS INTERFACES ---
+
+
+// Interfaz para métricas de insignias (Mantener)
+export interface BadgeMetrics {
+  totalBadgesObtained: number;
+  uniqueUsersCount: number;
+  badgeDistribution: {
+    badge_id: number;
+    badge_name: string;
+    category_name: string;
+    icon_url: string;
+    count: number;
+  }[];
+}
+
+// Interfaz para datos de tendencias (Mantener)
+export interface AcquisitionTrendItem {
+  date: string;
+  count: number;
 }
 
 @Injectable({
@@ -79,6 +120,22 @@ export class BadgeService {
           params,
           withCredentials: true
         });
+      })
+    );
+  }
+
+    /**
+   * Obtiene todas las insignias activas (solo id y nombre)
+   * @returns Observable con la lista de insignias activas
+   */
+  getActiveBadges(): Observable<{ message: string; badges: { badge_id: number; name: string }[]; total: number }> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<{ message: string; badges: { badge_id: number; name: string }[]; total: number }>(
+          `${this.apiUrl}/active`,
+          { headers, withCredentials: true }
+        );
       })
     );
   }
@@ -198,32 +255,31 @@ export class BadgeService {
     );
   }
 
-  // =======================================================================
-  // NUEVO MÉTODO: Historial de Insignias Otorgadas (Administración)
-  // =======================================================================
-
-  /**
-   * Obtiene el historial de insignias otorgadas con paginación y filtros.
-   * Endpoint: GET /api/badges/history
+/**
+   * Obtiene el historial de insignias otorgadas con paginación y filtros
+   * (Ahora retorna grupos de usuarios, no registros de insignias individuales)
    * @param page Número de página
    * @param pageSize Tamaño de página
    * @param userId Filtro opcional por ID de usuario
    * @param badgeId Filtro opcional por ID de insignia
-   * @param startDate Filtro opcional por fecha de inicio (formato ISO 8601: YYYY-MM-DD)
-   * @param endDate Filtro opcional por fecha de fin (formato ISO 8601: YYYY-MM-DD)
-   * @param sort Parámetro de ordenación opcional
-   * @returns Observable con la lista de historial y metadatos
+   * @param badgeCategoryId Filtro opcional por ID de categoría
+   * @param startDate Filtro opcional por fecha de inicio (YYYY-MM-DD)
+   * @param endDate Filtro opcional por fecha de fin (YYYY-MM-DD)
+   * @param search Término de búsqueda (nombre, email o user_id)
+   * @param sort Parámetro de ordenación (Ahora debe ser 'total_badges:DESC' o 'last_obtained_at:DESC')
+   * @returns Observable con la lista de usuarios agrupados y metadatos
    */
   getGrantedBadgesHistory(
     page?: number,
     pageSize?: number,
     userId?: number,
     badgeId?: number,
+    badgeCategoryId?: number,
     startDate?: string,
     endDate?: string,
+    search?: string,
     sort?: string
   ): Observable<GrantedHistoryResponse> {
-
     const pageValue = page ?? 1;
     const pageSizeValue = pageSize ?? 10;
 
@@ -240,17 +296,58 @@ export class BadgeService {
         if (badgeId) {
           params = params.set('badgeId', badgeId.toString());
         }
+        if (badgeCategoryId) {
+          params = params.set('badgeCategoryId', badgeCategoryId.toString());
+        }
         if (startDate) {
           params = params.set('startDate', startDate);
         }
         if (endDate) {
           params = params.set('endDate', endDate);
         }
+        if (search) {
+          params = params.set('search', search);
+        }
         if (sort) {
           params = params.set('sort', sort);
         }
 
         return this.http.get<GrantedHistoryResponse>(`${this.apiUrl}/history`, {
+          headers,
+          params,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  /**
+   * Obtiene métricas generales de insignias (totales, usuarios únicos, top 5)
+   * @returns Observable con las métricas
+   */
+  getBadgeMetrics(): Observable<{ message: string; metrics: BadgeMetrics }> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<{ message: string; metrics: BadgeMetrics }>(`${this.apiUrl}/metrics`, {
+          headers,
+          withCredentials: true
+        });
+      })
+    );
+  }
+
+  /**
+   * Obtiene tendencias de adquisición de insignias por día
+   * @param days Número de días a incluir (máximo 365)
+   * @returns Observable con los datos de tendencia
+   */
+  getAcquisitionTrend(days: number = 30): Observable<{ message: string; trend: AcquisitionTrendItem[] }> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        const params = new HttpParams().set('days', days.toString());
+        return this.http.get<{ message: string; trend: AcquisitionTrendItem[] }>(`${this.apiUrl}/trends`, {
           headers,
           params,
           withCredentials: true
