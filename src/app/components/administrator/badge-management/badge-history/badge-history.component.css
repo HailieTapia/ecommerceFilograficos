@@ -18,7 +18,7 @@
 .badge-grid {
   transition: max-height 0.3s ease, opacity 0.3s ease;
   display: grid;
-  place-items: center; /* Centra los elementos dentro de las celdas de la rejilla */
+  place-items: center;
 }
 
 .badge-item {
@@ -34,26 +34,23 @@
 /* Estilos para el gráfico (responsivo) */
 .chart-container {
   position: relative;
-  width: 100%; /* Asegura que ocupe todo el ancho disponible */
-  /* La altura se gestiona dinámicamente en el HTML: [style.height.px]="..." */
-  /* 'overflow: hidden' fue eliminado del container para permitir que el overflow-x-auto funcione en el padre */
+  width: 100%;
 }
 
 /* Media queries para responsividad de la rejilla de insignias */
-/* Estos estilos son mayormente redundantes si se usa Tailwind, pero se mantienen por claridad */
-@media (max-width: 640px) { /* Mobile (smartphones) */
+@media (max-width: 640px) {
   .badge-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (min-width: 641px) and (max-width: 1024px) { /* Tablets y laptops pequeñas */
+@media (min-width: 641px) and (max-width: 1024px) {
   .badge-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 1025px) { /* Pantallas grandes (monitores) */
+@media (min-width: 1025px) {
   .badge-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -68,7 +65,7 @@
 /* Estilos adicionales para tooltips en pantallas pequeñas */
 @media (max-width: 768px) {
   .chart-container .chartjs-tooltip {
-    font-size: 11px !important; /* Tooltips más pequeños */
+    font-size: 11px !important;
   }
 }
 

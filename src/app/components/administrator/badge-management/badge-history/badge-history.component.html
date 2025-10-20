@@ -37,9 +37,7 @@
         <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 border-b pb-2 dark:border-gray-600">
             Top Insignias más Otorgadas
         </h3>
-        <!-- FIX DE RESPONSIVIDAD: Se envuelve el gráfico en un div con 'overflow-x-auto' para que el contenido horizontal (etiquetas largas) no se desborde, permitiendo un scroll interno. -->
         <div class="relative overflow-x-auto">
-            <!-- La gráfica usa 'min-w-full' para asegurar que la canvas se extienda si es necesario, pero el contenedor exterior la mantiene dentro de los límites visibles. -->
             <div 
                 class="chart-container min-w-full" 
                 [style.height.px]="barChartData.labels!.length * 50 + 50"
@@ -53,7 +51,6 @@
                 ></canvas>
             </div>
         </div>
-        <!-- Mensaje de no datos -->
         <div
             *ngIf="!(barChartData.labels!.length > 0)"
             class="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 h-64 flex items-center justify-center"
@@ -94,7 +91,6 @@
     <!-- Filters Section -->
     <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
         <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtros de Historial</h2>
-        <!-- Rejilla de filtros mejorada para móvil: 2 columnas, que pasan a 3, y finalmente a 5 en md/lg -->
         <form [formGroup]="historyFilterForm" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 items-end">
             <div class="md:col-span-1 col-span-1">
                 <label for="badgeId" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Insignia:</label>
@@ -198,7 +194,6 @@
                             <p class="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100 truncate">
                                 {{ user.user_name || 'Usuario' }} (ID: {{ user.user_id }})
                             </p>
-                            <!-- Diseño responsive para el badge y el email/última fecha -->
                             <div class="flex flex-col sm:flex-row sm:items-center text-xs text-gray-500 dark:text-gray-400 gap-1 sm:gap-3 mt-0.5">
                                 <span class="text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-medium inline-block w-fit">
                                     {{ user.total_badges }} Insignia(s)
@@ -209,14 +204,12 @@
                                 <span *ngIf="user.last_obtained_at" class="whitespace-nowrap hidden sm:inline">| Última: {{ formatDateTime(user.last_obtained_at) }}</span>
                             </div>
                             <span *ngIf="user.last_obtained_at" class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap sm:hidden mt-1 block">Última: {{ formatDateTime(user.last_obtained_at) }}</span>
-
                         </div>
                     </div>
                     <i class="fas fa-chevron-down transition-transform duration-300 flex-shrink-0 ml-3" [ngClass]="{'rotate-180': expandedUserId === user.user_id}"></i>
                 </div>
                 
                 <div *ngIf="expandedUserId === user.user_id" class="p-3 sm:p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600">
-                    <!-- Ajuste de la rejilla para que el mínimo sea 1 columna y crezca bien -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 badge-grid">
                         <div *ngFor="let badge of user.badges" class="flex items-start gap-3 sm:gap-4 p-3 bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 badge-item w-full shadow-sm hover:shadow-md transition-all">
                             <div class="relative flex-shrink-0">
@@ -227,6 +220,10 @@
                                 <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ badge.badge_name }}</p>
                                 <div class="flex flex-col gap-1 mt-1">
                                     <span class="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-full font-medium w-fit">{{ badge.badge_category || '-' }}</span>
+                                    <!-- Nuevo campo para mostrar category_name si existe -->
+                                    <span *ngIf="badge.category_name" class="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded-full font-medium w-fit">
+                                        Categoría: {{ badge.category_name }}
+                                    </span>
                                     <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDateTime(badge.obtained_at) }}</span>
                                 </div>
                             </div>
