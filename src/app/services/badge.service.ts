@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { CsrfService } from '../services/csrf.service';
+import { CsrfService } from './csrf.service';
 import { environment } from '../environments/config';
 
 // Interfaz para insignias (Mantener)
@@ -40,6 +40,7 @@ export interface NestedBadge {
   badge_category: string;
   icon_url: string;
   obtained_at: string;
+  category_name?: string; // Soporta el nombre de la categoría
 }
 
 // Interfaz para la ENTIDAD AGRUPADA POR USUARIO (UserBadgeGroup)
