@@ -16,6 +16,7 @@ interface Badge {
   description: string;
   category: string;
   obtained_at: string;
+  product_category: string | null; // Added product_category
 }
 
 interface UserProfile {
@@ -27,7 +28,7 @@ interface UserProfile {
   user_type: string;
   address: any;
   profile_picture_url: string | null;
-  badges: Badge[]; // Definimos el tipo aquí
+  badges: Badge[];
 }
 
 @Component({
@@ -38,7 +39,7 @@ interface UserProfile {
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
-  userProfile: UserProfile | any = {}; 
+  userProfile: UserProfile | any = {};
   successMessage: string = '';
   errorMessage: string = '';
   activeTab: string = 'info';
@@ -51,13 +52,14 @@ export class ProfileComponent implements OnInit {
     private toastService: ToastService,
     private userService: UserService,
     private authService: AuthService,
-    private router: Router 
+    private router: Router
   ) {}
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    const tooltip = this.elRef.nativeElement.querySelector('.tooltip'); // Selector del tooltip
-    const button = this.elRef.nativeElement.querySelector('.h-24.w-24'); // Selector del botón o contenedor circular
+    const tooltip = this.elRef.nativeElement.querySelector('.tooltip');
+    const button = this.elRef.nativeElement.querySelector('.h-24.w-24');
     const clickedInside = (tooltip && tooltip.contains(target)) || (button && button.contains(target));
     if (!clickedInside && this.showTooltip) {
       this.showTooltip = false;
@@ -67,6 +69,7 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.getUserInfo();
   }
+
   toggleTooltip(): void {
     this.showTooltip = !this.showTooltip;
   }
@@ -84,7 +87,6 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // Método para obtener las iniciales del nombre
   getInitials(name: string | undefined | null): string {
     if (!name || name.trim() === '') return 'sin foto';
     const words = name.trim().split(/\s+/);
@@ -94,7 +96,6 @@ export class ProfileComponent implements OnInit {
     return (words[0][0] + (words[1] ? words[1][0] : words[0][1] || '')).toUpperCase();
   }
 
-  // Método para manejar la selección de archivo
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -103,7 +104,6 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  // Método para subir la foto de perfil
   uploadProfilePicture(): void {
     if (!this.selectedFile) {
       this.toastService.showToast('Por favor, selecciona una imagen', 'error');
@@ -125,7 +125,6 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // Método para eliminar la foto de perfil
   deleteProfilePicture(): void {
     this.userService.deleteProfilePicture().subscribe({
       next: () => {
@@ -140,7 +139,6 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // Método para manejar la actualización del perfil desde el componente hijo
   onProfileUpdated(updatedProfile: any): void {
     this.userProfile = { ...this.userProfile, ...updatedProfile };
     this.authService.updateUserProfile(this.userProfile);
@@ -169,5 +167,5 @@ export class ProfileComponent implements OnInit {
         });
       }
     );
-  }  
+  }
 }

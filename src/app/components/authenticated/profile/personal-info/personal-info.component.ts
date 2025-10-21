@@ -12,6 +12,7 @@ interface Badge {
   description: string;
   category: string;
   obtained_at: string;
+  product_category: string | null; // Added product_category
 }
 
 // Interfaz para tipar userProfile
@@ -20,7 +21,7 @@ interface UserProfile {
   phone?: string;
   email?: string;
   Addresses?: any[];
-  badges?: Badge[]; // Añadimos la propiedad badges
+  badges?: Badge[];
 }
 
 @Component({
