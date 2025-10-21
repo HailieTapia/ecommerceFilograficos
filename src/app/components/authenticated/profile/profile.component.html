@@ -65,7 +65,7 @@
             </div>
         </div>
 
-        <!-- LADO DERECHO: MINI PREVIEW DE INSIGNIAS (inspirado en el prototipo) -->
+        <!-- LADO DERECHO: MINI PREVIEW DE INSIGNIAS -->
         <div class="lg:ml-auto pt-4 lg:pt-0">
             <div class="flex items-center gap-2 mb-3 justify-center lg:justify-start">
                 <i class="fas fa-award text-lg text-yellow-500"></i>
@@ -81,22 +81,23 @@
                 <div *ngFor="let badge of userProfile.badges | slice:0:4"
                     class="group relative flex-shrink-0">
 
-                    <!-- Icono de la insignia sin borde amarillo/naranja y ahora es totalmente circular -->
+                    <!-- Icono de la insignia -->
                     <div
                         class="w-14 h-14 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-2xl shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:scale-105 cursor-pointer overflow-hidden">
-                        <!-- Usamos img para la URL del icono del backend -->
                         <img [src]="$any(badge).icon_url" [alt]="$any(badge).name" class="w-full h-full object-cover">
                     </div>
 
-                    <!-- Tooltip en hover (para el nombre de la insignia) -->
+                    <!-- Tooltip en hover (incluye product_category si está disponible) -->
                     <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
-                        <!-- FIX: Usamos $any() para resolver el error de tipo 'unknown' -->
                         {{ $any(badge).name }}
+                        <div *ngIf="$any(badge).product_category" class="mt-1 text-gray-300">
+                            Categoría: {{ $any(badge).product_category }}
+                        </div>
                         <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                     </div>
                 </div>
 
-                <!-- Si hay más de 4 insignias, mostramos un indicador de más -->
+                <!-- Indicador de más insignias -->
                 <div *ngIf="userProfile && userProfile.badges && userProfile.badges.length > 4"
                     class="w-14 h-14 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-sm text-gray-600 dark:text-gray-400 font-bold shadow-md cursor-default">
                     +{{ userProfile.badges.length - 4 }}
