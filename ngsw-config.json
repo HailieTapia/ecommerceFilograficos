@@ -42,13 +42,15 @@
     {
       "name": "api-data",
       "urls": [
-        "/api/**"
+        "/api/products/collection/**",
+        "/api/reviews/product/**",
+        "/api/csrf-token"
       ],
       "cacheConfig": {
-        "maxSize": 100,
-        "maxAge": "8h",
-        "timeout": "10s",
-        "strategy": "freshness"
+        "maxSize": 200,
+        "maxAge": "24h",
+        "timeout": "5s",
+        "strategy": "performance"
       }
     },
     {

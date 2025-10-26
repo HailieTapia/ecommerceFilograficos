@@ -47,7 +47,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private cartService: CartService,
     private reviewService: ReviewService,
     private toastService: ToastService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
@@ -88,7 +88,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
         this.breadcrumb = productResponse.product.breadcrumb || [];
         this.relatedProducts = relatedResponse.products.filter(p => p.product_id !== productId).slice(0, 4);
         this.reviewSummary = reviewSummary;
-        
+
         if (this.product.variants && this.product.variants.length > 0) {
           const matchingVariant = this.variantSku
             ? this.product.variants.find(v => v.sku === this.variantSku) || this.product.variants[0]
@@ -99,8 +99,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading product details:', error);
-        this.toastService.showToast(error.message, 'error');
         this.isLoading = false;
+        let message = error.message || 'No se pudo cargar el producto. Intenta de nuevo más tarde.';
+        if (!navigator.onLine) {
+          message = 'Estás en modo offline. Algunos datos podrían no estar disponibles.';
+        }
+        this.toastService.showToast(message, 'error');
         this.router.navigate(['/collection']);
       }
     });
