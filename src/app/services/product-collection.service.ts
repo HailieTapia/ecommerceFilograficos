@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { HttpClient, HttpParams, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError, from } from 'rxjs';
+import { switchMap, catchError, map } from 'rxjs/operators';
 import { environment } from '../environments/config';
 import { CsrfService } from './csrf.service';
 
@@ -90,17 +90,7 @@ export class ProductCollectionService {
    * Obtiene una lista de productos con filtros y paginación.
    * Si el usuario está autenticado, incluye el token CSRF y cookies.
    * @param filters Filtros opcionales para la búsqueda y paginación.
-   * @param filters.page Página actual (default: 1).
-   * @param filters.pageSize Tamaño de la página (default: 20).
-   * @param filters.sort Ordenamiento (ej. 'name:ASC').
-   * @param filters.categoryId ID de la categoría.
-   * @param filters.search Término de búsqueda (nombre, descripción, SKU, colaborador si autenticado).
-   * @param filters.minPrice Precio mínimo.
-   * @param filters.maxPrice Precio máximo.
-   * @param filters.collaboratorId ID del colaborador.
-   * @param filters.averageRating Calificación promedio (entero 0-5).
-   * @param filters.attributes Atributos del producto (JSON).
-   * @param isAuthenticated Indica si el usuario está autenticado (para incluir token CSRF y cookies).
+   * @param isAuthenticated Indica si el usuario está autenticado.
    * @returns Observable con la respuesta del servidor.
    */
   getAllProducts(filters: any = {}, isAuthenticated: boolean = false): Observable<ProductResponse> {
@@ -123,36 +113,20 @@ export class ProductCollectionService {
     }
     if (filters.attributes) params = params.set('attributes', JSON.stringify(filters.attributes));
 
+    const url = `${this.apiUrl}?${params.toString()}`;
+
     if (isAuthenticated) {
-      // Solicitud autenticada: incluye token CSRF y cookies
       return this.csrfService.getCsrfToken().pipe(
         switchMap(csrfToken => {
           const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-          return this.http.get<ProductResponse>(this.apiUrl, { headers, params, withCredentials: true }).pipe(
-            catchError(error => {
-              let errorMessage = 'No se pudieron cargar los productos. Intenta de nuevo más tarde.';
-              if (error.status === 400) {
-                errorMessage = 'Parámetros de búsqueda inválidos.';
-              } else if (error.status === 401) {
-                errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
-              }
-              console.error('Error al obtener productos:', error);
-              return throwError(() => new Error(errorMessage));
-            })
+          return this.http.get<ProductResponse>(url, { headers, params, withCredentials: true }).pipe(
+            catchError((error: HttpErrorResponse) => this.handleError(error, url, 'No se pudieron cargar los productos'))
           );
         })
       );
     } else {
-      // Solicitud pública: sin token CSRF ni cookies
-      return this.http.get<ProductResponse>(this.apiUrl, { params }).pipe(
-        catchError(error => {
-          let errorMessage = 'No se pudieron cargar los productos. Intenta de nuevo más tarde.';
-          if (error.status === 400) {
-            errorMessage = 'Parámetros de búsqueda inválidos.';
-          }
-          console.error('Error al obtener productos públicos:', error);
-          return throwError(() => new Error(errorMessage));
-        })
+      return this.http.get<ProductResponse>(url, { params }).pipe(
+        catchError((error: HttpErrorResponse) => this.handleError(error, url, 'No se pudieron cargar los productos públicos'))
       );
     }
   }
@@ -161,7 +135,7 @@ export class ProductCollectionService {
    * Obtiene los detalles de un producto específico por ID.
    * Si el usuario está autenticado, incluye el token CSRF y cookies.
    * @param productId ID del producto.
-   * @param isAuthenticated Indica si el usuario está autenticado (para incluir token CSRF y cookies).
+   * @param isAuthenticated Indica si el usuario está autenticado.
    * @returns Observable con los detalles del producto.
    */
   getProductById(productId: number, isAuthenticated: boolean = false): Observable<{ message: string; product: ProductDetail }> {
@@ -169,42 +143,63 @@ export class ProductCollectionService {
       return throwError(() => new Error('ID de producto inválido'));
     }
 
+    const url = `${this.apiUrl}/${productId}`;
+
     if (isAuthenticated) {
-      // Solicitud autenticada: incluye token CSRF y cookies
       return this.csrfService.getCsrfToken().pipe(
         switchMap(csrfToken => {
           const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
-          return this.http.get<{ message: string; product: ProductDetail }>(
-            `${this.apiUrl}/${productId}`,
-            { headers, withCredentials: true }
-          ).pipe(
-            catchError(error => {
-              let errorMessage = 'No se pudo cargar el producto. Intenta de nuevo más tarde.';
-              if (error.status === 404) {
-                errorMessage = 'Producto no encontrado.';
-              } else if (error.status === 401) {
-                errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
-              }
-              console.error('Error al obtener el producto:', error);
-              return throwError(() => new Error(errorMessage));
-            })
+          return this.http.get<{ message: string; product: ProductDetail }>(url, { headers, withCredentials: true }).pipe(
+            catchError((error: HttpErrorResponse) => this.handleError(error, url, 'No se pudo cargar el producto'))
           );
         })
       );
     } else {
-      // Solicitud pública: sin token CSRF ni cookies
-      return this.http.get<{ message: string; product: ProductDetail }>(
-        `${this.apiUrl}/${productId}`
-      ).pipe(
-        catchError(error => {
-          let errorMessage = 'No se pudo cargar el producto. Intenta de nuevo más tarde.';
-          if (error.status === 404) {
-            errorMessage = 'Producto no encontrado.';
-          }
-          console.error('Error al obtener el producto público:', error);
-          return throwError(() => new Error(errorMessage));
-        })
+      return this.http.get<{ message: string; product: ProductDetail }>(url).pipe(
+        catchError((error: HttpErrorResponse) => this.handleError(error, url, 'No se pudo cargar el producto público'))
       );
     }
+  }
+
+  /**
+   * Maneja errores HTTP y verifica si está offline para intentar recuperar del caché.
+   * @param error Error HTTP.
+   * @param url URL de la solicitud.
+   * @param defaultMessage Mensaje de error predeterminado.
+   * @returns Observable con datos del caché o error.
+   */
+  private handleError(error: HttpErrorResponse, url: string, defaultMessage: string): Observable<any> {
+    if (error.status === 0 && !navigator.onLine) {
+      return this.getCachedData(url).pipe(
+        catchError(() => throwError(() => new Error(`${defaultMessage}. No disponible en caché.`)))
+      );
+    }
+
+    let errorMessage = defaultMessage;
+    if (error.status === 400) {
+      errorMessage = 'Parámetros de búsqueda inválidos.';
+    } else if (error.status === 401) {
+      errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
+    } else if (error.status === 404) {
+      errorMessage = 'Producto no encontrado.';
+    }
+    console.error(`Error en la solicitud: ${url}`, error);
+    return throwError(() => new Error(errorMessage));
+  }
+
+  /**
+   * Recupera datos del caché del navegador.
+   * @param url URL a buscar en el caché.
+   * @returns Observable con los datos cacheados.
+   */
+  private getCachedData(url: string): Observable<any> {
+    return from(caches.match(url)).pipe(
+      map(response => {
+        if (response) {
+          return response.json();
+        }
+        throw new Error('Datos no disponibles en caché');
+      })
+    );
   }
 }

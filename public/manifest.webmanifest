@@ -2,7 +2,7 @@
   "name": "E-commerce Filográficos Oficial",
   "short_name": "Filográficos",
   "theme_color": "#071c52ff",
-  "background_color": "#ccdaeb",
+  "background_color": "#071c52ff",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
