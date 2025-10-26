@@ -285,9 +285,21 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<div *ngIf="product" class="recommendations-section">
-  <app-recommendation [product]="product.name"></app-recommendation>
+    <!-- Recommendations Section -->
+    <div *ngIf="recommendations.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mx-4 p-6">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-dark-text mb-4">Productos recomendados</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div *ngFor="let product of recommendations" class="recommendation-item">
+          <a [routerLink]="['/collection', product.product_id]" class="block">
+            <img [src]="product.image_url || 'https://via.placeholder.com/150x150?text=Sin+Imagen'"
+                 alt="{{ product.name }}"
+                 class="w-full h-40 object-cover rounded-lg mb-2">
+            <p class="text-gray-900 dark:text-dark-text font-semibold">{{ product.name }}</p>
+            <p class="text-gray-600 dark:text-dark-secondary">${{ formatPrice(product.min_price) }}</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
