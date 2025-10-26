@@ -16,188 +16,369 @@
 
     <!-- Product Section -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mx-4">
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
         <!-- Left Column - Product Images -->
+
         <div class="space-y-4">
+
           <!-- Main Product Image -->
+
           <div class="relative bg-gradient-to-br from-green-50 to-amber-50 dark:from-green-900 dark:to-amber-900 rounded-lg p-4 aspect-square">
+
             <div class="absolute inset-0 flex items-center justify-center">
+
               <img [src]="selectedImage || 'https://via.placeholder.com/500x500?text=Sin+Imagen'"
+
                 alt="{{ product.name }}" class="w-full h-full object-contain opt-contain">
+
             </div>
+
             <!-- Navigation arrows -->
+
             <button (click)="prevImage()" [disabled]="currentImageIndex === 0"
+
               class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-600">
+
               <i class="fas fa-chevron-left text-gray-600 dark:text-dark-text"></i>
+
             </button>
+
             <button (click)="nextImage()"
+
               [disabled]="!selectedVariant || !selectedVariant.images || currentImageIndex >= selectedVariant.images.length - 1"
+
               class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white dark:bg-gray-700 rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-gray-600">
+
               <i class="fas fa-chevron-right text-gray-600 dark:text-dark-text"></i>
+
             </button>
+
           </div>
+
           <!-- Thumbnail images -->
+
           <div *ngIf="selectedVariant" class="flex gap-2 overflow-x-auto">
+
             <img *ngFor="let image of selectedVariant.images" [src]="image.image_url"
+
               (click)="changeImage(image.image_url)"
+
               class="w-20 h-20 object-cover rounded-lg cursor-pointer hover:ring-2 hover:ring-green-500 dark:hover:ring-green-400"
+
               [class.ring-2]="selectedImage === image.image_url"
+
               [class.ring-green-500]="selectedImage === image.image_url">
+
           </div>
+
         </div>
+
+
 
         <!-- Right Column - Product Information -->
+
         <div class="space-y-6">
+
           <!-- Product Title, Stock, and Review Summary -->
+
           <div>
+
             <p class="text-sm text-gray-600 dark:text-dark-secondary mb-2">{{ product.category?.name || 'Sin categoría' }}</p>
+
             <h1 class="text-3xl font-bold text-gray-900 dark:text-dark-text mb-2">
+
               {{ product.name || 'Producto sin nombre' }}
+
               <span *ngIf="selectedVariant" class="ml-2 bg-green-100 dark:bg-green-900 text-xs px-2 py-1 rounded"
+
                 [class.text-green-800]="selectedVariant.stock > 0"
+
                 [class.dark:text-green-200]="selectedVariant.stock > 0"
+
                 [class.text-red-600]="selectedVariant.stock === 0"
+
                 [class.dark:text-red-400]="selectedVariant.stock === 0">
+
                 {{ selectedVariant.stock > 0 ? + selectedVariant.stock + ' disponibles' : 'Agotado' }}
+
               </span>
+
             </h1>
+
             <!-- Review Summary -->
+
             <div *ngIf="reviewSummary && reviewSummary.totalReviews > 0"
+
               class="flex items-center gap-2 text-sm text-gray-600 dark:text-dark-secondary">
+
               <div class="flex">
+
                 <i *ngFor="let i of [1,2,3,4,5]" class="fas fa-star"
+
                   [class.text-yellow-400]="i <= getRoundedAverageRating()"
+
                   [class.text-gray-300]="i > getRoundedAverageRating()"></i>
+
               </div>
+
               <span>{{ reviewSummary.averageRating.toFixed(1) }} ({{ reviewSummary.totalReviews }} reseñas)</span>
+
             </div>
+
           </div>
+
+
 
           <!-- Price -->
+
           <div class="flex items-center gap-4">
+
             <span class="text-3xl font-bold text-light-success-text dark:text-dark-success">
+
               ${{ formatPrice((selectedVariant?.calculated_price || 0) + (isUrgent && product.urgent_delivery_enabled ?
+
               product.urgent_delivery_cost : 0)) }}
+
             </span>
+
           </div>
+
+
 
           <!-- Description (Short) -->
+
           <p class="text-gray-600 dark:text-dark-secondary">
+
             {{ product.description ? (product.description | slice:0:200) : 'Sin descripción disponible.' }}
+
           </p>
 
+
+
           <!-- Variant Selection -->
+
           <div *ngIf="product.variants.length > 0">
+
             <p class="font-semibold text-gray-900 dark:text-dark-text mb-3">Modelo</p>
+
             <div class="flex gap-2 flex-wrap">
+
               <button *ngFor="let variant of product.variants" (click)="selectVariant(variant)"
+
                 class="px-4 py-2 rounded-md border transition-colors"
+
                 [class.bg-light-azulclaro]="selectedVariant?.variant_id === variant.variant_id"
+
                 [class.text-white]="selectedVariant?.variant_id === variant.variant_id"
+
                 [class.border-light-azulclaro]="selectedVariant?.variant_id === variant.variant_id"
+
                 [class.bg-white]="selectedVariant?.variant_id !== variant.variant_id"
+
                 [class.text-gray-700]="selectedVariant?.variant_id !== variant.variant_id"
+
                 [class.border-gray-300]="selectedVariant?.variant_id !== variant.variant_id"
+
                 [class.hover:border-light-azulclaro]="selectedVariant?.variant_id !== variant.variant_id"
+
                 [class.dark:bg-dark-primary]="selectedVariant?.variant_id === variant.variant_id"
+
                 [class.dark:border-dark-primary]="selectedVariant?.variant_id === variant.variant_id"
+
                 [class.dark:hover:border-dark-primary]="selectedVariant?.variant_id !== variant.variant_id">
+
                 {{ variant.sku || 'Variante ' + variant.variant_id }}
+
               </button>
+
             </div>
+
           </div>
+
+
 
           <!-- Quantity and Actions -->
+
           <div class="flex items-center gap-4 flex-wrap" *ngIf="selectedVariant">
+
             <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full p-0.5">
+
               <button (click)="decrementQuantity()" [disabled]="quantity <= 1"
+
                 class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors disabled:bg-gray-300 disabled:text-gray-500">
+
                 <i class="fas fa-minus text-gray-600 dark:text-gray-300 text-xs"></i>
+
               </button>
+
               <span class="w-10 text-center font-medium text-gray-800 dark:text-gray-100 text-sm">{{ quantity }}</span>
+
               <button (click)="incrementQuantity()" [disabled]="selectedVariant && quantity >= selectedVariant.stock"
+
                 class="w-8 h-8 rounded-full bg-white dark:bg-gray-600 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-500 flex items-center justify-center transition-colors">
+
                 <i class="fas fa-plus text-gray-600 dark:text-gray-300 text-xs"></i>
+
               </button>
+
             </div>
+
             <button (click)="addToCart()" [disabled]="isAddingToCart || !selectedVariant || selectedVariant.stock === 0"
+
               class="bg-light-table-header dark:bg-dark-table-header text-blue-600 font-semibold px-6 py-2 rounded-md hover:bg-light-primary-hover hover:text-white dark:hover:bg-dark-primary-hover transition-colors flex items-center gap-2 group">
+
               <i class="fas fa-shopping-cart text-blue-700 group-hover:text-white transition-colors"></i>
+
               Añadir al Carrito
+
             </button>
+
             <button (click)="buyNow()" [disabled]="isAddingToCart || !selectedVariant || selectedVariant.stock === 0"
+
               class="bg-light-azulclaro dark:bg-dark-primary text-white font-semibold px-6 py-2 rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-colors">
+
               Comprar Ahora
+
             </button>
+
           </div>
+
+
 
           <!-- Delivery Options -->
+
           <div *ngIf="isAuthenticated && userRole === 'cliente'" class="mb-4">
+
             <p class="font-semibold text-gray-900 dark:text-dark-text mb-3">Opciones de Entrega</p>
+
             <div class="flex flex-col gap-2">
+
               <label class="flex items-center gap-2">
+
                 <input type="radio" [(ngModel)]="isUrgent" [value]="false" (change)="selectVariant(selectedVariant!)"
+
                   class="text-green-700 dark:text-green-600 focus:ring-green-500 dark:focus:ring-green-400">
+
                 Estándar: {{ product.standard_delivery_days || 0 }} días naturales
+
               </label>
+
               <label class="flex items-center gap-2" *ngIf="product.urgent_delivery_enabled">
+
                 <input type="checkbox" [(ngModel)]="isUrgent" [value]="true" (change)="selectVariant(selectedVariant!)"
+
                   class="text-green-700 dark:text-green-600 focus:ring-green-500 dark:focus:ring-green-400">
+
                 Urgente: {{ product.urgent_delivery_days || 0 }} días naturales, +${{ formatPrice(product.urgent_delivery_cost || 0) }}
+
               </label>
+
             </div>
+
             <p class="text-sm text-gray-600 dark:text-dark-secondary mt-2">
+
               Nota: El tiempo de entrega final se calculará en el carrito según todos los productos.
+
             </p>
+
           </div>
+
+
 
           <!-- Customization -->
+
           <div *ngIf="isAuthenticated && userRole === 'cliente' && product.customizations.length > 0" class="mb-4">
+
             <p class="font-semibold text-gray-900 dark:text-dark-text mb-3">Personalización</p>
+
             <div class="flex gap-2 flex-wrap">
+
               <button (click)="selectCustomization(null)" class="px-4 py-2 rounded-md border transition-colors"
+
                 [class.bg-green-700]="selectedCustomization === null"
+
                 [class.text-white]="selectedCustomization === null"
+
                 [class.border-green-700]="selectedCustomization === null"
+
                 [class.bg-white]="selectedCustomization !== null" [class.text-gray-700]="selectedCustomization !== null"
+
                 [class.border-gray-300]="selectedCustomization !== null"
+
                 [class.hover:border-green-500]="selectedCustomization !== null">
+
                 Sin personalización
+
               </button>
+
               <button *ngFor="let cust of product.customizations" (click)="selectCustomization(cust)"
+
                 class="px-4 py-2 rounded-md border transition-colors"
+
                 [class.bg-green-700]="selectedCustomization?.option_id === cust.option_id"
+
                 [class.text-white]="selectedCustomization?.option_id === cust.option_id"
+
                 [class.border-green-700]="selectedCustomization?.option_id === cust.option_id"
+
                 [class.bg-white]="selectedCustomization?.option_id !== cust.option_id"
+
                 [class.text-gray-700]="selectedCustomization?.option_id !== cust.option_id"
+
                 [class.border-gray-300]="selectedCustomization?.option_id !== cust.option_id"
+
                 [class.hover:border-green-500]="selectedCustomization?.option_id !== cust.option_id">
+
                 {{ cust.type }}: {{ cust.description }}
+
               </button>
+
             </div>
-            
+
           </div>
 
+
+
           <!-- Product Info -->
+
           <div class="text-sm text-gray-600 dark:text-dark-secondary space-y-2">
+
             <p><strong>SKU:</strong> {{ selectedVariant?.sku || 'N/A' }}</p>
+
             <div class="flex items-center gap-2">
+
               <strong>Compartir:</strong>
+
               <div class="flex gap-1">
+
                 <button (click)="shareOnWhatsApp()"
+
                   class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer">
+
                   <i class="fab fa-whatsapp text-gray-600 dark:text-gray-300"></i>
+
                 </button>
+
                 <button (click)="copyLink()"
+
                   class="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-xs hover:bg-gray-300 dark:hover:bg-gray-600 cursor-pointer">
+
                   <i class="fas fa-link text-gray-600 dark:text-gray-300"></i>
+
                 </button>
+
               </div>
+
             </div>
+
           </div>
+
         </div>
+
       </div>
+
     </div>
 
     <!-- Tabs Section -->
@@ -289,18 +470,10 @@
   </div>
 </div>
 
-<!-- SECCIÓN DE RECOMENDACIONES -->
-<!-- SOLO se muestra si el producto existe Y el componente detecta que hay conexión (isOnline) -->
-<div *ngIf="product && isOnline" class="recommendations-section mx-4 mt-8 pb-8">
-  <h2 class="text-xl font-bold text-gray-900 dark:text-dark-text mb-4">Recomendaciones para ti</h2>
-  <app-recommendation [product]="product.name"></app-recommendation>
-</div>
 
-<!-- MENSAJE DE OFFLINE -->
-<!-- Se muestra si el producto existe PERO el componente detecta que NO hay conexión -->
-<div *ngIf="product && !isOnline" class="recommendations-section mx-4 mt-8 pb-8">
-  <div class="p-4 bg-yellow-100 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-800 dark:text-yellow-200 rounded-lg shadow-inner">
-    <p class="font-semibold text-lg mb-1">Modo Sin Conexión Activo</p>
-    <p class="text-sm">No podemos cargar las recomendaciones de productos más recientes. Conéctate a internet para ver esta sección.</p>
-  </div>
+
+<div *ngIf="product" class="recommendations-section">
+
+  <app-recommendation [product]="product.name"></app-recommendation>
+
 </div>

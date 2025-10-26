@@ -12,4 +12,4 @@ export class OfflineService {
     fromEvent(window, 'online').subscribe(() => this.onlineStatus.next(true));
     fromEvent(window, 'offline').subscribe(() => this.onlineStatus.next(false));
   }
-}
+} 

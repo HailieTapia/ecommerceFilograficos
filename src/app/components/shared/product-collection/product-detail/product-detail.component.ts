@@ -12,7 +12,6 @@ import { ProductReviewsComponent } from './product-reviews/product-reviews.compo
 import { takeUntil } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
 import { RecommendationComponent } from '../../recommendation/recommendation.component';
-import { OfflineService } from '../../../../services/offline.service'; // <-- IMPORTACIÓN CLAVE
 
 @Component({
   selector: 'app-product-detail',
@@ -39,7 +38,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   userRole: string | null = null;
   breadcrumb: { id: number | null; name: string }[] = [];
   variantSku: string | null = null;
-  isOnline: boolean = true; // <-- NUEVA PROPIEDAD para el estado de la conexión
 
   constructor(
     private route: ActivatedRoute,
@@ -48,16 +46,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private cartService: CartService,
     private reviewService: ReviewService,
-    private toastService: ToastService,
-    private offlineService: OfflineService // <-- INYECCIÓN CLAVE
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
-    // Suscribirse al estado de la conexión. Esto se actualizará en tiempo real.
-    this.offlineService.status$.pipe(takeUntil(this.destroy$)).subscribe(status => {
-      this.isOnline = status;
-      // Si el estado de conexión cambia, el template (*ngIf) se actualizará automáticamente.
-    });
 
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
       this.isAuthenticated = !!user;
@@ -105,13 +97,12 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
           this.selectVariant(matchingVariant);
         }
         this.isLoading = false;
-        // NOTA: La lógica de carga de recomendaciones se realiza en el HTML mediante *ngIf="isOnline".
       },
       error: (error) => {
         console.error('Error loading product details:', error);
         this.isLoading = false;
         let message = error.message || 'No se pudo cargar el producto. Intenta de nuevo más tarde.';
-        // Mensaje específico si el error es por offline (aunque el forkJoin puede fallar por otros motivos)
+
         if (!navigator.onLine) {
           message = 'Estás en modo offline. Algunos datos podrían no estar disponibles.';
         }
@@ -178,7 +169,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
       this.quantity++;
     }
   }
-
   decrementQuantity(): void {
     if (this.quantity > 1) {
       this.quantity--;
