@@ -176,6 +176,7 @@
                 {{ cust.type }}: {{ cust.description }}
               </button>
             </div>
+            
           </div>
 
           <!-- Product Info -->
@@ -288,6 +289,18 @@
   </div>
 </div>
 
-<div *ngIf="product" class="recommendations-section">
+<!-- SECCIÓN DE RECOMENDACIONES -->
+<!-- SOLO se muestra si el producto existe Y el componente detecta que hay conexión (isOnline) -->
+<div *ngIf="product && isOnline" class="recommendations-section mx-4 mt-8 pb-8">
+  <h2 class="text-xl font-bold text-gray-900 dark:text-dark-text mb-4">Recomendaciones para ti</h2>
   <app-recommendation [product]="product.name"></app-recommendation>
+</div>
+
+<!-- MENSAJE DE OFFLINE -->
+<!-- Se muestra si el producto existe PERO el componente detecta que NO hay conexión -->
+<div *ngIf="product && !isOnline" class="recommendations-section mx-4 mt-8 pb-8">
+  <div class="p-4 bg-yellow-100 dark:bg-yellow-900 border-l-4 border-yellow-500 text-yellow-800 dark:text-yellow-200 rounded-lg shadow-inner">
+    <p class="font-semibold text-lg mb-1">Modo Sin Conexión Activo</p>
+    <p class="text-sm">No podemos cargar las recomendaciones de productos más recientes. Conéctate a internet para ver esta sección.</p>
+  </div>
 </div>
