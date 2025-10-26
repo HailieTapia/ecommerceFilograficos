@@ -5,20 +5,18 @@ import { AuthService } from '../../../../services/auth.service';
 import { CartService, AddToCartRequest, CartItem } from '../../../../services/cart.service';
 import { ReviewService, ReviewSummary } from '../../../../services/review.service';
 import { ToastService } from '../../../../services/toastService';
-import { OfflineService } from '../../../../services/offline.service';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SpinnerComponent } from '../../../reusable/spinner/spinner.component';
 import { ProductReviewsComponent } from './product-reviews/product-reviews.component';
 import { takeUntil } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
-import { environment } from '../../../../environments/config';
+import { RecommendationComponent } from '../../recommendation/recommendation.component';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent, ProductReviewsComponent],
+  imports: [RecommendationComponent, CommonModule, FormsModule, RouterModule, SpinnerComponent, ProductReviewsComponent],
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.css']
 })
@@ -27,7 +25,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   product: ProductDetail | null = null;
   reviewSummary: ReviewSummary | null = null;
   relatedProducts: Product[] = [];
-  recommendations: Product[] = []; // Almacena las recomendaciones
   selectedVariant: ProductVariant | null = null;
   selectedImage: string | null = null;
   selectedCustomization: ProductDetail['customizations'][0] | null = null;
@@ -41,7 +38,6 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   userRole: string | null = null;
   breadcrumb: { id: number | null; name: string }[] = [];
   variantSku: string | null = null;
-  isOnline: boolean = true; // Estado de conexión
 
   constructor(
     private route: ActivatedRoute,
@@ -50,17 +46,10 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private cartService: CartService,
     private reviewService: ReviewService,
-    private toastService: ToastService,
-    private offlineService: OfflineService,
-    private http: HttpClient
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
-    // Suscribirse al estado de conexión
-    this.offlineService.status$.pipe(takeUntil(this.destroy$)).subscribe(status => {
-      this.isOnline = status;
-    });
-
     this.authService.getUser().pipe(takeUntil(this.destroy$)).subscribe(user => {
       this.isAuthenticated = !!user;
       this.userRole = user ? user.tipo : null;
@@ -106,40 +95,17 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
             : this.product.variants[0];
           this.selectVariant(matchingVariant);
         }
-
-        // Cargar recomendaciones solo si está online
-        if (this.isOnline) {
-          this.loadRecommendations(productId);
-        } else {
-          this.recommendations = this.relatedProducts;
-          this.toastService.showToast('Estás en modo offline. Mostrando productos relacionados.', 'info');
-        }
-
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading product details:', error);
         this.isLoading = false;
         let message = error.message || 'No se pudo cargar el producto. Intenta de nuevo más tarde.';
-        if (!this.isOnline) {
+        if (!navigator.onLine) {
           message = 'Estás en modo offline. Algunos datos podrían no estar disponibles.';
         }
         this.toastService.showToast(message, 'error');
         this.router.navigate(['/collection']);
-      }
-    });
-  }
-
-  private loadRecommendations(productId: number): void {
-    const url = `${environment.baseUrl}/recommendations`;
-    this.http.post<{ products: Product[] }>(url, { productId }).subscribe({
-      next: (response) => {
-        this.recommendations = response.products || [];
-      },
-      error: (error) => {
-        console.error('Error al cargar recomendaciones:', error);
-        this.recommendations = this.relatedProducts;
-        this.toastService.showToast('No se pudieron cargar las recomendaciones. Mostrando productos relacionados.', 'warning');
       }
     });
   }
