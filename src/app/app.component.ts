@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
@@ -9,6 +9,8 @@ import { ThemeService } from './services/theme.service';
 import { NotificationService } from './services/notification.service';
 import { AuthService } from './services/auth.service';
 import { CompanyService } from './services/company.service';
+import { OfflineService } from './services/offline.service';
+import { ToastService } from './services/toastService';
 import { Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -28,19 +30,22 @@ import { Subject } from 'rxjs';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   isLoggedIn: boolean = false;
   userRole: string | null = null;
   logoPreview: string | ArrayBuffer | null = null;
   companyName: string | null = null;
   isSidebarOpen: boolean = true;
+  isOnline: boolean = navigator.onLine; // Nueva propiedad para rastrear el estado
   private destroy$ = new Subject<void>();
 
   constructor(
     private themeService: ThemeService,
     private notificationService: NotificationService,
     private authService: AuthService,
-    private companyService: CompanyService
+    private companyService: CompanyService,
+    private offlineService: OfflineService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -84,6 +89,17 @@ export class AppComponent implements OnInit {
         },
         error => console.error('Error al obtener información de la compañía:', error)
       );
+
+    // Suscribirse al estado de conexión
+    this.offlineService.status$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isOnline: boolean) => {
+        this.isOnline = isOnline; // Actualizar el estado
+        this.toastService.showToast(
+          isOnline ? 'Conexión restablecida' : 'Modo Offline: Sin conexión a internet',
+          isOnline ? 'success' : 'warning'
+        );
+      });
   }
 
   ngOnDestroy(): void {

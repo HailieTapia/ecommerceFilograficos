@@ -7,6 +7,11 @@
     [userRole]="userRole"
   ></app-header>
 
+  <!-- Offline Status Bar -->
+  <div *ngIf="!isOnline" class="bg-yellow-500 dark:bg-yellow-600 text-white text-center py-2 text-sm sm:text-base font-medium">
+    <i class="fas fa-exclamation-triangle mr-2"></i>Sin conexión: No hay conexión a internet
+  </div>
+
   <!-- Main Content and Sidebar -->
   <div class="flex flex-1">
     <!-- Sidebar (visible only for administrators, overlay on mobile) -->

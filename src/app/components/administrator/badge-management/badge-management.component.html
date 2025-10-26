@@ -1,0 +1,299 @@
+<!-- badge-management.component.html (actualizado) -->
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-2 sm:p-4 md:p-6 font-sans">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-4">
+        <div>
+            <h1 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <i class="fas fa-medal text-blue-600 dark:text-blue-400"></i> Gestión de Gamificación
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Administración de insignias y auditoría de historial.</p>
+        </div>
+        
+        <div class="flex gap-2 w-full sm:w-auto" *ngIf="activeTab === 'management'">
+            <button
+                (click)="openCreateModal()"
+                class="w-full sm:w-auto px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover transition-all duration-300 flex items-center justify-center gap-2 text-xs sm:text-sm"
+            >
+                <i class="fas fa-plus"></i> Crear Insignia
+            </button>
+        </div>
+    </div>
+
+    <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+            <li class="mr-2" role="presentation">
+                <button
+                    [ngClass]="{
+                        'text-light-primary dark:text-dark-primary border-light-primary dark:border-dark-primary': activeTab === 'management',
+                        'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600': activeTab !== 'management'
+                    }"
+                    (click)="setActiveTab('management')"
+                    class="inline-block p-4 border-b-2 rounded-t-lg transition-colors duration-200"
+                    type="button"
+                    role="tab"
+                >
+                    <i class="fas fa-medal mr-2"></i> Gestión de Insignias
+                </button>
+            </li>
+            <li class="mr-2" role="presentation">
+                <button
+                    [ngClass]="{
+                        'text-light-primary dark:text-dark-primary border-light-primary dark:border-dark-primary': activeTab === 'history',
+                        'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-600 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600': activeTab !== 'history'
+                    }"
+                    (click)="setActiveTab('history')"
+                    class="inline-block p-4 border-b-2 rounded-t-lg transition-colors duration-200"
+                    type="button"
+                    role="tab"
+                >
+                    <i class="fas fa-history mr-2"></i> Historial Otorgado
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div *ngIf="activeTab === 'management'">
+        <div class="bg-white dark:bg-gray-800 p-3 sm:p-4 md:p-6 rounded-lg shadow-sm mb-4 sm:mb-6 border border-gray-200 dark:border-gray-700">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+                <div>
+                    <label for="searchTerm" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Buscar:</label>
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400"></i>
+                        <input
+                            id="searchTerm"
+                            [(ngModel)]="searchTerm"
+                            (ngModelChange)="onSearchChange()"
+                            placeholder="Buscar por nombre o descripción..."
+                            class="w-full p-2 pl-8 sm:pl-10 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+                            [ngClass]="{'border-red-500 dark:border-red-400': searchTerm && searchTerm.length > 100}"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label for="statusFilter" class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">Estado:</label>
+                    <select
+                        id="statusFilter"
+                        [(ngModel)]="statusFilter"
+                        (change)="onStatusFilterChange()"
+                        class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+                    >
+                        <option value="active">Activas</option>
+                        <option value="inactive">Inactivas</option>
+                        <option value="all">Todas</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div class="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
+                <h2 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Insignias</h2>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <label for="itemsPerPage" class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Por página:</label>
+                    <select
+                        id="itemsPerPage"
+                        [(ngModel)]="itemsPerPage"
+                        (change)="onItemsPerPageChange()"
+                        class="w-full sm:w-20 md:w-24 p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary focus:border-transparent text-xs sm:text-sm"
+                    >
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 dark:bg-gray-700">
+                        <tr>
+                            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">ID</th>
+                            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Icono</th>
+                            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Nombre</th>
+                            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Descripción</th>
+                            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Categoría</th>
+                            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Estado</th>
+                            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap hidden sm:table-cell">Creado</th>
+                            <th class="p-1 sm:p-2 md:p-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase whitespace-nowrap">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                        <tr *ngIf="badges.length === 0 && !isLoading" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+                            <td colspan="8" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-box-open w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2 opacity-50"></i>
+                                <p>No hay insignias disponibles</p>
+                            </td>
+                        </tr>
+                        <tr *ngIf="isLoading" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+                            <td colspan="8" class="p-3 text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                                <i class="fas fa-spinner animate-spin w-6 sm:w-8 h-6 sm:h-8 mx-auto mb-2"></i>
+                                <p>Cargando insignias...</p>
+                            </td>
+                        </tr>
+                        <tr *ngFor="let badge of badges" class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300">
+                            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ badge.badge_id }}</td>
+                            <td class="p-1 sm:p-2 md:p-3">
+                                <img [src]="badge.icon_url" [alt]="badge.name" class="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded-full">
+                            </td>
+                            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[80px] sm:max-w-[120px] md:max-w-[150px]">{{ badge.name }}</td>
+                            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-normal break-words max-w-[100px] sm:max-w-[150px] md:max-w-[200px] hidden sm:table-cell">{{ badge.description || '-' }}</td>
+                            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-900 dark:text-gray-100 whitespace-nowrap hidden sm:table-cell">{{ badge.category_name || '-' }}</td>
+                            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                      [ngClass]="{'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': badge.is_active, 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': !badge.is_active}">
+                                      {{ badge.is_active ? 'Activa' : 'Inactiva' }}
+                                </span>
+                            </td>
+                            <td class="p-1 sm:p-2 md:p-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:table-cell">{{ formatDate(badge.created_at) }}</td>
+                            <td class="p-1 sm:p-2 md:p-3 text-center">
+                                <div *ngIf="badge.is_active" class="flex justify-center items-center gap-1 sm:gap-2">
+                                    <button (click)="openEditModal(badge)" class="group text-light-primary dark:text-dark-primary hover:text-light-primary-hover dark:hover:text-dark-primary-hover transition-all duration-300 relative">
+                                        <i class="fas fa-edit"></i>
+                                        <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                            Editar
+                                        </span>
+                                    </button>
+                                    <button (click)="deleteBadge(badge)" class="group text-light-danger hover:text-light-danger-hover dark:text-dark-danger dark:hover:text-dark-danger-hover transition-all duration-300 relative">
+                                        <i class="fas fa-trash"></i>
+                                        <span class="absolute hidden group-hover:block bg-gray-800 dark:bg-gray-900 text-white dark:text-dark-text text-[10px] sm:text-xs rounded-lg px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                            Eliminar
+                                        </span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <app-pagination
+                [currentPage]="currentPage"
+                [totalItems]="totalBadges"
+                [itemsPerPage]="itemsPerPage"
+                (pageChange)="onPageChange($event)"
+                class="mt-4 p-3 sm:p-4 border-t border-gray-200 dark:border-gray-700"
+            ></app-pagination>
+        </div>
+    </div>
+
+    <app-badge-history *ngIf="activeTab === 'history'"></app-badge-history>
+
+    <app-modal
+        #createEditModal
+        [title]="selectedBadgeId ? 'Editar Insignia' : 'Crear Insignia'"
+        [modalType]="selectedBadgeId ? 'info' : 'success'"
+        [isConfirmModal]="false"
+    >
+        <div slot="body" class="p-4 sm:p-6 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 max-h-[80vh] overflow-y-auto space-y-4 sm:space-y-6">
+            <form [formGroup]="badgeForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+                        Nombre <span class="text-red-500 dark:text-red-400">*</span>
+                    </label>
+                    <input
+                        formControlName="name"
+                        type="text"
+                        placeholder="Ej. Insignia de Lealtad"
+                        class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+                        [ngClass]="{'border-red-500 dark:border-red-400': badgeForm.get('name')?.touched && badgeForm.get('name')?.invalid}"
+                    />
+                    <div *ngIf="badgeForm.get('name')?.touched && badgeForm.get('name')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+                        <p *ngIf="badgeForm.get('name')?.errors?.['required']">El nombre es obligatorio.</p>
+                        <p *ngIf="badgeForm.get('name')?.errors?.['minlength']">Debe tener al menos 3 caracteres.</p>
+                        <p *ngIf="badgeForm.get('name')?.errors?.['maxlength']">No puede exceder 100 caracteres.</p>
+                        <p *ngIf="badgeForm.get('name')?.errors?.['invalidContent']">No se permiten caracteres especiales ni palabras SQL.</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+                        Descripción
+                    </label>
+                    <textarea
+                        formControlName="description"
+                        placeholder="Ej. Insignia otorgada por compras frecuentes"
+                        class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+                        rows="4"
+                        [ngClass]="{'border-red-500 dark:border-red-400': badgeForm.get('description')?.touched && badgeForm.get('description')?.invalid}"
+                    ></textarea>
+                    <div *ngIf="badgeForm.get('description')?.touched && badgeForm.get('description')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+                        <p *ngIf="badgeForm.get('description')?.errors?.['maxlength']">No puede exceder 500 caracteres.</p>
+                        <p *ngIf="badgeForm.get('description')?.errors?.['invalidContent']">No se permiten caracteres especiales ni palabras SQL.</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+                        Categoría <span class="text-red-500 dark:text-red-400">*</span>
+                    </label>
+                    <select
+                        formControlName="badge_category_id"
+                        class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 transition-colors text-xs sm:text-sm"
+                        [ngClass]="{'border-red-500 dark:border-red-400': badgeForm.get('badge_category_id')?.touched && badgeForm.get('badge_category_id')?.invalid}"
+                    >
+                        <option value="" disabled>Selecciona una categoría</option>
+                        <option *ngFor="let category of badgeCategories" [value]="category.badge_category_id">{{ category.name }}</option>
+                    </select>
+                    <div *ngIf="badgeForm.get('badge_category_id')?.touched && badgeForm.get('badge_category_id')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+                        <p *ngIf="badgeForm.get('badge_category_id')?.errors?.['required']">La categoría es obligatoria.</p>
+                        <p *ngIf="badgeForm.get('badge_category_id')?.errors?.['min']">Selecciona una categoría válida.</p>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-100 mb-2">
+                        Icono <span *ngIf="!selectedBadgeId" class="text-red-500 dark:text-red-400">*</span>
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 sm:p-4 flex flex-col items-center justify-center bg-white dark:bg-gray-700">
+                        <i class="fas fa-upload text-gray-500 dark:text-gray-400 mb-2 text-lg sm:text-xl"></i>
+                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">Arrastra y suelta una imagen o</p>
+                        <input
+                            type="file"
+                            (change)="onFileSelected($event)"
+                            accept=".jpg,.jpeg,.png,.webp"
+                            class="hidden"
+                            #fileInput
+                        />
+                        <button
+                            type="button"
+                            (click)="fileInput.click()"
+                            class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-all duration-300 text-xs sm:text-sm"
+                        >
+                            Seleccionar archivo
+                        </button>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Formatos permitidos: JPG, JPEG, PNG, WEBP. Máximo 1MB.</p>
+                    </div>
+                    <img *ngIf="imagePreview" [src]="imagePreview" alt="Vista previa" class="w-full max-h-40 object-cover rounded mt-4" />
+                    <div *ngIf="badgeForm.get('badgeIcon')?.touched && badgeForm.get('badgeIcon')?.invalid" class="mt-1 text-xs text-red-500 dark:text-red-400">
+                        <p *ngIf="badgeForm.get('badgeIcon')?.errors?.['required']">El icono es obligatorio.</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div slot="actions" class="p-3 sm:p-4 flex justify-end gap-2 sm:gap-4">
+            <button
+                (click)="createEditModal.close()"
+                class="px-3 sm:px-4 py-1 sm:py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition duration-300 text-xs sm:text-sm"
+            >
+                Cancelar
+            </button>
+            <button
+                (click)="saveBadge()"
+                [disabled]="badgeForm.invalid && badgeForm.touched"
+                class="px-3 sm:px-4 py-1 sm:py-2 bg-light-primary dark:bg-dark-primary text-white rounded-md hover:bg-light-primary-hover dark:hover:bg-dark-primary-hover focus:outline-none focus:ring-2 focus:ring-light-primary dark:focus:ring-dark-primary transition duration-300 text-xs sm:text-sm disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
+            >
+                {{ selectedBadgeId ? 'Actualizar' : 'Crear' }}
+            </button>
+        </div>
+    </app-modal>
+
+    <app-modal
+        #confirmModal
+        [title]="confirmModalTitle"
+        [modalType]="confirmModalType"
+        [isConfirmModal]="true"
+        confirmText="Confirmar"
+        cancelText="Cancelar"
+        (confirm)="handleConfirm()"
+        (cancel)="confirmModal.close()"
+    >
+        <div slot="body" class="p-4 sm:p-6 text-gray-900 dark:text-gray-100">
+            <p class="text-xs sm:text-sm">{{ confirmModalMessage }}</p>
+        </div>
+    </app-modal>
+</div>

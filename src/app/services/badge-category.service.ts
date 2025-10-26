@@ -5,7 +5,15 @@ import { switchMap } from 'rxjs/operators';
 import { CsrfService } from '../services/csrf.service';
 import { environment } from '../environments/config';
 
-// Interfaz para categorías de insignias
+// Interfaz para insignias asociadas
+export interface Badge {
+  badge_id: number;
+  name: string;
+  icon_url: string;
+  is_active: boolean;
+}
+
+// Interfaz para categorías de insignias (actualizada para incluir insignias)
 export interface BadgeCategory {
   badge_category_id: number;
   name: string;
@@ -13,6 +21,14 @@ export interface BadgeCategory {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  badges: Badge[]; // ¡Añadido para cumplir con la HU!
+}
+
+// Interfaz para el Reporte de Distribución
+export interface BadgeDistributionReportItem {
+    category_id: number;
+    category_name: string;
+    total_badges: number;
 }
 
 @Injectable({
@@ -23,18 +39,29 @@ export class BadgeCategoryService {
 
   constructor(private csrfService: CsrfService, private http: HttpClient) {}
 
+  // ====================================================================
+  // 1. OBTENER CATEGORÍAS (Actualizado con filtros y ordenamiento del Backend)
+  // ====================================================================
   /**
-   * Obtiene todas las categorías de insignias con paginación y búsqueda (admin)
+   * Obtiene todas las categorías de insignias con paginación, búsqueda, filtros y ordenamiento (admin)
    * @param page Número de página
    * @param pageSize Tamaño de página
-   * @param search Término de búsqueda
+   * @param search Término de búsqueda (en nombre/descripción de la categoría)
    * @param statusFilter Filtro de estado (active, inactive, all)
+   * @param sort Parámetro de ordenamiento (ej. "name:ASC,created_at:DESC")
+   * @param badgeNameFilter Filtro por nombre de insignia asociada
    * @returns Observable con la lista de categorías y metadatos
    */
-  getAllBadgeCategories(page?: number, pageSize?: number, search?: string, statusFilter: 'active' | 'inactive' | 'all' = 'active'): Observable<any> {
+  getAllBadgeCategories(
+    page?: number, 
+    pageSize?: number, 
+    search?: string, 
+    statusFilter: 'active' | 'inactive' | 'all' = 'active',
+    sort?: string, // NUEVO: Parámetro de ordenamiento
+    badgeNameFilter?: string // NUEVO: Filtro por insignia
+  ): Observable<any> {
     const pageValue = page ?? 1;
     const pageSizeValue = pageSize ?? 10;
-    const searchValue = search ?? '';
 
     return this.csrfService.getCsrfToken().pipe(
       switchMap(csrfToken => {
@@ -44,8 +71,15 @@ export class BadgeCategoryService {
           .set('pageSize', pageSizeValue.toString())
           .set('statusFilter', statusFilter);
 
-        if (searchValue) {
-          params = params.set('search', searchValue);
+        // Agregar parámetros opcionales
+        if (search) {
+          params = params.set('search', search);
+        }
+        if (sort) { // Añadir ordenamiento
+            params = params.set('sort', sort);
+        }
+        if (badgeNameFilter) { // Añadir filtro por nombre de insignia
+            params = params.set('badgeName', badgeNameFilter);
         }
 
         return this.http.get(`${this.apiUrl}/`, {
@@ -56,6 +90,29 @@ export class BadgeCategoryService {
       })
     );
   }
+
+  // ====================================================================
+  // 2. REPORTE (¡NUEVO!)
+  // ====================================================================
+  /**
+   * Obtiene el reporte de distribución de insignias por categoría.
+   * @returns Observable con el array del reporte.
+   */
+  getBadgeDistributionReport(): Observable<{ message: string; report: BadgeDistributionReportItem[] }> {
+    return this.csrfService.getCsrfToken().pipe(
+      switchMap(csrfToken => {
+        const headers = new HttpHeaders().set('x-csrf-token', csrfToken);
+        return this.http.get<{ message: string; report: BadgeDistributionReportItem[] }>(
+            `${this.apiUrl}/report/distribution`, 
+            { headers, withCredentials: true }
+        );
+      })
+    );
+  }
+
+  // ====================================================================
+  // 3. CRUD (Sin cambios funcionales, solo se mantienen)
+  // ====================================================================
 
   /**
    * Obtiene una categoría de insignias por ID
