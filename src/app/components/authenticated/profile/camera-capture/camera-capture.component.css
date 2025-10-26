@@ -1,0 +1,10 @@
+/* Este archivo CSS contiene estilos mínimos para el componente de captura de cámara.
+  La mayoría de los estilos (color, padding, layout) se manejan con clases de Tailwind
+  en el archivo HTML para mantener la consistencia del proyecto. 
+*/
+video {
+  /* Asegura que el video llene el contenedor y se vea como un reflejo (espejo) */
+  display: block;
+  width: 100%;
+  height: 100%;
+}

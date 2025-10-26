@@ -1,0 +1,47 @@
+<div class="camera-capture bg-white dark:bg-gray-850 rounded-xl shadow-2xl p-4 sm:p-6 mx-auto w-full">
+  <h2 class="text-xl font-bold mb-4 text-center text-gray-800 dark:text-gray-100">Capturar Foto de Perfil</h2>
+
+  <!-- Contenedor de Video/Vista Previa -->
+  <div class="relative w-full aspect-[4/3] max-h-96 rounded-lg overflow-hidden bg-gray-900 border border-gray-700 mx-auto shadow-inner">
+    <!-- Referencia al elemento de video y estilo de espejo (scale-x-[-1]) -->
+    <video #videoElement autoplay playsinline [ngClass]="{'hidden': !isStreaming}"
+      class="w-full h-full object-cover transform scale-x-[-1]"></video>
+    
+    <!-- Mensaje de estado/cámara inactiva -->
+    <div *ngIf="!isStreaming" class="absolute inset-0 flex items-center justify-center flex-col p-4">
+      <i class="fas fa-video-slash text-white text-4xl mb-3 opacity-70"></i>
+      <p class="text-white text-sm text-center opacity-90">Presiona 'Activar Cámara' para comenzar.</p>
+    </div>
+  </div>
+
+  <!-- Controles -->
+  <div class="controls flex justify-center items-center gap-6 mt-6">
+
+    <ng-container *ngIf="!isStreaming">
+      <!-- Botón para iniciar la cámara -->
+      <button (click)="startCamera()"
+        class="flex items-center justify-center w-full sm:w-60 py-3 px-6 bg-light-primary text-white font-bold rounded-full shadow-lg hover:bg-light-primary-dark transition-all duration-300 transform hover:scale-[1.02]">
+        <i class="fas fa-video mr-2"></i> Activar Cámara
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="isStreaming">
+      <!-- Botón de Cancelar/Cerrar (Pequeño, rojo, a la izquierda) -->
+      <button (click)="stopCamera()"
+        class="w-12 h-12 flex items-center justify-center rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition-colors duration-200"
+        title="Cancelar y salir">
+        <i class="fas fa-times text-lg"></i>
+      </button>
+
+      <!-- Botón de Captura (Grande, circular, prominente) -->
+      <button (click)="capturePhoto()"
+        class="w-16 h-16 flex items-center justify-center rounded-full bg-light-primary border-4 border-light-primary-dark text-white shadow-2xl ring-4 ring-light-primary-light hover:scale-105 active:bg-dark-primary transition-transform duration-200"
+        title="Tomar Foto">
+        <i class="fas fa-camera text-xl"></i>
+      </button>
+      
+      <!-- Placeholder vacío para mantener el espaciado y simetría -->
+      <div class="w-12 h-12"></div> 
+    </ng-container>
+  </div>
+</div>

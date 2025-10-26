@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, HostListener, ElementRef, OnDestroy } from '@angular/core';
 import { UserService } from '../../../services/user.service';
 import { AuthService } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -8,6 +8,7 @@ import { PersonalInfoComponent } from './personal-info/personal-info.component';
 import { AddressesComponent } from './addresses/addresses.component';
 import { Router } from '@angular/router';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import { CameraCaptureComponent } from './camera-capture/camera-capture.component';
 
 interface Badge {
   id: number;
@@ -16,7 +17,7 @@ interface Badge {
   description: string;
   category: string;
   obtained_at: string;
-  product_category: string | null; // Added product_category
+  product_category: string | null;
 }
 
 interface UserProfile {
@@ -34,7 +35,15 @@ interface UserProfile {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [AddressesComponent, ChangePasswordComponent, PersonalInfoComponent, FormsModule, ReactiveFormsModule, CommonModule],
+  imports: [
+    AddressesComponent,
+    ChangePasswordComponent,
+    PersonalInfoComponent,
+    CameraCaptureComponent,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonModule
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -45,7 +54,13 @@ export class ProfileComponent implements OnInit {
   activeTab: string = 'info';
   addAddressId: number | null = null;
   selectedFile: File | null = null;
-  showTooltip: boolean = false;
+  
+  // [MODIFICADO]: Renombrado para representar un modal de opciones
+  showOptionsModal: boolean = false; 
+  showCamera: boolean = false;
+  
+  // [NUEVO]: Estado para indicar la carga y mostrar spinner
+  isUploading: boolean = false;
 
   constructor(
     private elRef: ElementRef,
@@ -55,14 +70,15 @@ export class ProfileComponent implements OnInit {
     private router: Router
   ) {}
 
+  // [MODIFICADO]: HostListener adaptado al nuevo nombre del modal
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    const tooltip = this.elRef.nativeElement.querySelector('.tooltip');
+    const modal = this.elRef.nativeElement.querySelector('.options-modal');
     const button = this.elRef.nativeElement.querySelector('.h-24.w-24');
-    const clickedInside = (tooltip && tooltip.contains(target)) || (button && button.contains(target));
-    if (!clickedInside && this.showTooltip) {
-      this.showTooltip = false;
+    const clickedInside = (modal && modal.contains(target)) || (button && button.contains(target));
+    if (!clickedInside && this.showOptionsModal) {
+      this.showOptionsModal = false;
     }
   }
 
@@ -70,8 +86,9 @@ export class ProfileComponent implements OnInit {
     this.getUserInfo();
   }
 
-  toggleTooltip(): void {
-    this.showTooltip = !this.showTooltip;
+  // [MODIFICADO]: Renombrado para el nuevo modal
+  toggleOptionsModal(): void {
+    this.showOptionsModal = !this.showOptionsModal;
   }
 
   getUserInfo(): void {
@@ -87,8 +104,9 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  // [MODIFICADO]: Mejorar el fallback visual a '?' en lugar de 'sin foto'
   getInitials(name: string | undefined | null): string {
-    if (!name || name.trim() === '') return 'sin foto';
+    if (!name || name.trim() === '') return '?';
     const words = name.trim().split(/\s+/);
     if (words.length === 1) {
       return words[0].substring(0, 2).toUpperCase();
@@ -109,6 +127,8 @@ export class ProfileComponent implements OnInit {
       this.toastService.showToast('Por favor, selecciona una imagen', 'error');
       return;
     }
+    
+    this.isUploading = true; // [NUEVO]: Iniciar el spinner
 
     this.userService.uploadProfilePicture(this.selectedFile).subscribe({
       next: (response) => {
@@ -116,11 +136,13 @@ export class ProfileComponent implements OnInit {
         this.authService.updateUserProfile(this.userProfile);
         this.toastService.showToast('Foto de perfil actualizada exitosamente', 'success');
         this.selectedFile = null;
+        this.isUploading = false; // [NUEVO]: Detener el spinner
       },
       error: (error) => {
         const errorMessage = error?.error?.message || 'Error al subir la foto de perfil';
         this.toastService.showToast(errorMessage, 'error');
         this.selectedFile = null;
+        this.isUploading = false; // [NUEVO]: Detener el spinner en error
       }
     });
   }
@@ -167,5 +189,24 @@ export class ProfileComponent implements OnInit {
         });
       }
     );
+  }
+
+  toggleCamera(): void {
+    this.showCamera = !this.showCamera;
+    // Asegurar que el modal de opciones se cierre al abrir la cámara
+    if (this.showCamera) {
+      this.showOptionsModal = false;
+    }
+  }
+
+  // [MODIFICADO]: Manejar la cancelación (file es null) enviada desde el componente de la cámara
+  onPhotoCaptured(file: File | null): void {
+    if (file) {
+      this.selectedFile = file;
+      this.uploadProfilePicture();
+    } else {
+      this.toastService.showToast('Captura de foto cancelada.', 'info');
+    }
+    this.showCamera = false;
   }
 }
