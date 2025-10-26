@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6 font-sans">
-    <!-- Cabecera de perfil (Ahora incluye insignias en el lado derecho) -->
+    <!-- Cabecera de perfil -->
     <div
         class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-850 rounded-xl shadow-lg p-6 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 border border-gray-200 dark:border-gray-700">
 
@@ -8,10 +8,21 @@
             <!-- Bloque de Imagen/Iniciales -->
             <div class="flex justify-center flex-shrink-0">
                 <div class="relative">
+                    
+                    <!-- [NUEVO] Spinner de Carga (Overlay) -->
+                    <div *ngIf="isUploading"
+                        class="absolute inset-0 bg-black bg-opacity-60 rounded-full flex items-center justify-center z-10 transition-opacity duration-300">
+                        <i class="fas fa-spinner fa-spin text-white text-2xl"></i>
+                    </div>
+                    
                     <div *ngIf="!userProfile?.profile_picture_url; else profileImage"
                         class="h-24 w-24 rounded-full bg-light-primary dark:bg-dark-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-light-primary dark:border-dark-primary cursor-pointer relative group"
-                        (click)="toggleTooltip()">
-                        {{ getInitials(userProfile?.name) }}
+                        (click)="toggleOptionsModal()">
+                        <!-- [MODIFICADO]: Usar ícono de persona como fallback para '?' -->
+                        <span *ngIf="getInitials(userProfile?.name) !== '?'">
+                            {{ getInitials(userProfile?.name) }}
+                        </span>
+                        <i *ngIf="getInitials(userProfile?.name) === '?'" class="fas fa-user text-3xl"></i>
                         <div
                             class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <i class="fas fa-camera text-white text-lg"></i>
@@ -20,7 +31,7 @@
                     <ng-template #profileImage>
                         <button
                             class="h-24 w-24 rounded-full border-4 border-light-primary dark:border-dark-primary overflow-hidden focus:outline-none relative group"
-                            (click)="toggleTooltip()">
+                            (click)="toggleOptionsModal()">
                             <img class="h-full w-full object-cover" [src]="userProfile?.profile_picture_url"
                                 alt="Foto de perfil" (error)="userProfile.profile_picture_url = null">
                             <div
@@ -29,21 +40,37 @@
                             </div>
                         </button>
                     </ng-template>
-                    <div *ngIf="showTooltip"
-                        class="tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-850 text-light-text dark:text-dark-text rounded-lg shadow-lg z-10 border border-gray-300 dark:border-gray-600 w-48">
-                        <div class="flex flex-col gap-2">
+
+                    <!-- [MODIFICADO] Menú de Opciones (Reemplazando el antiguo tooltip) -->
+                    <div *ngIf="showOptionsModal"
+                        class="options-modal absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-850 rounded-lg shadow-2xl border border-gray-300 dark:border-gray-600 w-56 z-20 p-2 transform origin-top-left transition-all duration-300 ease-out">
+                        <div class="flex flex-col gap-1">
+                            <!-- Opción 1: Subir Archivo -->
                             <label
-                                class="cursor-pointer flex items-center gap-2 px-4 py-2 hover:bg-light-primary dark:hover:bg-dark-primary hover:text-white rounded transition-all duration-300">
-                                <i class="fas fa-camera text-sm"></i>
-                                <span class="text-sm">Actualizar</span>
+                                class="cursor-pointer flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-light-primary dark:hover:bg-dark-primary hover:text-white rounded-md transition-colors duration-200">
+                                <i class="fas fa-cloud-upload-alt text-lg"></i>
+                                <span>Subir nueva imagen</span>
                                 <input type="file" class="hidden" accept="image/jpeg,image/png,image/webp"
-                                    (change)="onFileSelected($event)">
+                                    (change)="onFileSelected($event); toggleOptionsModal()">
                             </label>
+
+                            <!-- Opción 2: Tomar Foto con Cámara -->
+                            <button (click)="toggleCamera(); toggleOptionsModal()"
+                                class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-light-primary dark:hover:bg-dark-primary hover:text-white rounded-md transition-colors duration-200">
+                                <i class="fas fa-camera-retro text-lg"></i>
+                                <span>Tomar Foto</span>
+                            </button>
+
+                            <!-- Divisor opcional si existe foto -->
+                            <div *ngIf="userProfile?.profile_picture_url"
+                                class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
+                            <!-- Opción 3: Eliminar Foto (Si existe) -->
                             <button *ngIf="userProfile?.profile_picture_url"
-                                class="flex items-center gap-1 px-4 py-2 hover:bg-light-danger dark:hover:bg-dark-danger hover:text-white rounded transition-all duration-300"
-                                (click)="deleteProfilePicture()">
-                                <i class="fas fa-trash-alt text-sm"></i>
-                                <span class="text-sm">Eliminar</span>
+                                (click)="deleteProfilePicture(); toggleOptionsModal()"
+                                class="flex items-center gap-3 px-4 py-3 text-sm text-light-danger dark:text-dark-danger hover:bg-red-500 hover:bg-opacity-10 rounded-md transition-colors duration-200">
+                                <i class="fas fa-trash-alt text-lg"></i>
+                                <span>Eliminar foto</span>
                             </button>
                         </div>
                     </div>
@@ -78,8 +105,7 @@
                 class="flex gap-3 flex-wrap justify-center lg:justify-start">
 
                 <!-- Iteramos solo sobre las primeras 4 insignias para el preview -->
-                <div *ngFor="let badge of userProfile.badges | slice:0:4"
-                    class="group relative flex-shrink-0">
+                <div *ngFor="let badge of userProfile.badges | slice:0:4" class="group relative flex-shrink-0">
 
                     <!-- Icono de la insignia -->
                     <div
@@ -88,12 +114,15 @@
                     </div>
 
                     <!-- Tooltip en hover (incluye product_category si está disponible) -->
-                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                    <div
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
                         {{ $any(badge).name }}
                         <div *ngIf="$any(badge).product_category" class="mt-1 text-gray-300">
                             Categoría: {{ $any(badge).product_category }}
                         </div>
-                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                        <div
+                            class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900">
+                        </div>
                     </div>
                 </div>
 
@@ -110,6 +139,16 @@
             </ng-template>
         </div>
     </div>
+
+    <!-- [MODIFICADO] Componente de captura de cámara (Modal de pantalla completa) -->
+    <div *ngIf="showCamera"
+        class="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4">
+        <div class="max-w-xl w-full">
+            <!-- photoCaptured.emit(null) en la cámara cierra este modal en onPhotoCaptured -->
+            <app-camera-capture (photoCaptured)="onPhotoCaptured($event)"></app-camera-capture>
+        </div>
+    </div>
+
 
     <!-- Pestañas de navegación -->
     <div class="mb-6 border-b border-gray-200 dark:border-gray-600">
