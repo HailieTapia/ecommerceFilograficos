@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:jest": "jest --config ./jest.config.js"
+    "test:jest": "jest --config=jest.config.js"
   },
   "private": true,
   "dependencies": {
