@@ -1,4 +1,4 @@
-// badge-management.component.ts (actualizado)
+// badge-management.component.ts (Actualizado con Debounce Correcto)
 import { Component, OnInit, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
@@ -8,7 +8,7 @@ import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';
 import { ToastService } from '../../../services/toastService';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of, Subscription } from 'rxjs';
+import { of, Subscription, Subject } from 'rxjs'; // Importar Subject
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { BadgeHistoryComponent } from './badge-history/badge-history.component';
@@ -58,6 +58,7 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
 
   // Propiedades comunes
   private subscriptions: Subscription = new Subscription();
+  private searchSubject = new Subject<string>(); // Subject para el debounce
   confirmAction: (() => void) | null = null;
   confirmModalTitle = '';
   confirmModalMessage = '';
@@ -96,6 +97,17 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
   ngOnInit(): void {
     this.loadBadgeCategories();
     this.loadBadges();
+
+    // Suscripción para manejar el Debounce de la búsqueda
+    this.subscriptions.add(
+      this.searchSubject.pipe(
+        debounceTime(300),
+        distinctUntilChanged()
+      ).subscribe(() => {
+        // La lógica de carga real se ejecuta aquí, después del debounce
+        this.loadBadges();
+      })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -106,6 +118,7 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+    this.searchSubject.complete(); // Completar el Subject para liberar recursos
   }
 
   // Navegación entre pestañas
@@ -161,9 +174,10 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
     this.loadBadges();
   }
 
+  // **Actualizado:** Emite el término de búsqueda al Subject para que el debounce lo maneje
   onSearchChange(): void {
     this.currentPage = 1;
-    this.debounceSearch().subscribe(() => this.loadBadges());
+    this.searchSubject.next(this.searchTerm);
   }
 
   onStatusFilterChange(): void {
@@ -171,13 +185,7 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
     this.loadBadges();
   }
 
-  debounceSearch() {
-    return of(this.searchTerm).pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(() => of(null))
-    );
-  }
+  // Método debounceSearch anterior eliminado, la lógica está ahora en ngOnInit con el Subject
 
   openCreateModal(): void {
     if (!this.createEditModal) {
@@ -297,6 +305,7 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
   }
 
   sanitizeInput(input: string): string {
+    // Limpieza de caracteres peligrosos y palabras clave SQL
     return input.replace(/[<>'"`;]/g, '').replace(/(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|EXEC|UNION|GRANT|REVOKE)/gi, '');
   }
 
@@ -305,6 +314,8 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       const validFormats = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const maxSizeBytes = 1 * 1024 * 1024; // 1MB
+
       if (!validFormats.includes(file.type)) {
         this.toastService.showToast('Solo se permiten archivos JPG, JPEG, PNG o WEBP', 'error');
         this.selectedFile = null;
@@ -313,7 +324,7 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
         this.badgeForm.get('badgeIcon')?.markAsTouched();
         return;
       }
-      if (file.size > 1 * 1024 * 1024) {
+      if (file.size > maxSizeBytes) {
         this.toastService.showToast('El archivo no puede exceder 1MB', 'error');
         this.selectedFile = null;
         this.imagePreview = null;
@@ -321,6 +332,7 @@ export class BadgeManagementComponent implements OnInit, OnDestroy, AfterViewIni
         this.badgeForm.get('badgeIcon')?.markAsTouched();
         return;
       }
+      
       this.selectedFile = file;
       const reader = new FileReader();
       reader.onload = () => {

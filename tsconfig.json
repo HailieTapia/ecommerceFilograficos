@@ -24,6 +24,12 @@
       "dom"
     ]
   },
+  "exclude": [
+    "jest.config.js",
+    "src/setup-jest.ts",
+    "node_modules",
+    "tmp"
+  ],
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
