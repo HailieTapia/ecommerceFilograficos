@@ -1,0 +1,91 @@
+# Título: Flujo de Integración Continua (CI) para Módulo Web de Gamificación
+# Descripción: Automatiza la compilación, las pruebas y el despliegue
+#              condicional (a Vercel) del frontend Angular.
+name: CI/CD - Angular Frontend (Gamificación)
+
+# ----------------------------------------------------------------
+# 1. Activadores del Pipeline: Push y Pull Request en ramas clave
+# ----------------------------------------------------------------
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # ----------------------------------------------------------------
+  # JOB 1: Test - Compilación y Ejecución de Pruebas Unitarias/Integración
+  # Este job se ejecuta en todas las ramas definidas.
+  # ----------------------------------------------------------------
+  test:
+    name: Build & Test + Summary
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v5
+
+      - name: Configurar Entorno Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalación de Dependencias
+        run: npm ci
+
+      - name: Compilar Proyecto Angular
+        run: npm run build -- --configuration production
+
+      #  Aquí actualizamos para generar archivo JSON como el backend
+      - name: Ejecutar Pruebas Unitarias con JSON Output
+        run: |
+          mkdir -p tests
+          npm run test -- --json --outputFile=tests/jest-results.json --watch=false --browsers=ChromeHeadless
+
+      #  Resumen de pruebas visible en GitHub Actions
+      - name: Generar Test Summary
+        if: always()
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+          RESULTS_FILE=tests/jest-results.json
+
+          if [ -f "$RESULTS_FILE" ]; then
+            PASSED=$(jq .numPassedTests "$RESULTS_FILE")
+            FAILED=$(jq .numFailedTests "$RESULTS_FILE")
+            TOTAL=$(jq .numTotalTests "$RESULTS_FILE")
+            TIME=$(jq .testResults[0].perfStats.runtime "$RESULTS_FILE" | awk '{printf "%.1f", $1/1000}')
+            
+            ICON="✅"
+            if [ "$FAILED" -gt 0 ]; then
+              ICON="❌"
+            fi
+
+            echo "$ICON **$PASSED** passed — **$FAILED** failed — **$TOTAL** total — ⏱️ **$TIME** s" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$FAILED" -gt 0 ]; then
+              echo "## Revisar errores en los logs del job 👇" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ No se generó el reporte JSON. Las pruebas fallaron antes de ejecutarse." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generar Artefacto de Compilación (dist/)
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-dist
+          path: dist/
+          retention-days: 1
+
+      - name: Upload coverage report (si existe)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: tests/coverage
