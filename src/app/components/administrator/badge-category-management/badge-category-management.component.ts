@@ -1,12 +1,12 @@
 import { Component, OnInit, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { BadgeCategoryService, BadgeCategory, BadgeDistributionReportItem } from '../../../services/badge-category.service'; // Importar BadgeDistributionReportItem
+import { BadgeCategoryService, BadgeCategory, BadgeDistributionReportItem } from '../../../services/badge-category.service';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ModalComponent } from '../../reusable/modal/modal.component';
 import { ToastService } from '../../../services/toastService';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { of, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, tap } from 'rxjs/operators';
+import { of, Subscription, Subject } from 'rxjs'; // Importamos Subject
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 
@@ -31,10 +31,10 @@ registerLocaleData(localeEs);
     { provide: 'LOCALE_ID', useValue: 'es' }
   ]
 })
-export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, OnDestroy { // Añadido AfterViewInit
+export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('createEditModal') createEditModal!: ModalComponent;
   @ViewChild('confirmModal') confirmModal!: ModalComponent;
-  @ViewChild('reportModal') reportModal!: ModalComponent; // NUEVO: Modal para reportes
+  @ViewChild('reportModal') reportModal!: ModalComponent;
 
   badgeCategories: BadgeCategory[] = [];
   totalCategories = 0;
@@ -44,13 +44,13 @@ export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, 
   searchTerm = '';
   statusFilter: 'active' | 'inactive' | 'all' = 'active';
 
-  // --- NUEVAS PROPIEDADES DE FILTRO Y REPORTE ---
-  badgeNameFilter = ''; // Filtro por nombre de insignia
-  sortColumn = 'badge_category_id'; // Columna para ordenar
-  sortDirection: 'ASC' | 'DESC' = 'ASC'; // Dirección de ordenamiento
+  // --- PROPIEDADES DE FILTRO Y REPORTE ---
+  badgeNameFilter = '';
+  sortColumn = 'badge_category_id';
+  sortDirection: 'ASC' | 'DESC' = 'ASC';
   badgeDistributionReport: BadgeDistributionReportItem[] = [];
   isReportLoading: boolean = false;
-  // ---------------------------------------------
+  // -------------------------------------
 
   categoryForm!: FormGroup;
   selectedCategoryId: string | null = null;
@@ -60,6 +60,9 @@ export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, 
   confirmModalMessage: string = '';
   confirmModalType: 'danger' | 'success' | 'info' | 'warning' | 'error' | 'default' = 'default';
   isLoading: boolean = false;
+  
+  // 🚀 REFACRORIZACIÓN CLAVE: Usamos un Subject para manejar el debounce 🚀
+  private searchTerms = new Subject<{ term: string, filter: string }>();
 
   constructor(
     private badgeCategoryService: BadgeCategoryService,
@@ -84,8 +87,11 @@ export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, 
   }
 
   ngOnInit(): void {
-    // Inicializar la carga con un debounce para el término de búsqueda principal
-    this.debounceSearch().subscribe(() => this.loadBadgeCategories());
+    // Configurar el debounce solo una vez
+    this.subscriptions.add(this.setupSearchDebounce());
+
+    // Carga inicial de categorías
+    this.loadBadgeCategories();
   }
 
   ngAfterViewInit(): void {
@@ -98,7 +104,20 @@ export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, 
     this.subscriptions.unsubscribe();
   }
 
-  // --- LÓGICA PRINCIPAL DE CONSULTA (ACTUALIZADA) ---
+  /**
+   * 🚀 NUEVA LÓGICA: Configura la escucha para el debounce en los campos de texto
+   */
+  private setupSearchDebounce(): Subscription {
+    return this.searchTerms.pipe(
+      debounceTime(300), // Espera 300ms
+      distinctUntilChanged((a, b) => a.term === b.term && a.filter === b.filter), // Solo si el término o el filtro cambiaron
+    ).subscribe(() => {
+      this.currentPage = 1;
+      this.loadBadgeCategories();
+    });
+  }
+
+  // --- LÓGICA PRINCIPAL DE CONSULTA ---
   loadBadgeCategories(): void {
     this.isLoading = true; 
     const sort = `${this.sortColumn}:${this.sortDirection}`;
@@ -109,8 +128,8 @@ export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, 
         this.itemsPerPage, 
         this.searchTerm, 
         this.statusFilter,
-        sort, // NUEVO: Ordenamiento
-        this.badgeNameFilter // NUEVO: Filtro por insignia
+        sort, 
+        this.badgeNameFilter
       ).subscribe({
         next: (response) => {
           this.badgeCategories = response.badgeCategories;
@@ -138,18 +157,18 @@ export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, 
     this.loadBadgeCategories();
   }
 
+  /**
+   * 🚀 REFACRORIZACIÓN: Emitimos el término de búsqueda al Subject
+   */
   onSearchChange(): void {
-    this.currentPage = 1;
-    // La suscripción se hace en ngOnInit, aquí solo emitimos el valor
-    of(this.searchTerm).pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(() => this.loadBadgeCategories());
+    this.searchTerms.next({ term: this.searchTerm, filter: this.badgeNameFilter });
   }
   
+  /**
+   * 🚀 REFACRORIZACIÓN: Emitimos el filtro por nombre de insignia al Subject
+   */
   onBadgeNameFilterChange(): void {
-    this.currentPage = 1;
-    this.debounceSearch().subscribe(() => this.loadBadgeCategories());
+    this.searchTerms.next({ term: this.searchTerm, filter: this.badgeNameFilter });
   }
 
   onStatusFilterChange(): void {
@@ -157,7 +176,7 @@ export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, 
     this.loadBadgeCategories();
   }
   
-  // --- LÓGICA DE ORDENAMIENTO (NUEVA) ---
+  // --- LÓGICA DE ORDENAMIENTO ---
   onSortChange(column: string): void {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'ASC' ? 'DESC' : 'ASC';
@@ -175,15 +194,10 @@ export class BadgeCategoryManagementComponent implements OnInit, AfterViewInit, 
     return this.sortDirection === 'ASC' ? 'fas fa-sort-up' : 'fas fa-sort-down';
   }
 
-  debounceSearch() {
-    return of(this.searchTerm).pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(() => of(null))
-    );
-  }
+  // ❌ ELIMINAMOS debounceSearch() - Ya no es necesario
+  // debounceSearch() { ... }
 
-  // --- LÓGICA DE REPORTES (NUEVA) ---
+  // --- LÓGICA DE REPORTES ---
   openReportModal(): void {
     if (!this.reportModal) {
       this.toastService.showToast('Error: Modal de reportes no inicializado', 'error');

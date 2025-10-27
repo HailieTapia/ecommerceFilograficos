@@ -95,7 +95,6 @@ export class ProfileComponent implements OnInit {
     this.userService.getProfile().subscribe({
       next: (profile) => {
         this.userProfile = profile;
-        console.log('Perfil del usuario:', this.userProfile);
       },
       error: (error) => {
         const errorMessage = error?.error?.message || 'Error al obtener el perfil';

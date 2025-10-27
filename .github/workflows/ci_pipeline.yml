@@ -1,0 +1,111 @@
+name: CI/CD - Angular Frontend (Gamificación)
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # ----------------------------------------------------------------
+  # JOB 1: Test - Compilación y Ejecución de Pruebas Unitarias/Integración
+  # ----------------------------------------------------------------
+  test:
+    name: Build & Test + Summary
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v5
+
+      - name: Configurar Entorno Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalación de Dependencias
+        run: npm ci
+
+      - name: Compilar Proyecto Angular
+        run: npm run build -- --configuration production
+
+      - name: Ejecutar Pruebas Jest con JSON Report
+        run: |
+          mkdir -p tests
+          npm run test:jest -- "(badge|profile)" --json --outputFile=tests/jest-results.json
+
+      - name: Generar Test Summary
+        if: always()
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+          RESULTS_FILE=tests/jest-results.json
+
+          if [ -f "$RESULTS_FILE" ]; then
+            PASSED=$(jq .numPassedTests "$RESULTS_FILE")
+            FAILED=$(jq .numFailedTests "$RESULTS_FILE")
+            TOTAL=$(jq .numTotalTests "$RESULTS_FILE")
+
+            SUMMARY_ICON="✅"
+            if [ "$FAILED" -gt 0 ]; then SUMMARY_ICON="❌"; fi
+
+            echo "$SUMMARY_ICON **$PASSED** passed — **$FAILED** failed — **$TOTAL** total" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$FAILED" -gt 0 ]; then
+              echo "## Revisar fallos en consola 👇" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⚠️ Reporte JSON no encontrado" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generar Artefacto de Compilación (dist/)
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-dist
+          path: dist/
+          retention-days: 1
+
+      - name: Upload coverage report (si existe)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: tests/coverage
+
+  # ----------------------------------------------------------------
+  # JOB 2: Deploy - Solo si los tests pasan y rama es main o develop
+  # ----------------------------------------------------------------
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v5
+
+      - name: Instalar Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy a Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "Desplegando a Vercel..."
+          # Para main → producción
+          if [ "${GITHUB_REF##*/}" = "main" ]; then
+            vercel --prod --token $VERCEL_TOKEN --confirm
+          else
+            # Para develop → preview deploy
+            vercel --token $VERCEL_TOKEN --confirm
+          fi
