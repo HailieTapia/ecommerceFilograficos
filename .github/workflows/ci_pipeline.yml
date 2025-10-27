@@ -1,11 +1,5 @@
-# Título: Flujo de Integración Continua (CI) para Módulo Web de Gamificación
-# Descripción: Automatiza la compilación, las pruebas y el despliegue
-#              condicional (a Vercel) del frontend Angular.
 name: CI/CD - Angular Frontend (Gamificación)
 
-# ----------------------------------------------------------------
-# 1. Activadores del Pipeline: Push y Pull Request en ramas clave
-# ----------------------------------------------------------------
 on:
   push:
     branches:
@@ -20,7 +14,6 @@ on:
 jobs:
   # ----------------------------------------------------------------
   # JOB 1: Test - Compilación y Ejecución de Pruebas Unitarias/Integración
-  # Este job se ejecuta en todas las ramas definidas.
   # ----------------------------------------------------------------
   test:
     name: Build & Test + Summary
@@ -84,3 +77,34 @@ jobs:
         with:
           name: coverage-report
           path: tests/coverage
+
+  # ----------------------------------------------------------------
+  # JOB 2: Deploy - Solo si los tests pasan y rama es main o develop
+  # ----------------------------------------------------------------
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout del Repositorio
+        uses: actions/checkout@v5
+
+      - name: Instalar Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy a Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "Desplegando a Vercel..."
+          # Para main → producción
+          if [ "${GITHUB_REF##*/}" = "main" ]; then
+            vercel --prod --token $VERCEL_TOKEN --confirm
+          else
+            # Para develop → preview deploy
+            vercel --token $VERCEL_TOKEN --confirm
+          fi
