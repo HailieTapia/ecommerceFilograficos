@@ -85,4 +85,10 @@ export class UserService {
             })
         );
     }
+
+    /** NUEVO MÉTODO PÚBLICO: Obtener Top Clientes (VIP) */
+    getTopClients(): Observable<any> {
+        // Esta ruta es pública y no requiere el token CSRF ni cabeceras especiales.
+        return this.http.get(`${this.apiUrl}/users/top-clients`);
+    }
 }

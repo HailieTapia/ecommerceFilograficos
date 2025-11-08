@@ -38,7 +38,7 @@ jobs:
       - name: Ejecutar Pruebas Jest con JSON Report
         run: |
           mkdir -p tests
-          npm run test:jest -- "(badge|profile)" --json --outputFile=tests/jest-results.json
+          npm run test:jest -- "(badge|profile|client)" --json --outputFile=tests/jest-results.json
 
       - name: Generar Test Summary
         if: always()

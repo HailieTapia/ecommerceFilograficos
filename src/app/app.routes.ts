@@ -49,6 +49,7 @@ import { AdminOrderComponent } from './components/administrator/admin-order/admi
 import { ClusterComponent } from './components/administrator/cluster/cluster.component';
 import { BadgeCategoryManagementComponent } from './components/administrator/badge-category-management/badge-category-management.component';
 import { BadgeManagementComponent } from './components/administrator/badge-management//badge-management.component';
+import { TopClientsComponent } from './components/public/top-clients/top-clients.component';
 
 // Errores
 import { BadRequestComponent } from './components/errors/bad-request/bad-request.component';
@@ -114,6 +115,8 @@ export const routes: Routes = [
   { path: 'support-inquiry', component: SupportInquiryComponent, data: { breadcrumb: 'Consulta Soporte' } },
   { path: 'legal', component: LegalComponent, data: { breadcrumb: 'Legal' } },
   { path: 'product-categories', component: ProductCategoriesComponent, data: { breadcrumb: 'Categorias' } },
+
+  { path: 'top-clients', component: TopClientsComponent, data: { breadcrumb: 'Top clientes' } },
 
   // Rutas de error
   { path: '400', component: BadRequestComponent, data: { breadcrumb: 'Solicitud incorrecta' } },
