@@ -18,7 +18,7 @@
     },
     {
       "name": "assets",
-      "installMode": "lazy",
+      "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [
@@ -28,7 +28,7 @@
     },
     {
       "name": "fonts",
-      "installMode": "lazy",
+      "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "urls": [
@@ -63,6 +63,21 @@
         "maxAge": "1h",
         "timeout": "5s",
         "strategy": "performance"
+      }
+    },
+    {
+      "name": "static-content",
+      "urls": [
+        "/api/users/profile",        
+        "/api/regulatory",           
+        "/api/faq/public",           
+        "/api/company"             
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "30d",              
+        "timeout": "5s",
+        "strategy": "freshness"       
       }
     }
   ],

@@ -14,6 +14,7 @@ import { ToastService } from './services/toastService';
 import { Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { PrecacheService } from './services/precache.service'; // <-- NUEVA IMPORTACIÓN
 
 @Component({
   selector: 'app-root',
@@ -45,7 +46,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private companyService: CompanyService,
     private offlineService: OfflineService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private precacheService: PrecacheService // <-- INYECTAR NUEVO SERVICIO
   ) {}
 
   ngOnInit(): void {
@@ -77,6 +79,14 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(user => {
         this.isLoggedIn = !!user;
         this.userRole = user?.tipo || null;
+
+        // ********** LÓGICA DE PRECACHING **********
+        // Precachear datos dinámicos solo después de saber el estado de autenticación
+        // y si estamos online
+        if (this.isOnline) {
+          this.precacheService.prefetchCriticalData();
+        }
+        // *****************************************
       });
 
     // Obtener información de la compañía
@@ -99,6 +109,11 @@ export class AppComponent implements OnInit, OnDestroy {
           isOnline ? 'Conexión restablecida' : 'Modo Offline: Sin conexión a internet',
           isOnline ? 'success' : 'warning'
         );
+        
+        // Si la conexión se restablece, intentar precachear lo que pudo haber fallado
+        if (isOnline) {
+          this.precacheService.prefetchCriticalData();
+        }
       });
   }
 
