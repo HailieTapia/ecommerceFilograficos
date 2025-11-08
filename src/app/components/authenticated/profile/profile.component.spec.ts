@@ -244,4 +244,110 @@ describe('ProfileComponent', () => {
     expect(toastService.showToast).toHaveBeenCalledWith('Error de BD', 'error');
     expect(router.navigate).not.toHaveBeenCalled();
   }));
+
+  // ====================================================================
+  // PRUEBAS DE NIVEL VIP (Borde y Renderizado)
+  // ====================================================================
+  describe('VIP Level Border', () => {
+    
+    it('should apply yellow border for Oro level', () => {
+      userService.getProfile.mockReturnValue(of({
+        user_id: 1,
+        name: 'Ana Oro',
+        email: 'ana@oro.com',
+        vip_level: 'Oro',
+        // Es necesario simular que tiene una foto para que se use el <button> que seleccionaremos
+        profile_picture_url: 'oro.jpg', 
+        badges: []
+      }));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // [CORRECCIÓN] Usar un selector de atributo válido
+      const borderDiv = fixture.debugElement.query(By.css('[data-testid="vip-border-image"]'));
+      const classes = borderDiv.nativeElement.classList;
+
+      expect(classes).toContain('border-yellow-500');
+      expect(classes).toContain('dark:border-yellow-400');
+    });
+
+    it('should apply gray border for Plata level', () => {
+      userService.getProfile.mockReturnValue(of({
+        user_id: 2,
+        name: 'Beto Plata',
+        vip_level: 'Plata',
+        profile_picture_url: 'plata.jpg', 
+        badges: []
+      }));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // [CORRECCIÓN] Usar un selector de atributo válido
+      const classes = fixture.debugElement
+        .query(By.css('[data-testid="vip-border-image"]')) 
+        .nativeElement.classList;
+
+      expect(classes).toContain('border-gray-400');
+      expect(classes).toContain('dark:border-gray-500');
+    });
+
+    it('should apply amber border for Bronce level', () => {
+      userService.getProfile.mockReturnValue(of({
+        user_id: 3,
+        name: 'Carlos Bronce',
+        vip_level: 'Bronce',
+        profile_picture_url: 'bronce.jpg', 
+        badges: []
+      }));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // [CORRECCIÓN] Usar un selector de atributo válido
+      const classes = fixture.debugElement
+        .query(By.css('[data-testid="vip-border-image"]')) 
+        .nativeElement.classList;
+
+      expect(classes).toContain('border-amber-700');
+      expect(classes).toContain('dark:border-amber-800');
+    });
+
+    it('should have transparent border when vip_level is null', () => {
+      userService.getProfile.mockReturnValue(of({
+        user_id: 4,
+        name: 'Diana Sin Nivel',
+        vip_level: null,
+        profile_picture_url: 'no_vip.jpg', 
+        badges: []
+      }));
+      component.ngOnInit();
+      fixture.detectChanges();
+
+      // [CORRECCIÓN] Usar un selector de atributo válido
+      const classes = fixture.debugElement
+        .query(By.css('[data-testid="vip-border-image"]')) 
+        .nativeElement.classList;
+
+      expect(classes).toContain('border-transparent');
+    });
+
+    it('should call getVipBorderClass() and return correct class string (unit test)', () => {
+      // ... (Este test está bien porque no depende del DOM) ...
+      component.userProfile = { vip_level: 'Oro' };
+      expect(component.getVipBorderClass()).toBe('border-yellow-500 dark:border-yellow-400');
+
+      component.userProfile = { vip_level: 'Plata' };
+      expect(component.getVipBorderClass()).toBe('border-gray-400 dark:border-gray-500');
+
+      component.userProfile = { vip_level: 'Bronce' };
+      expect(component.getVipBorderClass()).toBe('border-amber-700 dark:border-amber-800');
+
+      component.userProfile = { vip_level: null };
+      expect(component.getVipBorderClass()).toBe('border-transparent dark:border-transparent');
+    });
+  });
+
+  // Limpieza
+  afterEach(() => {
+    document.documentElement.classList.remove('dark');
+  });
 });

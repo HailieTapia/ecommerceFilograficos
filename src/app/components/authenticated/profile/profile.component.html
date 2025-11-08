@@ -1,24 +1,20 @@
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6 font-sans">
-    <!-- Cabecera de perfil -->
     <div
         class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-850 rounded-xl shadow-lg p-6 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 border border-gray-200 dark:border-gray-700">
 
-        <!-- LADO IZQUIERDO: Imagen, Nombre, Correo, Estado -->
         <div class="flex items-center gap-6">
-            <!-- Bloque de Imagen/Iniciales -->
             <div class="flex justify-center flex-shrink-0">
                 <div class="relative">
                     
-                    <!-- [NUEVO] Spinner de Carga (Overlay) -->
                     <div *ngIf="isUploading"
                         class="absolute inset-0 bg-black bg-opacity-60 rounded-full flex items-center justify-center z-10 transition-opacity duration-300">
                         <i class="fas fa-spinner fa-spin text-white text-2xl"></i>
                     </div>
                     
                     <div *ngIf="!userProfile?.profile_picture_url; else profileImage"
-                        class="h-24 w-24 rounded-full bg-light-primary dark:bg-dark-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-light-primary dark:border-dark-primary cursor-pointer relative group"
-                        (click)="toggleOptionsModal()">
-                        <!-- [MODIFICADO]: Usar ícono de persona como fallback para '?' -->
+                        class="h-24 w-24 rounded-full bg-light-primary dark:bg-dark-primary flex items-center justify-center text-white text-3xl font-bold border-4 cursor-pointer relative group"
+                        [ngClass]="getVipBorderClass()"
+                        data-testid="vip-border-initials" (click)="toggleOptionsModal()">
                         <span *ngIf="getInitials(userProfile?.name) !== '?'">
                             {{ getInitials(userProfile?.name) }}
                         </span>
@@ -30,22 +26,20 @@
                     </div>
                     <ng-template #profileImage>
                         <button
-                            class="h-24 w-24 rounded-full border-4 border-light-primary dark:border-dark-primary overflow-hidden focus:outline-none relative group"
-                            (click)="toggleOptionsModal()">
+                            class="h-24 w-24 rounded-full border-4 overflow-hidden focus:outline-none relative group"
+                            [ngClass]="getVipBorderClass()"
+                            data-testid="vip-border-image" (click)="toggleOptionsModal()">
                             <img class="h-full w-full object-cover" [src]="userProfile?.profile_picture_url"
                                 alt="Foto de perfil" (error)="userProfile.profile_picture_url = null">
                             <div
                                 class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <i class="fas fa-camera text-white text-lg"></i>
                             </div>
-                        </button>
-                    </ng-template>
+                        </button> </ng-template>
 
-                    <!-- [MODIFICADO] Menú de Opciones (Reemplazando el antiguo tooltip) -->
                     <div *ngIf="showOptionsModal"
                         class="options-modal absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white dark:bg-gray-850 rounded-lg shadow-2xl border border-gray-300 dark:border-gray-600 w-56 z-20 p-2 transform origin-top-left transition-all duration-300 ease-out">
                         <div class="flex flex-col gap-1">
-                            <!-- Opción 1: Subir Archivo -->
                             <label
                                 class="cursor-pointer flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-light-primary dark:hover:bg-dark-primary hover:text-white rounded-md transition-colors duration-200">
                                 <i class="fas fa-cloud-upload-alt text-lg"></i>
@@ -54,21 +48,18 @@
                                     (change)="onFileSelected($event); toggleOptionsModal()">
                             </label>
 
-                            <!-- Opción 2: Tomar Foto con Cámara -->
                             <button (click)="toggleCamera(); toggleOptionsModal()"
                                 class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-light-primary dark:hover:bg-dark-primary hover:text-white rounded-md transition-colors duration-200">
                                 <i class="fas fa-camera-retro text-lg"></i>
                                 <span>Tomar Foto</span>
                             </button>
 
-                            <!-- Divisor opcional si existe foto -->
                             <div *ngIf="userProfile?.profile_picture_url"
                                 class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
 
-                            <!-- Opción 3: Eliminar Foto (Si existe) -->
                             <button *ngIf="userProfile?.profile_picture_url"
                                 (click)="deleteProfilePicture(); toggleOptionsModal()"
-                                class="flex items-center gap-3 px-4 py-3 text-sm text-light-danger dark:text-dark-danger hover:bg-red-500 hover:bg-opacity-10 rounded-md transition-colors duration-200">
+                                class="flex w-full items-center gap-3 px-4 py-3 text-sm text-light-danger dark:text-dark-danger hover:bg-red-500 hover:bg-opacity-10 rounded-md transition-colors duration-200">
                                 <i class="fas fa-trash-alt text-lg"></i>
                                 <span>Eliminar foto</span>
                             </button>
@@ -76,7 +67,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Bloque de Nombre/Correo/Estado -->
             <div class="text-left">
                 <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white">
                     {{ userProfile?.name || 'Cargando...' }}
@@ -92,7 +82,6 @@
             </div>
         </div>
 
-        <!-- LADO DERECHO: MINI PREVIEW DE INSIGNIAS -->
         <div class="lg:ml-auto pt-4 lg:pt-0">
             <div class="flex items-center gap-2 mb-3 justify-center lg:justify-start">
                 <i class="fas fa-award text-lg text-yellow-500"></i>
@@ -104,16 +93,13 @@
             <div *ngIf="userProfile?.badges?.length > 0; else noBadges"
                 class="flex gap-3 flex-wrap justify-center lg:justify-start">
 
-                <!-- Iteramos solo sobre las primeras 4 insignias para el preview -->
                 <div *ngFor="let badge of userProfile.badges | slice:0:4" class="group relative flex-shrink-0">
 
-                    <!-- Icono de la insignia -->
                     <div
                         class="w-14 h-14 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-2xl shadow-md hover:shadow-xl transition-all duration-300 transform group-hover:scale-105 cursor-pointer overflow-hidden">
                         <img [src]="$any(badge).icon_url" [alt]="$any(badge).name" class="w-full h-full object-cover">
                     </div>
 
-                    <!-- Tooltip en hover (incluye product_category si está disponible) -->
                     <div
                         class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
                         {{ $any(badge).name }}
@@ -126,31 +112,26 @@
                     </div>
                 </div>
 
-                <!-- Indicador de más insignias -->
                 <div *ngIf="userProfile && userProfile.badges && userProfile.badges.length > 4"
                     class="w-14 h-14 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center text-sm text-gray-600 dark:text-gray-400 font-bold shadow-md cursor-default">
                     +{{ userProfile.badges.length - 4 }}
                 </div>
             </div>
 
-            <!-- Plantilla para cuando no hay insignias -->
             <ng-template #noBadges>
                 <p class="text-sm text-gray-500 dark:text-gray-400 italic">No tienes insignias aún.</p>
             </ng-template>
         </div>
     </div>
 
-    <!-- [MODIFICADO] Componente de captura de cámara (Modal de pantalla completa) -->
     <div *ngIf="showCamera"
         class="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4">
         <div class="max-w-xl w-full">
-            <!-- photoCaptured.emit(null) en la cámara cierra este modal en onPhotoCaptured -->
             <app-camera-capture (photoCaptured)="onPhotoCaptured($event)"></app-camera-capture>
         </div>
     </div>
 
 
-    <!-- Pestañas de navegación -->
     <div class="mb-6 border-b border-gray-200 dark:border-gray-600">
         <nav class="flex space-x-4">
             <button
@@ -174,11 +155,8 @@
         </nav>
     </div>
 
-    <!-- Diseño de dos columnas -->
     <div class="grid md:grid-cols-3 gap-6">
-        <!-- Contenido principal (2/3) -->
         <div class="md:col-span-2">
-            <!-- Contenido dinámico -->
             <div>
                 <app-personal-info *ngIf="activeTab === 'info'" [userProfile]="userProfile"
                     (profileUpdated)="onProfileUpdated($event)"></app-personal-info>
@@ -187,9 +165,7 @@
             </div>
         </div>
 
-        <!-- Panel lateral (1/3) -->
         <div>
-            <!-- Actividad reciente -->
             <div
                 class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-850 shadow-md rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-600">
                 <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Actividad reciente</h3>
@@ -217,7 +193,6 @@
                 </div>
             </div>
 
-            <!-- Acciones de cuenta -->
             <div
                 class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-850 shadow-md rounded-lg p-6 border border-gray-200 dark:border-gray-600">
                 <h3 class="text-lg font-medium text-light-text dark:text-dark-text mb-3">Acciones de cuenta</h3>

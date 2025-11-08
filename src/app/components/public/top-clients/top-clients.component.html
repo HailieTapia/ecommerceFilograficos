@@ -1,0 +1,132 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-8 font-sans">
+  <div class="max-w-6xl mx-auto">
+    <header class="text-center mb-12">
+      <i class="fas fa-award text-4xl text-yellow-500 mx-auto mb-3"></i>
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-gray-100 leading-tight">
+        Top Clientes <span class="text-yellow-500">VIP</span>
+      </h1>
+      <p class="mt-3 text-lg text-gray-600 dark:text-gray-400">
+        Conoce a los clientes más leales y activos de nuestra comunidad.
+      </p>
+    </header>
+
+    <app-spinner [isLoading]="isLoading"></app-spinner>
+
+    <div *ngIf="!isLoading">
+      <div *ngIf="error" class="text-center text-red-500 p-4 border border-red-300 rounded-lg dark:bg-red-900/20 dark:border-red-700 mb-8">
+        Error al cargar la lista: {{ error }}
+      </div>
+      <div *ngIf="topClients.length === 0 && !error" class="text-center text-gray-500 p-8 border border-gray-300 rounded-xl dark:border-gray-700 dark:bg-gray-800/50 mb-8">
+        Aún no hay clientes con Nivel Plata o superior para mostrar.
+      </div>
+    </div>
+
+    <!-- ORO -->
+    <section *ngIf="oroClients.length > 0 && !isLoading" class="mb-12">
+      <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-100 border-l-4 border-yellow-500 pl-4 mb-8">
+        Clientes <span class="text-yellow-500">ORO</span>
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div *ngFor="let client of oroClients; trackBy: trackByUserId; let i = index"
+             class="relative p-4 md:p-6 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-gray-700 dark:to-gray-800 shadow-2xl border-4 border-yellow-400 dark:border-yellow-600 transform hover:scale-[1.02] transition-all duration-300">
+
+          <div class="absolute top-0 right-0 p-2 text-3xl font-extrabold text-yellow-600 dark:text-yellow-400 opacity-80">
+            #{{ i + 1 }}
+          </div>
+
+          <div class="flex items-start space-x-4">
+            <div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 border-4 border-white dark:border-gray-900 shadow-md">
+              <img *ngIf="client.profile_picture_url; else initialsOro"
+                   [src]="client.profile_picture_url"
+                   [alt]="client.customer_name"
+                   class="w-full h-full object-cover"
+                   (error)="onImgError($event)">
+              <ng-template #initialsOro>
+                <div class="w-full h-full bg-gray-400 dark:bg-gray-600 flex items-center justify-center text-white text-xl font-semibold">
+                  {{ getInitials(client.customer_name) }}
+                </div>
+              </ng-template>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-xl font-extrabold text-gray-800 dark:text-gray-100 truncate" [title]="client.customer_name">
+                {{ client.customer_name }}
+              </h3>
+              <p class="flex items-center text-sm font-semibold mt-1 text-yellow-600 dark:text-yellow-400">
+                <i class="fas fa-crown text-base mr-1"></i> Nivel ORO
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-yellow-300 dark:border-yellow-700 grid grid-cols-2 gap-4 text-center">
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-yellow-400 dark:bg-yellow-600 text-white shadow-md">
+                <i class="fas fa-shopping-cart text-xs"></i>
+              </div>
+              <span class="text-xl font-bold text-gray-700 dark:text-gray-200">{{ client.total_orders_completed }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">Órdenes</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center mb-1 bg-yellow-400 dark:bg-yellow-600 text-white shadow-md">
+                <i class="fas fa-star text-xs"></i>
+              </div>
+              <span class="text-xl font-bold text-gray-700 dark:text-gray-200">{{ client.total_badges_obtained }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">Insignias</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLATA -->
+    <section *ngIf="plataClients.length > 0 && !isLoading">
+      <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-100 border-l-4 border-gray-400 pl-4 mb-8">
+        Clientes <span class="text-gray-500">PLATA</span>
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let client of plataClients; trackBy: trackByUserId; let i = index"
+             class="relative p-4 md:p-6 rounded-xl bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
+
+          <div class="flex items-start space-x-4">
+            <!-- Ranking + Foto (sin div extra) -->
+            <ng-container class="flex flex-col items-center flex-shrink-0">
+              <div class="text-xl font-bold text-gray-500 dark:text-gray-400 mb-2">#{{ i + 1 }}</div>
+              <div class="w-12 h-12 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600">
+                <img *ngIf="client.profile_picture_url; else initialsPlata"
+                     [src]="client.profile_picture_url"
+                     [alt]="client.customer_name"
+                     class="w-full h-full object-cover"
+                     (error)="onImgError($event)">
+                <ng-template #initialsPlata>
+                  <div class="w-full h-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-700 dark:text-gray-300 text-lg font-semibold">
+                    {{ getInitials(client.customer_name) }}
+                  </div>
+                </ng-template>
+              </div>
+            </ng-container>
+
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 truncate" [title]="client.customer_name">
+                {{ client.customer_name }}
+              </h3>
+              <p class="flex items-center text-xs font-semibold mt-1 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-trophy text-sm mr-1"></i> Nivel PLATA
+              </p>
+              <div class="flex space-x-4 mt-3 text-sm">
+                <div class="flex items-center text-gray-600 dark:text-gray-300">
+                  <i class="fas fa-shopping-cart text-blue-500 mr-1.5 text-xs"></i>
+                  <span class="font-medium">{{ client.total_orders_completed }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">Órdenes</span>
+                </div>
+                <div class="flex items-center text-gray-600 dark:text-gray-300">
+                  <i class="fas fa-star text-yellow-500 mr-1.5 text-xs"></i>
+                  <span class="font-medium">{{ client.total_badges_obtained }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">Insignias</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

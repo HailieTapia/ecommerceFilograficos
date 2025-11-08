@@ -30,6 +30,7 @@ interface UserProfile {
   address: any;
   profile_picture_url: string | null;
   badges: Badge[];
+  vip_level: 'Oro' | 'Plata' | 'Bronce' | null; // Aseguramos que el tipo esté presente
 }
 
 @Component({
@@ -101,6 +102,26 @@ export class ProfileComponent implements OnInit {
         this.toastService.showToast(errorMessage, 'error');
       }
     });
+  }
+    
+  /** NUEVO MÉTODO: Define las clases de color del borde según el Nivel VIP */
+  getVipBorderClass(): string {
+    const level = this.userProfile?.vip_level;
+    
+    switch (level) {
+        case 'Oro':
+            // Borde dorado
+            return 'border-yellow-500 dark:border-yellow-400';
+        case 'Plata':
+            // Borde plateado/gris
+            return 'border-gray-400 dark:border-gray-500';
+        case 'Bronce':
+            // Borde café claro
+            return 'border-amber-700 dark:border-amber-800';
+        default:
+            // Nivel nulo o desconocido (se pierde con el fondo)
+            return 'border-transparent dark:border-transparent';
+    }
   }
 
   // [MODIFICADO]: Mejorar el fallback visual a '?' en lugar de 'sin foto'
